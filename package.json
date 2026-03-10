@@ -1,0 +1,20 @@
+{
+  "name": "foody",
+  "version": "1.0.0",
+  "description": "Foody website and admin panel",
+  "main": "website-server.js",
+  "scripts": {
+    "start": "node website-server.js",
+    "start:website": "node website-server.js",
+    "start:admin": "node admin-server.js",
+    "check": "node --check website-server.js && node --check admin-server.js && node --check site-store.js && node --check server-common.js && node --check app.js && node --check admin.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^2.1.1"
+  }
+}

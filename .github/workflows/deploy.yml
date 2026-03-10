@@ -1,43 +1,68 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy to Coolify
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches:
+      - main
+      - staging
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ github.event.deployment.payload.web_url || steps.deployment.outputs.page_url }}
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload entire repository
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+
+      - name: Verify required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f Dockerfile
+          test -f docker-compose.yml
+          test -f website-server.js
+          test -f admin-server.js
+
+      - name: Syntax check JavaScript files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check website-server.js
+          node --check admin-server.js
+          node --check site-store.js
+          node --check server-common.js
+          node --check app.js
+          node --check admin.js
+
+  deploy-production:
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify production deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${{ secrets.COOLIFY_WEBHOOK_PROD }}" ] || [ -z "${{ secrets.COOLIFY_TOKEN_PROD }}" ]; then
+            echo "COOLIFY_WEBHOOK_PROD or COOLIFY_TOKEN_PROD is not set. Skipping production deploy."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN_PROD }}" \
+            "${{ secrets.COOLIFY_WEBHOOK_PROD }}"
+
+  deploy-staging:
+    needs: validate
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify staging deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${{ secrets.COOLIFY_WEBHOOK_STAGING }}" ] || [ -z "${{ secrets.COOLIFY_TOKEN_STAGING }}" ]; then
+            echo "COOLIFY_WEBHOOK_STAGING or COOLIFY_TOKEN_STAGING is not set. Skipping staging deploy."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN_STAGING }}" \
+            "${{ secrets.COOLIFY_WEBHOOK_STAGING }}"

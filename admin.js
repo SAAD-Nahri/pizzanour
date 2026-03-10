@@ -88,46 +88,130 @@ const defaultMenu = [
 
 const defaultCatEmojis = { 'Burgers': '🍔', 'Sandwich Froid': '🥪', 'Sandwich Chaud': '🔥', 'Plats': '🍽️', 'Paninis': '🥖', 'Tacos': '🌮', 'Gratiné': '🧀', 'Divers': '🍟', 'Salades': '🥗' };
 
-let menu = JSON.parse(localStorage.getItem('foody_menu')) || defaultMenu;
-let catEmojis = JSON.parse(localStorage.getItem('foody_cat_emojis')) || defaultCatEmojis;
-let wifiData = JSON.parse(localStorage.getItem('foody_wifi')) || { ssid: 'Foody_Guest', pass: 'foody2026' };
-let socialLinks = JSON.parse(localStorage.getItem('foody_social')) || { instagram: '', facebook: '', tiktok: '', whatsapp: '212626081745' };
+const defaultWifiData = { ssid: 'Foody_Guest', pass: 'foody2026' };
+const defaultSocialLinks = { instagram: '', facebook: '', tiktok: '', whatsapp: '212626081745' };
 
-// Default admin credentials (change these!)
-let promoId = localStorage.getItem('foody_promo_id') || null;
+let menu = [];
+let catEmojis = {};
+let wifiData = { ...defaultWifiData };
+let socialLinks = { ...defaultSocialLinks };
+let promoId = null;
+let formsInitialized = false;
 
-// Credentials with fallback to defaults
-let adminAuth = JSON.parse(localStorage.getItem('foody_admin_creds')) || { user: 'admin', pass: 'foody2026' };
+function normalizeMenuItem(item) {
+    const images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+    return {
+        ...item,
+        images,
+        img: item.img || images[0] || ''
+    };
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Bypass login screen
-    sessionStorage.setItem('foody_admin_auth', 'true');
-    showDashboard();
+function applySiteData(data) {
+    menu = (Array.isArray(data?.menu) ? data.menu : defaultMenu).map(normalizeMenuItem);
+    catEmojis = data?.catEmojis && typeof data.catEmojis === 'object' ? data.catEmojis : { ...defaultCatEmojis };
+    wifiData = { ...defaultWifiData, ...(data?.wifi && typeof data.wifi === 'object' ? data.wifi : {}) };
+    socialLinks = { ...defaultSocialLinks, ...(data?.social && typeof data.social === 'object' ? data.social : {}) };
+    promoId = typeof data?.promoId === 'undefined' ? null : data.promoId;
+}
 
-    // Allow Enter key on login
+function buildSiteData() {
+    return {
+        menu: menu.map(normalizeMenuItem),
+        catEmojis,
+        wifi: wifiData,
+        social: socialLinks,
+        promoId
+    };
+}
+
+function showLoginScreen() {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('adminSidebar').style.display = 'none';
+    document.getElementById('adminMain').style.display = 'none';
+}
+
+async function checkSession() {
+    try {
+        const res = await fetch('/api/admin/session');
+        if (!res.ok) return false;
+        const result = await res.json();
+        return Boolean(result.authenticated);
+    } catch (_error) {
+        return false;
+    }
+}
+
+async function loadData() {
+    const res = await fetch('/api/data');
+    if (res.status === 401) {
+        showLoginScreen();
+        throw new Error('Authentication required');
+    }
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    applySiteData(await res.json());
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loginPass').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') attemptLogin();
     });
     document.getElementById('loginUser').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') document.getElementById('loginPass').focus();
     });
+
+    if (await checkSession()) {
+        await showDashboard();
+    } else {
+        showLoginScreen();
+    }
 });
 
-function attemptLogin() {
-    sessionStorage.setItem('foody_admin_auth', 'true');
-    showDashboard();
+async function attemptLogin() {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+
+    try {
+        const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(result.error || 'Login failed');
+        }
+        await showDashboard();
+    } catch (error) {
+        alert('Login failed: ' + error.message);
+    }
 }
 
-function showDashboard() {
+async function showDashboard() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminSidebar').style.display = 'flex';
     document.getElementById('adminMain').style.display = 'block';
-    refreshUI();
-    initForms();
+
+    try {
+        await loadData();
+        refreshUI();
+        if (!formsInitialized) {
+            initForms();
+            formsInitialized = true;
+        }
+    } catch (error) {
+        if (error.message !== 'Authentication required') {
+            alert('Failed to load admin data: ' + error.message);
+        }
+    }
 }
 
-function adminLogout() {
-    sessionStorage.removeItem('foody_admin_auth');
+async function adminLogout() {
+    try {
+        await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (_error) {
+        // Ignore logout failures and reset UI state.
+    }
     location.reload();
 }
 
@@ -206,10 +290,8 @@ function initForms() {
         let images = urlInput.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
 
         if (fileInput.files.length > 0) {
-            for (let file of fileInput.files) {
-                const base64 = await toBase64(file);
-                images.push(base64);
-            }
+            const uploadedImages = await uploadFiles(fileInput.files);
+            images.push(...uploadedImages);
         }
 
         const ingredients = document.getElementById('itemIngredients').value.split(',').map(s => s.trim()).filter(s => s.length > 0);
@@ -217,7 +299,6 @@ function initForms() {
         if (editingItemId) {
             const index = menu.findIndex(m => m.id == editingItemId);
             if (index !== -1) {
-                // Keep existing images if no new ones are added via form
                 const finalImages = images.length > 0 ? images : (menu[index].images || []);
                 menu[index] = {
                     ...menu[index],
@@ -246,38 +327,37 @@ function initForms() {
             showToast('Produit ajouté avec succès !');
         }
 
-        saveAndRefresh();
+        await saveAndRefresh();
         resetFoodForm();
     };
 
-    document.getElementById('catForm').onsubmit = (e) => {
+    document.getElementById('catForm').onsubmit = async (e) => {
         e.preventDefault();
         catEmojis[document.getElementById('catName').value] = document.getElementById('catEmoji').value;
-        saveAndRefresh();
+        await saveAndRefresh();
         e.target.reset();
         showToast('Catégorie ajoutée !');
     };
 
-    document.getElementById('wifiForm').onsubmit = (e) => {
+    document.getElementById('wifiForm').onsubmit = async (e) => {
         e.preventDefault();
         wifiData.ssid = document.getElementById('wifiSSID').value;
         wifiData.pass = document.getElementById('wifiPassInput').value;
-        saveAndRefresh();
+        await saveAndRefresh();
         showToast('WiFi mis à jour !');
     };
 
-    document.getElementById('socialForm').onsubmit = (e) => {
+    document.getElementById('socialForm').onsubmit = async (e) => {
         e.preventDefault();
         socialLinks.instagram = document.getElementById('socialInsta').value;
         socialLinks.facebook = document.getElementById('socialFb').value;
         socialLinks.tiktok = document.getElementById('socialTiktok').value;
         socialLinks.whatsapp = document.getElementById('socialWhatsapp').value.trim();
-        localStorage.setItem('foody_social', JSON.stringify(socialLinks));
+        await saveAndRefresh();
         initSocialForm();
         showToast('Liens sociaux sauvegardés !');
     };
 }
-
 function initSocialForm() {
     document.getElementById('socialInsta').value = socialLinks.instagram;
     document.getElementById('socialFb').value = socialLinks.facebook;
@@ -286,97 +366,111 @@ function initSocialForm() {
 
     const preview = document.getElementById('socialPreview');
     let chips = '';
-    if (socialLinks.instagram) chips += `<a href="${socialLinks.instagram}" target="_blank" class="social-chip"><span>📸</span> Instagram</a>`;
-    if (socialLinks.facebook) chips += `<a href="${socialLinks.facebook}" target="_blank" class="social-chip"><span>📘</span> Facebook</a>`;
-    if (socialLinks.tiktok) chips += `<a href="${socialLinks.tiktok}" target="_blank" class="social-chip"><span>🎵</span> TikTok</a>`;
-    if (socialLinks.whatsapp) chips += `<a href="https://wa.me/${socialLinks.whatsapp}" target="_blank" class="social-chip"><span>📞</span> WhatsApp</a>`;
+    if (socialLinks.instagram) chips += `<a href="${socialLinks.instagram}" target="_blank" class="social-chip"><span>IG</span> Instagram</a>`;
+    if (socialLinks.facebook) chips += `<a href="${socialLinks.facebook}" target="_blank" class="social-chip"><span>FB</span> Facebook</a>`;
+    if (socialLinks.tiktok) chips += `<a href="${socialLinks.tiktok}" target="_blank" class="social-chip"><span>TT</span> TikTok</a>`;
+    if (socialLinks.whatsapp) chips += `<a href="https://wa.me/${socialLinks.whatsapp}" target="_blank" class="social-chip"><span>WA</span> WhatsApp</a>`;
     preview.innerHTML = chips || '<p style="color:#888">No social links configured yet.</p>';
 }
 
 function initSecurityForm() {
-    const form = document.getElementById('securityForm');
-    document.getElementById('adminNewUser').value = adminAuth.user;
-
-    form.onsubmit = (e) => {
-        e.preventDefault();
-        const newUser = document.getElementById('adminNewUser').value.trim();
-        const newPass = document.getElementById('adminNewPass').value;
-        const confirmPass = document.getElementById('adminConfirmPass').value;
-
-        if (newPass && newPass !== confirmPass) {
-            return alert('❌ Les mots de passe ne correspondent pas !');
-        }
-
-        adminAuth.user = newUser;
-        if (newPass) adminAuth.pass = newPass;
-
-        localStorage.setItem('foody_admin_creds', JSON.stringify(adminAuth));
-        showToast('🔒 Identifiants mis à jour avec succès !');
-        form.reset();
-        document.getElementById('adminNewUser').value = adminAuth.user;
-    };
-}
-
-// Smart image compressor — auto-resize & compress any image to fit storage
-function compressImage(file, maxWidth = 600, quality = 0.7) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = reject;
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onerror = reject;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let w = img.width;
-                let h = img.height;
-
-                // Scale down proportionally
-                if (w > maxWidth) {
-                    h = Math.round(h * maxWidth / w);
-                    w = maxWidth;
-                }
-
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-
-                // Output as compressed JPEG
-                resolve(canvas.toDataURL('image/jpeg', quality));
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-// Keep old name as alias so existing form code still works
-const toBase64 = (file) => compressImage(file);
-
-function deleteItem(id) { if (confirm('Supprimer cet article ?')) { menu = menu.filter(m => m.id != id); if (promoId == id) promoId = null; saveAndRefresh(); } }
-function togglePromo(id) { promoId = (promoId == id ? null : id); saveAndRefresh(); }
-function saveAndRefresh() {
-    try {
-        localStorage.setItem('foody_menu', JSON.stringify(menu));
-        localStorage.setItem('foody_cat_emojis', JSON.stringify(catEmojis));
-        localStorage.setItem('foody_wifi', JSON.stringify(wifiData));
-        localStorage.setItem('foody_social', JSON.stringify(socialLinks));
-        if (promoId) localStorage.setItem('foody_promo_id', promoId); else localStorage.removeItem('foody_promo_id');
-        refreshUI();
-    } catch (e) {
-        console.error('Storage Error:', e);
-        alert('❌ Erreur de sauvegarde : L\'image est probablement trop grande (Base64). Essayez une image plus petite ou un lien URL.');
+    const note = document.getElementById('securityNote');
+    if (note) {
+        note.textContent = 'Admin credentials are controlled by ADMIN_USER and ADMIN_PASS in the server environment.';
     }
 }
-function resetDefaults() { if (confirm('Voulez-vous réinitialiser toutes les données ?')) { localStorage.clear(); sessionStorage.clear(); location.reload(); } }
-function showToast(msg) { const t = document.getElementById('adminToast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+
+async function uploadFiles(fileList) {
+    const urls = [];
+    for (const file of Array.from(fileList || [])) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        if (res.status === 401) {
+            showLoginScreen();
+            throw new Error('Authentication required');
+        }
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(result.error || 'Upload failed with status ' + res.status);
+        }
+        urls.push(result.url);
+    }
+    return urls;
+}
+
+async function deleteItem(id) {
+    if (!confirm('Delete this item?')) return;
+    menu = menu.filter(item => item.id != id);
+    if (promoId == id) promoId = null;
+    await saveAndRefresh();
+}
+
+async function togglePromo(id) {
+    promoId = promoId == id ? null : id;
+    await saveAndRefresh();
+}
+
+async function saveAndRefresh() {
+    try {
+        const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(buildSiteData())
+        });
+        if (res.status === 401) {
+            showLoginScreen();
+            throw new Error('Authentication required');
+        }
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(result.error || 'Server returned ' + res.status);
+        }
+        applySiteData(result.data || buildSiteData());
+        refreshUI();
+    } catch (error) {
+        console.error('Save error:', error);
+        alert('Save failed: ' + error.message);
+    }
+}
+
+async function resetDefaults() {
+    if (!confirm('Reset all site data?')) return;
+    try {
+        const res = await fetch('/api/data/reset', { method: 'POST' });
+        if (res.status === 401) {
+            showLoginScreen();
+            throw new Error('Authentication required');
+        }
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(result.error || 'Reset failed');
+        }
+        applySiteData(result.data || {});
+        refreshUI();
+        showToast('Data reset.');
+    } catch (error) {
+        alert('Reset failed: ' + error.message);
+    }
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('adminToast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 function showSection(id, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(navBtn => navBtn.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     btn.classList.add('active');
 
-    // Auto-close sidebar on mobile after choosing
     if (window.innerWidth <= 992) {
         toggleSidebar();
     }
@@ -388,21 +482,55 @@ function toggleSidebar() {
     sidebar.classList.toggle('mobile-open');
     overlay.classList.toggle('active');
 }
-function populateCatDropdown() { document.getElementById('itemCat').innerHTML = Object.keys(catEmojis).map(c => `<option value="${c}">${c}</option>`).join(''); }
-function renderCatTable() { document.querySelector('#catTable tbody').innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="deleteCat('${cat}')">🗑️</button></td></tr>`).join(''); }
-function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Supprimez d\'abord les produits de cette catégorie !'); delete catEmojis[cat]; saveAndRefresh(); }
-function initWifiForm() { document.getElementById('wifiSSID').value = wifiData.ssid; document.getElementById('wifiPassInput').value = wifiData.pass; document.getElementById('hintS').textContent = wifiData.ssid; document.getElementById('hintP').textContent = wifiData.pass; }
-function updateStats() { document.getElementById('stat-products').textContent = menu.length; document.getElementById('stat-cats').textContent = Object.keys(catEmojis).length; document.getElementById('stat-promo').textContent = promoId ? 'OUI' : 'NON'; }
 
-// IMAGE MODAL LOGIC
+function populateCatDropdown() {
+    document.getElementById('itemCat').innerHTML = Object.keys(catEmojis)
+        .map(category => `<option value="${category}">${category}</option>`)
+        .join('');
+}
+
+function renderCatTable() {
+    document.querySelector('#catTable tbody').innerHTML = Object.keys(catEmojis)
+        .map(category => `
+            <tr>
+                <td>${catEmojis[category]}</td>
+                <td><strong>${category}</strong></td>
+                <td>${menu.filter(item => item.cat === category).length} items</td>
+                <td><button class="action-btn" onclick="deleteCat('${category}')">Delete</button></td>
+            </tr>
+        `)
+        .join('');
+}
+
+async function deleteCat(category) {
+    if (menu.some(item => item.cat === category)) {
+        alert('Delete the items in this category first.');
+        return;
+    }
+    delete catEmojis[category];
+    await saveAndRefresh();
+}
+
+function initWifiForm() {
+    document.getElementById('wifiSSID').value = wifiData.ssid;
+    document.getElementById('wifiPassInput').value = wifiData.pass;
+    document.getElementById('hintS').textContent = wifiData.ssid;
+    document.getElementById('hintP').textContent = wifiData.pass;
+}
+
+function updateStats() {
+    document.getElementById('stat-products').textContent = menu.length;
+    document.getElementById('stat-cats').textContent = Object.keys(catEmojis).length;
+    document.getElementById('stat-promo').textContent = promoId ? 'YES' : 'NO';
+}
+
 let currentEditingId = null;
 
 function openImageModal(id) {
     currentEditingId = id;
-    const item = menu.find(m => m.id == id); // Use == for safety
+    const item = menu.find(m => m.id == id);
     if (!item) return;
 
-    // Ensure item has an images array
     if (!item.images) {
         item.images = item.img ? [item.img] : [];
     }
@@ -420,66 +548,62 @@ function closeImageModal() {
 function renderModalImages() {
     const item = menu.find(m => m.id == currentEditingId);
     if (!item) return;
+
     const grid = document.getElementById('currentImagesGrid');
     const images = item.images || (item.img ? [item.img] : []);
-
-    grid.innerHTML = images.map((img, index) => `
+    const cards = images.map((img, index) => `
         <div style="position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:1px solid #ddd;">
             <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
-            <button onclick="deleteModalImage(${index})" style="position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.8); color:#fff; border:none; border-radius:5px; cursor:pointer; padding:2px 6px; font-size:12px;">✕</button>
+            <button onclick="deleteModalImage(${index})" style="position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.8); color:#fff; border:none; border-radius:5px; cursor:pointer; padding:2px 6px; font-size:12px;">X</button>
         </div>
-    `).join('') + (images.length === 0 ? '<p style="grid-column: span 3; color:#888; text-align:center;">Aucune image pour le moment.</p>' : '');
+    `).join('');
+
+    grid.innerHTML = cards || '<p style="grid-column: span 3; color:#888; text-align:center;">No images yet.</p>';
 }
 
 async function handleModalImageUpload(input) {
     if (!input.files || input.files.length === 0) return;
+
     const item = menu.find(m => m.id == currentEditingId);
     if (!item) return;
 
     if (!item.images) item.images = item.img ? [item.img] : [];
 
-    for (let file of input.files) {
-        const base64 = await toBase64(file);
-        item.images.push(base64);
-    }
-
-    // SYNC: Ensure main img is set to the first image for the main page cards
-    if (item.images.length > 0) item.img = item.images[0];
+    const uploadedImages = await uploadFiles(input.files);
+    item.images.push(...uploadedImages);
+    item.img = item.images[0] || '';
 
     input.value = '';
-    saveAndRefresh();
+    await saveAndRefresh();
     renderModalImages();
-    showToast('Image(s) ajoutée(s)!');
+    showToast('Images added.');
 }
 
-function addModalImageUrl() {
+async function addModalImageUrl() {
     const url = document.getElementById('modalImgUrl').value.trim();
     if (!url) return;
+
     const item = menu.find(m => m.id == currentEditingId);
     if (!item) return;
 
     if (!item.images) item.images = item.img ? [item.img] : [];
     item.images.push(url);
-
-    // SYNC: Keep main img updated
-    if (item.images.length > 0) item.img = item.images[0];
+    item.img = item.images[0] || '';
 
     document.getElementById('modalImgUrl').value = '';
-    saveAndRefresh();
+    await saveAndRefresh();
     renderModalImages();
-    showToast('Image ajoutée via URL!');
+    showToast('Image added.');
 }
 
-function deleteModalImage(index) {
+async function deleteModalImage(index) {
     const item = menu.find(m => m.id == currentEditingId);
     if (!item || !item.images) return;
 
     item.images.splice(index, 1);
+    item.img = item.images[0] || '';
 
-    // SYNC: Keep main img updated after deletion
-    item.img = item.images.length > 0 ? item.images[0] : '';
-
-    saveAndRefresh();
+    await saveAndRefresh();
     renderModalImages();
-    showToast('Image supprimée');
+    showToast('Image removed.');
 }

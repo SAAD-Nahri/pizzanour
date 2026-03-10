@@ -108,19 +108,57 @@ const defaultCatEmojis = {
 
 
 // Persistence Layer
-let menu = JSON.parse(localStorage.getItem('foody_menu')) || defaultMenu;
-let catEmojis = JSON.parse(localStorage.getItem('foody_cat_emojis')) || defaultCatEmojis;
-let wifiData = JSON.parse(localStorage.getItem('foody_wifi')) || { ssid: 'Foody_Guest', pass: 'foody2026' };
-let promoId = localStorage.getItem('foody_promo_id') || null;
-let socialLinks = JSON.parse(localStorage.getItem('foody_social')) || { instagram: '', facebook: '', tiktok: '', whatsapp: '212626081745' };
+const defaultWifiData = { ssid: 'Foody_Guest', pass: 'foody2026' };
+const defaultSocialLinks = { instagram: '', facebook: '', tiktok: '', whatsapp: '212626081745' };
 
-let categories = [...new Set(menu.map(m => m.cat))];
+let menu = defaultMenu.map(item => ({ ...item, images: Array.isArray(item.images) ? item.images : [], img: item.img || '' }));
+let catEmojis = { ...defaultCatEmojis };
+let wifiData = { ...defaultWifiData };
+let promoId = null;
+let socialLinks = { ...defaultSocialLinks };
+
+let categories = [];
 let cart = [];
 let serviceType = 'onsite';
 let currentSlide = 0;
 
+function normalizeMenuItem(item) {
+    const images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+    return {
+        ...item,
+        images,
+        img: item.img || images[0] || ''
+    };
+}
+
+function applySiteData(data) {
+    menu = (Array.isArray(data?.menu) ? data.menu : defaultMenu).map(normalizeMenuItem);
+    catEmojis = data?.catEmojis && typeof data.catEmojis === 'object' ? data.catEmojis : { ...defaultCatEmojis };
+    wifiData = { ...defaultWifiData, ...(data?.wifi && typeof data.wifi === 'object' ? data.wifi : {}) };
+    socialLinks = { ...defaultSocialLinks, ...(data?.social && typeof data.social === 'object' ? data.social : {}) };
+    promoId = typeof data?.promoId === 'undefined' ? null : data.promoId;
+}
+
+async function loadSiteData() {
+    try {
+        const res = await fetch('/api/data');
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+        applySiteData(await res.json());
+    } catch (error) {
+        console.error('Failed to load site data:', error);
+        applySiteData({
+            menu: defaultMenu,
+            catEmojis: defaultCatEmojis,
+            wifi: defaultWifiData,
+            social: defaultSocialLinks,
+            promoId: null
+        });
+    }
+}
+
 // INIT
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSiteData();
     initApp();
 });
 

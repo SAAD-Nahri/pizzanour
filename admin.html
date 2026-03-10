@@ -740,22 +740,7 @@
         <!-- SECURITY SECTION -->
         <div id="security" class="section">
             <h3>Admin Security</h3>
-            <p>Change your admin login credentials here. These will be required next time you log in.</p>
-            <form id="securityForm">
-                <div class="form-group">
-                    <label>Admin Username</label>
-                    <input type="text" id="adminNewUser" required />
-                </div>
-                <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" id="adminNewPass" placeholder="Leave blank to keep current" />
-                </div>
-                <div class="form-group">
-                    <label>Confirm New Password</label>
-                    <input type="password" id="adminConfirmPass" placeholder="Confirm new password" />
-                </div>
-                <button type="submit" class="primary-btn">💾 Update Credentials</button>
-            </form>
+            <p id="securityNote">Admin credentials are controlled by the server environment variables <code>ADMIN_USER</code> and <code>ADMIN_PASS</code>.</p>
         </div>
 
     </main>

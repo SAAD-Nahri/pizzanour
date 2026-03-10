@@ -1,43 +1,26 @@
-<<<<<<< HEAD
-# ─── Stage 1: Builder (optional lint/validation step) ───────────────────────
-# For a pure static app, the builder stage is lightweight.
-# If you later add a build step (e.g., npm run build), do it here.
-FROM node:20-alpine AS builder
-
+FROM node:20-alpine AS base
 WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
 COPY . .
 
-# No build step needed for a pure static app.
-# Add your build commands here if you add a bundler in the future:
-# RUN npm ci && npm run build
+RUN mkdir -p /app/data /app/uploads && chown -R node:node /app
 
-# ─── Stage 2: Production (nginx) ─────────────────────────────────────────────
-FROM nginx:1.27-alpine AS production
+ENV NODE_ENV=production
+USER node
 
-# Remove default nginx content
-RUN rm -rf /usr/share/nginx/html/*
+FROM base AS website-production
+ENV PORT=3002
+EXPOSE 3002
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:${PORT:-3002}/health || exit 1
+CMD ["node", "website-server.js"]
 
-# Copy static files from builder
-COPY --from=builder /app /usr/share/nginx/html
-
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Remove the default nginx.conf server block
-RUN rm -f /etc/nginx/conf.d/default.conf.bak
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
-
-# Expose port
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-=======
-FROM nginx:alpine
-
-COPY . /usr/share/nginx/html
-
-EXPOSE 80
->>>>>>> 0c6e5cd9726a8a9b9bedaaf8af45a63027f6ce2c
+FROM base AS admin-production
+ENV PORT=3102
+EXPOSE 3102
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:${PORT:-3102}/health || exit 1
+CMD ["node", "admin-server.js"]

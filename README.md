@@ -1,135 +1,116 @@
-# 🍔 Foody — Restaurant Menu App
+# Foody
 
-A modern, dynamic restaurant menu and ordering system. Pure static web app (HTML + CSS + JS) served via nginx in Docker.
+Deployable website and admin panel for the Foody product site.
 
----
+## Architecture
 
-## 🛠 Tech Stack
+- `website-server.js`: public website API and static site
+- `admin-server.js`: protected admin API and admin UI
+- shared persistent data in `data.json`
+- shared uploads directory in `uploads/`
 
-| Layer | Technology |
-|---|---|
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Web Server | nginx 1.27 (Alpine) |
-| Container | Docker (multi-stage build) |
-| Deployment | Coolify + Traefik (self-hosted VPS) |
+The admin is configured for a separate subdomain:
 
----
+- website: `foody.ibnbatoutaweb.com`
+- admin: `admin.foody.ibnbatoutaweb.com`
 
-## 🚀 Running Locally
+## Local development
 
-### Option 1 — Node.js serve (development)
-```bash
-npx -y serve -l 8080
-```
-Open: http://localhost:8080
+1. Install dependencies:
+   ```bash
+   npm ci
+   ```
+2. Start the website:
+   ```bash
+   npm run start:website
+   ```
+3. Start the admin:
+   ```bash
+   ADMIN_USER=admin ADMIN_PASS=change-me-now npm run start:admin
+   ```
 
-### Option 2 — Docker (production-like)
+Local URLs:
 
-```bash
-# 1. Copy env file and configure
-cp .env.example .env
+- website: `http://localhost:3002`
+- admin: `http://localhost:3102/admin`
 
-# 2. Build and run
-docker compose up -d --build
+## Security model
 
-# 3. Open in browser
-open http://localhost:8090
-```
+- public site can only read site data
+- admin login is server-side and cookie-based
+- admin credentials come from `ADMIN_USER` / `ADMIN_PASS`
+- uploads require admin authentication
+- site data no longer stores admin credentials in browser storage
 
-### Stop
-```bash
-docker compose down
-```
+## Deploy to Coolify
 
----
+Use Docker Compose.
 
-## 🌐 Deploying to VPS with Coolify
+### Environment variables
 
-### Prerequisites
-- A VPS with [Coolify](https://coolify.io) installed
-- A domain pointed to your VPS IP
-- Traefik enabled in Coolify (enabled by default)
+- `WEBSITE_PORT=3002`
+- `ADMIN_PORT=3102`
+- `PRODUCT_DOMAIN=foody.ibnbatoutaweb.com`
+- `ADMIN_DOMAIN=admin.foody.ibnbatoutaweb.com`
+- `ADMIN_USER=admin`
+- `ADMIN_PASS=<strong-password>`
+- `COOKIE_SECURE=true`
+- `DATA_FILE=/app/data/data.json`
+- `UPLOADS_DIR=/app/uploads`
 
-### Steps
+### Coolify domain fields
 
-1. **Push code to GitHub** (already done via CI)
+Use generated domains first. After they work over HTTPS, move to custom domains one by one.
 
-2. **In Coolify:**
-   - Add new Resource → Docker Compose
-   - Connect your GitHub repo
-   - Set the `DOMAIN` environment variable to your domain (e.g., `foody.yourdomain.com`)
-   - Deploy
+- website service: `https://foody.ibnbatoutaweb.com:3002`
+- admin service: `https://admin.foody.ibnbatoutaweb.com:3102`
 
-3. **Coolify will automatically:**
-   - Pull the repo
-   - Build the Docker image
-   - Configure Traefik for HTTPS routing
-   - Start the container with restart policy
+Do not start with bare hostnames in the domain fields. Use full HTTPS FQDNs with ports.
 
-### Environment Variables (set in Coolify UI)
+### DNS strategy
 
-| Variable | Description | Example |
-|---|---|---|
-| `DOMAIN` | Public domain name | `foody.yourdomain.com` |
-| `TZ` | Server timezone | `Africa/Casablanca` |
-| `HOST_PORT` | Local port (dev only) | `8090` |
+For first deployment:
 
----
+- `A panel -> <server-ip>`
+- `A * -> <server-ip>`
 
-## 📁 Project Structure
+After custom domains are stable, keep only:
 
-```
-foody-main/
-├── index.html          # Main customer-facing page
-├── admin.html          # Admin panel
-├── app.js              # Frontend logic
-├── admin.js            # Admin panel logic
-├── style.css           # All styles
-├── images/             # Static assets
-├── nginx.conf          # nginx server config
-├── Dockerfile          # Multi-stage Docker build
-├── docker-compose.yml  # Compose with Traefik labels
-├── .env.example        # Environment variable template
-└── .github/workflows/  # GitHub Pages CI (alternative)
+- `A panel -> <server-ip>`
+- `A foody -> <server-ip>`
+- `A admin.foody -> <server-ip>`
+
+Add `AAAA` records only after IPv4 HTTP/HTTPS is confirmed working.
+
+## Deployment scripts
+
+Generate `.env` for the Foody subdomain:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-env.ps1 -ParentDomain ibnbatoutaweb.com -ProductSubdomain foody
 ```
 
----
+The generated local `.env` keeps `COOKIE_SECURE=false` for HTTP testing. In Coolify production, set `COOKIE_SECURE=true`.
 
-## 🔄 Multi-Restaurant Template
+Deploy locally with Docker:
 
-This project is designed as a **base template**. To deploy a second restaurant:
-
-```bash
-# 1. Copy the template
-cp -r foody-main restaurant-two
-
-# 2. Edit the .env
-cd restaurant-two
-cp .env.example .env
-# Set DOMAIN=restaurant-two.yourdomain.com
-# Set HOST_PORT=8091
-
-# 3. Deploy
-docker compose up -d --build
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-local.ps1
 ```
 
-Each restaurant gets its own domain, container, and port.
+Commit, push, and optionally trigger Coolify directly:
 
----
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\push-and-deploy.ps1 -Branch main -Remote origin
+```
 
-## ✅ Health Check
+## GitHub auto-deploy
 
-The container exposes a health check at `http://localhost:80/`. Docker and Coolify will automatically restart the container if it becomes unhealthy.
+This repo includes `.github/workflows/deploy.yml`.
 
----
+Set these repository secrets:
 
-## 📞 Admin Panel
-
-Access at: `https://yourdomain.com/admin.html`
-
-The admin panel lets you manage:
-- Menu items & categories
-- Social media links (including WhatsApp number)
-- WiFi credentials
-- Promo section
-- Gallery images
+- `COOLIFY_WEBHOOK_PROD`
+- `COOLIFY_TOKEN_PROD`
+- `COOLIFY_WEBHOOK_STAGING` (optional)
+- `COOLIFY_TOKEN_STAGING` (optional)
