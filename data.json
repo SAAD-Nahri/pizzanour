@@ -1,993 +1,1847 @@
 {
   "menu": [
     {
-      "id": 1,
-      "cat": "Burgers",
-      "name": "Cheese-Burger",
-      "desc": "1 Steak, Fromage, Salade",
+      "id": 99,
+      "cat": "Petit Déjeuner",
+      "name": "Chamali",
+      "desc": "Soupe du jour, confiture, olive noire, 2 oeufs au plats, Jben arabi, fromage rouge, dinde fumée, jus, boisson chaude au choix, eau minérale",
+      "price": 30,
+      "featured": true,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Steak haché",
-        "Fromage",
-        "Salade",
-        "Sauce"
+        "Soupe du jour",
+        "Confiture",
+        "Olive noire",
+        "2 Oeufs au plats",
+        "Jben arabi",
+        "Fromage rouge",
+        "Dinde fumée",
+        "Jus d'orange",
+        "Boisson chaude au choix",
+        "Eau minérale"
       ],
-      "price": 22,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ],
+      "hasSizes": true,
+      "sizes": {
+        "small": 30,
+        "medium": 40,
+        "large": 50
+      }
     },
     {
-      "id": 2,
-      "cat": "Burgers",
-      "name": "Quality-Burger",
-      "desc": "1 Steak, Oeuf, Fromage, Salade",
+      "id": 100,
+      "cat": "Petit Déjeuner",
+      "name": "Continental",
+      "desc": "Soupe du jour, omelette, fromage charcuterie, confiture, huile d'olive, olive noire, jus, boisson chaude au choix, eau minérale",
+      "price": 30,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Steak haché",
-        "Oeuf",
-        "Fromage",
-        "Salade"
+        "Soupe du jour",
+        "Omelette",
+        "Fromage charcuterie",
+        "Confiture",
+        "Huile d'olive",
+        "Olive noire",
+        "Jus d'orange",
+        "Boisson chaude au choix",
+        "Eau minérale"
       ],
-      "price": 25,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
-      "id": 3,
-      "cat": "Burgers",
-      "name": "Double-Cheese",
-      "desc": "2 Steaks, Fromage, Salade",
-      "ingredients": [
-        "2 Steaks hachés",
-        "Fromage",
-        "Salade",
-        "Sauce"
-      ],
-      "price": 32,
-      "images": []
-    },
-    {
-      "id": 4,
-      "cat": "Burgers",
-      "name": "Triple-Burger",
-      "desc": "3 Steaks, Fromage, Salade",
-      "ingredients": [
-        "3 Steaks hachés",
-        "Fromage",
-        "Salade",
-        "Sauce"
-      ],
-      "price": 50,
-      "badge": "XXL",
-      "images": []
-    },
-    {
-      "id": 5,
-      "cat": "Burgers",
-      "name": "Bigg-Burger",
-      "desc": "2 Steaks, Fromage, Salade",
-      "ingredients": [
-        "2 Steaks hachés",
-        "Fromage",
-        "Salade",
-        "Sauce"
-      ],
-      "price": 33,
-      "images": []
-    },
-    {
-      "id": 6,
-      "cat": "Burgers",
-      "name": "Chicken-Burger",
-      "desc": "1 Steak Poulet, Fromage, Salade",
-      "ingredients": [
-        "Steak poulet",
-        "Fromage",
-        "Salade",
-        "Sauce"
-      ],
-      "price": 24,
-      "images": []
-    },
-    {
-      "id": 7,
-      "cat": "Burgers",
-      "name": "Roasty Chicken",
-      "desc": "Poulet rôti, Fromage, Salade",
-      "ingredients": [
-        "Poulet rôti",
-        "Fromage",
-        "Salade"
-      ],
-      "price": 28,
-      "images": []
-    },
-    {
-      "id": 8,
-      "cat": "Burgers",
-      "name": "Fish-Supreme",
-      "desc": "Filet de poisson, Fromage, Salade",
-      "ingredients": [
-        "Filet de poisson",
-        "Fromage",
-        "Salade",
-        "Sauce tartare"
-      ],
-      "price": 28,
-      "images": []
-    },
-    {
-      "id": 9,
-      "cat": "Burgers",
-      "name": "Menu Enfants",
-      "desc": "Burger + Cheese + Frites + Boisson",
-      "ingredients": [
-        "Mini burger",
-        "Fromage",
-        "Frites",
-        "Boisson"
-      ],
+      "id": 101,
+      "cat": "Petit Déjeuner",
+      "name": "Fassi",
+      "desc": "Soupe du jour, oeufs au Khli, pain complet, huile d'olive, olive noire, jus, boisson chaude au choix, eau minérale",
       "price": 40,
-      "badge": "Kids",
-      "images": []
+      "img": "images/hero_burger.png",
+      "ingredients": [
+        "Soupe du jour",
+        "Oeufs au Khli",
+        "Pain complet",
+        "Huile d'olive",
+        "Olive noire",
+        "Jus d'orange",
+        "Boisson chaude au choix",
+        "Eau minérale"
+      ],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
-      "id": 10,
-      "cat": "Sandwich Froid",
-      "name": "Sandwich Thon",
-      "desc": "Thon, Salade, Frites",
+      "id": 102,
+      "cat": "Petit Déjeuner",
+      "name": "Marocain",
+      "desc": "Soupe du jour, 2 Msaman, 2 Harcha, huile d'olive, confiture, olive noire, jus, boisson chaude au choix, eau minérale",
+      "price": 30,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Thon",
-        "Salade",
-        "Frites",
-        "Mayonnaise"
+        "Soupe du jour",
+        "2 Msaman",
+        "2 Harcha",
+        "Huile d'olive",
+        "Confiture",
+        "Olive noire",
+        "Jus d'orange",
+        "Boisson chaude au choix",
+        "Eau minérale"
       ],
-      "price": 15,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
-      "id": 11,
-      "cat": "Sandwich Froid",
-      "name": "Sandwich Mortadelle",
-      "desc": "Mortadelle, Salade, Frites",
-      "ingredients": [
-        "Mortadelle",
-        "Salade",
-        "Frites"
-      ],
-      "price": 12,
-      "images": []
-    },
-    {
-      "id": 12,
-      "cat": "Sandwich Froid",
-      "name": "Sandwich Cacher",
-      "desc": "Cacher, Salade, Frites",
-      "ingredients": [
-        "Cacher",
-        "Salade",
-        "Frites"
-      ],
-      "price": 12,
-      "images": []
-    },
-    {
-      "id": 13,
-      "cat": "Sandwich Froid",
-      "name": "Sandwich Oeuf",
-      "desc": "Oeuf, Salade, Frites",
-      "ingredients": [
-        "Oeuf",
-        "Salade",
-        "Frites"
-      ],
-      "price": 12,
-      "images": []
-    },
-    {
-      "id": 14,
-      "cat": "Sandwich Froid",
-      "name": "Sandwich Tortilla",
-      "desc": "Tortilla, Salade, Frites",
-      "ingredients": [
-        "Tortilla",
-        "Salade",
-        "Frites"
-      ],
-      "price": 15,
-      "images": []
-    },
-    {
-      "id": 15,
-      "cat": "Sandwich Froid",
-      "name": "Sandwich Tortilla Spéciale",
-      "desc": "Tortilla spéciale, Salade, Frites",
-      "ingredients": [
-        "Tortilla",
-        "Garniture spéciale",
-        "Salade",
-        "Frites"
-      ],
-      "price": 20,
-      "badge": "Spécial",
-      "images": []
-    },
-    {
-      "id": 16,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Escalope",
-      "desc": "Escalope grillée, Salade, Frites",
-      "ingredients": [
-        "Escalope",
-        "Salade",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 27,
-      "images": []
-    },
-    {
-      "id": 17,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Poulet",
-      "desc": "Poulet grillé, Salade, Frites",
-      "ingredients": [
-        "Poulet",
-        "Salade",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 27,
-      "images": []
-    },
-    {
-      "id": 18,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Viande Hachée",
-      "desc": "Viande hachée, Salade, Frites",
-      "ingredients": [
-        "Viande hachée",
-        "Salade",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 27,
-      "images": []
-    },
-    {
-      "id": 19,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Saucisse",
-      "desc": "Saucisse grillée, Salade, Frites",
-      "ingredients": [
-        "Saucisse",
-        "Salade",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
-    },
-    {
-      "id": 20,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Fruits de Mer",
-      "desc": "Fruits de mer, Salade, Frites",
-      "ingredients": [
-        "Crevettes",
-        "Calamar",
-        "Salade",
-        "Frites"
-      ],
-      "price": 40,
-      "badge": "Premium",
-      "images": []
-    },
-    {
-      "id": 21,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Foie",
-      "desc": "Foie grillé, Salade, Frites",
-      "ingredients": [
-        "Foie",
-        "Salade",
-        "Frites",
-        "Oignons"
-      ],
-      "price": 35,
-      "images": []
-    },
-    {
-      "id": 22,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Mixte",
-      "desc": "Mix viandes, Salade, Frites",
-      "ingredients": [
-        "Mix viandes",
-        "Salade",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 35,
-      "images": []
-    },
-    {
-      "id": 23,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Cordon Bleu",
-      "desc": "Cordon bleu, Salade, Frites",
-      "ingredients": [
-        "Cordon bleu",
-        "Fromage",
-        "Salade",
-        "Frites"
-      ],
-      "price": 27,
-      "images": []
-    },
-    {
-      "id": 24,
-      "cat": "Sandwich Chaud",
-      "name": "Sandwich Chawarma",
-      "desc": "Chawarma, Salade, Frites",
-      "ingredients": [
-        "Chawarma",
-        "Salade",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 27,
-      "images": []
-    },
-    {
-      "id": 25,
-      "cat": "Plats",
-      "name": "Plat Poulet",
-      "desc": "Poulet grillé avec riz ou frites, salade",
-      "ingredients": [
-        "Poulet",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 38,
-      "images": []
-    },
-    {
-      "id": 26,
-      "cat": "Plats",
-      "name": "Plat Viande Hachée",
-      "desc": "Viande hachée avec riz ou frites, salade",
-      "ingredients": [
-        "Viande hachée",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 38,
-      "images": []
-    },
-    {
-      "id": 27,
-      "cat": "Plats",
-      "name": "Plat Chawarma",
-      "desc": "Chawarma avec riz ou frites, salade",
-      "ingredients": [
-        "Chawarma",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 38,
-      "images": []
-    },
-    {
-      "id": 28,
-      "cat": "Plats",
-      "name": "Plat Saucisse",
-      "desc": "Saucisse avec riz ou frites, salade",
-      "ingredients": [
-        "Saucisse",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 38,
-      "images": []
-    },
-    {
-      "id": 29,
-      "cat": "Plats",
-      "name": "Plat Cordon Bleu",
-      "desc": "Cordon bleu avec riz ou frites, salade",
-      "ingredients": [
-        "Cordon bleu",
-        "Riz ou Frites",
-        "Salade"
-      ],
+      "id": 103,
+      "cat": "Petit Déjeuner",
+      "name": "Hollandaise",
+      "desc": "Soupe du jour, toaste, dinde fumée, fromage, oeuf au plat, jus, boisson chaude au choix, eau minérale",
       "price": 45,
-      "images": []
-    },
-    {
-      "id": 30,
-      "cat": "Plats",
-      "name": "Plat Foie",
-      "desc": "Foie grillé avec riz ou frites, salade",
+      "featured": true,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Foie",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 45,
-      "images": []
-    },
-    {
-      "id": 31,
-      "cat": "Plats",
-      "name": "Plat Fruits de Mer",
-      "desc": "Fruits de mer avec riz ou frites, salade",
-      "ingredients": [
-        "Crevettes",
-        "Calamar",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 50,
-      "badge": "Premium",
-      "images": []
-    },
-    {
-      "id": 32,
-      "cat": "Plats",
-      "name": "Plat Mixte",
-      "desc": "Mix viandes avec riz ou frites, salade",
-      "ingredients": [
-        "Mix viandes",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 50,
-      "images": []
-    },
-    {
-      "id": 33,
-      "cat": "Plats",
-      "name": "Plat Escalope",
-      "desc": "Escalope avec riz ou frites, salade",
-      "ingredients": [
-        "Escalope",
-        "Riz ou Frites",
-        "Salade"
-      ],
-      "price": 40,
-      "images": []
-    },
-    {
-      "id": 34,
-      "cat": "Paninis",
-      "name": "Panini Thon",
-      "desc": "Panini grillé au thon",
-      "ingredients": [
-        "Thon",
+        "Soupe du jour",
+        "Toaste",
+        "Dinde fumée",
         "Fromage",
-        "Sauce"
+        "Oeuf au plat",
+        "Jus d'orange",
+        "Boisson chaude au choix",
+        "Eau minérale"
       ],
-      "price": 18,
-      "images": []
-    },
-    {
-      "id": 35,
-      "cat": "Paninis",
-      "name": "Panini Fromage",
-      "desc": "Panini grillé fromage fondu",
-      "ingredients": [
-        "Fromage fondu",
-        "Herbes"
-      ],
-      "price": 18,
-      "images": []
-    },
-    {
-      "id": 36,
-      "cat": "Paninis",
-      "name": "Panini Poulet",
-      "desc": "Panini grillé au poulet",
-      "ingredients": [
-        "Poulet",
-        "Fromage",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
-    },
-    {
-      "id": 37,
-      "cat": "Paninis",
-      "name": "Panini Viande Hachée",
-      "desc": "Panini grillé viande hachée",
-      "ingredients": [
-        "Viande hachée",
-        "Fromage",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
-    },
-    {
-      "id": 38,
-      "cat": "Paninis",
-      "name": "Panini Saucisse",
-      "desc": "Panini grillé saucisse",
-      "ingredients": [
-        "Saucisse",
-        "Fromage",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
-    },
-    {
-      "id": 39,
-      "cat": "Paninis",
-      "name": "Panini Chawarma",
-      "desc": "Panini grillé chawarma",
-      "ingredients": [
-        "Chawarma",
-        "Fromage",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
-    },
-    {
-      "id": 40,
-      "cat": "Paninis",
-      "name": "Panini Fruits de Mer",
-      "desc": "Panini grillé fruits de mer",
-      "ingredients": [
-        "Crevettes",
-        "Calamar",
-        "Fromage",
-        "Sauce"
-      ],
-      "price": 35,
-      "images": []
-    },
-    {
-      "id": 41,
-      "cat": "Paninis",
-      "name": "Panini Mixte",
-      "desc": "Panini grillé mixte",
-      "ingredients": [
-        "Mix viandes",
-        "Fromage",
-        "Sauce"
-      ],
-      "price": 35,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
       "id": 42,
-      "cat": "Tacos",
-      "name": "Tacos Poulet (L)",
-      "desc": "Poulet, fromage, sauce",
+      "cat": "Les Salades",
+      "name": "Salade Marocaine",
+      "desc": "Tomate, concombre, oignon, laitue, poivron, thon",
+      "price": 25,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Poulet",
-        "Fromage",
-        "Sauce fromagère"
+        "Tomate",
+        "Concombre",
+        "Oignon",
+        "Laitue",
+        "Poivron",
+        "Thon"
       ],
-      "price": 35,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 43,
-      "cat": "Tacos",
-      "name": "Tacos Poulet (XL)",
-      "desc": "Poulet, fromage, sauce — XL",
+      "cat": "Les Salades",
+      "name": "Salade Niçoise",
+      "desc": "Pomme de terre, carotte, betterave, concombre, tomate, riz, thon, œuf dur, sauce cocktail",
+      "price": 35,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Poulet (double)",
-        "Fromage",
-        "Sauce fromagère"
+        "Pomme de terre",
+        "Carotte",
+        "Betterave",
+        "Concombre",
+        "Tomate",
+        "Riz",
+        "Thon",
+        "Œuf dur",
+        "Sauce cocktail"
       ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
       "id": 44,
-      "cat": "Tacos",
-      "name": "Tacos Viande Hachée (L)",
-      "desc": "Viande hachée, fromage, sauce",
+      "cat": "Les Salades",
+      "name": "Salade Cesar",
+      "desc": "Poulet, tomate cerise, croutons, fromage parmesan, l'anchois, laitue, sauce césar",
+      "price": 45,
+      "featured": true,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Viande hachée",
-        "Fromage",
-        "Sauce fromagère"
+        "Poulet",
+        "Tomate cerise",
+        "Croutons",
+        "Fromage parmesan",
+        "Anchois",
+        "Laitue",
+        "Sauce césar"
       ],
-      "price": 35,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 45,
-      "cat": "Tacos",
-      "name": "Tacos Viande Hachée (XL)",
-      "desc": "Viande hachée, fromage, sauce — XL",
+      "cat": "Les Salades",
+      "name": "Salade Royal Nolasco",
+      "desc": "Laitue, avocat, crevette, calamar, tomate cerise, surimi, anchois, thon, ananas, parmesan, sauce pesto",
+      "price": 80,
+      "featured": true,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Viande hachée (double)",
-        "Fromage",
-        "Sauce fromagère"
+        "Laitue",
+        "Avocat",
+        "Crevette",
+        "Calamar",
+        "Tomate cerise",
+        "Surimi",
+        "Anchois",
+        "Thon",
+        "Ananas",
+        "Fromage parmesan",
+        "Sauce Pesto"
       ],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 1,
+      "cat": "Les Pâtes",
+      "name": "Pâtes sauce bolognaise",
+      "desc": "Spaghetti, Penné ou Tagliatelle",
+      "price": 40,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 2,
+      "cat": "Les Pâtes",
+      "name": "Pâtes fruits de mer sauce blanche",
+      "desc": "Spaghetti, Penné ou Tagliatelle",
       "price": 50,
-      "badge": "XL",
-      "images": []
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 3,
+      "cat": "Les Pâtes",
+      "name": "Pâtes poulet sauce champignon",
+      "desc": "Spaghetti, Penné ou Tagliatelle",
+      "price": 40,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 4,
+      "cat": "Les Pâtes",
+      "name": "Pâtes carbonara",
+      "desc": "Spaghetti, Penné ou Tagliatelle",
+      "price": 40,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 5,
+      "cat": "Les Pâtes",
+      "name": "Pâtes poulet pesto",
+      "desc": "Spaghetti, Penné ou Tagliatelle",
+      "price": 45,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 6,
+      "cat": "Pasticcio",
+      "name": "Pasticcio poulet",
+      "desc": "Gratin de pâtes au poulet et fromage",
+      "price": 35,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 7,
+      "cat": "Pasticcio",
+      "name": "Pasticcio dinde fumée",
+      "desc": "Gratin de pâtes à la dinde fumée",
+      "price": 35,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 8,
+      "cat": "Pasticcio",
+      "name": "Pasticcio mixte",
+      "desc": "Mélange gourmand de viandes",
+      "price": 45,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 9,
+      "cat": "Pasticcio",
+      "name": "Pasticcio fruits de mer",
+      "desc": "Gratin aux fruits de mer frais",
+      "price": 50,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 10,
+      "cat": "Pasticcio",
+      "name": "Pasticcio viande hachée",
+      "desc": "Gratin à la viande hachée savoureuse",
+      "price": 40,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 11,
+      "cat": "Les Plats",
+      "name": "Émincé Poulet au Champignon",
+      "desc": "Garniture: Riz mariné, Pomme frite, Légumes sautés ou Penne",
+      "price": 70,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 12,
+      "cat": "Les Plats",
+      "name": "Cordon Bleu",
+      "desc": "Garniture: Riz mariné, Pomme frite, Légumes sautés ou Penne",
+      "price": 75,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 13,
+      "cat": "Les Plats",
+      "name": "Chicken Panée",
+      "desc": "Garniture: Riz mariné, Pomme frite, Légumes sautés ou Penne",
+      "price": 75,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 14,
+      "cat": "Les Plats",
+      "name": "Brochette de poulet",
+      "desc": "Garniture: Riz mariné, Pomme frite, Légumes sautés ou Penne",
+      "price": 55,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 15,
+      "cat": "Les Plats",
+      "name": "Brochette Mixte",
+      "desc": "Garniture: Riz mariné, Pomme frite, Légumes sautés ou Penne",
+      "price": 70,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 16,
+      "cat": "Tajine",
+      "name": "Crevette Pilpil",
+      "desc": "Tajine traditionnel aux crevettes épicées",
+      "price": 60,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 17,
+      "cat": "Tajine",
+      "name": "Tajin Viande hachée",
+      "desc": "Tajine à la viande hachée et œufs",
+      "price": 50,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 46,
-      "cat": "Tacos",
-      "name": "Tacos Cordon Bleu (L)",
-      "desc": "Cordon bleu, fromage, sauce",
-      "ingredients": [
-        "Cordon bleu",
-        "Fromage",
-        "Sauce fromagère"
-      ],
+      "cat": "Pizzas",
+      "name": "Pizza Margarita",
+      "desc": "Sauce tomate, fromage mozzarella, olive noire, origan",
       "price": 35,
-      "images": []
+      "img": "images/hero_burger.png",
+      "ingredients": [
+        "Sauce tomate",
+        "Mozzarella",
+        "Olive noire",
+        "Origan"
+      ],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
       "id": 47,
-      "cat": "Tacos",
-      "name": "Tacos Cordon Bleu (XL)",
-      "desc": "Cordon bleu, fromage, sauce — XL",
+      "cat": "Pizzas",
+      "name": "Pizza Viande Hachée",
+      "desc": "Sauce tomate, fromage mozzarella, viande hachée, champignons, olive noire, origan",
+      "price": 55,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Cordon bleu (double)",
-        "Fromage",
-        "Sauce fromagère"
+        "Sauce tomate",
+        "Mozzarella",
+        "Viande hachée",
+        "Champignons",
+        "Olive noire",
+        "Origan"
       ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 48,
-      "cat": "Tacos",
-      "name": "Tacos Nuggets (L)",
-      "desc": "Nuggets, fromage, sauce",
+      "cat": "Pizzas",
+      "name": "Pizza Poulet",
+      "desc": "Sauce tomate, fromage mozzarella, poulet, poivron, olive noire, origan",
+      "price": 40,
+      "featured": true,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Nuggets",
-        "Fromage",
-        "Sauce fromagère"
+        "Sauce tomate",
+        "Mozzarella",
+        "Poulet",
+        "Poivron",
+        "Olive noire",
+        "Origan"
       ],
-      "price": 35,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
       "id": 49,
-      "cat": "Tacos",
-      "name": "Tacos Nuggets (XL)",
-      "desc": "Nuggets, fromage, sauce — XL",
+      "cat": "Pizzas",
+      "name": "Pizza Thon",
+      "desc": "Sauce tomate, fromage mozzarella, thon, oignon, olive noire, origan",
+      "price": 40,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Nuggets (double)",
-        "Fromage",
-        "Sauce fromagère"
+        "Sauce tomate",
+        "Mozzarella",
+        "Thon",
+        "Oignon",
+        "Olive noire",
+        "Origan"
       ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 50,
-      "cat": "Tacos",
-      "name": "Tacos Tenders (L)",
-      "desc": "Tenders, fromage, sauce",
+      "cat": "Pizzas",
+      "name": "Pizza Poulet Pesto",
+      "desc": "Sauce pesto, fromage mozzarella, poulet, champignons, olive noire, origan",
+      "price": 45,
+      "featured": true,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Tenders",
-        "Fromage",
-        "Sauce fromagère"
+        "Sauce pesto",
+        "Mozzarella",
+        "Poulet",
+        "Champignons",
+        "Olive noire",
+        "Origan"
       ],
-      "price": 35,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
       "id": 51,
-      "cat": "Tacos",
-      "name": "Tacos Tenders (XL)",
-      "desc": "Tenders, fromage, sauce — XL",
+      "cat": "Pizzas",
+      "name": "Pizza Fruits De Mer",
+      "desc": "Sauce tomate, fromage mozzarella, crevettes, calamar, champignons, origan",
+      "price": 60,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Tenders (double)",
-        "Fromage",
-        "Sauce fromagère"
+        "Sauce tomate",
+        "Mozzarella",
+        "Crevettes",
+        "Calamar",
+        "Champignons",
+        "Origan"
       ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 52,
-      "cat": "Tacos",
-      "name": "Tacos Fish (L)",
-      "desc": "Poisson, fromage, sauce",
+      "cat": "Pizzas",
+      "name": "Pizza 4 Saisons",
+      "desc": "Sauce tomate, fromage mozzarella, poulet, viande hachée, thon, crevettes, champignons, origan",
+      "price": 50,
+      "img": "images/hero_burger.png",
       "ingredients": [
-        "Poisson pané",
-        "Fromage",
-        "Sauce fromagère"
+        "Sauce tomate",
+        "Mozzarella",
+        "Poulet",
+        "Viande hachée",
+        "Thon",
+        "Crevettes",
+        "Champignons",
+        "Origan"
       ],
-      "price": 35,
-      "images": []
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
     },
     {
       "id": 53,
-      "cat": "Tacos",
-      "name": "Tacos Fish (XL)",
-      "desc": "Poisson, fromage, sauce — XL",
+      "cat": "Pizzas",
+      "name": "Pizza Nolasco",
+      "desc": "Crème fraîche, fromage mozzarella, viande hachée, crevette, calamar, surimi, olive noire, champignons, origan",
+      "price": 70,
+      "featured": true,
+      "img": "images/bg_tasty.png",
       "ingredients": [
-        "Poisson pané (double)",
-        "Fromage",
-        "Sauce fromagère"
+        "Crème fraîche",
+        "Mozzarella",
+        "Viande hachée",
+        "Crevette",
+        "Calamar",
+        "Surimi",
+        "Olive noire",
+        "Champignons",
+        "Origan"
       ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
     },
     {
       "id": 54,
-      "cat": "Tacos",
-      "name": "Tacos Escalope (L)",
-      "desc": "Escalope, fromage, sauce",
-      "ingredients": [
-        "Escalope",
-        "Fromage",
-        "Sauce fromagère"
-      ],
+      "cat": "Pizzas",
+      "name": "Calzone",
+      "desc": "Sauce tomate, fromage mozzarella, dinde fumée, poulet, champignons, olive noire",
       "price": 45,
-      "images": []
+      "img": "images/hero_burger.png",
+      "ingredients": [
+        "Sauce tomate",
+        "Mozzarella",
+        "Dinde fumée",
+        "Poulet",
+        "Champignons",
+        "Olive noire"
+      ],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 18,
+      "cat": "Burger",
+      "name": "Hamburger",
+      "desc": "Classique et savoureux",
+      "price": 40,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 19,
+      "cat": "Burger",
+      "name": "Cheese Burger",
+      "desc": "Avec fromage fondant",
+      "price": 35,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 20,
+      "cat": "Burger",
+      "name": "Chicken Burger",
+      "desc": "Poulet croustillant",
+      "price": 35,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 21,
+      "cat": "Burger",
+      "name": "Double Burger",
+      "desc": "Deux fois plus de plaisir",
+      "price": 50,
+      "featured": true,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 22,
+      "cat": "Burger",
+      "name": "Double Chicken",
+      "desc": "Double poulet croustillant",
+      "price": 55,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 23,
+      "cat": "Burger",
+      "name": "American Burger",
+      "desc": "Style USA généreux",
+      "price": 60,
+      "featured": true,
+      "img": "images/bg_tasty.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/bg_tasty.png"
+      ]
+    },
+    {
+      "id": 24,
+      "cat": "Burger",
+      "name": "Nolasco Burger",
+      "desc": "La spécialité de la maison",
+      "price": 70,
+      "featured": true,
+      "img": "images/hero_burger.png",
+      "ingredients": [],
+      "badge": "",
+      "images": [
+        "images/hero_burger.png"
+      ]
+    },
+    {
+      "id": 25,
+      "cat": "Burritos",
+      "name": "Burritos Steak Poulet",
+      "desc": "Tomate, Laitue, Fromage, Dinde, Maïs, Avocat",
+      "price": 45,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 26,
+      "cat": "Burritos",
+      "name": "Burritos Viande Hachée",
+      "desc": "Tomate, Laitue, Fromage, Dinde, Maïs, Avocat",
+      "price": 50,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 27,
+      "cat": "Burritos",
+      "name": "Burritos Chicken Panée",
+      "desc": "Tomate, Laitue, Fromage, Dinde, Maïs, Avocat",
+      "price": 50,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 28,
+      "cat": "Burritos",
+      "name": "Burritos Fruits De Mer",
+      "desc": "Tomate, Laitue, Fromage, Dinde, Maïs, Avocat",
+      "price": 65,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 29,
+      "cat": "Burritos",
+      "name": "Burritos Nuggets",
+      "desc": "Tomate, Laitue, Fromage, Dinde, Maïs, Avocat",
+      "price": 45,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 30,
+      "cat": "Burritos",
+      "name": "Burritos Nolasco",
+      "desc": "Tomate, Laitue, Fromage, Dinde, Maïs, Avocat",
+      "price": 70,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 31,
+      "cat": "Crêpes Salées",
+      "name": "Crêpe Poulet Champignon",
+      "desc": "Garniture riche et crémeuse",
+      "price": 40,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 32,
+      "cat": "Crêpes Salées",
+      "name": "Crêpe Fruits De Mer",
+      "desc": "Mélange de la mer frais",
+      "price": 50,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 33,
+      "cat": "Crêpes Salées",
+      "name": "Crêpe Dinde Fumée",
+      "desc": "Légère et savoureuse",
+      "price": 35,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 34,
+      "cat": "Crêpes Salées",
+      "name": "Crêpe Viande Hachée",
+      "desc": "Généreuse en viande",
+      "price": 45,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 35,
+      "cat": "Crêpes Salées",
+      "name": "Crêpe Salé Royal Nolasco",
+      "desc": "L'expérience royale salée",
+      "price": 70,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 55,
-      "cat": "Tacos",
-      "name": "Tacos Escalope (XL)",
-      "desc": "Escalope, fromage, sauce — XL",
-      "ingredients": [
-        "Escalope (double)",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 55,
-      "badge": "XL",
-      "images": []
+      "cat": "Sandwich",
+      "name": "Sandwich Steak Poulet",
+      "desc": "Laitue, Tomate, Cheddar, Steak Poulet, Sauce cocktail",
+      "price": 35,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 56,
-      "cat": "Tacos",
-      "name": "Tacos Mixte 2 Viandes (L)",
-      "desc": "2 viandes, fromage, sauce",
-      "ingredients": [
-        "2 Viandes au choix",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 50,
-      "images": []
+      "cat": "Sandwich",
+      "name": "Sandwich American",
+      "desc": "Oignon Caramelisé, Viande Hachée, Fromage, Dinde Fumée",
+      "price": 40,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 57,
-      "cat": "Tacos",
-      "name": "Tacos Mixte 2 Viandes (XL)",
-      "desc": "2 viandes, fromage, sauce — XL",
-      "ingredients": [
-        "2 Viandes au choix (double)",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 65,
-      "badge": "XL",
-      "images": []
+      "cat": "Sandwich",
+      "name": "Sandwich Chicken Pané",
+      "desc": "Laitue, Tomate, Fromage, Chicken Pané, Sauce Cocktail",
+      "price": 40,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 58,
-      "cat": "Tacos",
-      "name": "Tacos 3 Viandes",
-      "desc": "3 viandes, fromage, sauce",
-      "ingredients": [
-        "3 Viandes au choix",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 65,
-      "badge": "Géant",
-      "images": []
+      "cat": "Sandwich",
+      "name": "Sandwich Fruits De Mer",
+      "desc": "Laitue, Tomate, Fromage, Crevette, Calamar, Sauce Cocktail",
+      "price": 50,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 59,
-      "cat": "Tacos",
-      "name": "Tacos Chawarma (L)",
-      "desc": "Chawarma, fromage, sauce",
-      "ingredients": [
-        "Chawarma",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 35,
-      "images": []
+      "cat": "Sandwich",
+      "name": "Sandwich Thon",
+      "desc": "Laitue, Tomate, Fromage, Thon, Oignon, Sauce Cocktail",
+      "price": 30,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 60,
       "cat": "Tacos",
-      "name": "Tacos Chawarma (XL)",
-      "desc": "Chawarma, fromage, sauce — XL",
-      "ingredients": [
-        "Chawarma (double)",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "name": "Tacos Poulet",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
+      "price": 40,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 61,
       "cat": "Tacos",
-      "name": "Tacos Saucisse (L)",
-      "desc": "Saucisse, fromage, sauce",
-      "ingredients": [
-        "Saucisse",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 35,
-      "images": []
+      "name": "Tacos Viande Haché",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
+      "price": 45,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 62,
       "cat": "Tacos",
-      "name": "Tacos Saucisse (XL)",
-      "desc": "Saucisse, fromage, sauce — XL",
-      "ingredients": [
-        "Saucisse (double)",
-        "Fromage",
-        "Sauce fromagère"
-      ],
-      "price": 50,
-      "badge": "XL",
-      "images": []
+      "name": "Tacos Nugget",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
+      "price": 40,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 63,
-      "cat": "Gratiné",
-      "name": "Gratiné (L)",
-      "desc": "Gratiné au fromage",
-      "ingredients": [
-        "Viande",
-        "Fromage gratiné",
-        "Frites",
-        "Sauce"
-      ],
+      "cat": "Tacos",
+      "name": "Tacos Cordon Bleu",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
       "price": 45,
-      "images": []
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 64,
-      "cat": "Gratiné",
-      "name": "Gratiné (XL)",
-      "desc": "Gratiné au fromage — XL",
-      "ingredients": [
-        "Viande (double)",
-        "Fromage gratiné",
-        "Frites",
-        "Sauce"
-      ],
-      "price": 60,
-      "badge": "XL",
-      "images": []
+      "cat": "Tacos",
+      "name": "Tacos Fruits De Mer",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
+      "price": 55,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 65,
-      "cat": "Divers",
-      "name": "6 Nuggets",
-      "desc": "6 pièces croustillantes",
-      "ingredients": [
-        "Nuggets de poulet",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
+      "cat": "Tacos",
+      "name": "Tacos Chicken pané",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
+      "price": 45,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 66,
-      "cat": "Divers",
-      "name": "6 Croquettes",
-      "desc": "6 croquettes croustillantes",
-      "ingredients": [
-        "Croquettes",
-        "Sauce"
-      ],
-      "price": 30,
-      "images": []
+      "cat": "Tacos",
+      "name": "Tacos Nolasco",
+      "desc": "Sauce au choix: Algérienne, Andalouse, Bigup, Samurai",
+      "price": 60,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 67,
-      "cat": "Divers",
-      "name": "Plat de Frites",
-      "desc": "Portion de frites",
-      "ingredients": [
-        "Frites",
-        "Sel"
-      ],
-      "price": 7,
-      "images": []
+      "cat": "Tacos",
+      "name": "Gratiné fromage cheddar",
+      "desc": "Supplément délicieux",
+      "price": 5,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 68,
-      "cat": "Divers",
-      "name": "Supplément Fromage",
-      "desc": "Fromage en supplément",
-      "ingredients": [
-        "Fromage"
-      ],
-      "price": 10,
-      "images": []
+      "cat": "Panini",
+      "name": "Panini Thon",
+      "desc": "Classique et croustillant",
+      "price": 30,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 69,
-      "cat": "Salades",
-      "name": "Salade Niçoise",
-      "desc": "Salade niçoise fraîche",
-      "ingredients": [
-        "Thon",
-        "Oeuf",
-        "Tomate",
-        "Olives",
-        "Laitue"
-      ],
-      "price": 20,
-      "images": []
+      "cat": "Panini",
+      "name": "Panini Poulet",
+      "desc": "Poulet fondant",
+      "price": 30,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 70,
-      "cat": "Salades",
-      "name": "Salade Rosa",
-      "desc": "Salade rosa",
-      "ingredients": [
-        "Laitue",
-        "Tomate",
-        "Concombre",
-        "Carotte",
-        "Vinaigrette"
-      ],
-      "price": 20,
-      "images": []
+      "cat": "Panini",
+      "name": "Panini Viande Hachée",
+      "desc": "Savoureux et chaud",
+      "price": 35,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 71,
-      "cat": "Salades",
-      "name": "Salade Poulet",
-      "desc": "Salade au poulet grillé",
-      "ingredients": [
-        "Poulet grillé",
-        "Laitue",
-        "Tomate",
-        "Maïs",
-        "Sauce"
-      ],
-      "price": 25,
-      "images": []
+      "cat": "Panini",
+      "name": "Panini Fruit De Mer",
+      "desc": "Délices de la mer",
+      "price": 50,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     },
     {
       "id": 72,
-      "cat": "Salades",
-      "name": "Salade Panda",
-      "desc": "Salade panda premium",
+      "cat": "Panini",
+      "name": "Panini Mixte",
+      "desc": "Le meilleur des deux mondes",
+      "price": 45,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 104,
+      "cat": "Nos Cafés",
+      "name": "Expresso",
+      "desc": "Café italien noir intenso",
+      "price": 14,
+      "images": [],
       "ingredients": [
-        "Mix salade",
-        "Garniture spéciale",
-        "Sauce chef"
+        "Café noir"
       ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 105,
+      "cat": "Nos Cafés",
+      "name": "Double expresso",
+      "desc": "Double dose de café italien",
+      "price": 18,
+      "images": [],
+      "ingredients": [
+        "Café noir double"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 106,
+      "cat": "Nos Cafés",
+      "name": "Café au Lait",
+      "desc": "Équilibré et crémeux",
+      "price": 14,
+      "images": [],
+      "ingredients": [
+        "Café",
+        "Lait"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 107,
+      "cat": "Nos Cafés",
+      "name": "Café Allongé Américain",
+      "desc": "Plus long, plus léger",
+      "price": 14,
+      "images": [],
+      "ingredients": [
+        "Café",
+        "Eau"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 108,
+      "cat": "Nos Cafés",
+      "name": "Nescafé",
+      "desc": "Instantané classique",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Nescafé"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 109,
+      "cat": "Nos Cafés",
+      "name": "Café diablo + Crème Chantilly",
+      "desc": "Café au lait avec le meilleur goût du chocolat fondu",
+      "price": 28,
+      "images": [],
+      "ingredients": [
+        "Café",
+        "Lait",
+        "Chocolat fondu",
+        "Crème chantilly"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 110,
+      "cat": "Nos Cafés",
+      "name": "Cappuccino italiane",
+      "desc": "Café au lait avec une onctueuse crème chantilly garnie au sirop du chocolat",
+      "price": 28,
+      "images": [],
+      "ingredients": [
+        "Café",
+        "Lait",
+        "Crème chantilly",
+        "Sirop chocolat"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 111,
+      "cat": "Nos Cafés",
+      "name": "Iced Coffee",
+      "desc": "Café glacé rafraîchissant",
+      "price": 23,
+      "images": [],
+      "ingredients": [
+        "Café",
+        "Glaçons",
+        "Lait"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 112,
+      "cat": "Nos Cafés",
+      "name": "Café aromatisé",
+      "desc": "Café aux saveurs subtiles",
+      "price": 17,
+      "images": [],
+      "ingredients": [
+        "Café",
+        "Arôme au choix"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 113,
+      "cat": "Lait",
+      "name": "Lait Chaud",
+      "desc": "Pur et réconfortant",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Lait chaud"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 114,
+      "cat": "Lait",
+      "name": "Lait Froid",
+      "desc": "Frais et nutritif",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Lait froid"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 115,
+      "cat": "Lait",
+      "name": "Verveine au lait",
+      "desc": "Infusion relaxante de verveine au lait",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Verveine",
+        "Lait"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 116,
+      "cat": "Lait",
+      "name": "Lait au Sirop",
+      "desc": "Lait sucré et coloré au sirop",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Sirop"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 117,
+      "cat": "Lait",
+      "name": "Lait au Chocolat",
+      "desc": "Le favori des petits et grands",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Chocolat"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 118,
+      "cat": "Lait",
+      "name": "Chocolat Fondu",
+      "desc": "Chocolat riche et onctueux",
+      "price": 25,
+      "images": [],
+      "ingredients": [
+        "Chocolat fondu"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 119,
+      "cat": "Thé et Infusion",
+      "name": "Thé à la Menthe",
+      "desc": "Thé à la menthe traditionnel marocain",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Thé",
+        "Menthe fraîche",
+        "Sucre"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 120,
+      "cat": "Thé et Infusion",
+      "name": "Thé aux Herbes Aromatiques",
+      "desc": "Mélange d'herbes digestives et parfumées",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Thé",
+        "Herbes aromatiques"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 121,
+      "cat": "Thé et Infusion",
+      "name": "Verveine au Thé",
+      "desc": "Mélange relaxant de thé et verveine",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Thé",
+        "Verveine"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 122,
+      "cat": "Thé et Infusion",
+      "name": "Thé au Chiba",
+      "desc": "Thé traditionnel d'hiver à l'absinthe",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Thé",
+        "Chiba (Absinthe)"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 123,
+      "cat": "Thé et Infusion",
+      "name": "Verveine à l'eau",
+      "desc": "Infusion pure de verveine",
+      "price": 12,
+      "images": [],
+      "ingredients": [
+        "Verveine",
+        "Eau"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 124,
+      "cat": "Boissons",
+      "name": "L'eau 50cl",
+      "desc": "Eau minérale",
+      "price": 8,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 125,
+      "cat": "Boissons",
+      "name": "Boisson Gazeuse Canette Maxi",
+      "desc": "Soda au choix",
+      "price": 14,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 126,
+      "cat": "Boissons",
+      "name": "Energie",
+      "desc": "Boisson énergisante",
+      "price": 20,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 127,
+      "cat": "Boissons",
+      "name": "Redbull",
+      "desc": "Original Energy Drink",
+      "price": 35,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 128,
+      "cat": "Boissons",
+      "name": "Jus conservé",
+      "desc": "Jus en bouteille",
+      "price": 27,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 129,
+      "cat": "Boissons",
+      "name": "Oulmes",
+      "desc": "Eau gazeuse marocaine",
+      "price": 12,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 73,
+      "cat": "Nos Jus",
+      "name": "Jus d'Orange",
+      "desc": "Orange fraîche pressée",
+      "price": 16,
+      "images": [],
+      "ingredients": [
+        "Orange fraîche"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 74,
+      "cat": "Nos Jus",
+      "name": "Jus de Banane",
+      "desc": "Banane onctueuse",
+      "price": 16,
+      "images": [],
+      "ingredients": [
+        "Banane"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 75,
+      "cat": "Nos Jus",
+      "name": "Jus de Pomme",
+      "desc": "Pomme douce et fraîche",
+      "price": 16,
+      "images": [],
+      "ingredients": [
+        "Pomme"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 76,
+      "cat": "Nos Jus",
+      "name": "Jus d'Ananas",
+      "desc": "Ananas exotique pressé",
+      "price": 25,
+      "images": [],
+      "ingredients": [
+        "Ananas"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 77,
+      "cat": "Nos Jus",
+      "name": "Jus d'Avocat",
+      "desc": "Avocat riche et crémeux",
+      "price": 25,
+      "images": [],
+      "ingredients": [
+        "Avocat"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 78,
+      "cat": "Nos Jus",
+      "name": "Jus de Mangue",
+      "desc": "Mangue sucrée et douce",
+      "price": 25,
+      "images": [],
+      "ingredients": [
+        "Mangue"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 79,
+      "cat": "Nos Jus",
+      "name": "Jus de Pêches",
+      "desc": "Pêche veloutée",
+      "price": 25,
+      "images": [],
+      "ingredients": [
+        "Pêche"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 80,
+      "cat": "Nos Jus",
+      "name": "Jus de Fraise",
+      "desc": "Fraise gourmande",
+      "price": 25,
+      "images": [],
+      "ingredients": [
+        "Fraise"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 81,
+      "cat": "Nos Jus",
+      "name": "Jus de Kiwi",
+      "desc": "Kiwi acidulé et vitaminé",
+      "price": 28,
+      "images": [],
+      "ingredients": [
+        "Kiwi"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 82,
+      "cat": "Nos Jus",
+      "name": "Panaché Orange",
+      "desc": "Mélange de fruits frais à l'orange",
+      "price": 28,
+      "ingredients": [
+        "Fruits mixés",
+        "Orange"
+      ],
+      "badge": "",
+      "images": [],
+      "img": ""
+    },
+    {
+      "id": 83,
+      "cat": "Nos Jus",
+      "name": "Panaché au Lait",
+      "desc": "Mix de fruits frais onctueux au lait",
+      "price": 25,
+      "ingredients": [
+        "Fruits mixés",
+        "Lait"
+      ],
+      "badge": "",
+      "images": [],
+      "img": ""
+    },
+    {
+      "id": 84,
+      "cat": "Nos Jus",
+      "name": "Banane à l'orange",
+      "desc": "Le duo classique banane et orange",
+      "price": 20,
+      "ingredients": [
+        "Banane",
+        "Orange"
+      ],
+      "badge": "",
+      "images": [],
+      "img": ""
+    },
+    {
+      "id": 85,
+      "cat": "Nos Jus",
+      "name": "Avocat à l'orange",
+      "desc": "Mélange surprenant d'avocat et orange",
       "price": 30,
-      "badge": "Premium",
-      "images": []
+      "ingredients": [
+        "Avocat",
+        "Orange"
+      ],
+      "badge": "",
+      "images": [],
+      "img": ""
+    },
+    {
+      "id": 86,
+      "cat": "Nos Mojito",
+      "name": "Mojito Classique",
+      "desc": "Citron vert, menthe fraîche, eau pétillante",
+      "price": 22,
+      "images": [],
+      "ingredients": [
+        "Citron vert",
+        "Menthe fraîche",
+        "Eau pétillante"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 87,
+      "cat": "Nos Mojito",
+      "name": "Mojito Kiwi",
+      "desc": "Mojito frais au kiwi",
+      "price": 30,
+      "images": [],
+      "ingredients": [
+        "Kiwi",
+        "Citron vert",
+        "Menthe",
+        "Eau pétillante"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 88,
+      "cat": "Nos Mojito",
+      "name": "Mojito Ananas",
+      "desc": "Mojito exotique à l'ananas",
+      "price": 30,
+      "images": [],
+      "ingredients": [
+        "Ananas",
+        "Citron vert",
+        "Menthe",
+        "Eau pétillante"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 89,
+      "cat": "Nos Mojito",
+      "name": "Mojito Mangue",
+      "desc": "Mojito sucré à la mangue",
+      "price": 30,
+      "images": [],
+      "ingredients": [
+        "Mangue",
+        "Citron vert",
+        "Menthe",
+        "Eau pétillante"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 90,
+      "cat": "Nos Mojito",
+      "name": "Mojito Fraise",
+      "desc": "Mojito gourmand à la fraise",
+      "price": 30,
+      "images": [],
+      "ingredients": [
+        "Fraise",
+        "Citron vert",
+        "Menthe",
+        "Eau pétillante"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 91,
+      "cat": "Nos Mojito",
+      "name": "Mojito Redbull",
+      "desc": "Mojito énergisant au Redbull",
+      "price": 50,
+      "images": [],
+      "ingredients": [
+        "Redbull",
+        "Citron vert",
+        "Menthe"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 92,
+      "cat": "Nos Milkshakes",
+      "name": "Oreo Shake",
+      "desc": "Milkshake onctueux au biscuit Oreo",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Oreo",
+        "Glace vanille"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 93,
+      "cat": "Nos Milkshakes",
+      "name": "Snickers Shake",
+      "desc": "Milkshake gourmand au Snickers",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Snickers",
+        "Chocolat",
+        "Cacahuètes"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 94,
+      "cat": "Nos Milkshakes",
+      "name": "Mars Shake",
+      "desc": "Milkshake doux au chocolat Mars",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Mars",
+        "Chocolat"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 95,
+      "cat": "Nos Milkshakes",
+      "name": "Fraise Shake",
+      "desc": "Milkshake fruité à la fraise",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Fraise",
+        "Glace"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 96,
+      "cat": "Nos Milkshakes",
+      "name": "Banana Shake",
+      "desc": "Milkshake onctueux à la banane",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Banane",
+        "Glace"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 97,
+      "cat": "Nos Milkshakes",
+      "name": "Ananas Shake",
+      "desc": "Milkshake tropical à l'ananas",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Ananas",
+        "Glace"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 98,
+      "cat": "Nos Milkshakes",
+      "name": "Mangue Shake",
+      "desc": "Milkshake sucré à la mangue",
+      "price": 40,
+      "images": [],
+      "ingredients": [
+        "Lait",
+        "Mangue",
+        "Glace"
+      ],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 36,
+      "cat": "Crêpes Sucrées",
+      "name": "Crêpe Nutella",
+      "desc": "Le classique indémodable",
+      "price": 30,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 37,
+      "cat": "Crêpes Sucrées",
+      "name": "Crêpe Nutella Banane",
+      "desc": "Duo gourmand parfait",
+      "price": 35,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 38,
+      "cat": "Crêpes Sucrées",
+      "name": "Crêpe Royal Nolasco",
+      "desc": "Délice sucré suprême",
+      "price": 50,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 39,
+      "cat": "Desserts",
+      "name": "Tiramisu",
+      "desc": "Fait maison",
+      "price": 20,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 40,
+      "cat": "Desserts",
+      "name": "Crème Caramel",
+      "desc": "Onctueuse et douce",
+      "price": 20,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
+    },
+    {
+      "id": 41,
+      "cat": "Desserts",
+      "name": "Cheese Cake",
+      "desc": "Fondant et fruité",
+      "price": 20,
+      "images": [],
+      "ingredients": [],
+      "badge": "",
+      "img": ""
     }
   ],
   "catEmojis": {
-    "Burgers": "🍔",
-    "Sandwich Froid": "🥪",
-    "Sandwich Chaud": "🔥",
-    "Plats": "🍽️",
-    "Paninis": "🥖",
-    "Tacos": "🌮",
-    "Gratiné": "🧀",
-    "Divers": "🍟",
-    "Salades": "🥗"
+    "Petit Déjeuner": "🥞",
+    "Les Salades": "🥗",
+    "Les Pâtes": "🍝",
+    "Pasticcio": "🥘",
+    "Les Plats": "🍽️",
+    "Tajine": "🏺",
+    "Pizzas": "🍕",
+    "Burger": "🍔",
+    "Burritos": "🌯",
+    "Crêpes Salées": "🌮",
+    "Sandwich": "🥪",
+    "Tacos": "🌯",
+    "Panini": "🥖",
+    "Nos Cafés": "☕",
+    "Lait": "🥛",
+    "Thé et Infusion": "🍵",
+    "Boissons": "🥤",
+    "Nos Jus": "🥤",
+    "Nos Mojito": "🍹",
+    "Nos Milkshakes": "🥛",
+    "Crêpes Sucrées": "🥞",
+    "Desserts": "🍰"
   },
   "wifi": {
     "ssid": "Foody_Guest",
@@ -999,5 +1853,87 @@
     "tiktok": "",
     "whatsapp": "212626081745"
   },
-  "promoId": null
+  "promoId": null,
+  "promoIds": [],
+  "superCategories": [
+    {
+      "id": "breakfast",
+      "name": "Petit Déjeuner",
+      "desc": "Formules Chamali, Fassi et Hollandaise",
+      "emoji": "🌞",
+      "cats": [
+        "Petit Déjeuner"
+      ]
+    },
+    {
+      "id": "cuisine",
+      "name": "Cuisine & Salades",
+      "desc": "Pâtes, Pasticcio et Plats cuisinés",
+      "emoji": "🥘",
+      "cats": [
+        "Les Salades",
+        "Les Pâtes",
+        "Pasticcio",
+        "Les Plats",
+        "Tajine"
+      ]
+    },
+    {
+      "id": "pizzas",
+      "name": "Pizzas Artisanales",
+      "desc": "Nos pizzas au feu de bois",
+      "emoji": "🍕",
+      "cats": [
+        "Pizzas"
+      ]
+    },
+    {
+      "id": "fastfood",
+      "name": "Burger & Street Food",
+      "desc": "Burgers, Burritos et Crêpes Salées",
+      "emoji": "🍔",
+      "cats": [
+        "Burger",
+        "Burritos",
+        "Crêpes Salées"
+      ]
+    },
+    {
+      "id": "wraps",
+      "name": "Sandwiches & Tacos",
+      "desc": "Tacos, Paninis et Sandwichs variés",
+      "emoji": "🌯",
+      "cats": [
+        "Sandwich",
+        "Tacos",
+        "Panini"
+      ]
+    },
+    {
+      "id": "sweets",
+      "name": "Bar & Pause Sucrée",
+      "desc": "Cafés, Jus, Mojitos et Desserts",
+      "emoji": "🍹",
+      "cats": [
+        "Nos Cafés",
+        "Lait",
+        "Thé et Infusion",
+        "Boissons",
+        "Nos Jus",
+        "Nos Mojito",
+        "Nos Milkshakes",
+        "Crêpes Sucrées",
+        "Desserts"
+      ]
+    }
+  ],
+  "hours": [],
+  "gallery": [],
+  "landing": {
+    "location": {
+      "address": "Tanger, Maroc",
+      "url": "https://maps.apple.com/?address=Tangier,%20Morocco&auid=16265780283084666504&ll=35.776667,-5.803889&lsp=6489&q=Tangier"
+    },
+    "phone": "+212 600 000 000"
+  }
 }

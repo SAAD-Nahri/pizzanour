@@ -8,3 +8,4 @@ uploads/*
 .DS_Store
 Thumbs.db
 .agent/
+auth.json

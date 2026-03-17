@@ -305,7 +305,7 @@ function scrollToCat(cat, btn) {
 // MENU RENDER
 function renderMenu() {
     document.getElementById('menuWrap').innerHTML = categories.map(cat => {
-        const items = menu.filter(m => m.cat === cat);
+        const items = menu.filter(m => m.cat === cat && m.available !== false);
         return `
       <section class="cat-section" id="cat-${cat.replace(/\s/g, '-')}">
         <h2 class="cat-title">${cat}</h2>
@@ -315,7 +315,7 @@ function renderMenu() {
             <div class="p-info">
               <div class="p-name">${item.name}</div>
               <div class="p-desc">${item.desc}</div>
-              <div class="p-price">MAD ${item.price.toFixed(2)}</div>
+              <div class="p-price">${item.hasSizes && item.sizes && item.sizes.length > 0 ? `À partir de MAD ${Math.min(...item.sizes.map(s => s.price)).toFixed(2)}` : `MAD ${item.price.toFixed(2)}`}</div>
             </div>
             <div class="p-img">${imgTag(item)}</div>
             <button class="p-add" onclick="event.stopPropagation();addItem(${item.id})">+</button>

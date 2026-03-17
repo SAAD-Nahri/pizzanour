@@ -61,22 +61,27 @@ function sanitizeMenuItem(item, index) {
   const images = sanitizeImages(source.images, source.img);
   const price = Number.parseFloat(source.price);
 
-  return {
-    id: sanitizeId(source.id, Date.now() + index),
-    cat: asString(source.cat, 120),
-    name: asString(source.name, 160),
-    desc: asString(source.desc, 2000),
-    ingredients: Array.isArray(source.ingredients)
-      ? source.ingredients
-        .filter((value) => typeof value === "string" && value.trim())
-        .map((value) => value.trim().slice(0, 160))
-        .slice(0, 24)
-      : [],
-    price: Number.isFinite(price) ? price : 0,
-    badge: asString(source.badge, 64),
-    images,
-    img: images[0] || ""
-  };
+  // Start with all source properties to preserve extended fields
+  // (hasSizes, sizes, featured, likes, discount, superCategory, etc.)
+  const result = { ...source };
+
+  // Sanitize known core fields
+  result.id = sanitizeId(source.id, Date.now() + index);
+  result.cat = asString(source.cat, 120);
+  result.name = asString(source.name, 160);
+  result.desc = asString(source.desc, 2000);
+  result.ingredients = Array.isArray(source.ingredients)
+    ? source.ingredients
+      .filter((value) => typeof value === "string" && value.trim())
+      .map((value) => value.trim().slice(0, 160))
+      .slice(0, 24)
+    : [];
+  result.price = Number.isFinite(price) ? price : 0;
+  result.badge = asString(source.badge, 64);
+  result.images = images;
+  result.img = images[0] || "";
+
+  return result;
 }
 
 function sanitizeCatEmojis(input) {
@@ -119,14 +124,21 @@ function sanitizePromoId(input, menu) {
 function normalizeData(input) {
   const source = input && typeof input === "object" ? input : {};
   const menu = Array.isArray(source.menu) ? source.menu.map(sanitizeMenuItem) : [];
-  return {
-    menu,
-    catEmojis: sanitizeCatEmojis(source.catEmojis),
-    wifi: sanitizeWifi(source.wifi),
-    social: sanitizeSocial(source.social),
-    promoId: sanitizePromoId(source.promoId, menu)
-  };
+
+  // Start with all source properties to preserve extended top-level fields
+  // (superCategories, hours, gallery, landing, paymentMethods, etc.)
+  const result = { ...source };
+
+  // Sanitize known core fields
+  result.menu = menu;
+  result.catEmojis = sanitizeCatEmojis(source.catEmojis);
+  result.wifi = sanitizeWifi(source.wifi);
+  result.social = sanitizeSocial(source.social);
+  result.promoId = sanitizePromoId(source.promoId, menu);
+
+  return result;
 }
+
 
 const INITIAL_DATA = normalizeData(readBundledSeed());
 

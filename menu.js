@@ -3,47 +3,80 @@
  * Landing → Super Category → Sub Category → Items
  */
 
-let menu = JSON.parse(localStorage.getItem('foody_menu')) || window.defaultMenu;
-let catEmojis = JSON.parse(localStorage.getItem('foody_cat_emojis')) || window.defaultCatEmojis;
+let menu = window.defaultMenu || [];
+let catEmojis = window.defaultCatEmojis || {};
 let cart = JSON.parse(localStorage.getItem('foody_cart_menu')) || [];
 let serviceType = 'onsite';
 
-// ═══ RELOAD DATA FROM LOCALSTORAGE ═══
-// Call this to always get the latest admin changes
-function reloadMenuData() {
-    menu = JSON.parse(localStorage.getItem('foody_menu')) || window.defaultMenu;
-    catEmojis = JSON.parse(localStorage.getItem('foody_cat_emojis')) || window.defaultCatEmojis;
+// Global comparison to detect changes
+let lastDataVersion = "";
+
+// ═══ SYNC DATA FROM SERVER ═══
+async function syncDataFromServer() {
+    try {
+        const res = await fetch('/api/data');
+        if (!res.ok) return;
+        const data = await res.json();
+        const dataStr = JSON.stringify(data);
+
+        if (dataStr === lastDataVersion) return; // No change
+        lastDataVersion = dataStr;
+
+        // Update local variables
+        menu = Array.isArray(data.menu) ? data.menu : menu;
+        catEmojis = data.catEmojis || catEmojis;
+
+        // Update global config object
+        if (data.superCategories) window.restaurantConfig.superCategories = data.superCategories;
+        if (data.wifi) window.restaurantConfig.wifi = { name: data.wifi.ssid, code: data.wifi.pass };
+        if (data.social) window.restaurantConfig.socials = data.social;
+        if (data.hours) window.restaurantConfig._hours = data.hours;
+        if (data.hoursNote) window.restaurantConfig._hoursNote = data.hoursNote;
+        if (data.promoIds) window.promoIds = data.promoIds;
+
+        console.log('[SYNC] Data updated from server');
+
+        // Refresh UI
+        if (typeof renderMenu === 'function') renderMenu();
+        if (typeof renderPromoCarousel === 'function') renderPromoCarousel();
+        if (typeof renderLandingInfo === 'function') renderLandingInfo();
+
+        // If we are in the items view, refresh the list
+        if (navigationStack.length > 0) {
+            const last = navigationStack[navigationStack.length - 1];
+            if (last.startsWith('items:')) {
+                const cat = last.split(':')[1];
+                showCategoryItems(cat); // This navigates, but we want to refresh CURRENT view.
+                navigationStack.pop(); // Remove the extra stack entry added by showCategoryItems
+            } else if (last.startsWith('subcats:')) {
+                const scId = last.split(':')[1];
+                const sc = window.restaurantConfig.superCategories.find(s => s.id === scId);
+                if (sc) {
+                    showSubCategoryGrid(sc, false);
+                }
+            }
+        }
+
+        // Check if dish page is open for the updated menu
+        const dishPage = document.getElementById('dishPage');
+        if (dishPage && dishPage.classList.contains('open')) {
+            // Re-open (refresh) the current dish page to show new price/sizes
+            const currentName = document.getElementById('dishPageName')?.textContent;
+            if (currentName) {
+                const cleanName = currentName.replace(' (PROMO)', '');
+                const updatedItem = menu.find(m => m.name === cleanName);
+                if (updatedItem) {
+                    openDishPage(updatedItem.id);
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('[SYNC] Failed to fetch data:', e);
+    }
 }
 
-// ═══ CROSS-TAB SYNC ═══
-// If admin saves in another tab, auto-refresh this page
-window.addEventListener('storage', (e) => {
-    if (e.key === 'foody_menu' || e.key === 'foody_cat_emojis' || e.key === 'foody_config') {
-        reloadMenuData();
-        renderMenu();
-        renderPromoCarousel();
-        console.log('[SYNC] Menu data updated from admin panel');
-    }
-});
-
-// ═══ FEATURED MIGRATION ═══
-// Sync featured flags from defaultMenu to any existing localStorage menu.
-// This lets us update defaults without requiring users to clear their cache.
-(function migrateFeatured() {
-    const defaultMap = {};
-    (window.defaultMenu || []).forEach(item => { defaultMap[item.id] = item; });
-    let changed = false;
-    menu.forEach(item => {
-        const def = defaultMap[item.id];
-        if (def && item.featured === undefined && def.featured) {
-            item.featured = true;
-            changed = true;
-        }
-    });
-    if (changed) {
-        localStorage.setItem('foody_menu', JSON.stringify(menu));
-    }
-})();
+// Start real-time sync (poll every 2 seconds for "instant" feel)
+setInterval(syncDataFromServer, 2000);
 
 // ═══════════════════════ RESTAURANT CONFIG ═══════════════════════
 const config = window.restaurantConfig;
@@ -55,9 +88,9 @@ let currentSuperCat = null;
 
 // ═══════════════════════ INIT ═══════════════════════
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Always reload from localStorage on page load to get latest admin changes
-    reloadMenuData();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initial sync
+    await syncDataFromServer();
     initMenuApp();
 });
 
@@ -414,7 +447,7 @@ function showCategoryItems(cat) {
     });
 
     // Update global featured slider for specific category
-    const featuredItems = menu.filter(m => m.cat === cat && m.featured);
+    const featuredItems = menu.filter(m => m.cat === cat && m.featured && m.available !== false);
     renderFeaturedSlider(featuredItems, 'featuredGlobal');
 
     updateBackBtn();
@@ -429,7 +462,7 @@ function renderMenu() {
     let categories = [...new Set(menu.map(m => m.cat))];
 
     wrap.innerHTML = categories.map(cat => {
-        const items = menu.filter(m => m.cat === cat);
+        const items = menu.filter(m => m.cat === cat && m.available !== false);
         return `
             <section class="menu-section" id="cat-${cat.replace(/\s/g, '-')}">
                 <h2 class="menu-section-title">${catEmojis[cat] || '🍴'} ${cat}</h2>
@@ -444,9 +477,11 @@ function renderMenu() {
                                 <div class="menu-item-name">${item.name} ${window.isItemInPromo(item.id) ? '<span class="promo-tag-small">PROMO</span>' : ''}</div>
                                 <div class="menu-item-desc">${item.desc}</div>
                                 <div class="menu-item-price">
-                                    ${window.isItemInPromo(item.id)
-                ? `<span class="price-discounted">${window.getItemPrice(item).toFixed(0)} MAD</span> <span class="price-original-item">${item.price.toFixed(0)} MAD</span>`
-                : `${item.price.toFixed(0)} MAD`}
+                                    ${item.hasSizes
+                ? `<span style="font-size:0.7em; opacity:0.7;">À partir de</span> ${window.getItemPrice(item, 'small').toFixed(0)} MAD`
+                : (window.isItemInPromo(item.id)
+                    ? `<span class="price-discounted">${window.getItemPrice(item).toFixed(0)} MAD</span> <span class="price-original-item">${item.price.toFixed(0)} MAD</span>`
+                    : `${item.price.toFixed(0)} MAD`)}
                                 </div>
                             </div>
                             <div class="menu-item-img" onclick="event.stopPropagation(); openGallery(menu.filter(m => m.cat === '${cat}'), menu.filter(m => m.cat === '${cat}').indexOf(item))">
@@ -480,6 +515,58 @@ function openDishPage(id) {
     const descEl = document.getElementById('dishPageDesc');
     const addBtn = document.getElementById('dishPageAddBtn');
 
+    // Size Selector Logic
+    let selectedSize = item.hasSizes ? 'small' : null;
+    const updateSizePrice = () => {
+        if (priceEl) {
+            const currentPrice = window.getItemPrice(item, selectedSize);
+            const originalPrice = selectedSize ? (item.sizes[selectedSize] || item.price) : item.price;
+            if (window.isItemInPromo(item.id)) {
+                priceEl.innerHTML = `<span style="color:#ffd700; font-weight:800;">${currentPrice.toFixed(0)} MAD</span> <span style="text-decoration:line-through; font-size:0.8em; opacity:0.6;">${originalPrice.toFixed(0)} MAD</span>`;
+            } else {
+                priceEl.textContent = `${currentPrice.toFixed(0)} MAD`;
+            }
+        }
+    };
+
+    const sizeSelectorHtml = item.hasSizes ? `
+        <div class="size-selector-wrap" style="margin: 20px 0; display: flex; gap: 10px; justify-content: center;">
+            ${['small', 'medium', 'large'].map(s => {
+        const p = item.sizes[s];
+        if (!p) return '';
+        const labels = { small: 'S', medium: 'M', large: 'L' };
+        return `
+                    <button class="size-btn ${selectedSize === s ? 'active' : ''}" 
+                            onclick="window.selectDishSize('${s}')"
+                            style="padding: 10px 20px; border-radius: 50px; border: 2px solid ${selectedSize === s ? 'var(--primary)' : '#eee'}; background: ${selectedSize === s ? 'var(--primary)' : '#fff'}; color: ${selectedSize === s ? '#fff' : '#333'}; cursor: pointer; font-weight: 700; transition: all 0.2s;">
+                        ${labels[s]} - ${p} MAD
+                    </button>
+                `;
+    }).join('')}
+        </div>
+    ` : '';
+
+    // Add global helper for size selection if not exists
+    window.selectDishSize = (size) => {
+        selectedSize = size;
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.innerText.startsWith(size.charAt(0).toUpperCase()));
+            // Simpler way: update the background/border inline or via another render
+            btn.style.background = btn.innerText.startsWith(size.charAt(0).toUpperCase()) ? 'var(--primary)' : '#fff';
+            btn.style.color = btn.innerText.startsWith(size.charAt(0).toUpperCase()) ? '#fff' : '#333';
+            btn.style.borderColor = btn.innerText.startsWith(size.charAt(0).toUpperCase()) ? 'var(--primary)' : '#eee';
+        });
+        updateSizePrice();
+    };
+
+    const descContainer = descEl.parentElement;
+    // Check if selector already exists and remove
+    const oldSelector = descContainer.querySelector('.size-selector-wrap');
+    if (oldSelector) oldSelector.remove();
+    if (sizeSelectorHtml) {
+        descEl.insertAdjacentHTML('afterend', sizeSelectorHtml);
+    }
+
     const imgSrc = (item.images && item.images.length > 0) ? item.images[0] : item.img;
 
     if (imgSrc) {
@@ -493,17 +580,11 @@ function openDishPage(id) {
     }
 
     if (nameEl) nameEl.textContent = item.name + (window.isItemInPromo(item.id) ? ' (PROMO)' : '');
-    if (priceEl) {
-        if (window.isItemInPromo(item.id)) {
-            priceEl.innerHTML = `<span style="color:#ffd700; font-weight:800;">${window.getItemPrice(item).toFixed(0)} MAD</span> <span style="text-decoration:line-through; font-size:0.8em; opacity:0.6;">${item.price.toFixed(0)} MAD</span>`;
-        } else {
-            priceEl.textContent = `${item.price.toFixed(0)} MAD`;
-        }
-    }
+    updateSizePrice();
     if (descEl) descEl.textContent = item.desc || 'Une préparation soignée avec les meilleurs ingrédients.';
 
     if (addBtn) {
-        addBtn.onclick = () => { addToCart(item.id); closeDishPage(); };
+        addBtn.onclick = () => { addToCart(item.id, selectedSize); closeDishPage(); };
     }
 
     // Love button in page
@@ -615,26 +696,42 @@ document.addEventListener('click', (e) => {
 
 // ═══════════════════════ CART ═══════════════════════
 
-function addToCart(id) {
+window.addToCart = function (id, size) {
     const item = menu.find(m => m.id === id);
     if (!item) return;
-    const existing = cart.find(c => c.id === id);
-    const correctPrice = window.getItemPrice(item);
-    if (existing) existing.qty++;
-    else cart.push({ ...item, price: correctPrice, qty: 1 });
+
+    const cartId = size ? `${id}_${size}` : `${id}`;
+    const existing = cart.find(c => c.cartId === cartId);
+    const correctPrice = window.getItemPrice(item, size);
+
+    if (existing) {
+        existing.qty++;
+    } else {
+        cart.push({
+            ...item,
+            cartId: cartId,
+            selectedSize: size,
+            price: correctPrice,
+            qty: 1
+        });
+    }
     saveCart();
     updateCartUI();
-    window.showToast?.(`✅ ${item.name} ajouté!`);
-}
+    const sizeLabel = size ? ` (${size.charAt(0).toUpperCase()})` : '';
+    window.showToast?.(`✅ ${item.name}${sizeLabel} ajouté!`);
+};
 
-function removeFromCart(id) {
-    const idx = cart.findIndex(c => c.id === id);
-    if (idx > -1) { cart[idx].qty--; if (cart[idx].qty <= 0) cart.splice(idx, 1); }
+window.removeFromCart = function (cartId) {
+    const idx = cart.findIndex(c => c.cartId === cartId);
+    if (idx > -1) {
+        cart[idx].qty--;
+        if (cart[idx].qty <= 0) cart.splice(idx, 1);
+    }
     saveCart();
     updateCartUI();
     if (cart.length === 0) closeAllModals();
     else renderDrawer();
-}
+};
 
 function saveCart() { localStorage.setItem('foody_cart_menu', JSON.stringify(cart)); }
 
@@ -682,13 +779,15 @@ function renderDrawer() {
                 ${cart.map(item => `
                     <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;background:#f8f8f8;padding:12px;border-radius:12px;">
                         <div style="flex:1;">
-                            <div style="font-weight:700;font-size:0.95rem;color:#000;">${item.name}</div>
+                            <div style="font-weight:700;font-size:0.95rem;color:#000;">
+                                ${item.name} ${item.selectedSize ? `<span style="font-size:0.8rem; color:var(--primary);">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}
+                            </div>
                             <div style="color:var(--red);font-weight:700;font-size:0.9rem;">${(item.price * item.qty).toFixed(2)} MAD</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <button onclick="removeFromCart(${item.id})" style="width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:#fff;">-</button>
+                            <button onclick="removeFromCart('${item.cartId}')" style="width:28px;height:28px;border-radius:8px;border:1px solid #ddd;background:#fff;">-</button>
                             <span style="font-weight:700;color:#000;">${item.qty}</span>
-                            <button onclick="addToCart(${item.id});renderDrawer();" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--red);color:#fff;">+</button>
+                            <button onclick="addToCart(${item.id}, '${item.selectedSize || ''}');renderDrawer();" style="width:28px;height:28px;border-radius:8px;border:none;background:var(--red);color:#fff;">+</button>
                         </div>
                     </div>
                 `).join('')}

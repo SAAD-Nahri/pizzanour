@@ -421,11 +421,22 @@ window.isItemInPromo = function (id) {
     return window.getPromoIds().includes(Number(id));
 };
 
-window.getItemPrice = function (item) {
-    if (window.isItemInPromo(item.id)) {
-        return item.price * 0.8; // 20% Discount
+window.getItemPrice = function (item, sizeKey) {
+    let basePrice = item.price;
+
+    if (item.hasSizes && item.sizes) {
+        if (sizeKey && item.sizes[sizeKey.toLowerCase()]) {
+            basePrice = item.sizes[sizeKey.toLowerCase()];
+        } else {
+            // Default to small or the logic-defined price if no size specified
+            basePrice = item.sizes.small || item.sizes.medium || item.sizes.large || item.price;
+        }
     }
-    return item.price;
+
+    if (window.isItemInPromo(item.id)) {
+        return basePrice * 0.8; // 20% Discount
+    }
+    return basePrice;
 };
 
 window.currentLang = 'fr';
