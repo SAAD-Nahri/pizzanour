@@ -1053,7 +1053,6 @@ window.closeHistory = closeHistory;
 window.generateTicket = generateTicket;
 window.openDishPage = openDishPage;
 window.closeDishPage = closeDishPage;
-window.setService = setService;
 window.renderDrawer = renderDrawer;
 window.saveCart = saveCart;
 window.updateCartUI = updateCartUI;
