@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const path = require("path");
+const fs = require("fs");
 const multer = require("multer");
 
 const { uploadsDir } = require("./site-store");
