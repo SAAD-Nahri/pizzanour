@@ -48,6 +48,7 @@ async function loadDataFromServer() {
         if (Array.isArray(data.promoIds)) {
             promoIds = data.promoIds;
         }
+        window.promoIds = promoIds; // Sync for shared.js
 
         console.log('[ADMIN] Loaded', menu.length, 'items from server');
         return true;
@@ -629,6 +630,7 @@ function togglePromo(id) {
     } else {
         promoIds.push(id);
     }
+    window.promoIds = promoIds; // Sync for shared.js
     saveAndRefresh();
 }
 function toggleFeatured(id) {

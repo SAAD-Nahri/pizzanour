@@ -409,6 +409,11 @@ window.translations = {
 
 // --- PROMO & DISCOUNT HELPERS ---
 window.getPromoIds = function () {
+    // Priority 1: Use window.promoIds if set (usually by menu.js or admin.js sync)
+    if (window.promoIds && Array.isArray(window.promoIds) && window.promoIds.length > 0) {
+        return window.promoIds;
+    }
+    // Priority 2: Fallback to localStorage (legacy/local-only support)
     try {
         let ids = JSON.parse(localStorage.getItem('foody_promo_ids'));
         return Array.isArray(ids) ? ids : [];

@@ -136,6 +136,18 @@ function normalizeData(input) {
   result.social = sanitizeSocial(source.social);
   result.promoId = sanitizePromoId(source.promoId, menu);
 
+  // Sanitize promoIds array
+  if (Array.isArray(source.promoIds)) {
+    result.promoIds = source.promoIds
+      .map((id) => {
+        const match = menu.find((item) => String(item.id) === String(id));
+        return match ? match.id : null;
+      })
+      .filter((id) => id !== null);
+  } else {
+    result.promoIds = result.promoId !== null ? [result.promoId] : [];
+  }
+
   return result;
 }
 
