@@ -2033,7 +2033,7 @@ window.updateBrandingPreview = function () {
     }
     if (menuChipPrimary) {
         menuChipPrimary.style.background = `linear-gradient(135deg, ${draft.primaryColor}, ${draft.secondaryColor})`;
-        menuChipPrimary.textContent = draft.shortName || 'Maison';
+        menuChipPrimary.textContent = draft.shortName || 'Menu';
     }
     if (menuCardPreview) {
         menuCardPreview.style.background = draft.menuSurface;
@@ -2399,7 +2399,7 @@ window.applyOnboardingPreset = async function () {
     try {
         await saveAndRefresh();
         refreshUI();
-        const dataToolsButton = Array.from(document.querySelectorAll('.nav-btn')).find((button) => button.textContent.includes('Data Tools'));
+        const dataToolsButton = Array.from(document.querySelectorAll('.nav-btn')).find((button) => button.textContent.includes('Seller Tools'));
         if (dataToolsButton) {
             showSection('data-tools', dataToolsButton);
         }
@@ -2674,7 +2674,7 @@ function getFloatingSaveButtonMarkup(saved = false) {
     if (saved) {
         return '<span class="floating-action-icon">OK</span><span>Saved</span>';
     }
-    return '<span class="floating-action-icon">SV</span><span>Save Changes</span>';
+    return '<span class="floating-action-icon">SV</span><span>Publish Changes</span>';
 }
 
 async function forceSaveChanges() {

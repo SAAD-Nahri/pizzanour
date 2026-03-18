@@ -10,8 +10,8 @@ const FALLBACK_DATA = {
   menu: [],
   catEmojis: {},
   wifi: {
-    ssid: "Restaurant WiFi",
-    pass: "Ask the team"
+    ssid: "",
+    pass: ""
   },
   social: {
     instagram: "",

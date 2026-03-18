@@ -8,6 +8,8 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- Starter runtime/contact defaults are now safer for live preview: fake phone/address/WiFi values have been removed from the shared seed and fallback storage, the homepage now falls back to empty-state behavior instead of leaking false public details, and the directions CTA uses a proper disabled class instead of inline state styling
+- The admin seller flow is a bit tighter too: the branding preview no longer falls back to `Maison`, quick-launch now correctly returns to `Seller Tools`, and the floating save action now reads `Publish Changes` to better match the actual delivery workflow
 - The preset/theme system now persists a real `presetId` plus additional theme tokens for public surfaces, text, and menu atmosphere instead of relying on only three colors
 - The dead legacy demo seed has been removed from `shared.js`, so the repo now matches the active white-label runtime instead of carrying a large commented historical block
 - The product now includes a first internal menu-image library with local tagged SVG placeholders plus a Data Tools action to assign missing item images quickly before client photos or future AI generation
@@ -173,9 +175,9 @@ If a task does not directly improve those goals, it should usually wait.
 - [x] Payment / facilities section
 - [x] Footer content
 - [x] Make section visibility toggleable per restaurant
-- [ ] Add better empty states when a section has no data
+- [x] Add better empty states when a section has no data
 - [x] Add copy and starter menu defaults that are neutral and reusable across many restaurant types
-- [ ] Stop relying on burger-specific wording in the default public experience
+- [ ] Stop relying on opinionated starter wording in the default public experience
 
 ## Phase 4: Seller-Ready Admin Experience
 

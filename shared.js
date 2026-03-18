@@ -994,10 +994,10 @@ function normalizeSectionOrder(input) {
 window.defaultConfig = {
     "name": "Restaurant",
     "location": {
-        "address": "Restaurant address",
-        "url": "https://maps.google.com"
+        "address": "",
+        "url": ""
     },
-    "phone": "+212 600 000 000",
+    "phone": "",
     "socials": {
         "instagram": "",
         "facebook": "",
@@ -1007,8 +1007,8 @@ window.defaultConfig = {
     },
     "superCategories": window.defaultSuperCategories,
     "wifi": {
-        "name": "Restaurant WiFi",
-        "code": "Ask the team"
+        "name": "",
+        "code": ""
     },
     "gallery": [
         "images/gallery-default-room.svg",
@@ -1327,7 +1327,7 @@ window.applyBranding = function () {
         } else if (lang === 'ar') {
             signature.textContent = `${branding.logoMark} فريق ${branding.shortName}`;
         } else {
-            signature.textContent = `- L'equipe ${branding.shortName} ${branding.logoMark}`;
+            signature.textContent = `- L'équipe ${branding.shortName} ${branding.logoMark}`;
         }
     }
 
@@ -1587,12 +1587,12 @@ window.translations = {
         hero_sub2: 'Découvrez nos', hero_title2: 'PLATS <span>SIGNATURE</span>', hero_desc2: 'Des recettes maison pensées pour tous les appétits',
         hero_sub3: 'Cuisine préparée', hero_title3: 'FRAIS <span>CHAQUE JOUR</span>', hero_desc3: 'Sur place, à emporter ou en livraison',
         see_order: 'Voir ma commande',
-        about_tag: 'Notre Histoire', about_title: 'À Propos de <span>Notre Maison</span>',
+        about_tag: 'Notre Histoire', about_title: 'À Propos de <span>Notre Table</span>',
         about_tagline: 'Cuisine sincère, service attentionné et identité locale',
         about_p1: "Notre histoire commence avec une idée simple : proposer une table accueillante, lisible et régulière pour les repas du quotidien comme pour les moments à partager.",
         about_p2: 'Nous privilégions des ingrédients frais, une cuisine soignée et une ambiance qui donne envie de revenir avec confiance.',
         about_p3: 'Notre objectif est de devenir une adresse locale fiable, chaleureuse et facile à recommander.',
-        about_welcome: 'Bienvenue, revenez nous voir !', about_thanks: 'Merci,',
+        about_welcome: 'Au plaisir de vous revoir.', about_thanks: 'Merci,',
         about_years: "Ans d'Expérience", about_items: 'Plats au Menu', about_halal: 'Préparé chaque jour', about_rating: 'Avis Clients',
         events_tag: 'Célébrez avec nous', events_title: 'Événements <span>Privés</span>',
         event_birthday: 'Anniversaires', event_birthday_desc: 'Célébrez votre jour spécial avec un menu personnalisé et une ambiance festive.',
@@ -1608,7 +1608,7 @@ window.translations = {
         pf_payment_cash: 'Espèces', pf_payment_tpe: 'TPE',
         pf_facility_wifi: 'WiFi', pf_facility_accessible: 'Accessible', pf_facility_parking: 'Parking',
         pf_facility_terrace: 'Terrasse', pf_facility_family: 'Espace famille',
-        gallery_tag: 'Moments du Restaurant', gallery_title: 'Notre <span>Galerie</span>',
+        gallery_tag: 'Ambiance & Assiettes', gallery_title: 'Notre <span>Galerie</span>',
         contact_tag: 'Venez Manger', contact_title: 'Contactez-<span>Nous</span>',
         footer_note: 'Cuisine maison, service chaleureux et accueil de proximité.',
         footer_rights: 'Tous droits réservés.',
@@ -1658,7 +1658,7 @@ window.translations = {
         about_p1: 'Our story starts with one simple idea: build a welcoming address people can trust for everyday meals and shared moments.',
         about_p2: 'We focus on fresh ingredients, careful preparation, and a comfortable atmosphere that makes guests want to return.',
         about_p3: 'Our goal is to become a reliable local favorite with food that feels generous, polished, and easy to recommend.',
-        about_welcome: 'Welcome, please come visit us again!', about_thanks: 'Thank you,',
+        about_welcome: 'We look forward to welcoming you again.', about_thanks: 'Thank you,',
         about_years: 'Years Experience', about_items: 'Menu Items', about_halal: 'Prepared Daily', about_rating: 'Customer Reviews',
         events_tag: 'Celebrate with us', events_title: 'Private <span>Events</span>',
         event_birthday: 'Birthdays', event_birthday_desc: 'Celebrate your special day with a custom menu and festive ambiance.',
@@ -1674,7 +1674,7 @@ window.translations = {
         pf_payment_cash: 'Cash', pf_payment_tpe: 'Card / TPE',
         pf_facility_wifi: 'WiFi', pf_facility_accessible: 'Accessible', pf_facility_parking: 'Parking',
         pf_facility_terrace: 'Terrace', pf_facility_family: 'Family space',
-        gallery_tag: 'Restaurant Moments', gallery_title: 'Our <span>Gallery</span>',
+        gallery_tag: 'Atmosphere & Plates', gallery_title: 'Our <span>Gallery</span>',
         contact_tag: 'Come eat', contact_title: 'Contact <span>Us</span>',
         footer_note: 'House-made cuisine, warm service, and a welcoming local address.',
         footer_rights: 'All rights reserved.',
@@ -1725,7 +1725,7 @@ window.translations = {
         about_p1: 'تبدأ قصتنا بفكرة بسيطة: تقديم عنوان مريح وموثوق للوجبات اليومية واللحظات التي تستحق المشاركة.',
         about_p2: 'نركز على المكونات الطازجة والتحضير المتقن وأجواء تجعل الضيف يرغب في العودة بثقة.',
         about_p3: 'هدفنا أن نصبح عنواناً محلياً موثوقاً يجمع بين الكرم والتنظيم وسهولة التوصية به.',
-        about_welcome: 'مرحباً، عودوا لزيارتنا!', about_thanks: 'شكراً لكم،',
+        about_welcome: 'يسعدنا أن نرحب بكم مرة أخرى.', about_thanks: 'شكراً لكم،',
         about_years: 'سنة خبرة', about_items: 'طبق في القائمة', about_halal: 'محضر يومياً', about_rating: 'آراء الزبائن',
         events_tag: 'احتفل معنا', events_title: 'فعاليات <span>خاصة</span>',
         event_birthday: 'أعياد الميلاد', event_birthday_desc: 'احتفل بيومك الخاص مع قائمة مخصصة وأجواء احتفالية.',
@@ -1741,7 +1741,7 @@ window.translations = {
         pf_payment_cash: 'نقداً', pf_payment_tpe: 'جهاز الأداء الإلكتروني',
         pf_facility_wifi: 'واي فاي', pf_facility_accessible: 'ولوج سهل', pf_facility_parking: 'موقف سيارات',
         pf_facility_terrace: 'تراس', pf_facility_family: 'فضاء عائلي',
-        gallery_tag: 'لحظات المطعم', gallery_title: '<span>معرضنا</span>',
+        gallery_tag: 'الأجواء والأطباق', gallery_title: '<span>معرضنا</span>',
         contact_tag: 'تعال كُل', contact_title: 'اتصل <span>بنا</span>',
         footer_note: 'مأكولات منزلية وخدمة دافئة واستقبال يليق بالضيوف.',
         footer_rights: 'جميع الحقوق محفوظة.',

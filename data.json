@@ -423,8 +423,8 @@
     "Boissons": "🥤"
   },
   "wifi": {
-    "ssid": "Restaurant WiFi",
-    "pass": "Ask the team"
+    "ssid": "",
+    "pass": ""
   },
   "social": {
     "instagram": "",
@@ -588,9 +588,9 @@
   ],
   "landing": {
     "location": {
-      "address": "Adresse du restaurant",
-      "url": "https://maps.google.com"
+      "address": "",
+      "url": ""
     },
-    "phone": "+212 600 000 000"
+    "phone": ""
   }
 }

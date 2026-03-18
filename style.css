@@ -2380,6 +2380,15 @@ body[data-theme-preset='traditional'] .about-section {
   box-shadow: 0 16px 30px rgba(226, 27, 27, 0.26);
 }
 
+.dir-btn.is-disabled {
+  pointer-events: none;
+  opacity: 0.58;
+  background: rgba(255, 255, 255, 0.72);
+  color: #9b7b7b;
+  border-color: rgba(155, 123, 123, 0.2);
+  box-shadow: none;
+}
+
 /* ===== ABOUT US SECTION ===== */
 .about-section {
   padding: 116px 24px 112px;

@@ -371,16 +371,21 @@ function renderLocation() {
         }
         if (directionsLink && mapUrl) {
             directionsLink.href = mapUrl;
-            directionsLink.style.pointerEvents = '';
-            directionsLink.style.opacity = '';
+            directionsLink.classList.remove('is-disabled');
         } else if (directionsLink) {
             directionsLink.removeAttribute('href');
-            directionsLink.style.pointerEvents = 'none';
-            directionsLink.style.opacity = '0.6';
+            directionsLink.classList.add('is-disabled');
         }
     } else if (addressCard) {
         addressCard.onclick = null;
         addressCard.classList.remove('is-actionable');
+        if (addressText) {
+            addressText.textContent = typeof window.getTranslation === 'function'
+                ? window.getTranslation('landing_address_placeholder', 'Restaurant address')
+                : 'Restaurant address';
+        }
+        if (footerAddressText) footerAddressText.textContent = '';
+        if (topAddressText) topAddressText.textContent = '';
     }
 
     if (restaurantConfig.phone) {
@@ -393,6 +398,16 @@ function renderLocation() {
                 contactPhoneLink.removeAttribute('href');
             }
             contactPhoneLink.textContent = restaurantConfig.phone;
+        }
+    }
+
+    if (!restaurantConfig.phone) {
+        if (topPhoneText) topPhoneText.textContent = '';
+        if (contactPhoneLink) {
+            contactPhoneLink.removeAttribute('href');
+            contactPhoneLink.textContent = typeof window.getTranslation === 'function'
+                ? window.getTranslation('landing_phone_placeholder', 'Phone coming soon')
+                : 'Phone coming soon';
         }
     }
 

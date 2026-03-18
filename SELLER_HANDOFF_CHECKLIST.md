@@ -132,6 +132,7 @@ Check:
 - gallery has no broken items
 - dish images feel consistent
 - missing images degrade gracefully
+- public address, phone, map, and WiFi details do not show fake starter values when the client has not provided them yet
 - managed starter visuals are replaced where the client has stronger real media
 - if using temporary static media, keep it aligned with the current preset/theme and log what still needs client-specific replacement
 
