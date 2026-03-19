@@ -35,6 +35,7 @@ The current goal is to turn this into a dependable first sellable product that c
 - [MEDIA_IMPORT_BASIS.md](./MEDIA_IMPORT_BASIS.md): future-facing basis for seller-side asset libraries, static media assignment, and PDF/image import
 - [IMPORTER_PAYLOAD_SPEC.md](./IMPORTER_PAYLOAD_SPEC.md): implementable importer contract against the live restaurant schema
 - [SELLER_IMAGE_PIPELINE.md](./SELLER_IMAGE_PIPELINE.md): seller-only image sourcing and generation workflow for hero, gallery, and product imagery
+- [LOCAL_IMAGE_LIBRARY_PLAN.md](./LOCAL_IMAGE_LIBRARY_PLAN.md): deeper architecture plan for deterministic local asset reuse and controlled AI generation
 
 ## Current Product Status
 
@@ -60,6 +61,7 @@ Already working in the codebase:
 - hashed admin credentials with throttling and security status
 - safer public handling for broken URLs and missing images
 - seller-side AI menu import drafts from uploaded menu images plus optional logo/venue photos
+- local seller-side media-library catalog foundation for reusable hero, gallery, and future product assets
 
 Still not finished:
 
@@ -84,7 +86,9 @@ Still not finished:
 - `shared.js`: shared defaults, i18n helpers, browser-state helpers
 - `data.json`: persisted restaurant data
 - `uploads/`: uploaded assets
+- `media-library/`: seller-side reusable asset catalog and reusable media store
 - `scripts/smoke-check.js`: lightweight end-to-end sanity test
+- `scripts/media-library-check.js`: validates the local seller media catalog structure and prints counts
 
 ## Local Development
 
@@ -118,6 +122,7 @@ Run these before deployment or handoff:
 ```bash
 npm run check
 npm run smoke
+npm run media:check
 npm run predeploy
 ```
 
@@ -125,6 +130,7 @@ What they do:
 
 - `npm run check`: syntax-checks the main server and frontend entry files
 - `npm run smoke`: boots the public and admin servers on test ports and checks key public/admin routes
+- `npm run media:check`: ensures the local seller media catalog exists and prints asset counts
 - `npm run predeploy`: runs the full local deploy gate before pushing to Coolify
 
 ## Security Notes

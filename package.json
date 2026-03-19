@@ -8,6 +8,7 @@
     "start:website": "node website-server.js",
     "start:admin": "node admin-server.js",
     "check": "node --check website-server.js && node --check admin-server.js && node --check site-store.js && node --check server-common.js && node --check app.js && node --check admin.js",
+    "media:check": "node scripts/media-library-check.js",
     "smoke": "node scripts/smoke-check.js",
     "predeploy": "npm run check && npm run smoke"
   },

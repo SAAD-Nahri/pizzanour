@@ -118,6 +118,8 @@ If you want a faster first menu draft:
 - add logo and restaurant photos when they are available
 - review the generated summary and raw JSON before clicking apply
 - treat the importer as a seller draft assistant, not as direct auto-publish
+- use admin `Seller Tools` -> `AI Media Studio` for hero or generic gallery visuals only
+- when an AI media result is applied, it is also marked approved in the local seller-side media library for future reuse
 
 For each item, review:
 
@@ -147,6 +149,7 @@ Check:
 - public address, phone, map, and WiFi details do not show fake starter values when the client has not provided them yet
 - managed starter visuals are replaced where the client has stronger real media
 - if using temporary static media, keep it aligned with the current preset/theme and log what still needs client-specific replacement
+- remember that seller-generated hero/gallery assets now have a reusable local-library path; dish/drink imagery should still prefer real photos or curated approved assets before AI generation
 
 Current blocker policy:
 

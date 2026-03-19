@@ -40,9 +40,11 @@ Current implementation path:
 - `Seller Tools -> AI Media Studio`
 - generates a hero or gallery image
 - saves the result into `/uploads`
+- registers the generated result in the local reusable seller catalog under `media-library/`
 - allows applying it directly to:
   - `branding.heroImage` and `branding.heroSlides`
   - `gallery[]`
+- when applied, the registered asset is marked approved for future reuse
 
 ### Menu item images
 
@@ -90,13 +92,15 @@ This is better than giving every restaurant fully generated dish images by defau
 
 - `AI Media Studio` is intended for hero and generic atmosphere visuals only
 - generated images are saved locally under `/uploads`
+- the seller-side reusable asset catalog now lives under `media-library/`
+- the local catalog tracks asset metadata, approval state, and future exact-match recipe reuse
 - menu item placeholder assignment remains a separate seller tool
 - the next product-image step should be library expansion, not immediate full AI generation
 
 ## Next Recommended Expansion
 
-1. Add a real local asset manifest for menu, hero, and gallery assets
-2. Expand the menu-image library from SVG placeholders to a curated real-photo set
+1. Expand the menu-image library from SVG placeholders to a curated real-photo set
+2. Connect menu item matching to the local catalog before broad AI dish generation
 3. Add seller-side media review states:
    - client media
    - curated local asset

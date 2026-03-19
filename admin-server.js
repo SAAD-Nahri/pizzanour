@@ -13,6 +13,11 @@ const {
   setSessionCookie
 } = require("./server-common");
 const { ensureStorage, readData, resetToBundledData, uploadsDir, writeData } = require("./site-store");
+const {
+  approveLibraryAsset,
+  ensureMediaLibraryStructure,
+  registerLibraryAsset
+} = require("./media-library/library");
 
 const DEFAULT_ADMIN_USER = "admin";
 const DEFAULT_ADMIN_PASS = "foody2026";
@@ -919,6 +924,10 @@ async function generateSellerMediaImage(input) {
   }
 
   const slot = input?.slot === "gallery" ? "gallery" : "hero";
+  const restaurantName = asImporterString(input?.restaurantName) || "Restaurant";
+  const shortName = asImporterString(input?.shortName) || restaurantName;
+  const cuisineHint = asImporterString(input?.cuisineHint);
+  const notes = asImporterString(input?.notes);
   const logoImageUrl = asImporterString(input?.logoImageUrl);
   const referenceImageUrls = Array.isArray(input?.referenceImageUrls)
     ? input.referenceImageUrls.filter((value) => typeof value === "string" && value.trim()).slice(0, 4)
@@ -971,11 +980,41 @@ async function generateSellerMediaImage(input) {
   }
 
   const url = saveGeneratedImage(base64Image, slot === "hero" ? "hero-generated" : "gallery-generated");
+  let libraryAssetId = "";
+  let libraryAssetStatus = "";
+
+  try {
+    const uploadPath = resolveLocalUploadPath(url);
+    if (uploadPath) {
+      const libraryAsset = registerLibraryAsset({
+        sourceFilePath: uploadPath,
+        slotType: slot,
+        sourceType: "generated",
+        displayName: `${shortName} ${slot}`,
+        description: notes || `${slot} visual for ${restaurantName}`,
+        cuisineTags: cuisineHint ? [cuisineHint] : [],
+        tags: [slot, "seller-ai-media", shortName, restaurantName].filter(Boolean),
+        approved: false,
+        model: OPENAI_MEDIA_MODEL,
+        prompt,
+        promptVersion: "seller-media-studio-v1",
+        notes: `Generated in AI Media Studio with ${imageInputs.length} reference image(s).`,
+        createdFrom: "ai_media_studio"
+      });
+      libraryAssetId = libraryAsset?.assetId || "";
+      libraryAssetStatus = libraryAsset?.approvalStatus || "";
+    }
+  } catch (error) {
+    console.error("MEDIA LIBRARY REGISTER ERROR:", error);
+  }
+
   return {
     slot,
     prompt,
     url,
-    referenceCount: imageInputs.length
+    referenceCount: imageInputs.length,
+    libraryAssetId,
+    libraryAssetStatus
   };
 }
 
@@ -1256,6 +1295,7 @@ if (currentCreds.usesDefaultCredentials) {
 }
 
 ensureStorage();
+ensureMediaLibraryStructure();
 
 app.use(express.json({ limit: MAX_JSON_BYTES }));
 
@@ -1439,6 +1479,26 @@ app.post("/api/media/generate", requireAuth, async (req, res) => {
       ok: false,
       error: error.message || "media_generation_failed"
     });
+  }
+});
+
+app.post("/api/media/library/approve", requireAuth, (req, res) => {
+  const assetId = typeof req.body?.assetId === "string" ? req.body.assetId.trim() : "";
+  if (!assetId) {
+    res.status(400).json({ ok: false, error: "asset_id_required" });
+    return;
+  }
+
+  try {
+    const asset = approveLibraryAsset(assetId);
+    if (!asset) {
+      res.status(404).json({ ok: false, error: "asset_not_found" });
+      return;
+    }
+    res.json({ ok: true, asset });
+  } catch (error) {
+    console.error("MEDIA LIBRARY APPROVAL ERROR:", error);
+    res.status(500).json({ ok: false, error: "media_library_approval_failed" });
   }
 });
 

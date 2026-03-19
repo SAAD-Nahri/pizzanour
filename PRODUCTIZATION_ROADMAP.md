@@ -8,6 +8,8 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The seller-side local media-library foundation now exists: generated hero/gallery images are registered into a reusable local catalog under `media-library/`, and applying one in `AI Media Studio` marks that asset approved for future reuse instead of leaving it only in `/uploads`
+- A new `LOCAL_IMAGE_LIBRARY_PLAN.md` now captures the concrete architecture for deterministic local asset reuse, recipe-key matching, approval states, and controlled AI generation so future contributors can continue the image-library path without re-deciding the model
 - A seller-only `AI Media Studio` now exists for hero and generic gallery visuals: it uses the current restaurant branding plus optional uploaded references, generates an image server-side, stores it locally under `/uploads`, and can apply it directly to the hero or gallery flow
 - The importer quality layer is stronger now too: after the initial draft, the server preserves uploaded logo/venue media as homepage/gallery fallback, runs a second translation-completion pass for menu/category/super-category text, and the apply step auto-assigns managed menu placeholders when imported items still have no images
 - The first seller-only AI importer slice is now hardened against malformed model output: `AI Import Studio` uses the Responses API with a strict JSON schema, normalizes imported categories back into the live runtime shape, and logs the raw model text when a parse failure still occurs
@@ -367,10 +369,10 @@ Long term:
 
 ## Immediate Next Recommended Slices
 
-1. Validate the new AI Media Studio and hardened AI Import Studio end to end on the live deployment with real restaurant assets
+1. Validate the local media-library registration and approval flow end to end on the live deployment with real seller-generated hero/gallery assets
 2. Extend the importer from image-only ingestion to menu PDF support while keeping the same review-first seller workflow
-3. Expand the curated image library and the media-slot matching rules so imported menu items and hero/gallery slots have a better non-AI fallback path
-4. Introduce a real local image-library manifest so the product can scale from SVG placeholders to a 150+ vetted photo set
+3. Expand the curated image library and move product-image matching from `shared.js` placeholders onto the local catalog before broad AI dish generation
+4. Introduce seller-only capability gating so AI/import/image-library tools stay out of the client-facing admin surface by default
 5. Browser-QA the refreshed public site and admin on the live Coolify deployment, focusing on desktop spacing, motion restraint, and the rewritten seller-facing surfaces
 6. Define the exact seller packages, what is customized manually, and what stays admin-editable after delivery
 

@@ -2541,8 +2541,11 @@ function renderMediaStudioOutputs(result) {
         `Slot: ${result.slot || 'unknown'}`,
         `Generated URL: ${result.url || ''}`,
         `Reference images used: ${result.referenceCount || 0}`,
+        `Library asset id: ${result.libraryAssetId || 'not registered'}`,
+        `Library status: ${result.libraryAssetStatus || 'n/a'}`,
         '',
-        'Use this for seller-side review before applying it to the live site.'
+        'Use this for seller-side review before applying it to the live site.',
+        'Applying the image also marks the registered library asset as approved for future reuse.'
     ].join('\n');
     promptEl.value = result.prompt || '';
     previewEl.src = result.url || '';
@@ -2850,6 +2853,23 @@ window.applyGeneratedMedia = async function () {
 
     const saved = await saveAndRefresh();
     if (saved) {
+        if (lastGeneratedMedia.libraryAssetId) {
+            try {
+                await fetch('/api/media/library/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ assetId: lastGeneratedMedia.libraryAssetId })
+                });
+                lastGeneratedMedia = {
+                    ...lastGeneratedMedia,
+                    libraryAssetStatus: 'approved'
+                };
+                renderMediaStudioOutputs(lastGeneratedMedia);
+            } catch (error) {
+                console.error('Approve media library asset error:', error);
+            }
+        }
         showToast(slot === 'hero' ? 'Generated image applied to hero.' : 'Generated image added to gallery.');
     }
 };
