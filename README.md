@@ -15,6 +15,7 @@ It is now a seller-oriented white-label restaurant website template with:
 - preset-aware branding controls for colors, surfaces, text, and menu mood
 - a branding preview that mirrors homepage/menu mood more closely during setup
 - preset-specific public styling so each main preset feels more distinct on homepage and menu
+- a seller-only AI Import Studio that turns uploaded menu images into a reviewable schema draft
 - section visibility and ordering controls
 - quick-launch presets for new restaurants
 - a local menu-image suggestion library for missing dish visuals
@@ -56,11 +57,13 @@ Already working in the codebase:
 - rerender-safe staged motion on the menu landing, promo, featured, category, and item flows instead of one-shot paint-only animation
 - hashed admin credentials with throttling and security status
 - safer public handling for broken URLs and missing images
+- seller-side AI menu import drafts from uploaded menu images plus optional logo/venue photos
 
 Still not finished:
 
 - launch-quality media/content pass for the first sellable package
-- importer implementation for PDF / image menu ingestion
+- PDF ingestion for the seller importer
+- stronger schema enforcement and review UX for the seller importer
 - internal launcher / AI onboarding tooling
 - stronger preset/theme system for different restaurant categories
 
@@ -131,6 +134,7 @@ What they do:
 - Once a restaurant changes credentials from the Security tab, that stored auth file takes precedence over the original `ADMIN_USER` / `ADMIN_PASS` environment values.
 - The admin security panel should not show the default-credentials warning at handoff time.
 - Keep AI keys and future automation credentials out of the live restaurant admin.
+- If you want to use `Seller Tools -> AI Import Studio`, set `OPENAI_API_KEY` server-side and optionally `OPENAI_IMPORT_MODEL`.
 
 ## Data And Product Model
 
@@ -153,6 +157,14 @@ That data shape already covers:
 - menu items with translations
 
 The future importer and launcher should write into that same normalized shape instead of creating a separate format.
+
+Current importer status:
+
+- image-based input works now through `Seller Tools -> AI Import Studio`
+- the seller uploads menu images first, then optionally a logo and venue photos
+- the server generates a review draft against the live restaurant schema
+- the draft must be reviewed and explicitly applied
+- PDF parsing is still a later slice
 
 ## Recommended Working Mode
 

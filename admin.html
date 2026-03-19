@@ -2746,6 +2746,43 @@
                     <textarea id="menuImageSuggestionOutput" class="summary-output" readonly placeholder="Run the suggestion tool to assign local library images to items without visuals." data-i18n-placeholder="admin.tools.menu_image_suggestions_placeholder"></textarea>
                 </div>
                 <div class="tool-card tool-card--accent tool-card--wide">
+                    <div class="tool-card-eyebrow">Importer</div>
+                    <h4>AI Import Studio</h4>
+                    <p>Upload menu images plus optional logo and venue photos. This first seller-only importer generates a reviewable draft for menu data, categories, super-categories, translations, and starter branding suggestions before anything is applied live.</p>
+                    <p class="muted-copy">Current scope: image-based drafts only. Use up to 8 menu images and 6 venue photos per run. PDF ingestion comes next.</p>
+                    <div class="form-group">
+                        <label for="importStudioRestaurantName">Restaurant Name</label>
+                        <input type="text" id="importStudioRestaurantName" placeholder="e.g. Matsco" />
+                    </div>
+                    <div class="form-group">
+                        <label for="importStudioShortName">Short Brand Name</label>
+                        <input type="text" id="importStudioShortName" placeholder="e.g. Matsco" />
+                    </div>
+                    <div class="form-group">
+                        <label for="importStudioMenuFiles">Menu Images</label>
+                        <input type="file" id="importStudioMenuFiles" accept="image/*" multiple />
+                    </div>
+                    <div class="form-group">
+                        <label for="importStudioLogoFile">Logo Image (optional)</label>
+                        <input type="file" id="importStudioLogoFile" accept="image/*" />
+                    </div>
+                    <div class="form-group">
+                        <label for="importStudioVenueFiles">Restaurant Photos (optional)</label>
+                        <input type="file" id="importStudioVenueFiles" accept="image/*" multiple />
+                    </div>
+                    <div class="form-group">
+                        <label for="importStudioNotes">Seller Notes (optional)</label>
+                        <textarea id="importStudioNotes" rows="3" placeholder="Add context such as cuisine type, preferred tone, or which photos are cover images."></textarea>
+                    </div>
+                    <div class="tool-actions">
+                        <button type="button" class="primary-btn btn-auto" onclick="generateImporterDraft()">Generate AI Draft</button>
+                        <button type="button" class="brand-secondary-btn" onclick="applyImporterDraft()">Apply Draft</button>
+                        <button type="button" class="brand-secondary-btn" onclick="copyImporterDraftJson()">Copy Draft JSON</button>
+                    </div>
+                    <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft generated yet. Upload menu images, generate a draft, then review blockers and warnings here."></textarea>
+                    <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON will appear here for seller review before apply."></textarea>
+                </div>
+                <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow" data-i18n="admin.tools.starter">Starter</div>
                     <h4 data-i18n="admin.tools.quick_launch_preset">Quick Launch Preset</h4>
                     <p data-i18n="admin.tools.quick_launch_preset_desc">Apply a strong starting point for a fast-food, cafe, or traditional restaurant before you fine-tune the final content.</p>

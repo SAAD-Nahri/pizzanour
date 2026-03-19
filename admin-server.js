@@ -23,6 +23,10 @@ const MIN_PASSWORD_LENGTH = 8;
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
+const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
+const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+const IMPORTER_MAX_MENU_IMAGES = 8;
+const IMPORTER_MAX_VENUE_IMAGES = 6;
 
 const app = express();
 const port = parsePort(process.env.PORT, 3102);
@@ -33,6 +37,284 @@ const dataRoot = process.env.DATA_FILE
   : __dirname;
 const authFile = process.env.AUTH_FILE || path.join(dataRoot, "auth.json");
 const loginAttempts = new Map();
+
+const IMPORTER_SYSTEM_PROMPT = [
+  "You generate seller-side draft JSON for a white-label restaurant website.",
+  "Return valid JSON only. No markdown. No commentary.",
+  "Use the uploaded menu images as the source of truth for menu items, prices, categories, and descriptions.",
+  "Infer FR, EN, and AR names and descriptions for menu items, categories, and super-categories when confidence is reasonable.",
+  "Do not invent contact details, maps, hours, WiFi, or social links.",
+  "If information is missing, leave the field empty and record a warning.",
+  "Prefer clean restaurant website categories and group them into super-categories only when the grouping is clear.",
+  "Flag uncertainty in review.warnings or review.blockers instead of pretending confidence.",
+  "Use the exact top-level shape: { restaurantData: {...}, review: {...} }."
+].join("\n");
+
+function guessMimeType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === ".png") return "image/png";
+  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+  if (ext === ".webp") return "image/webp";
+  if (ext === ".gif") return "image/gif";
+  return "";
+}
+
+function resolveLocalUploadPath(value) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return "";
+
+  const cleanPath = raw.startsWith("http")
+    ? (() => {
+      try {
+        return new URL(raw).pathname || "";
+      } catch (_error) {
+        return "";
+      }
+    })()
+    : raw;
+
+  if (!cleanPath.startsWith("/uploads/")) return "";
+  const relativePath = cleanPath.replace(/^\/uploads\//, "");
+  if (!relativePath || relativePath.includes("..")) return "";
+  return path.join(uploadsDir, relativePath);
+}
+
+function buildInputImageFromUploadUrl(value) {
+  const filePath = resolveLocalUploadPath(value);
+  if (!filePath || !fs.existsSync(filePath)) return null;
+  const mimeType = guessMimeType(filePath);
+  if (!mimeType) return null;
+  const base64 = fs.readFileSync(filePath).toString("base64");
+  return {
+    type: "input_image",
+    image_url: `data:${mimeType};base64,${base64}`
+  };
+}
+
+function buildImporterDraftSkeleton(input) {
+  const menuImageUrls = Array.isArray(input.menuImageUrls) ? input.menuImageUrls : [];
+  const restaurantPhotoUrls = Array.isArray(input.restaurantPhotoUrls) ? input.restaurantPhotoUrls : [];
+  const restaurantName = typeof input.restaurantName === "string" ? input.restaurantName.trim() : "";
+  const shortName = typeof input.shortName === "string" ? input.shortName.trim() : "";
+  const logoImageUrl = typeof input.logoImageUrl === "string" ? input.logoImageUrl.trim() : "";
+  const heroImage = restaurantPhotoUrls[0] || "";
+
+  return {
+    restaurantData: {
+      menu: [],
+      catEmojis: {},
+      categoryTranslations: {},
+      wifi: { ssid: "", pass: "" },
+      social: {
+        instagram: "",
+        facebook: "",
+        tiktok: "",
+        tripadvisor: "",
+        whatsapp: ""
+      },
+      guestExperience: {
+        paymentMethods: [],
+        facilities: []
+      },
+      sectionVisibility: {},
+      sectionOrder: [],
+      branding: {
+        presetId: "core",
+        restaurantName,
+        shortName: shortName || restaurantName,
+        tagline: "",
+        logoMark: "🍽️",
+        primaryColor: "",
+        secondaryColor: "",
+        accentColor: "",
+        surfaceColor: "",
+        surfaceMuted: "",
+        textColor: "",
+        textMuted: "",
+        menuBackground: "",
+        menuSurface: "",
+        heroImage,
+        heroSlides: [
+          heroImage,
+          restaurantPhotoUrls[1] || "",
+          restaurantPhotoUrls[2] || ""
+        ],
+        logoImage: logoImageUrl
+      },
+      contentTranslations: {
+        fr: {},
+        en: {},
+        ar: {}
+      },
+      promoId: null,
+      promoIds: [],
+      superCategories: [],
+      hours: [],
+      hoursNote: "",
+      gallery: restaurantPhotoUrls,
+      landing: {
+        location: {
+          address: "",
+          url: ""
+        },
+        phone: ""
+      }
+    },
+    review: {
+      sourceFiles: [...menuImageUrls, ...restaurantPhotoUrls, ...(logoImageUrl ? [logoImageUrl] : [])],
+      summary: "",
+      blockers: [],
+      warnings: [],
+      missingMediaSlots: [],
+      untranslatedItems: [],
+      confidence: {
+        menuExtraction: "unknown",
+        translations: "unknown",
+        mediaMatching: "unknown"
+      }
+    }
+  };
+}
+
+function deepMerge(target, source) {
+  if (Array.isArray(source)) {
+    return source.slice();
+  }
+  if (!source || typeof source !== "object") {
+    return source;
+  }
+
+  const base = target && typeof target === "object" && !Array.isArray(target)
+    ? { ...target }
+    : {};
+
+  for (const [key, value] of Object.entries(source)) {
+    if (Array.isArray(value)) {
+      base[key] = value.slice();
+    } else if (value && typeof value === "object") {
+      base[key] = deepMerge(base[key], value);
+    } else {
+      base[key] = value;
+    }
+  }
+
+  return base;
+}
+
+function extractResponseText(payload) {
+  if (payload && typeof payload.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text.trim();
+  }
+
+  const output = Array.isArray(payload?.output) ? payload.output : [];
+  const parts = [];
+
+  output.forEach((entry) => {
+    const content = Array.isArray(entry?.content) ? entry.content : [];
+    content.forEach((item) => {
+      if (item?.type === "output_text" && typeof item.text === "string") {
+        parts.push(item.text);
+      }
+    });
+  });
+
+  return parts.join("").trim();
+}
+
+async function generateImporterDraft(input) {
+  if (!process.env.OPENAI_API_KEY) {
+    const error = new Error("openai_not_configured");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const menuImageUrls = Array.isArray(input.menuImageUrls) ? input.menuImageUrls.slice(0, IMPORTER_MAX_MENU_IMAGES) : [];
+  const restaurantPhotoUrls = Array.isArray(input.restaurantPhotoUrls) ? input.restaurantPhotoUrls.slice(0, IMPORTER_MAX_VENUE_IMAGES) : [];
+  const logoImageUrl = typeof input.logoImageUrl === "string" ? input.logoImageUrl.trim() : "";
+  const restaurantName = typeof input.restaurantName === "string" ? input.restaurantName.trim() : "";
+  const shortName = typeof input.shortName === "string" ? input.shortName.trim() : "";
+  const notes = typeof input.notes === "string" ? input.notes.trim() : "";
+
+  const imageInputs = [
+    ...menuImageUrls.map(buildInputImageFromUploadUrl).filter(Boolean),
+    ...(logoImageUrl ? [buildInputImageFromUploadUrl(logoImageUrl)].filter(Boolean) : []),
+    ...restaurantPhotoUrls.map(buildInputImageFromUploadUrl).filter(Boolean)
+  ];
+
+  if (!imageInputs.length) {
+    const error = new Error("no_import_images");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const userContext = [
+    `Restaurant name: ${restaurantName || "(not provided)"}`,
+    `Short brand name: ${shortName || "(not provided)"}`,
+    `Menu image count: ${menuImageUrls.length}`,
+    `Logo provided: ${logoImageUrl ? "yes" : "no"}`,
+    `Restaurant photo count: ${restaurantPhotoUrls.length}`,
+    `Seller notes: ${notes || "(none)"}`
+  ].join("\n");
+
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: OPENAI_IMPORT_MODEL,
+      input: [
+        {
+          role: "system",
+          content: [{ type: "input_text", text: IMPORTER_SYSTEM_PROMPT }]
+        },
+        {
+          role: "user",
+          content: [
+            { type: "input_text", text: userContext },
+            ...imageInputs
+          ]
+        }
+      ],
+      max_output_tokens: 6000
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || "openai_request_failed";
+    const error = new Error(message);
+    error.statusCode = response.status || 502;
+    throw error;
+  }
+
+  const rawText = extractResponseText(payload);
+  if (!rawText) {
+    const error = new Error("empty_openai_response");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch (_error) {
+    const error = new Error("invalid_json_from_openai");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  const skeleton = buildImporterDraftSkeleton({
+    restaurantName,
+    shortName,
+    menuImageUrls,
+    logoImageUrl,
+    restaurantPhotoUrls
+  });
+
+  return deepMerge(skeleton, parsed);
+}
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   const passwordHash = crypto
@@ -355,6 +637,20 @@ app.post("/api/data/import", requireAuth, (req, res) => {
   } catch (error) {
     console.error("IMPORT ERROR:", error);
     res.status(400).json({ ok: false, error: "invalid_import_payload" });
+  }
+});
+
+app.post("/api/importer/draft", requireAuth, async (req, res) => {
+  try {
+    const payload = req.body && typeof req.body === "object" ? req.body : {};
+    const draft = await generateImporterDraft(payload);
+    res.json({ ok: true, draft });
+  } catch (error) {
+    console.error("IMPORTER DRAFT ERROR:", error);
+    res.status(error.statusCode || 500).json({
+      ok: false,
+      error: error.message || "importer_draft_failed"
+    });
   }
 });
 

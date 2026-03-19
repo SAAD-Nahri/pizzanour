@@ -44,6 +44,8 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `ADMIN_DOMAIN=<admin-domain>`
 - `ADMIN_USER=<admin-username>`
 - `ADMIN_PASS=<strong-password>`
+- `OPENAI_API_KEY=<server-side-key>` if you want `Seller Tools -> AI Import Studio`
+- `OPENAI_IMPORT_MODEL=gpt-4o-mini` optional override for the importer model
 - `COOKIE_SECURE=true`
 - `DATA_FILE=/app/data/data.json`
 - `UPLOADS_DIR=/app/uploads`
@@ -53,6 +55,7 @@ Recommended production rule:
 
 - never leave `ADMIN_PASS` on the fallback default
 - keep `AUTH_FILE` inside the persisted `/app/data` volume so Security-tab password changes survive redeploys
+- keep `OPENAI_API_KEY` server-side only; do not expose it to the client or browser
 
 ## Configure In Coolify
 
@@ -84,6 +87,13 @@ Minimum env review before clicking deploy:
 - `DATA_FILE=/app/data/data.json`
 - `UPLOADS_DIR=/app/uploads`
 - `AUTH_FILE=/app/data/auth.json`
+- `OPENAI_API_KEY` is set if you want the seller-only importer enabled
+
+Importer note:
+
+- the current importer slice supports uploaded images only
+- it does not parse PDFs yet
+- it produces a review draft that must be explicitly applied by the seller
 
 ## Deploy To See It Live
 

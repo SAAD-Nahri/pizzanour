@@ -3,6 +3,9 @@ let catEmojis = window.defaultCatEmojis || {};
 let categoryTranslations = window.defaultCategoryTranslations || {};
 let restaurantConfig = window.restaurantConfig || window.defaultConfig || {};
 let promoIds = [];
+let lastImporterDraft = null;
+const IMPORT_STUDIO_MAX_MENU_IMAGES = 8;
+const IMPORT_STUDIO_MAX_VENUE_IMAGES = 6;
 let adminAuth = { user: 'admin', pass: '' };
 let adminSecurityStatus = null;
 let adminSaveState = {
@@ -803,6 +806,7 @@ function refreshUI() {
     initHoursForm();
     initGalleryForm();
     renderGalleryAdmin();
+    renderImporterDraftOutputs(lastImporterDraft);
     renderLaunchReadinessCard();
     updateStats();
     if (typeof window.applyBranding === 'function') {
@@ -2475,6 +2479,217 @@ window.importRestaurantBackup = async function () {
     } catch (error) {
         console.error('Import backup error:', error);
         showToast('Backup import failed. Use a valid JSON export file.');
+    }
+};
+
+function renderImporterDraftOutputs(draft) {
+    const summaryEl = document.getElementById('importStudioSummaryOutput');
+    const jsonEl = document.getElementById('importStudioJsonOutput');
+    if (!summaryEl || !jsonEl) return;
+
+    if (!draft) {
+        summaryEl.value = 'No draft generated yet.';
+        jsonEl.value = '';
+        return;
+    }
+
+    const restaurantData = draft.restaurantData || {};
+    const review = draft.review || {};
+    const menuItems = Array.isArray(restaurantData.menu) ? restaurantData.menu : [];
+    const superCategories = Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : [];
+    const blockers = Array.isArray(review.blockers) ? review.blockers : [];
+    const warnings = Array.isArray(review.warnings) ? review.warnings : [];
+    const untranslatedItems = Array.isArray(review.untranslatedItems) ? review.untranslatedItems : [];
+
+    summaryEl.value = [
+        `Summary: ${review.summary || 'No summary returned.'}`,
+        `Menu items: ${menuItems.length}`,
+        `Categories: ${Object.keys(restaurantData.catEmojis || {}).length}`,
+        `Super categories: ${superCategories.length}`,
+        `Blockers: ${blockers.length}`,
+        `Warnings: ${warnings.length}`,
+        `Untranslated items: ${untranslatedItems.length}`,
+        `Menu extraction confidence: ${review.confidence?.menuExtraction || 'unknown'}`,
+        `Translation confidence: ${review.confidence?.translations || 'unknown'}`,
+        `Media confidence: ${review.confidence?.mediaMatching || 'unknown'}`,
+        '',
+        blockers.length ? `Blockers:\n- ${blockers.join('\n- ')}` : 'Blockers:\n- none',
+        '',
+        warnings.length ? `Warnings:\n- ${warnings.join('\n- ')}` : 'Warnings:\n- none'
+    ].join('\n');
+
+    jsonEl.value = JSON.stringify(draft, null, 2);
+}
+
+async function uploadFilesForImporter(fileList, label) {
+    const files = Array.from(fileList || []).filter(Boolean);
+    const urls = [];
+
+    for (let index = 0; index < files.length; index += 1) {
+        showToast(`Uploading ${label} ${index + 1}/${files.length}...`);
+        const url = await uploadImageToServer(files[index]);
+        if (url) urls.push(url);
+    }
+
+    return urls;
+}
+
+function buildImporterApplyPayload(draft) {
+    const imported = draft?.restaurantData || {};
+    const importedContent = imported.contentTranslations || {};
+
+    return {
+        menu: Array.isArray(imported.menu) && imported.menu.length ? imported.menu : menu,
+        catEmojis: {
+            ...catEmojis,
+            ...(imported.catEmojis || {})
+        },
+        categoryTranslations: {
+            ...categoryTranslations,
+            ...(imported.categoryTranslations || {})
+        },
+        wifi: {
+            ssid: imported.wifi?.ssid || restaurantConfig.wifi?.name || '',
+            pass: imported.wifi?.pass || restaurantConfig.wifi?.code || ''
+        },
+        social: {
+            ...(restaurantConfig.socials || {}),
+            ...(imported.social || {})
+        },
+        guestExperience: imported.guestExperience || restaurantConfig.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] },
+        sectionVisibility: imported.sectionVisibility || restaurantConfig.sectionVisibility || window.defaultConfig?.sectionVisibility || {},
+        sectionOrder: imported.sectionOrder || restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
+        branding: {
+            ...(restaurantConfig.branding || window.defaultBranding || {}),
+            ...(imported.branding || {})
+        },
+        contentTranslations: {
+            fr: { ...(restaurantConfig.contentTranslations?.fr || {}), ...(importedContent.fr || {}) },
+            en: { ...(restaurantConfig.contentTranslations?.en || {}), ...(importedContent.en || {}) },
+            ar: { ...(restaurantConfig.contentTranslations?.ar || {}), ...(importedContent.ar || {}) }
+        },
+        promoId: Array.isArray(imported.promoIds) && imported.promoIds.length ? imported.promoIds[0] : (imported.promoId ?? (promoIds.length > 0 ? promoIds[0] : null)),
+        promoIds: Array.isArray(imported.promoIds) ? imported.promoIds : promoIds,
+        superCategories: Array.isArray(imported.superCategories) && imported.superCategories.length ? imported.superCategories : (restaurantConfig.superCategories || []),
+        hours: Array.isArray(imported.hours) && imported.hours.length ? imported.hours : (restaurantConfig._hours || null),
+        hoursNote: imported.hoursNote || restaurantConfig._hoursNote || '',
+        gallery: Array.isArray(imported.gallery) && imported.gallery.length ? imported.gallery : (restaurantConfig.gallery || []),
+        landing: {
+            location: {
+                ...(restaurantConfig.location || {}),
+                ...(imported.landing?.location || {})
+            },
+            phone: imported.landing?.phone || restaurantConfig.phone || ''
+        }
+    };
+}
+
+window.generateImporterDraft = async function () {
+    const menuFiles = document.getElementById('importStudioMenuFiles')?.files;
+    const logoFile = document.getElementById('importStudioLogoFile')?.files?.[0] || null;
+    const venueFiles = document.getElementById('importStudioVenueFiles')?.files;
+    const restaurantName = (document.getElementById('importStudioRestaurantName')?.value || '').trim();
+    const shortName = (document.getElementById('importStudioShortName')?.value || '').trim();
+    const notes = (document.getElementById('importStudioNotes')?.value || '').trim();
+
+    if (!menuFiles || !menuFiles.length) {
+        showToast('Add at least one menu image first.');
+        return;
+    }
+
+    if (menuFiles.length > IMPORT_STUDIO_MAX_MENU_IMAGES) {
+        showToast(`Use up to ${IMPORT_STUDIO_MAX_MENU_IMAGES} menu images per draft.`);
+        return;
+    }
+
+    if (venueFiles && venueFiles.length > IMPORT_STUDIO_MAX_VENUE_IMAGES) {
+        showToast(`Use up to ${IMPORT_STUDIO_MAX_VENUE_IMAGES} restaurant photos per draft.`);
+        return;
+    }
+
+    try {
+        showToast('Uploading import assets...');
+        const menuImageUrls = await uploadFilesForImporter(menuFiles, 'menu image');
+        const restaurantPhotoUrls = await uploadFilesForImporter(venueFiles, 'restaurant photo');
+        const logoImageUrl = logoFile ? await uploadImageToServer(logoFile) : '';
+
+        showToast('Generating AI import draft...');
+        const response = await fetch('/api/importer/draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                restaurantName,
+                shortName,
+                notes,
+                menuImageUrls,
+                logoImageUrl,
+                restaurantPhotoUrls
+            })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok || !data.draft) {
+            throw new Error(data.error || 'Importer draft failed.');
+        }
+
+        lastImporterDraft = data.draft;
+        renderImporterDraftOutputs(lastImporterDraft);
+        showToast('AI import draft generated.');
+    } catch (error) {
+        console.error('Importer draft error:', error);
+        const message = error?.message === 'openai_not_configured'
+            ? 'Set OPENAI_API_KEY on the admin server before using AI Import Studio.'
+            : error.message;
+        showToast(`AI import draft failed: ${message}`);
+    }
+};
+
+window.applyImporterDraft = async function () {
+    if (!lastImporterDraft) {
+        showToast('Generate a draft first.');
+        return;
+    }
+
+    if (!confirm('Apply this importer draft to the current restaurant instance? Review the JSON first if you are unsure.')) {
+        return;
+    }
+
+    try {
+        const payload = buildImporterApplyPayload(lastImporterDraft);
+        const response = await fetch('/api/data/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ data: payload })
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || !data.ok) {
+            throw new Error(data.error || 'Draft apply failed.');
+        }
+
+        await loadDataFromServer();
+        refreshUI();
+        showToast('Importer draft applied.');
+    } catch (error) {
+        console.error('Apply importer draft error:', error);
+        showToast(`Draft apply failed: ${error.message}`);
+    }
+};
+
+window.copyImporterDraftJson = async function () {
+    if (!lastImporterDraft) {
+        showToast('No draft to copy yet.');
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(JSON.stringify(lastImporterDraft, null, 2));
+        showToast('Importer draft JSON copied.');
+    } catch (error) {
+        console.error('Copy importer draft error:', error);
+        showToast('Could not copy importer draft JSON.');
     }
 };
 

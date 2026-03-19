@@ -8,6 +8,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The first seller-only AI importer slice now exists in `Seller Tools` as `AI Import Studio`: menu images plus optional logo/venue photos can be uploaded, sent to OpenAI server-side, turned into a reviewable schema draft, copied as JSON, and applied only after explicit seller confirmation
 - The admin shell now has a real FR / EN / AR translation foundation for login, sidebar navigation, seller tools, launch-readiness copy, handoff-summary labels, security messaging, and quick-launch/security form labels, so the i18n system no longer stops at public pages and menu data
 - The admin form layer now also covers the main menu-item, category, WiFi, stats, branding, and landing configuration labels and placeholders in FR / EN / AR, which removes another large batch of seller-facing hardcoded frontend text
 - Public menu wrappers have been tightened further too: the super-menu selection sheet and the remaining visible game helper headings are now on translation keys instead of fixed page text, keeping the frontend focus on user-facing I18 clean-up
@@ -114,6 +115,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 - CSS and UI styling are spread across large files plus many inline styles
 - Social/profile fields are inconsistent across storage and frontend rendering
 - The product is still structured like one restaurant site, not a reusable SaaS-like template
+- The importer is only partially implemented yet: image inputs work, but PDF parsing and stricter structured-output validation are still missing
 
 ## Working Rules For Each Iteration
 

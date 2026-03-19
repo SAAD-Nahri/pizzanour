@@ -20,7 +20,7 @@ Before touching setup, confirm what was sold:
 Also confirm what is not included yet:
 
 - internal AI onboarding
-- automated PDF/image import
+- automated PDF import
 - custom code-level template changes beyond the agreed package
 
 ## 2. Gather Client Inputs
@@ -110,6 +110,14 @@ If item images are missing:
 - treat those placeholders as an internal delivery aid, not a final substitute for strong client-specific visuals
 - use the confidence levels in the suggestion summary to replace fallback placeholders first
 - starter instances may also already include managed local menu and gallery visuals; treat them the same way during review
+
+If you want a faster first menu draft:
+
+- use admin `Seller Tools` -> `AI Import Studio`
+- upload menu images first
+- add logo and restaurant photos when they are available
+- review the generated summary and raw JSON before clicking apply
+- treat the importer as a seller draft assistant, not as direct auto-publish
 
 For each item, review:
 
