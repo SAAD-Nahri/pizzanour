@@ -2144,6 +2144,7 @@
         <div id="categories" class="section">
             <h3 data-i18n="admin.categories.title">Add New Category</h3>
             <form id="catForm">
+                <input type="hidden" id="catEditingKey" value="" />
                 <div style="display:grid; grid-template-columns: 1fr 100px; gap: 15px;">
                     <div class="form-group">
                         <label>Fallback / Internal Category Key</label>
@@ -2551,6 +2552,7 @@
             <p>Group your food categories into logical meal times (e.g. Breakfast, Lunch, Dinner).</p>
 
             <form id="superCatForm" class="panel-soft">
+                <input type="hidden" id="scEditingId" value="" />
                 <div class="form-grid form-grid-name-emoji">
                     <div class="form-group">
                         <label>Fallback Name</label>

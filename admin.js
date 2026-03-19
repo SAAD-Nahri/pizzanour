@@ -580,6 +580,25 @@ function setSuperCategoryTranslationFields(input, fallbackName = '', fallbackDes
     });
 }
 
+function resetCategoryFormState() {
+    const form = document.getElementById('catForm');
+    if (form) form.reset();
+    const editingKeyInput = document.getElementById('catEditingKey');
+    if (editingKeyInput) editingKeyInput.value = '';
+    setCategoryTranslationFields();
+}
+
+function resetSuperCategoryFormState() {
+    const form = document.getElementById('superCatForm');
+    if (form) form.reset();
+    const editingIdInput = document.getElementById('scEditingId');
+    if (editingIdInput) editingIdInput.value = '';
+    setSuperCategoryTranslationFields();
+    document.querySelectorAll('.sc-cat-check').forEach((cb) => {
+        cb.checked = false;
+    });
+}
+
 function buildSuperCategoryTranslations(name, desc) {
     const next = normalizeEntityTranslations();
     ['fr', 'en', 'ar'].forEach((lang) => {
@@ -1553,17 +1572,34 @@ function initForms() {
 
     document.getElementById('catForm').onsubmit = (e) => {
         e.preventDefault();
+        const editingKeyInput = document.getElementById('catEditingKey');
+        const previousKey = editingKeyInput ? editingKeyInput.value.trim() : '';
         const categoryName = document.getElementById('catName').value.trim();
         if (!categoryName) {
             showToast('Category name is required.');
             return;
         }
-        catEmojis[categoryName] = document.getElementById('catEmoji').value;
-        categoryTranslations[categoryName] = buildCategoryTranslations(categoryName);
+        const nextEmoji = document.getElementById('catEmoji').value;
+        const nextTranslations = buildCategoryTranslations(categoryName);
+
+        if (previousKey && previousKey !== categoryName) {
+            menu.forEach((item) => {
+                if (item.cat === previousKey) item.cat = categoryName;
+            });
+            (restaurantConfig.superCategories || []).forEach((sc) => {
+                if (Array.isArray(sc.cats)) {
+                    sc.cats = sc.cats.map((cat) => cat === previousKey ? categoryName : cat);
+                }
+            });
+            delete catEmojis[previousKey];
+            delete categoryTranslations[previousKey];
+        }
+
+        catEmojis[categoryName] = nextEmoji;
+        categoryTranslations[categoryName] = nextTranslations;
         saveAndRefresh();
-        e.target.reset();
-        setCategoryTranslationFields();
-        showToast('Catégorie ajoutée !');
+        resetCategoryFormState();
+        showToast(previousKey ? 'Catégorie mise à jour !' : 'Catégorie ajoutée !');
     };
 
     document.getElementById('wifiForm').onsubmit = (e) => {
@@ -1667,6 +1703,8 @@ function initForms() {
 
     document.getElementById('superCatForm').onsubmit = (e) => {
         e.preventDefault();
+        const editingIdInput = document.getElementById('scEditingId');
+        const editingId = editingIdInput ? editingIdInput.value.trim() : '';
         const selectedCats = Array.from(document.querySelectorAll('.sc-cat-check:checked')).map(cb => cb.value);
         const name = document.getElementById('scName').value.trim();
         const emoji = document.getElementById('scEmoji').value;
@@ -1674,7 +1712,7 @@ function initForms() {
         const time = document.getElementById('scTime').value;
         const translations = buildSuperCategoryTranslations(name, desc);
 
-        const id = name.toLowerCase().replace(/\s+/g, '_');
+        const id = editingId || name.toLowerCase().replace(/\s+/g, '_');
         const existingIdx = restaurantConfig.superCategories.findIndex(sc => sc.id === id);
 
         const newSC = { id, name, emoji, desc, time, cats: selectedCats, translations };
@@ -1686,8 +1724,8 @@ function initForms() {
         }
 
         saveAndRefresh();
-        e.target.reset();
-        showToast('Super Catégorie sauvegardée !');
+        resetSuperCategoryFormState();
+        showToast(existingIdx !== -1 ? 'Super Catégorie mise à jour !' : 'Super Catégorie sauvegardée !');
     };
 }
 
@@ -2310,6 +2348,8 @@ function renderSuperCatTable() {
 function editSuperCat(id) {
     const sc = restaurantConfig.superCategories.find(s => s.id === id);
     if (!sc) return;
+    const editingIdInput = document.getElementById('scEditingId');
+    if (editingIdInput) editingIdInput.value = sc.id;
     document.getElementById('scName').value = sc.name;
     document.getElementById('scEmoji').value = sc.emoji;
     document.getElementById('scDesc').value = sc.desc;
@@ -2933,7 +2973,15 @@ function populateCatDropdown() {
 }
 function renderCatTable() {
     const el = document.querySelector('#catTable tbody');
-    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="deleteCat('${cat}')">🗑️</button></td></tr>`).join('');
+    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">✏️</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">🗑️</button></td></tr>`).join('');
+}
+function editCat(cat) {
+    const editingKeyInput = document.getElementById('catEditingKey');
+    if (editingKeyInput) editingKeyInput.value = cat;
+    document.getElementById('catName').value = cat;
+    document.getElementById('catEmoji').value = catEmojis[cat] || '';
+    setCategoryTranslationFields(cat);
+    document.getElementById('categories').scrollIntoView({ behavior: 'smooth' });
 }
 function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Supprimez d\'abord les produits de cette catégorie !'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
 function initWifiForm() {
