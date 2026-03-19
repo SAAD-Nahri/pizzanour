@@ -1472,6 +1472,18 @@
             resize: vertical;
         }
 
+        .tool-preview-image {
+            display: none;
+            width: 100%;
+            min-height: 220px;
+            max-height: 320px;
+            object-fit: cover;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #faf3ea, #f3f6fb);
+            margin-bottom: 14px;
+        }
+
         .tool-actions {
             display: flex;
             flex-wrap: wrap;
@@ -2781,6 +2793,39 @@
                     </div>
                     <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft generated yet. Upload menu images, generate a draft, then review blockers and warnings here."></textarea>
                     <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON will appear here for seller review before apply."></textarea>
+                </div>
+                <div class="tool-card tool-card--accent tool-card--wide">
+                    <div class="tool-card-eyebrow">Media</div>
+                    <h4>AI Media Studio</h4>
+                    <p>Generate seller-only hero or generic atmosphere images from the current restaurant branding, optional uploaded references, and prompt notes. Use this for homepage and gallery visuals, not for every dish.</p>
+                    <p class="muted-copy">Recommended flow: generate hero and generic gallery images here, keep dish photos on the client-photo or curated-library path.</p>
+                    <div class="form-group">
+                        <label for="mediaStudioSlot">Target Slot</label>
+                        <select id="mediaStudioSlot">
+                            <option value="hero">Homepage Hero</option>
+                            <option value="gallery">Gallery / Atmosphere</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mediaStudioCuisineHint">Cuisine / Concept</label>
+                        <input type="text" id="mediaStudioCuisineHint" placeholder="e.g. Modern Moroccan seafood, cafe brunch, grilled family restaurant" />
+                    </div>
+                    <div class="form-group">
+                        <label for="mediaStudioReferenceFiles">Extra Reference Images (optional)</label>
+                        <input type="file" id="mediaStudioReferenceFiles" accept="image/*" multiple />
+                    </div>
+                    <div class="form-group">
+                        <label for="mediaStudioNotes">Style Notes (optional)</label>
+                        <textarea id="mediaStudioNotes" rows="3" placeholder="Examples: warm sunset terrace, premium indoor dining, plated hero dish in foreground, no people, no text."></textarea>
+                    </div>
+                    <div class="tool-actions">
+                        <button type="button" class="primary-btn btn-auto" onclick="generateAIMedia()">Generate AI Image</button>
+                        <button type="button" class="brand-secondary-btn" onclick="applyGeneratedMedia()">Apply To Site</button>
+                        <button type="button" class="brand-secondary-btn" onclick="copyGeneratedMediaPrompt()">Copy Prompt</button>
+                    </div>
+                    <img id="mediaStudioPreview" class="tool-preview-image" alt="Generated media preview" />
+                    <textarea id="mediaStudioSummaryOutput" class="summary-output" readonly placeholder="No AI media generated yet. Generate an image, review the result, then apply it to the hero or gallery."></textarea>
+                    <textarea id="mediaStudioPromptOutput" class="summary-output" readonly placeholder="The generation prompt will appear here for seller review and reuse."></textarea>
                 </div>
                 <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow" data-i18n="admin.tools.starter">Starter</div>

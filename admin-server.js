@@ -24,6 +24,7 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
 const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
+const OPENAI_MEDIA_MODEL = process.env.OPENAI_MEDIA_MODEL || "gpt-4.1";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const IMPORTER_MAX_MENU_IMAGES = 8;
 const IMPORTER_MAX_VENUE_IMAGES = 6;
@@ -415,6 +416,15 @@ function buildInputImageFromUploadUrl(value) {
     type: "input_image",
     image_url: `data:${mimeType};base64,${base64}`
   };
+}
+
+function saveGeneratedImage(base64Data, prefix = "generated") {
+  const safePrefix = typeof prefix === "string" && prefix.trim() ? prefix.trim().replace(/[^a-z0-9_-]+/gi, "-") : "generated";
+  const filename = `${safePrefix}_${Date.now()}_${crypto.randomBytes(8).toString("hex")}.png`;
+  const filePath = path.join(uploadsDir, filename);
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+  return `/uploads/${filename}`;
 }
 
 function asImporterString(value) {
@@ -870,6 +880,105 @@ function extractResponseText(payload) {
   return parts.join("").trim();
 }
 
+function extractGeneratedImageBase64(payload) {
+  const output = Array.isArray(payload?.output) ? payload.output : [];
+  const imageCall = output.find((entry) => entry?.type === "image_generation_call" && typeof entry?.result === "string" && entry.result.trim());
+  return imageCall?.result || "";
+}
+
+function buildSellerMediaPrompt(input) {
+  const slot = input?.slot === "gallery" ? "gallery" : "hero";
+  const restaurantName = asImporterString(input?.restaurantName) || "Restaurant";
+  const shortName = asImporterString(input?.shortName) || restaurantName;
+  const cuisineHint = asImporterString(input?.cuisineHint);
+  const notes = asImporterString(input?.notes);
+  const baseDirection = slot === "hero"
+    ? "Generate a polished restaurant homepage hero image in a premium editorial food-photography style."
+    : "Generate a polished restaurant atmosphere/gallery image in a premium editorial hospitality-photography style.";
+
+  return [
+    baseDirection,
+    `Restaurant: ${restaurantName}.`,
+    `Short brand: ${shortName}.`,
+    cuisineHint ? `Cuisine or concept: ${cuisineHint}.` : "",
+    "Use the reference images only for palette, atmosphere, plating cues, interior cues, and visual direction.",
+    "Do not render any text, watermark, UI, menu, or legible logo inside the image.",
+    "Make the image realistic, commercially usable, and appropriate for a restaurant website launch.",
+    slot === "hero"
+      ? "Compose for a strong website hero: inviting, spacious, warm lighting, clean focal point, landscape-friendly."
+      : "Compose for a generic website/gallery slot: interior ambiance, plating detail, service mood, or atmosphere without looking like stock filler.",
+    notes ? `Seller notes: ${notes}.` : ""
+  ].filter(Boolean).join(" ");
+}
+
+async function generateSellerMediaImage(input) {
+  if (!process.env.OPENAI_API_KEY) {
+    const error = new Error("openai_not_configured");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const slot = input?.slot === "gallery" ? "gallery" : "hero";
+  const logoImageUrl = asImporterString(input?.logoImageUrl);
+  const referenceImageUrls = Array.isArray(input?.referenceImageUrls)
+    ? input.referenceImageUrls.filter((value) => typeof value === "string" && value.trim()).slice(0, 4)
+    : [];
+  const imageInputs = [
+    ...(logoImageUrl ? [buildInputImageFromUploadUrl(logoImageUrl)].filter(Boolean) : []),
+    ...referenceImageUrls.map(buildInputImageFromUploadUrl).filter(Boolean)
+  ];
+  const prompt = buildSellerMediaPrompt(input);
+
+  const toolConfig = imageInputs.length
+    ? { type: "image_generation", quality: "high", input_fidelity: "high", action: "edit" }
+    : { type: "image_generation", quality: "high" };
+
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: OPENAI_MEDIA_MODEL,
+      input: [
+        {
+          role: "user",
+          content: [
+            { type: "input_text", text: prompt },
+            ...imageInputs
+          ]
+        }
+      ],
+      tools: [toolConfig],
+      store: false
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || "openai_media_request_failed";
+    const error = new Error(message);
+    error.statusCode = response.status || 502;
+    throw error;
+  }
+
+  const base64Image = extractGeneratedImageBase64(payload);
+  if (!base64Image) {
+    const error = new Error("empty_generated_image");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  const url = saveGeneratedImage(base64Image, slot === "hero" ? "hero-generated" : "gallery-generated");
+  return {
+    slot,
+    prompt,
+    url,
+    referenceCount: imageInputs.length
+  };
+}
+
 async function generateImporterDraft(input) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error("openai_not_configured");
@@ -1315,6 +1424,20 @@ app.post("/api/importer/draft", requireAuth, async (req, res) => {
     res.status(error.statusCode || 500).json({
       ok: false,
       error: error.message || "importer_draft_failed"
+    });
+  }
+});
+
+app.post("/api/media/generate", requireAuth, async (req, res) => {
+  try {
+    const payload = req.body && typeof req.body === "object" ? req.body : {};
+    const result = await generateSellerMediaImage(payload);
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    console.error("MEDIA GENERATION ERROR:", error);
+    res.status(error.statusCode || 500).json({
+      ok: false,
+      error: error.message || "media_generation_failed"
     });
   }
 });

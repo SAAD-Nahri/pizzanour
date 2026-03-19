@@ -111,6 +111,15 @@ Use this order for any client delivery:
 
 This rule should apply to hero images, static homepage visuals, menu top images, and featured content images.
 
+### Practical split
+
+The strongest split for this product is:
+
+- hero and generic atmosphere images: seller-only AI generation is acceptable and useful
+- menu item images: keep client photos and curated library matches ahead of AI generation
+
+This avoids spending generation cost on every dish while still giving the website a polished top-level visual identity quickly.
+
 ## Operational Guardrails
 
 - AI tools should stay internal to the seller workflow.

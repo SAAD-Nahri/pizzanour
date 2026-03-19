@@ -16,6 +16,7 @@ It is now a seller-oriented white-label restaurant website template with:
 - a branding preview that mirrors homepage/menu mood more closely during setup
 - preset-specific public styling so each main preset feels more distinct on homepage and menu
 - a seller-only AI Import Studio that turns uploaded menu images into a reviewable schema draft
+- a seller-only AI Media Studio that generates hero or generic gallery visuals into local uploads
 - section visibility and ordering controls
 - quick-launch presets for new restaurants
 - a local menu-image suggestion library for missing dish visuals
@@ -33,6 +34,7 @@ The current goal is to turn this into a dependable first sellable product that c
 - [coolify.matsco.env.example](./coolify.matsco.env.example): prepared Coolify env values for the `matsco.ibnbatoutaweb.com` deployment target
 - [MEDIA_IMPORT_BASIS.md](./MEDIA_IMPORT_BASIS.md): future-facing basis for seller-side asset libraries, static media assignment, and PDF/image import
 - [IMPORTER_PAYLOAD_SPEC.md](./IMPORTER_PAYLOAD_SPEC.md): implementable importer contract against the live restaurant schema
+- [SELLER_IMAGE_PIPELINE.md](./SELLER_IMAGE_PIPELINE.md): seller-only image sourcing and generation workflow for hero, gallery, and product imagery
 
 ## Current Product Status
 
@@ -135,6 +137,7 @@ What they do:
 - The admin security panel should not show the default-credentials warning at handoff time.
 - Keep AI keys and future automation credentials out of the live restaurant admin.
 - If you want to use `Seller Tools -> AI Import Studio`, set `OPENAI_API_KEY` server-side and optionally `OPENAI_IMPORT_MODEL`.
+- If you want to use `Seller Tools -> AI Media Studio`, set `OPENAI_API_KEY` server-side and optionally `OPENAI_MEDIA_MODEL`.
 
 ## Data And Product Model
 
@@ -165,6 +168,12 @@ Current importer status:
 - the server generates a review draft against the live restaurant schema
 - the draft must be reviewed and explicitly applied
 - PDF parsing is still a later slice
+
+Current seller-side media status:
+
+- `Seller Tools -> AI Media Studio` can now generate hero or generic gallery visuals server-side
+- generated images are saved locally under `/uploads`
+- the recommended product-image path is still client photos first, local library second, AI later
 
 ## Recommended Working Mode
 

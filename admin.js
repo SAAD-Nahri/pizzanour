@@ -4,6 +4,7 @@ let categoryTranslations = window.defaultCategoryTranslations || {};
 let restaurantConfig = window.restaurantConfig || window.defaultConfig || {};
 let promoIds = [];
 let lastImporterDraft = null;
+let lastGeneratedMedia = null;
 const IMPORT_STUDIO_MAX_MENU_IMAGES = 8;
 const IMPORT_STUDIO_MAX_VENUE_IMAGES = 6;
 let adminAuth = { user: 'admin', pass: '' };
@@ -807,6 +808,7 @@ function refreshUI() {
     initGalleryForm();
     renderGalleryAdmin();
     renderImporterDraftOutputs(lastImporterDraft);
+    renderMediaStudioOutputs(lastGeneratedMedia);
     renderLaunchReadinessCard();
     updateStats();
     if (typeof window.applyBranding === 'function') {
@@ -2521,6 +2523,52 @@ function renderImporterDraftOutputs(draft) {
     jsonEl.value = JSON.stringify(draft, null, 2);
 }
 
+function renderMediaStudioOutputs(result) {
+    const summaryEl = document.getElementById('mediaStudioSummaryOutput');
+    const previewEl = document.getElementById('mediaStudioPreview');
+    const promptEl = document.getElementById('mediaStudioPromptOutput');
+    if (!summaryEl || !previewEl || !promptEl) return;
+
+    if (!result) {
+        summaryEl.value = 'No AI media generated yet.';
+        promptEl.value = '';
+        previewEl.style.display = 'none';
+        previewEl.removeAttribute('src');
+        return;
+    }
+
+    summaryEl.value = [
+        `Slot: ${result.slot || 'unknown'}`,
+        `Generated URL: ${result.url || ''}`,
+        `Reference images used: ${result.referenceCount || 0}`,
+        '',
+        'Use this for seller-side review before applying it to the live site.'
+    ].join('\n');
+    promptEl.value = result.prompt || '';
+    previewEl.src = result.url || '';
+    previewEl.style.display = result.url ? 'block' : 'none';
+}
+
+function getCurrentMediaStudioReferenceUrls() {
+    const urls = [];
+    const branding = restaurantConfig?.branding || {};
+    const gallery = Array.isArray(restaurantConfig?.gallery) ? restaurantConfig.gallery : [];
+
+    if (typeof branding.logoImage === 'string' && branding.logoImage.trim().startsWith('/uploads/')) {
+        urls.push(branding.logoImage.trim());
+    }
+    if (typeof branding.heroImage === 'string' && branding.heroImage.trim().startsWith('/uploads/')) {
+        urls.push(branding.heroImage.trim());
+    }
+
+    gallery
+        .filter((value) => typeof value === 'string' && value.trim().startsWith('/uploads/'))
+        .slice(0, 3)
+        .forEach((value) => urls.push(value.trim()));
+
+    return [...new Set(urls)];
+}
+
 async function uploadFilesForImporter(fileList, label) {
     const files = Array.from(fileList || []).filter(Boolean);
     const urls = [];
@@ -2722,6 +2770,101 @@ window.copyImporterDraftJson = async function () {
     } catch (error) {
         console.error('Copy importer draft error:', error);
         showToast('Could not copy importer draft JSON.');
+    }
+};
+
+window.generateAIMedia = async function () {
+    const slot = document.getElementById('mediaStudioSlot')?.value === 'gallery' ? 'gallery' : 'hero';
+    const cuisineHint = (document.getElementById('mediaStudioCuisineHint')?.value || '').trim();
+    const notes = (document.getElementById('mediaStudioNotes')?.value || '').trim();
+    const extraReferenceFiles = document.getElementById('mediaStudioReferenceFiles')?.files;
+    const branding = restaurantConfig?.branding || {};
+    const restaurantName = (branding.restaurantName || window.getRestaurantDisplayName?.() || '').trim();
+    const shortName = (branding.shortName || restaurantName || '').trim();
+    const currentReferenceUrls = getCurrentMediaStudioReferenceUrls();
+
+    try {
+        let uploadedExtraRefs = [];
+        if (extraReferenceFiles && extraReferenceFiles.length) {
+            showToast('Uploading AI media references...');
+            uploadedExtraRefs = await uploadFilesForImporter(extraReferenceFiles, 'media reference');
+        }
+
+        const response = await fetch('/api/media/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                slot,
+                restaurantName,
+                shortName,
+                cuisineHint,
+                notes,
+                logoImageUrl: typeof branding.logoImage === 'string' ? branding.logoImage : '',
+                referenceImageUrls: [...currentReferenceUrls, ...uploadedExtraRefs]
+            })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok || !data.url) {
+            throw new Error(data.error || 'AI media generation failed.');
+        }
+
+        lastGeneratedMedia = data;
+        renderMediaStudioOutputs(lastGeneratedMedia);
+        showToast('AI media image generated.');
+    } catch (error) {
+        console.error('AI media generation error:', error);
+        const message = error?.message === 'openai_not_configured'
+            ? 'Set OPENAI_API_KEY on the admin server before using AI Media Studio.'
+            : error.message;
+        showToast(`AI media generation failed: ${message}`);
+    }
+};
+
+window.applyGeneratedMedia = async function () {
+    if (!lastGeneratedMedia?.url) {
+        showToast('Generate an AI media image first.');
+        return;
+    }
+
+    const slot = lastGeneratedMedia.slot === 'gallery' ? 'gallery' : 'hero';
+    if (slot === 'hero') {
+        const currentSlides = Array.isArray(restaurantConfig.branding?.heroSlides) ? restaurantConfig.branding.heroSlides.filter(Boolean) : [];
+        const nextSlides = [
+            lastGeneratedMedia.url,
+            currentSlides[1] || currentSlides[0] || lastGeneratedMedia.url,
+            currentSlides[2] || currentSlides[1] || currentSlides[0] || lastGeneratedMedia.url
+        ];
+        restaurantConfig.branding = {
+            ...(restaurantConfig.branding || {}),
+            heroImage: lastGeneratedMedia.url,
+            heroSlides: nextSlides
+        };
+    } else {
+        const gallery = Array.isArray(restaurantConfig.gallery) ? restaurantConfig.gallery.slice() : [];
+        if (!gallery.includes(lastGeneratedMedia.url)) {
+            gallery.unshift(lastGeneratedMedia.url);
+        }
+        restaurantConfig.gallery = gallery;
+    }
+
+    const saved = await saveAndRefresh();
+    if (saved) {
+        showToast(slot === 'hero' ? 'Generated image applied to hero.' : 'Generated image added to gallery.');
+    }
+};
+
+window.copyGeneratedMediaPrompt = async function () {
+    if (!lastGeneratedMedia?.prompt) {
+        showToast('No AI media prompt to copy yet.');
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(lastGeneratedMedia.prompt);
+        showToast('AI media prompt copied.');
+    } catch (error) {
+        console.error('Copy AI media prompt error:', error);
+        showToast('Could not copy the AI media prompt.');
     }
 };
 
