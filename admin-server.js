@@ -901,6 +901,11 @@ async function completeImporterTranslations(draft) {
     throw error;
   }
 
+  const parsedPayload = extractStructuredParsedOutput(payload);
+  if (parsedPayload) {
+    return mergeImporterTranslationCompletion(draft, parsedPayload);
+  }
+
   const rawText = extractResponseText(payload);
   if (!rawText) {
     const error = new Error(payload?.status === "incomplete" ? "incomplete_translation_response" : "empty_translation_response");
@@ -939,6 +944,25 @@ function extractResponseText(payload) {
   });
 
   return parts.join("").trim();
+}
+
+function extractStructuredParsedOutput(payload) {
+  if (payload && typeof payload === "object") {
+    if (payload.output_parsed && typeof payload.output_parsed === "object") {
+      return payload.output_parsed;
+    }
+
+    const output = Array.isArray(payload.output) ? payload.output : [];
+    for (const entry of output) {
+      const content = Array.isArray(entry?.content) ? entry.content : [];
+      for (const item of content) {
+        if (item && typeof item === "object" && item.parsed && typeof item.parsed === "object") {
+          return item.parsed;
+        }
+      }
+    }
+  }
+  return null;
 }
 
 function parseModelJsonText(rawText) {
@@ -1010,6 +1034,14 @@ async function repairImporterJsonText(rawText) {
     const error = new Error(message);
     error.statusCode = response.status || 502;
     throw error;
+  }
+
+  const parsedPayload = extractStructuredParsedOutput(payload);
+  if (parsedPayload) {
+    return {
+      rawText: JSON.stringify(parsedPayload),
+      parsed: parsedPayload
+    };
   }
 
   const repairedText = extractResponseText(payload);
@@ -1300,6 +1332,41 @@ async function generateImporterDraft(input) {
       const error = new Error(message);
       error.statusCode = response.status || 502;
       throw error;
+    }
+
+    const parsedPayload = extractStructuredParsedOutput(payload);
+    if (parsedPayload) {
+      const skeleton = buildImporterDraftSkeleton({
+        restaurantName,
+        shortName,
+        menuImageUrls,
+        logoImageUrl,
+        restaurantPhotoUrls
+      });
+      let enrichedDraft = normalizeStructuredImporterDraft(parsedPayload);
+      enrichedDraft = applyImporterMediaFallbacks(enrichedDraft, { logoImageUrl, restaurantPhotoUrls });
+
+      try {
+        enrichedDraft = await completeImporterTranslations(enrichedDraft);
+      } catch (error) {
+        console.error("IMPORTER TRANSLATION COMPLETION ERROR:", error);
+        const review = enrichedDraft.review && typeof enrichedDraft.review === "object" ? enrichedDraft.review : {};
+        const warnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+        warnings.push(`Translation completion fallback used: ${error.message}`);
+        enrichedDraft.review = { ...review, warnings };
+      }
+
+      let mergedDraft = deepMerge(skeleton, enrichedDraft);
+      const matchedMedia = applyImporterProductLibraryMatches(mergedDraft);
+      mergedDraft = matchedMedia.draft;
+
+      writeSellerJobJson(job.jobId, "final/draft.json", mergedDraft);
+
+      return {
+        draft: mergedDraft,
+        jobId: job.jobId,
+        mediaLibraryMatches: matchedMedia.matchedCount
+      };
     }
 
     const rawText = extractResponseText(payload);
