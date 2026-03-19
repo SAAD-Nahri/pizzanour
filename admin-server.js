@@ -125,17 +125,6 @@ const IMPORTER_TEXT_FORMAT = {
                 name: { type: "string" },
                 desc: { type: "string" },
                 price: { type: ["number", "null"] },
-                ingredients: {
-                  type: "array",
-                  items: { type: "string" }
-                },
-                badge: { type: "string" },
-                featured: { type: "boolean" },
-                img: { type: "string" },
-                images: {
-                  type: "array",
-                  items: { type: "string" }
-                },
                 translations: IMPORTER_TRANSLATIONS_SCHEMA
               }
             }
@@ -164,35 +153,12 @@ const IMPORTER_TEXT_FORMAT = {
                 id: { type: "string" },
                 name: { type: "string" },
                 desc: { type: "string" },
-                emoji: { type: "string" },
-                time: { type: "string" },
                 cats: {
                   type: "array",
                   items: { type: "string" }
                 },
                 translations: IMPORTER_TRANSLATIONS_SCHEMA
               }
-            }
-          },
-          wifi: {
-            type: "object",
-            additionalProperties: false,
-            required: ["ssid", "pass"],
-            properties: {
-              ssid: { type: "string" },
-              pass: { type: "string" }
-            }
-          },
-          social: {
-            type: "object",
-            additionalProperties: false,
-            required: ["instagram", "facebook", "tiktok", "tripadvisor", "whatsapp"],
-            properties: {
-              instagram: { type: "string" },
-              facebook: { type: "string" },
-              tiktok: { type: "string" },
-              tripadvisor: { type: "string" },
-              whatsapp: { type: "string" }
             }
           },
           branding: {
@@ -206,31 +172,7 @@ const IMPORTER_TEXT_FORMAT = {
               tagline: { type: "string" },
               primaryColor: { type: "string" },
               secondaryColor: { type: "string" },
-              accentColor: { type: "string" },
-              heroImage: { type: "string" },
-              heroSlides: {
-                type: "array",
-                items: { type: "string" }
-              },
-              logoImage: { type: "string" }
-            }
-          },
-          landing: {
-            type: "object",
-            additionalProperties: false,
-            required: ["phone", "location"],
-            properties: {
-              phone: { type: "string" },
-              location: {
-                type: "object",
-                additionalProperties: false,
-                required: ["title", "address", "url"],
-                properties: {
-                  title: { type: "string" },
-                  address: { type: "string" },
-                  url: { type: "string" }
-                }
-              }
+              accentColor: { type: "string" }
             }
           },
           contentTranslations: {
@@ -241,6 +183,7 @@ const IMPORTER_TEXT_FORMAT = {
               fr: {
                 type: "object",
                 additionalProperties: false,
+                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
                 properties: {
                   homeTitle: { type: "string" },
                   homeSubtitle: { type: "string" },
@@ -253,6 +196,7 @@ const IMPORTER_TEXT_FORMAT = {
               en: {
                 type: "object",
                 additionalProperties: false,
+                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
                 properties: {
                   homeTitle: { type: "string" },
                   homeSubtitle: { type: "string" },
@@ -265,6 +209,7 @@ const IMPORTER_TEXT_FORMAT = {
               ar: {
                 type: "object",
                 additionalProperties: false,
+                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
                 properties: {
                   homeTitle: { type: "string" },
                   homeSubtitle: { type: "string" },
@@ -275,30 +220,7 @@ const IMPORTER_TEXT_FORMAT = {
                 }
               }
             }
-          },
-          promoIds: {
-            type: "array",
-            items: { type: ["string", "number"] }
-          },
-          gallery: {
-            type: "array",
-            items: { type: "string" }
-          },
-          hours: {
-            type: "array",
-            items: {
-              type: "object",
-              additionalProperties: false,
-              required: ["day", "open", "close", "highlight"],
-              properties: {
-                day: { type: "string" },
-                open: { type: "string" },
-                close: { type: "string" },
-                highlight: { type: "boolean" }
-              }
-            }
-          },
-          hoursNote: { type: "string" }
+          }
         }
       },
       review: {
