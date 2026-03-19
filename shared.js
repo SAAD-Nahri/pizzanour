@@ -2344,7 +2344,9 @@ Object.assign(window.translations.fr, {
     'admin.landing.facility_accessible': 'Entrée accessible',
     'admin.landing.facility_parking': 'Parking',
     'admin.landing.facility_terrace': 'Terrasse',
-    'admin.landing.facility_family': 'Espace famille'
+    'admin.landing.facility_family': 'Espace famille',
+    'menu_select_title': 'Sélectionner un menu',
+    'game_how_to_play': 'Comment jouer ?'
 });
 
 Object.assign(window.translations.en, {
@@ -2699,7 +2701,9 @@ Object.assign(window.translations.en, {
     'admin.landing.facility_accessible': 'Accessible entrance',
     'admin.landing.facility_parking': 'Parking',
     'admin.landing.facility_terrace': 'Terrace seating',
-    'admin.landing.facility_family': 'Family-friendly area'
+    'admin.landing.facility_family': 'Family-friendly area',
+    'menu_select_title': 'Select a Menu',
+    'game_how_to_play': 'How to play?'
 });
 
 Object.assign(window.translations.ar, {
@@ -2886,7 +2890,9 @@ Object.assign(window.translations.ar, {
     'admin.landing.facility_accessible': 'مدخل ميسّر',
     'admin.landing.facility_parking': 'موقف سيارات',
     'admin.landing.facility_terrace': 'جلسات خارجية',
-    'admin.landing.facility_family': 'منطقة عائلية'
+    'admin.landing.facility_family': 'منطقة عائلية',
+    'menu_select_title': 'اختر قائمة',
+    'game_how_to_play': 'كيف تلعب؟'
 });
 
 Object.assign(window.translations.ar, {
