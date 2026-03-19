@@ -2537,9 +2537,37 @@ async function uploadFilesForImporter(fileList, label) {
 function buildImporterApplyPayload(draft) {
     const imported = draft?.restaurantData || {};
     const importedContent = imported.contentTranslations || {};
+    const importedMenu = Array.isArray(imported.menu) && imported.menu.length ? imported.menu : menu;
+    const preparedMenu = importedMenu.map((item) => {
+        const images = Array.isArray(item?.images)
+            ? item.images.filter((value) => typeof value === 'string' && value.trim())
+            : [];
+        const img = typeof item?.img === 'string' ? item.img.trim() : '';
+
+        if (img || images.length) {
+            return {
+                ...item,
+                img: img || images[0] || '',
+                images: images.length ? images : (img ? [img] : [])
+            };
+        }
+
+        if (typeof window.getMenuImageSuggestion === 'function') {
+            const suggestion = window.getMenuImageSuggestion(item);
+            if (suggestion?.src) {
+                return {
+                    ...item,
+                    img: suggestion.src,
+                    images: [suggestion.src]
+                };
+            }
+        }
+
+        return item;
+    });
 
     return {
-        menu: Array.isArray(imported.menu) && imported.menu.length ? imported.menu : menu,
+        menu: preparedMenu,
         catEmojis: {
             ...catEmojis,
             ...(imported.catEmojis || {})

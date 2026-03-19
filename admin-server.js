@@ -313,6 +313,69 @@ const IMPORTER_TEXT_FORMAT = {
   }
 };
 
+const IMPORTER_TRANSLATION_SYSTEM_PROMPT = [
+  "You improve translations for an extracted restaurant website draft.",
+  "Return translations only and follow the JSON schema exactly.",
+  "Preserve ids and keys exactly as provided.",
+  "Provide natural FR, EN, and AR names and descriptions for every entry.",
+  "Do not invent new dishes, categories, or facts.",
+  "Use the provided extracted text as the source of truth.",
+  "If a phrase is ambiguous, choose the safest natural translation and mention the ambiguity in warnings."
+].join("\n");
+
+const IMPORTER_TRANSLATION_COMPLETION_FORMAT = {
+  type: "json_schema",
+  name: "restaurant_translation_completion",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["menu", "categories", "superCategories", "warnings"],
+    properties: {
+      menu: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["id", "translations"],
+          properties: {
+            id: { type: ["string", "number", "null"] },
+            translations: IMPORTER_TRANSLATIONS_SCHEMA
+          }
+        }
+      },
+      categories: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["key", "translations"],
+          properties: {
+            key: { type: "string" },
+            translations: IMPORTER_TRANSLATIONS_SCHEMA
+          }
+        }
+      },
+      superCategories: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["id", "translations"],
+          properties: {
+            id: { type: "string" },
+            translations: IMPORTER_TRANSLATIONS_SCHEMA
+          }
+        }
+      },
+      warnings: {
+        type: "array",
+        items: { type: "string" }
+      }
+    }
+  }
+};
+
 function guessMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === ".png") return "image/png";
@@ -363,6 +426,23 @@ function canonicalImporterLookup(value) {
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+}
+
+function fillTranslationBucket(bucket, fallbackName = "", fallbackDesc = "") {
+  const source = bucket && typeof bucket === "object" ? bucket : {};
+  return {
+    name: asImporterString(source.name) || fallbackName,
+    desc: asImporterString(source.desc) || fallbackDesc
+  };
+}
+
+function fillTranslationSet(translations, fallbackName = "", fallbackDesc = "") {
+  const source = translations && typeof translations === "object" ? translations : {};
+  return {
+    fr: fillTranslationBucket(source.fr, fallbackName, fallbackDesc),
+    en: fillTranslationBucket(source.en, fallbackName, fallbackDesc),
+    ar: fillTranslationBucket(source.ar, fallbackName, fallbackDesc)
+  };
 }
 
 function buildImporterDraftSkeleton(input) {
@@ -509,26 +589,17 @@ function normalizeStructuredImporterDraft(parsed) {
       || asImporterString(translations?.fr?.name)
       || asImporterString(category?.name)
       || `category-${index + 1}`;
-    const frName = asImporterString(translations?.fr?.name) || asImporterString(category?.name) || key;
-    const enName = asImporterString(translations?.en?.name);
-    const arName = asImporterString(translations?.ar?.name);
-    const frDesc = asImporterString(translations?.fr?.desc);
-    const enDesc = asImporterString(translations?.en?.desc);
-    const arDesc = asImporterString(translations?.ar?.desc);
+    const categoryTranslationSet = fillTranslationSet(translations, asImporterString(category?.name) || key, "");
 
     catEmojis[key] = asImporterString(category?.emoji) || "🍴";
-    categoryTranslations[key] = {
-      fr: { name: frName, desc: frDesc },
-      en: { name: enName, desc: enDesc },
-      ar: { name: arName, desc: arDesc }
-    };
+    categoryTranslations[key] = categoryTranslationSet;
 
     [
       key,
       category?.name,
-      translations?.fr?.name,
-      translations?.en?.name,
-      translations?.ar?.name
+      categoryTranslationSet?.fr?.name,
+      categoryTranslationSet?.en?.name,
+      categoryTranslationSet?.ar?.name
     ].forEach((alias) => {
       const canonical = canonicalImporterLookup(alias);
       if (canonical) aliasMap.set(canonical, key);
@@ -547,7 +618,8 @@ function normalizeStructuredImporterDraft(parsed) {
       ...item,
       cat: normalizedCat,
       img,
-      images: img && !images.length ? [img] : images
+      images: img && !images.length ? [img] : images,
+      translations: fillTranslationSet(item?.translations, asImporterString(item?.name), asImporterString(item?.desc))
     };
   });
 
@@ -558,7 +630,8 @@ function normalizeStructuredImporterDraft(parsed) {
       ? entry.cats
         .map((value) => aliasMap.get(canonicalImporterLookup(value)) || asImporterString(value))
         .filter(Boolean)
-      : []
+      : [],
+    translations: fillTranslationSet(entry?.translations, asImporterString(entry?.name), asImporterString(entry?.desc))
   }));
 
   if (restaurantData.branding && typeof restaurantData.branding === "object") {
@@ -577,6 +650,204 @@ function normalizeStructuredImporterDraft(parsed) {
   draft.restaurantData = restaurantData;
 
   return draft;
+}
+
+function applyImporterMediaFallbacks(draft, input) {
+  const workingDraft = draft && typeof draft === "object" ? draft : {};
+  const restaurantData = workingDraft.restaurantData && typeof workingDraft.restaurantData === "object"
+    ? workingDraft.restaurantData
+    : {};
+  const branding = restaurantData.branding && typeof restaurantData.branding === "object"
+    ? restaurantData.branding
+    : {};
+  const logoImageUrl = asImporterString(input?.logoImageUrl);
+  const restaurantPhotoUrls = Array.isArray(input?.restaurantPhotoUrls)
+    ? input.restaurantPhotoUrls.filter((value) => typeof value === "string" && value.trim())
+    : [];
+
+  if (!asImporterString(branding.logoImage) && logoImageUrl) {
+    branding.logoImage = logoImageUrl;
+  }
+
+  if (!asImporterString(branding.heroImage) && restaurantPhotoUrls[0]) {
+    branding.heroImage = restaurantPhotoUrls[0];
+  }
+
+  const existingHeroSlides = Array.isArray(branding.heroSlides)
+    ? branding.heroSlides.filter((value) => typeof value === "string" && value.trim())
+    : [];
+  if (!existingHeroSlides.length) {
+    branding.heroSlides = [
+      asImporterString(branding.heroImage),
+      restaurantPhotoUrls[1] || "",
+      restaurantPhotoUrls[2] || ""
+    ].filter(Boolean);
+  } else {
+    branding.heroSlides = existingHeroSlides;
+  }
+
+  const existingGallery = Array.isArray(restaurantData.gallery)
+    ? restaurantData.gallery.filter((value) => typeof value === "string" && value.trim())
+    : [];
+  if (!existingGallery.length && restaurantPhotoUrls.length) {
+    restaurantData.gallery = restaurantPhotoUrls.slice(0, 6);
+  } else {
+    restaurantData.gallery = existingGallery;
+  }
+
+  restaurantData.branding = branding;
+  workingDraft.restaurantData = restaurantData;
+  return workingDraft;
+}
+
+function buildImporterTranslationRequest(draft) {
+  const restaurantData = draft?.restaurantData || {};
+  return {
+    menu: (Array.isArray(restaurantData.menu) ? restaurantData.menu : []).map((item) => ({
+      id: item.id ?? null,
+      name: asImporterString(item?.name),
+      desc: asImporterString(item?.desc),
+      translations: fillTranslationSet(item?.translations, asImporterString(item?.name), asImporterString(item?.desc))
+    })),
+    categories: Object.entries(restaurantData.categoryTranslations || {}).map(([key, value]) => ({
+      key,
+      name: asImporterString(value?.fr?.name) || key,
+      desc: asImporterString(value?.fr?.desc),
+      translations: fillTranslationSet(value, asImporterString(value?.fr?.name) || key, asImporterString(value?.fr?.desc))
+    })),
+    superCategories: (Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : []).map((entry) => ({
+      id: asImporterString(entry?.id),
+      name: asImporterString(entry?.name),
+      desc: asImporterString(entry?.desc),
+      translations: fillTranslationSet(entry?.translations, asImporterString(entry?.name), asImporterString(entry?.desc))
+    }))
+  };
+}
+
+function mergeImporterTranslationCompletion(draft, completion) {
+  const workingDraft = draft && typeof draft === "object" ? draft : {};
+  const restaurantData = workingDraft.restaurantData && typeof workingDraft.restaurantData === "object"
+    ? workingDraft.restaurantData
+    : {};
+  const review = workingDraft.review && typeof workingDraft.review === "object"
+    ? workingDraft.review
+    : {};
+  const menuTranslations = new Map(
+    (Array.isArray(completion?.menu) ? completion.menu : []).map((entry) => [String(entry?.id ?? ""), entry?.translations])
+  );
+  const categoryTranslations = new Map(
+    (Array.isArray(completion?.categories) ? completion.categories : []).map((entry) => [asImporterString(entry?.key), entry?.translations])
+  );
+  const superCategoryTranslations = new Map(
+    (Array.isArray(completion?.superCategories) ? completion.superCategories : []).map((entry) => [asImporterString(entry?.id), entry?.translations])
+  );
+
+  restaurantData.menu = (Array.isArray(restaurantData.menu) ? restaurantData.menu : []).map((item) => ({
+    ...item,
+    translations: fillTranslationSet(
+      menuTranslations.get(String(item?.id ?? "")) || item?.translations,
+      asImporterString(item?.name),
+      asImporterString(item?.desc)
+    )
+  }));
+
+  restaurantData.categoryTranslations = Object.fromEntries(
+    Object.entries(restaurantData.categoryTranslations || {}).map(([key, value]) => [
+      key,
+      fillTranslationSet(
+        categoryTranslations.get(key) || value,
+        asImporterString(value?.fr?.name) || key,
+        asImporterString(value?.fr?.desc)
+      )
+    ])
+  );
+
+  restaurantData.superCategories = (Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : []).map((entry) => ({
+    ...entry,
+    translations: fillTranslationSet(
+      superCategoryTranslations.get(asImporterString(entry?.id)) || entry?.translations,
+      asImporterString(entry?.name),
+      asImporterString(entry?.desc)
+    )
+  }));
+
+  const warnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+  const completionWarnings = Array.isArray(completion?.warnings) ? completion.warnings : [];
+  review.warnings = [...warnings, ...completionWarnings].filter(Boolean);
+  review.untranslatedItems = restaurantData.menu
+    .filter((item) => {
+      const translations = item?.translations || {};
+      return !asImporterString(translations?.fr?.name)
+        || !asImporterString(translations?.en?.name)
+        || !asImporterString(translations?.ar?.name);
+    })
+    .map((item) => asImporterString(item?.name) || String(item?.id ?? "unknown-item"));
+
+  workingDraft.restaurantData = restaurantData;
+  workingDraft.review = review;
+  return workingDraft;
+}
+
+async function completeImporterTranslations(draft) {
+  const translationInput = buildImporterTranslationRequest(draft);
+  const hasContent = translationInput.menu.length || translationInput.categories.length || translationInput.superCategories.length;
+  if (!hasContent) return draft;
+
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: OPENAI_IMPORT_MODEL,
+      instructions: IMPORTER_TRANSLATION_SYSTEM_PROMPT,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: JSON.stringify(translationInput)
+            }
+          ]
+        }
+      ],
+      text: {
+        format: IMPORTER_TRANSLATION_COMPLETION_FORMAT
+      },
+      store: false,
+      temperature: 0.2,
+      max_output_tokens: 4000
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || "openai_translation_completion_failed";
+    const error = new Error(message);
+    error.statusCode = response.status || 502;
+    throw error;
+  }
+
+  const rawText = extractResponseText(payload);
+  if (!rawText) {
+    const error = new Error(payload?.status === "incomplete" ? "incomplete_translation_response" : "empty_translation_response");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch (_error) {
+    console.error("IMPORTER RAW TRANSLATION TEXT:", rawText.slice(0, 1200));
+    const error = new Error("invalid_translation_json_from_openai");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  return mergeImporterTranslationCompletion(draft, parsed);
 }
 
 function extractResponseText(payload) {
@@ -694,7 +965,20 @@ async function generateImporterDraft(input) {
     restaurantPhotoUrls
   });
 
-  return deepMerge(skeleton, normalizeStructuredImporterDraft(parsed));
+  let enrichedDraft = normalizeStructuredImporterDraft(parsed);
+  enrichedDraft = applyImporterMediaFallbacks(enrichedDraft, { logoImageUrl, restaurantPhotoUrls });
+
+  try {
+    enrichedDraft = await completeImporterTranslations(enrichedDraft);
+  } catch (error) {
+    console.error("IMPORTER TRANSLATION COMPLETION ERROR:", error);
+    const review = enrichedDraft.review && typeof enrichedDraft.review === "object" ? enrichedDraft.review : {};
+    const warnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+    warnings.push(`Translation completion fallback used: ${error.message}`);
+    enrichedDraft.review = { ...review, warnings };
+  }
+
+  return deepMerge(skeleton, enrichedDraft);
 }
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {

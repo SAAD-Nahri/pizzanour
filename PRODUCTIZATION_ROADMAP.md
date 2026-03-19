@@ -8,6 +8,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The importer quality layer is stronger now too: after the initial draft, the server preserves uploaded logo/venue media as homepage/gallery fallback, runs a second translation-completion pass for menu/category/super-category text, and the apply step auto-assigns managed menu placeholders when imported items still have no images
 - The first seller-only AI importer slice is now hardened against malformed model output: `AI Import Studio` uses the Responses API with a strict JSON schema, normalizes imported categories back into the live runtime shape, and logs the raw model text when a parse failure still occurs
 - The first seller-only AI importer slice now exists in `Seller Tools` as `AI Import Studio`: menu images plus optional logo/venue photos can be uploaded, sent to OpenAI server-side, turned into a reviewable schema draft, copied as JSON, and applied only after explicit seller confirmation
 - The admin shell now has a real FR / EN / AR translation foundation for login, sidebar navigation, seller tools, launch-readiness copy, handoff-summary labels, security messaging, and quick-launch/security form labels, so the i18n system no longer stops at public pages and menu data
