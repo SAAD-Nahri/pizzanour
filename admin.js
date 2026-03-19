@@ -2640,7 +2640,11 @@ window.generateImporterDraft = async function () {
         console.error('Importer draft error:', error);
         const message = error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY on the admin server before using AI Import Studio.'
-            : error.message;
+            : error?.message === 'invalid_json_from_openai'
+                ? 'The model returned an invalid draft. Try fewer/clearer menu images; the server importer was hardened for this path.'
+                : error?.message === 'incomplete_openai_response'
+                    ? 'The model stopped before finishing the draft. Try fewer images or a clearer menu capture.'
+                    : error.message;
         showToast(`AI import draft failed: ${message}`);
     }
 };

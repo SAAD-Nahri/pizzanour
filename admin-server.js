@@ -40,15 +40,278 @@ const loginAttempts = new Map();
 
 const IMPORTER_SYSTEM_PROMPT = [
   "You generate seller-side draft JSON for a white-label restaurant website.",
-  "Return valid JSON only. No markdown. No commentary.",
   "Use the uploaded menu images as the source of truth for menu items, prices, categories, and descriptions.",
   "Infer FR, EN, and AR names and descriptions for menu items, categories, and super-categories when confidence is reasonable.",
   "Do not invent contact details, maps, hours, WiFi, or social links.",
   "If information is missing, leave the field empty and record a warning.",
   "Prefer clean restaurant website categories and group them into super-categories only when the grouping is clear.",
   "Flag uncertainty in review.warnings or review.blockers instead of pretending confidence.",
-  "Use the exact top-level shape: { restaurantData: {...}, review: {...} }."
+  "Use category keys consistently: restaurantData.categories[].key must match menu[].cat and superCategories[].cats[].",
+  "Follow the JSON schema exactly."
 ].join("\n");
+
+const IMPORTER_TRANSLATION_BUCKET_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["name", "desc"],
+  properties: {
+    name: { type: "string" },
+    desc: { type: "string" }
+  }
+};
+
+const IMPORTER_TRANSLATIONS_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["fr", "en", "ar"],
+  properties: {
+    fr: IMPORTER_TRANSLATION_BUCKET_SCHEMA,
+    en: IMPORTER_TRANSLATION_BUCKET_SCHEMA,
+    ar: IMPORTER_TRANSLATION_BUCKET_SCHEMA
+  }
+};
+
+const IMPORTER_TEXT_FORMAT = {
+  type: "json_schema",
+  name: "restaurant_import_draft",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["restaurantData", "review"],
+    properties: {
+      restaurantData: {
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "menu",
+          "categories",
+          "superCategories",
+          "wifi",
+          "social",
+          "branding",
+          "landing",
+          "contentTranslations",
+          "promoIds",
+          "gallery",
+          "hours",
+          "hoursNote"
+        ],
+        properties: {
+          menu: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["id", "cat", "name", "desc", "price", "ingredients", "badge", "featured", "img", "images", "translations"],
+              properties: {
+                id: { type: ["string", "number", "null"] },
+                cat: { type: "string" },
+                name: { type: "string" },
+                desc: { type: "string" },
+                price: { type: ["number", "null"] },
+                ingredients: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                badge: { type: "string" },
+                featured: { type: "boolean" },
+                img: { type: "string" },
+                images: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                translations: IMPORTER_TRANSLATIONS_SCHEMA
+              }
+            }
+          },
+          categories: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["key", "name", "emoji", "translations"],
+              properties: {
+                key: { type: "string" },
+                name: { type: "string" },
+                emoji: { type: "string" },
+                translations: IMPORTER_TRANSLATIONS_SCHEMA
+              }
+            }
+          },
+          superCategories: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["id", "name", "desc", "emoji", "time", "cats", "translations"],
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                desc: { type: "string" },
+                emoji: { type: "string" },
+                time: { type: "string" },
+                cats: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                translations: IMPORTER_TRANSLATIONS_SCHEMA
+              }
+            }
+          },
+          wifi: {
+            type: "object",
+            additionalProperties: false,
+            required: ["ssid", "pass"],
+            properties: {
+              ssid: { type: "string" },
+              pass: { type: "string" }
+            }
+          },
+          social: {
+            type: "object",
+            additionalProperties: false,
+            required: ["instagram", "facebook", "tiktok", "tripadvisor", "whatsapp"],
+            properties: {
+              instagram: { type: "string" },
+              facebook: { type: "string" },
+              tiktok: { type: "string" },
+              tripadvisor: { type: "string" },
+              whatsapp: { type: "string" }
+            }
+          },
+          branding: {
+            type: "object",
+            additionalProperties: false,
+            required: ["presetId", "restaurantName", "shortName", "tagline", "primaryColor", "secondaryColor", "accentColor", "heroImage", "heroSlides", "logoImage"],
+            properties: {
+              presetId: { type: "string" },
+              restaurantName: { type: "string" },
+              shortName: { type: "string" },
+              tagline: { type: "string" },
+              primaryColor: { type: "string" },
+              secondaryColor: { type: "string" },
+              accentColor: { type: "string" },
+              heroImage: { type: "string" },
+              heroSlides: {
+                type: "array",
+                items: { type: "string" }
+              },
+              logoImage: { type: "string" }
+            }
+          },
+          landing: {
+            type: "object",
+            additionalProperties: false,
+            required: ["phone", "location"],
+            properties: {
+              phone: { type: "string" },
+              location: {
+                type: "object",
+                additionalProperties: false,
+                required: ["title", "address", "url"],
+                properties: {
+                  title: { type: "string" },
+                  address: { type: "string" },
+                  url: { type: "string" }
+                }
+              }
+            }
+          },
+          contentTranslations: {
+            type: "object",
+            additionalProperties: false,
+            required: ["fr", "en", "ar"],
+            properties: {
+              fr: {
+                type: "object",
+                additionalProperties: false,
+                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
+                properties: {
+                  homeTitle: { type: "string" },
+                  homeSubtitle: { type: "string" },
+                  aboutTitle: { type: "string" },
+                  aboutText: { type: "string" },
+                  footerNote: { type: "string" },
+                  footerRights: { type: "string" }
+                }
+              },
+              en: {
+                type: "object",
+                additionalProperties: false,
+                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
+                properties: {
+                  homeTitle: { type: "string" },
+                  homeSubtitle: { type: "string" },
+                  aboutTitle: { type: "string" },
+                  aboutText: { type: "string" },
+                  footerNote: { type: "string" },
+                  footerRights: { type: "string" }
+                }
+              },
+              ar: {
+                type: "object",
+                additionalProperties: false,
+                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
+                properties: {
+                  homeTitle: { type: "string" },
+                  homeSubtitle: { type: "string" },
+                  aboutTitle: { type: "string" },
+                  aboutText: { type: "string" },
+                  footerNote: { type: "string" },
+                  footerRights: { type: "string" }
+                }
+              }
+            }
+          },
+          promoIds: {
+            type: "array",
+            items: { type: ["string", "number"] }
+          },
+          gallery: {
+            type: "array",
+            items: { type: "string" }
+          },
+          hours: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["day", "open", "close", "highlight"],
+              properties: {
+                day: { type: "string" },
+                open: { type: "string" },
+                close: { type: "string" },
+                highlight: { type: "boolean" }
+              }
+            }
+          },
+          hoursNote: { type: "string" }
+        }
+      },
+      review: {
+        type: "object",
+        additionalProperties: false,
+        required: ["summary", "blockers", "warnings", "untranslatedItems"],
+        properties: {
+          summary: { type: "string" },
+          blockers: {
+            type: "array",
+            items: { type: "string" }
+          },
+          warnings: {
+            type: "array",
+            items: { type: "string" }
+          },
+          untranslatedItems: {
+            type: "array",
+            items: { type: "string" }
+          }
+        }
+      }
+    }
+  }
+};
 
 function guessMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -89,6 +352,17 @@ function buildInputImageFromUploadUrl(value) {
     type: "input_image",
     image_url: `data:${mimeType};base64,${base64}`
   };
+}
+
+function asImporterString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function canonicalImporterLookup(value) {
+  return asImporterString(value)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 function buildImporterDraftSkeleton(input) {
@@ -201,6 +475,110 @@ function deepMerge(target, source) {
   return base;
 }
 
+function normalizeStructuredImporterDraft(parsed) {
+  const draft = parsed && typeof parsed === "object"
+    ? JSON.parse(JSON.stringify(parsed))
+    : {};
+  const restaurantData = draft.restaurantData && typeof draft.restaurantData === "object"
+    ? draft.restaurantData
+    : {};
+  const menu = Array.isArray(restaurantData.menu) ? restaurantData.menu : [];
+  const categories = Array.isArray(restaurantData.categories) ? restaurantData.categories : [];
+  const aliasMap = new Map();
+  const catEmojis = {};
+  const categoryTranslations = {};
+
+  const derivedCategories = categories.length
+    ? categories
+    : [...new Set(menu.map((item) => asImporterString(item?.cat)).filter(Boolean))].map((key) => ({
+      key,
+      name: key,
+      emoji: "🍴",
+      translations: {
+        fr: { name: key, desc: "" },
+        en: { name: key, desc: "" },
+        ar: { name: key, desc: "" }
+      }
+    }));
+
+  derivedCategories.forEach((category, index) => {
+    const translations = category?.translations && typeof category.translations === "object"
+      ? category.translations
+      : {};
+    const key = asImporterString(category?.key)
+      || asImporterString(translations?.fr?.name)
+      || asImporterString(category?.name)
+      || `category-${index + 1}`;
+    const frName = asImporterString(translations?.fr?.name) || asImporterString(category?.name) || key;
+    const enName = asImporterString(translations?.en?.name);
+    const arName = asImporterString(translations?.ar?.name);
+    const frDesc = asImporterString(translations?.fr?.desc);
+    const enDesc = asImporterString(translations?.en?.desc);
+    const arDesc = asImporterString(translations?.ar?.desc);
+
+    catEmojis[key] = asImporterString(category?.emoji) || "🍴";
+    categoryTranslations[key] = {
+      fr: { name: frName, desc: frDesc },
+      en: { name: enName, desc: enDesc },
+      ar: { name: arName, desc: arDesc }
+    };
+
+    [
+      key,
+      category?.name,
+      translations?.fr?.name,
+      translations?.en?.name,
+      translations?.ar?.name
+    ].forEach((alias) => {
+      const canonical = canonicalImporterLookup(alias);
+      if (canonical) aliasMap.set(canonical, key);
+    });
+  });
+
+  restaurantData.menu = menu.map((item, index) => {
+    const images = Array.isArray(item?.images)
+      ? item.images.filter((value) => typeof value === "string" && value.trim())
+      : [];
+    const img = asImporterString(item?.img) || images[0] || "";
+    const catValue = asImporterString(item?.cat);
+    const normalizedCat = aliasMap.get(canonicalImporterLookup(catValue)) || catValue || `category-${index + 1}`;
+
+    return {
+      ...item,
+      cat: normalizedCat,
+      img,
+      images: img && !images.length ? [img] : images
+    };
+  });
+
+  restaurantData.superCategories = (Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : []).map((entry, index) => ({
+    ...entry,
+    id: asImporterString(entry?.id) || `super-category-${index + 1}`,
+    cats: Array.isArray(entry?.cats)
+      ? entry.cats
+        .map((value) => aliasMap.get(canonicalImporterLookup(value)) || asImporterString(value))
+        .filter(Boolean)
+      : []
+  }));
+
+  if (restaurantData.branding && typeof restaurantData.branding === "object") {
+    const heroSlides = Array.isArray(restaurantData.branding.heroSlides)
+      ? restaurantData.branding.heroSlides.filter((value) => typeof value === "string" && value.trim())
+      : [];
+    const heroImage = asImporterString(restaurantData.branding.heroImage);
+    restaurantData.branding.heroSlides = heroSlides.length
+      ? heroSlides
+      : (heroImage ? [heroImage] : []);
+  }
+
+  delete restaurantData.categories;
+  restaurantData.catEmojis = catEmojis;
+  restaurantData.categoryTranslations = categoryTranslations;
+  draft.restaurantData = restaurantData;
+
+  return draft;
+}
+
 function extractResponseText(payload) {
   if (payload && typeof payload.output_text === "string" && payload.output_text.trim()) {
     return payload.output_text.trim();
@@ -264,11 +642,8 @@ async function generateImporterDraft(input) {
     },
     body: JSON.stringify({
       model: OPENAI_IMPORT_MODEL,
+      instructions: IMPORTER_SYSTEM_PROMPT,
       input: [
-        {
-          role: "system",
-          content: [{ type: "input_text", text: IMPORTER_SYSTEM_PROMPT }]
-        },
         {
           role: "user",
           content: [
@@ -277,6 +652,11 @@ async function generateImporterDraft(input) {
           ]
         }
       ],
+      text: {
+        format: IMPORTER_TEXT_FORMAT
+      },
+      store: false,
+      temperature: 0.2,
       max_output_tokens: 6000
     })
   });
@@ -291,7 +671,7 @@ async function generateImporterDraft(input) {
 
   const rawText = extractResponseText(payload);
   if (!rawText) {
-    const error = new Error("empty_openai_response");
+    const error = new Error(payload?.status === "incomplete" ? "incomplete_openai_response" : "empty_openai_response");
     error.statusCode = 502;
     throw error;
   }
@@ -300,6 +680,7 @@ async function generateImporterDraft(input) {
   try {
     parsed = JSON.parse(rawText);
   } catch (_error) {
+    console.error("IMPORTER RAW OPENAI TEXT:", rawText.slice(0, 1200));
     const error = new Error("invalid_json_from_openai");
     error.statusCode = 502;
     throw error;
@@ -313,7 +694,7 @@ async function generateImporterDraft(input) {
     restaurantPhotoUrls
   });
 
-  return deepMerge(skeleton, parsed);
+  return deepMerge(skeleton, normalizeStructuredImporterDraft(parsed));
 }
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {

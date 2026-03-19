@@ -8,6 +8,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The first seller-only AI importer slice is now hardened against malformed model output: `AI Import Studio` uses the Responses API with a strict JSON schema, normalizes imported categories back into the live runtime shape, and logs the raw model text when a parse failure still occurs
 - The first seller-only AI importer slice now exists in `Seller Tools` as `AI Import Studio`: menu images plus optional logo/venue photos can be uploaded, sent to OpenAI server-side, turned into a reviewable schema draft, copied as JSON, and applied only after explicit seller confirmation
 - The admin shell now has a real FR / EN / AR translation foundation for login, sidebar navigation, seller tools, launch-readiness copy, handoff-summary labels, security messaging, and quick-launch/security form labels, so the i18n system no longer stops at public pages and menu data
 - The admin form layer now also covers the main menu-item, category, WiFi, stats, branding, and landing configuration labels and placeholders in FR / EN / AR, which removes another large batch of seller-facing hardcoded frontend text
@@ -364,13 +365,12 @@ Long term:
 
 ## Immediate Next Recommended Slices
 
-1. Browser-QA the refreshed public site and admin on the live Coolify deployment, focusing on desktop spacing, motion restraint, and the rewritten seller-facing surfaces
-2. Expand the new local image library and replace the remaining placeholder media with a stronger launch-quality content/media set
-3. Start shaping the private launcher/onboarding flow around `IMPORTER_PAYLOAD_SPEC.md`
-4. Keep refining the seller handoff tooling so media blockers, warnings, and final delivery gates are easy to scan and resolve quickly
+1. Validate the hardened AI Import Studio flow end to end on the live deployment with real menu images, then tighten review/error states around blockers, warnings, and partial extraction
+2. Extend the importer from image-only ingestion to menu PDF support while keeping the same review-first seller workflow
+3. Expand the curated image library and the media-slot matching rules so imported menu items and hero/gallery slots have a better non-AI fallback path
+4. Browser-QA the refreshed public site and admin on the live Coolify deployment, focusing on desktop spacing, motion restraint, and the rewritten seller-facing surfaces
 5. Define the exact seller packages, what is customized manually, and what stays admin-editable after delivery
-6. Design the internal onboarding/launcher schema before wiring any OpenAI workflow into the live product
-7. Expand the first curated image library and matching rules for menu items before any AI image-generation fallback
+6. Design the internal onboarding/launcher schema before wiring any broader automation into the live product
 
 ## Notes From This Iteration
 
