@@ -15,7 +15,8 @@ let serviceType = 'onsite';
 let lastDataVersion = "";
 let syncInFlight = null;
 const PUBLIC_DATA_TIMEOUT_MS = 8000;
-const PUBLIC_SYNC_INTERVAL_MS = 15000;
+const PUBLIC_RESUME_SYNC_MIN_GAP_MS = 60000;
+let lastPublicSyncStartedAt = 0;
 
 async function fetchPublicDataWithTimeout() {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -36,6 +37,7 @@ async function fetchPublicDataWithTimeout() {
 // ═══ SYNC DATA FROM SERVER ═══
 async function syncDataFromServer() {
     if (syncInFlight) return syncInFlight;
+    lastPublicSyncStartedAt = Date.now();
 
     syncInFlight = (async () => {
     try {
@@ -126,17 +128,20 @@ async function syncDataFromServer() {
     return syncInFlight;
 }
 
-setInterval(() => {
-    if (document.visibilityState === 'visible') {
-        syncDataFromServer();
-    }
-}, PUBLIC_SYNC_INTERVAL_MS);
+function shouldSyncOnResume() {
+    return (Date.now() - lastPublicSyncStartedAt) >= PUBLIC_RESUME_SYNC_MIN_GAP_MS;
+}
+
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
+    if (document.visibilityState === 'visible' && shouldSyncOnResume()) {
         syncDataFromServer();
     }
 });
-window.addEventListener('focus', syncDataFromServer);
+window.addEventListener('focus', () => {
+    if (shouldSyncOnResume()) {
+        syncDataFromServer();
+    }
+});
 
 // ═══════════════════════ RESTAURANT CONFIG ═══════════════════════
 const config = window.restaurantConfig;
