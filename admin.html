@@ -323,6 +323,61 @@
             cursor: pointer;
         }
 
+        .admin-disclosure {
+            margin-top: 18px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: #fafafa;
+            overflow: hidden;
+        }
+
+        .admin-disclosure[open] {
+            background: #fff;
+        }
+
+        .admin-disclosure summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 16px 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .admin-disclosure summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .admin-disclosure summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .admin-disclosure[open] summary::after {
+            content: '−';
+        }
+
+        .admin-disclosure-copy {
+            display: block;
+            font-size: 0.86rem;
+            color: var(--text2);
+            font-weight: 500;
+        }
+
+        .admin-disclosure-body {
+            padding: 0 18px 18px;
+        }
+
+        .modal-form-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -2369,53 +2424,46 @@
                     <label data-i18n="admin.menu.default_description">Default Description</label>
                     <input type="text" id="itemDesc" placeholder="Used as the fallback when a translation is missing" data-i18n-placeholder="admin.menu.default_description_placeholder" required />
                 </div>
-                <div class="form-group">
-                    <label data-i18n="admin.menu.localized_names">Localized Names & Descriptions</label>
-                    <p class="translation-hint" data-i18n="admin.menu.localized_names_hint">These fields power the French, English, and Arabic menu experience today and give the future AI importer a clean target schema.</p>
-                    <div class="translation-grid">
-                        <div class="translation-card">
-                            <h4 data-i18n="admin.lang.french">French</h4>
-                            <label for="itemNameFr" data-i18n="admin.menu.name_fr">Name (FR)</label>
-                            <input type="text" id="itemNameFr" placeholder="Nom du plat en francais" data-i18n-placeholder="admin.menu.name_fr_placeholder" />
-                            <label for="itemDescFr" data-i18n="admin.menu.description_fr">Description (FR)</label>
-                            <textarea id="itemDescFr" placeholder="Description en francais" data-i18n-placeholder="admin.menu.description_fr_placeholder" rows="3"></textarea>
-                        </div>
-                        <div class="translation-card">
-                            <h4 data-i18n="admin.lang.english">English</h4>
-                            <label for="itemNameEn" data-i18n="admin.menu.name_en">Name (EN)</label>
-                            <input type="text" id="itemNameEn" placeholder="Dish name in English" data-i18n-placeholder="admin.menu.name_en_placeholder" />
-                            <label for="itemDescEn" data-i18n="admin.menu.description_en">Description (EN)</label>
-                            <textarea id="itemDescEn" placeholder="Dish description in English" data-i18n-placeholder="admin.menu.description_en_placeholder" rows="3"></textarea>
-                        </div>
-                        <div class="translation-card">
-                            <h4 data-i18n="admin.lang.arabic">Arabic</h4>
-                            <label for="itemNameAr" data-i18n="admin.menu.name_ar">Name (AR)</label>
-                            <input type="text" id="itemNameAr" placeholder="Dish name in Arabic" data-i18n-placeholder="admin.menu.name_ar_placeholder" />
-                            <label for="itemDescAr" data-i18n="admin.menu.description_ar">Description (AR)</label>
-                            <textarea id="itemDescAr" placeholder="Dish description in Arabic" data-i18n-placeholder="admin.menu.description_ar_placeholder" rows="3"></textarea>
+                <details class="admin-disclosure">
+                    <summary>
+                        <span>
+                            <span data-i18n="admin.menu.localized_names">Localized Names & Descriptions</span>
+                            <span class="admin-disclosure-copy">Open only when you need FR / EN / AR overrides.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <p class="translation-hint" data-i18n="admin.menu.localized_names_hint">These fields power the French, English, and Arabic menu experience today and give the future AI importer a clean target schema.</p>
+                        <div class="translation-grid">
+                            <div class="translation-card">
+                                <h4 data-i18n="admin.lang.french">French</h4>
+                                <label for="itemNameFr" data-i18n="admin.menu.name_fr">Name (FR)</label>
+                                <input type="text" id="itemNameFr" placeholder="Nom du plat en francais" data-i18n-placeholder="admin.menu.name_fr_placeholder" />
+                                <label for="itemDescFr" data-i18n="admin.menu.description_fr">Description (FR)</label>
+                                <textarea id="itemDescFr" placeholder="Description en francais" data-i18n-placeholder="admin.menu.description_fr_placeholder" rows="3"></textarea>
+                            </div>
+                            <div class="translation-card">
+                                <h4 data-i18n="admin.lang.english">English</h4>
+                                <label for="itemNameEn" data-i18n="admin.menu.name_en">Name (EN)</label>
+                                <input type="text" id="itemNameEn" placeholder="Dish name in English" data-i18n-placeholder="admin.menu.name_en_placeholder" />
+                                <label for="itemDescEn" data-i18n="admin.menu.description_en">Description (EN)</label>
+                                <textarea id="itemDescEn" placeholder="Dish description in English" data-i18n-placeholder="admin.menu.description_en_placeholder" rows="3"></textarea>
+                            </div>
+                            <div class="translation-card">
+                                <h4 data-i18n="admin.lang.arabic">Arabic</h4>
+                                <label for="itemNameAr" data-i18n="admin.menu.name_ar">Name (AR)</label>
+                                <input type="text" id="itemNameAr" placeholder="Dish name in Arabic" data-i18n-placeholder="admin.menu.name_ar_placeholder" />
+                                <label for="itemDescAr" data-i18n="admin.menu.description_ar">Description (AR)</label>
+                                <textarea id="itemDescAr" placeholder="Dish description in Arabic" data-i18n-placeholder="admin.menu.description_ar_placeholder" rows="3"></textarea>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="admin.menu.ingredients">Ingredients (Separate by commas)</label>
-                    <textarea id="itemIngredients" placeholder="Tomato, Lettuce, Special Sauce..." data-i18n-placeholder="admin.menu.ingredients_placeholder" rows="2"></textarea>
-                </div>
-                <div class="inline-check-grid">
+                </details>
+                <div class="inline-check-grid" style="margin-top:18px;">
                     <div class="form-group inline-check">
                         <input type="checkbox" id="itemHasSizes" onchange="toggleSizesUI()"
                             class="check-input" />
                         <label for="itemHasSizes" data-i18n="admin.menu.has_sizes">📏 Item has Multiple
                             Sizes</label>
-                    </div>
-                    <div class="form-group inline-check">
-                        <input type="checkbox" id="itemFeatured" class="check-input" />
-                        <label for="itemFeatured" data-i18n="admin.menu.featured">✨ Featured Item</label>
-                    </div>
-                    <div class="form-group inline-check">
-                        <input type="checkbox" id="itemAvailable" class="check-input"
-                            checked />
-                        <label for="itemAvailable" data-i18n="admin.menu.available">✅ En Stock /
-                            Disponible</label>
                     </div>
                 </div>
 
@@ -2439,15 +2487,40 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label data-i18n="admin.menu.gallery">Gallery (URLs or Upload)</label>
-                    <input type="file" id="itemFile" accept="image/*" multiple class="file-input-spaced" />
-                    <textarea id="itemImg" placeholder="Or paste URLs here (comma separated)..." data-i18n-placeholder="admin.menu.gallery_placeholder" rows="2"></textarea>
-                </div>
-                <div class="btn-row">
+                <details class="admin-disclosure">
+                    <summary>
+                        <span>
+                            <span>Advanced & Media</span>
+                            <span class="admin-disclosure-copy">Open only for ingredients, media, availability, or featured status.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <div class="form-group">
+                            <label data-i18n="admin.menu.ingredients">Ingredients (Separate by commas)</label>
+                            <textarea id="itemIngredients" placeholder="Tomato, Lettuce, Special Sauce..." data-i18n-placeholder="admin.menu.ingredients_placeholder" rows="2"></textarea>
+                        </div>
+                        <div class="inline-check-grid">
+                            <div class="form-group inline-check">
+                                <input type="checkbox" id="itemFeatured" class="check-input" />
+                                <label for="itemFeatured" data-i18n="admin.menu.featured">✨ Featured Item</label>
+                            </div>
+                            <div class="form-group inline-check">
+                                <input type="checkbox" id="itemAvailable" class="check-input"
+                                    checked />
+                                <label for="itemAvailable" data-i18n="admin.menu.available">✅ En Stock /
+                                    Disponible</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="admin.menu.gallery">Gallery (URLs or Upload)</label>
+                            <input type="file" id="itemFile" accept="image/*" multiple class="file-input-spaced" />
+                            <textarea id="itemImg" placeholder="Or paste URLs here (comma separated)..." data-i18n-placeholder="admin.menu.gallery_placeholder" rows="2"></textarea>
+                        </div>
+                    </div>
+                </details>
+                <div class="modal-form-actions">
                     <button type="submit" class="primary-btn" data-i18n="admin.menu.save_product">➕ Save Product</button>
-                    <button type="button" class="primary-btn secondary-btn" onclick="resetDefaults()" data-i18n="admin.menu.reset_all_data">🔄 Reset
-                        All Data</button>
+                    <button type="button" class="primary-btn secondary-btn" onclick="closeMenuCrudModal()">Cancel</button>
                 </div>
             </form>
 
@@ -2542,24 +2615,37 @@
                     </div>
                 </div>
                 <p class="translation-hint">The website uses the translated category names below. This top field is the stable fallback key used internally and whenever a translation is missing.</p>
-                <div class="translation-grid" style="margin-top:16px;">
-                    <div class="translation-card">
-                        <h4 data-i18n="admin.lang.french">French</h4>
-                        <label for="catNameFr" data-i18n="admin.categories.name_fr">Category Name</label>
-                        <input type="text" id="catNameFr" placeholder="Nom de la categorie en francais" data-i18n-placeholder="admin.categories.name_fr_placeholder" />
+                <details class="admin-disclosure">
+                    <summary>
+                        <span>
+                            <span>Translations</span>
+                            <span class="admin-disclosure-copy">Only open this when you need category labels in multiple languages.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <div class="translation-grid" style="margin-top:16px;">
+                            <div class="translation-card">
+                                <h4 data-i18n="admin.lang.french">French</h4>
+                                <label for="catNameFr" data-i18n="admin.categories.name_fr">Category Name</label>
+                                <input type="text" id="catNameFr" placeholder="Nom de la categorie en francais" data-i18n-placeholder="admin.categories.name_fr_placeholder" />
+                            </div>
+                            <div class="translation-card">
+                                <h4 data-i18n="admin.lang.english">English</h4>
+                                <label for="catNameEn" data-i18n="admin.categories.name_en">Category Name</label>
+                                <input type="text" id="catNameEn" placeholder="Category name in English" data-i18n-placeholder="admin.categories.name_en_placeholder" />
+                            </div>
+                            <div class="translation-card">
+                                <h4 data-i18n="admin.lang.arabic">Arabic</h4>
+                                <label for="catNameAr" data-i18n="admin.categories.name_ar">Category Name</label>
+                                <input type="text" id="catNameAr" placeholder="اسم الفئة بالعربية" data-i18n-placeholder="admin.categories.name_ar_placeholder" />
+                            </div>
+                        </div>
                     </div>
-                    <div class="translation-card">
-                        <h4 data-i18n="admin.lang.english">English</h4>
-                        <label for="catNameEn" data-i18n="admin.categories.name_en">Category Name</label>
-                        <input type="text" id="catNameEn" placeholder="Category name in English" data-i18n-placeholder="admin.categories.name_en_placeholder" />
-                    </div>
-                    <div class="translation-card">
-                        <h4 data-i18n="admin.lang.arabic">Arabic</h4>
-                        <label for="catNameAr" data-i18n="admin.categories.name_ar">Category Name</label>
-                        <input type="text" id="catNameAr" placeholder="اسم الفئة بالعربية" data-i18n-placeholder="admin.categories.name_ar_placeholder" />
-                    </div>
+                </details>
+                <div class="modal-form-actions">
+                    <button type="submit" class="primary-btn" data-i18n="admin.categories.add">➕ Add Category</button>
+                    <button type="button" class="primary-btn secondary-btn" onclick="closeMenuCrudModal()">Cancel</button>
                 </div>
-                <button type="submit" class="primary-btn" data-i18n="admin.categories.add">➕ Add Category</button>
             </form>
 
             <div style="margin-top: 40px;">
@@ -2964,36 +3050,49 @@
                     <input type="text" id="scTime" placeholder="e.g. 07:00 – 12:00" />
                 </div>
                 <p class="translation-hint">Customer-facing super-category titles and descriptions come from the FR / EN / AR fields below. These fallback fields only appear when a translation is missing.</p>
-                <div class="translation-grid">
-                    <div class="translation-card">
-                        <h4>French</h4>
-                        <label for="scNameFr">Name</label>
-                        <input type="text" id="scNameFr" placeholder="Nom en francais" />
-                        <label for="scDescFr">Description</label>
-                        <textarea id="scDescFr" rows="3" placeholder="Description en francais"></textarea>
+                <details class="admin-disclosure">
+                    <summary>
+                        <span>
+                            <span>Translations</span>
+                            <span class="admin-disclosure-copy">Open only when you need FR / EN / AR labels for the customer-facing menu.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <div class="translation-grid">
+                            <div class="translation-card">
+                                <h4>French</h4>
+                                <label for="scNameFr">Name</label>
+                                <input type="text" id="scNameFr" placeholder="Nom en francais" />
+                                <label for="scDescFr">Description</label>
+                                <textarea id="scDescFr" rows="3" placeholder="Description en francais"></textarea>
+                            </div>
+                            <div class="translation-card">
+                                <h4>English</h4>
+                                <label for="scNameEn">Name</label>
+                                <input type="text" id="scNameEn" placeholder="Name in English" />
+                                <label for="scDescEn">Description</label>
+                                <textarea id="scDescEn" rows="3" placeholder="Description in English"></textarea>
+                            </div>
+                            <div class="translation-card">
+                                <h4>Arabic</h4>
+                                <label for="scNameAr">Name</label>
+                                <input type="text" id="scNameAr" placeholder="?????" />
+                                <label for="scDescAr">Description</label>
+                                <textarea id="scDescAr" rows="3" placeholder="?????"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="translation-card">
-                        <h4>English</h4>
-                        <label for="scNameEn">Name</label>
-                        <input type="text" id="scNameEn" placeholder="Name in English" />
-                        <label for="scDescEn">Description</label>
-                        <textarea id="scDescEn" rows="3" placeholder="Description in English"></textarea>
-                    </div>
-                    <div class="translation-card">
-                        <h4>Arabic</h4>
-                        <label for="scNameAr">Name</label>
-                        <input type="text" id="scNameAr" placeholder="?????" />
-                        <label for="scDescAr">Description</label>
-                        <textarea id="scDescAr" rows="3" placeholder="?????"></textarea>
-                    </div>
-                </div>
+                </details>
                 <div class="form-group">
                     <label>Included Categories</label>
                     <div id="scCatsList" class="chip-select-list">
                         <!-- Checkboxes will be rendered here -->
                     </div>
                 </div>
-                <button type="submit" class="primary-btn">➕ Save Super Category</button>
+                <div class="modal-form-actions">
+                    <button type="submit" class="primary-btn">➕ Save Super Category</button>
+                    <button type="button" class="primary-btn secondary-btn" onclick="closeMenuCrudModal()">Cancel</button>
+                </div>
             </form>
 
             <table id="superCatTable">
