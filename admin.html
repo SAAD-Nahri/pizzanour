@@ -328,6 +328,45 @@
             color: #6b7280;
         }
 
+        .parameter-shell {
+            margin-bottom: 22px;
+        }
+
+        .parameter-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .parameter-tab-btn {
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text2);
+            border-radius: 999px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .parameter-tab-btn:hover {
+            color: var(--text);
+            border-color: rgba(255, 141, 8, 0.24);
+        }
+
+        .parameter-tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), #ff7b00);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 12px 26px rgba(255, 141, 8, 0.2);
+        }
+
+        .parameter-panel-intro {
+            margin: 0 0 18px;
+            color: #6b7280;
+        }
+
         .hint-chip-row {
             display: flex;
             gap: 10px;
@@ -1968,15 +2007,12 @@
 
     <div class="sidebar" id="adminSidebar" style="display:none">
         <h1 id="adminSidebarTitleText" data-i18n="admin.sidebar_title">🍽️ Restaurant Admin</h1>
-        <button class="nav-btn active" onclick="showSection('menu', this)" data-i18n="admin.nav.menu">🍴 Menu Items</button>
+        <button class="nav-btn active" id="menuNavBtn" onclick="showSection('menu', this)" data-i18n="admin.nav.menu">🍴 Menu Items</button>
         <button class="nav-btn" onclick="showSection('categories', this)" data-i18n="admin.nav.categories">📂 Categories</button>
-        <button class="nav-btn" onclick="showSection('branding', this)" data-i18n="admin.nav.branding">🎨 Branding</button>
-        <button class="nav-btn" onclick="showSection('landing', this)" data-i18n="admin.nav.landing">🏠 Landing Page</button>
+        <button class="nav-btn" id="parametersNavBtn" onclick="showSection('branding', this)" data-i18n="admin.nav.parameters">⚙️ Parameters</button>
         <button class="nav-btn" onclick="showSection('supercategories', this)" data-i18n="admin.nav.supercategories">📂 Super Categories</button>
         <button class="nav-btn" onclick="showSection('hours', this)" data-i18n="admin.nav.hours">🕐 Horaires</button>
-        <button class="nav-btn" onclick="showSection('wifi', this)" data-i18n="admin.nav.wifi">📶 WiFi</button>
-        <button class="nav-btn" onclick="showSection('data-tools', this)" data-i18n="admin.nav.data_tools">🧰 Data Tools</button>
-        <button class="nav-btn" onclick="showSection('security', this)" data-i18n="admin.nav.security">🛡️ Security</button>
+        <button class="nav-btn" id="sellerToolsNavBtn" onclick="showSection('data-tools', this)" data-i18n="admin.nav.data_tools">🧰 Data Tools</button>
         <button class="nav-btn" onclick="showSection('stats', this)" data-i18n="admin.nav.stats">📊 Statistics</button>
         <button class="nav-btn" onclick="showSection('gallery', this)" data-i18n="admin.nav.gallery">🖼️ Galerie</button>
         <div class="sidebar-actions">
@@ -2206,6 +2242,7 @@
 
         <!-- WIFI SECTION -->
         <div id="wifi" class="section">
+            <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.wifi.title">Network Settings</h3>
             <p data-i18n="admin.wifi.subtitle">Updates will be immediately visible to customers on the scan page.</p>
             <form id="wifiForm">
@@ -2246,6 +2283,7 @@
 
         <!-- BRANDING SECTION -->
         <div id="branding" class="section">
+            <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.branding.title">Brand & Theme System</h3>
             <p data-i18n="admin.branding.subtitle">Configure the reusable identity that should follow this restaurant across the public website and menu.
             </p>
@@ -2453,6 +2491,7 @@
 
         <!-- LANDING PAGE SECTION -->
         <div id="landing" class="section">
+            <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.landing.title">Landing Page Configuration</h3>
             <p data-i18n="admin.landing.subtitle">Update what your customers see when they first visit your site.</p>
             <form id="landingPageForm">
@@ -2794,7 +2833,7 @@
                     <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft generated yet. Upload menu images, generate a draft, then review blockers and warnings here."></textarea>
                     <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON will appear here for seller review before apply."></textarea>
                 </div>
-                <div class="tool-card tool-card--accent tool-card--wide">
+                <div class="tool-card tool-card--accent tool-card--wide" id="aiMediaStudioCard">
                     <div class="tool-card-eyebrow">Media</div>
                     <h4>AI Media Studio</h4>
                     <p>Generate seller-only hero or generic atmosphere images from the current restaurant branding, optional uploaded references, and prompt notes. Use this for homepage and gallery visuals, not for every dish.</p>
@@ -2893,6 +2932,7 @@
 
         <!-- SECURITY SECTION -->
         <div id="security" class="section">
+            <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.security.title">Admin Security</h3>
             <p class="copy-muted" data-i18n="admin.security.subtitle">Update the admin login used for this restaurant. Credential changes are stored in persisted server storage and survive redeploys.</p>
 
@@ -2944,7 +2984,7 @@
     <div id="adminToast" class="toast"></div>
 
     <!-- CLEAR CACHE BUTTON -->
-    <button class="floating-action floating-action--cache" onclick="clearImageCache()" title="Clear local image cache">
+    <button id="clearCacheBtn" class="floating-action floating-action--cache" onclick="clearImageCache()" title="Clear local image cache">
         <span class="floating-action-icon">CC</span><span>Clear Image Cache</span>
     </button>
 

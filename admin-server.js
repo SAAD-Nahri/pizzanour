@@ -5,6 +5,7 @@ const path = require("path");
 
 const {
   MAX_JSON_BYTES,
+  booleanFromEnv,
   clearSessionCookie,
   createBuildFingerprint,
   createSessionManager,
@@ -40,6 +41,11 @@ const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
 const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
 const OPENAI_MEDIA_MODEL = process.env.OPENAI_MEDIA_MODEL || "gpt-4.1";
+const SELLER_TOOLS_ENABLED = booleanFromEnv(
+  process.env.SELLER_TOOLS_ENABLED,
+  process.env.NODE_ENV !== "production"
+);
+const AI_MEDIA_TOOLS_ENABLED = booleanFromEnv(process.env.AI_MEDIA_TOOLS_ENABLED, false);
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const IMPORTER_MAX_MENU_IMAGES = 8;
 const IMPORTER_MAX_VENUE_IMAGES = 6;
@@ -1652,6 +1658,14 @@ app.get("/api/admin/security-status", requireAuth, (_req, res) => {
     isLegacyPlainText: currentCreds.isLegacyPlainText,
     credentialSource: currentCreds.source,
     minPasswordLength: MIN_PASSWORD_LENGTH
+  });
+});
+
+app.get("/api/admin/capabilities", requireAuth, (_req, res) => {
+  res.json({
+    ok: true,
+    sellerToolsEnabled: SELLER_TOOLS_ENABLED,
+    aiMediaToolsEnabled: SELLER_TOOLS_ENABLED && AI_MEDIA_TOOLS_ENABLED
   });
 });
 

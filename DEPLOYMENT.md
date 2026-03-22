@@ -47,6 +47,8 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `OPENAI_API_KEY=<server-side-key>` if you want `Seller Tools -> AI Import Studio` or `AI Media Studio`
 - `OPENAI_IMPORT_MODEL=gpt-4o-mini` optional override for the importer model
 - `OPENAI_MEDIA_MODEL=gpt-4.1` optional override for seller-side media generation
+- `SELLER_TOOLS_ENABLED=false` for clean client handoff admin; enable only on seller setup instances
+- `AI_MEDIA_TOOLS_ENABLED=false` unless you explicitly want seller-side AI media generation available
 - `COOKIE_SECURE=true`
 - `DATA_FILE=/app/data/data.json`
 - `UPLOADS_DIR=/app/uploads`

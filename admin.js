@@ -10,6 +10,10 @@ const IMPORT_STUDIO_MAX_MENU_IMAGES = 8;
 const IMPORT_STUDIO_MAX_VENUE_IMAGES = 6;
 let adminAuth = { user: 'admin', pass: '' };
 let adminSecurityStatus = null;
+let adminCapabilities = {
+    sellerToolsEnabled: false,
+    aiMediaToolsEnabled: false
+};
 let adminSaveState = {
     type: 'idle',
     message: '',
@@ -77,6 +81,7 @@ const SECTION_VISIBILITY_FIELDS = {
     hours: 'lpSectionHours',
     contact: 'lpSectionContact'
 };
+const PARAMETER_SECTION_IDS = ['branding', 'landing', 'wifi', 'security'];
 const ADMIN_SECTION_ORDER_KEYS = ['about', 'payments', 'events', 'gallery', 'hours', 'contact'];
 const SECTION_ORDER_LABELS = {
     about: 'admin.section_order.about',
@@ -735,6 +740,102 @@ function setAdminSaveState(type, message) {
     renderAdminSaveState();
 }
 
+function isParameterSection(sectionId) {
+    return PARAMETER_SECTION_IDS.includes(sectionId);
+}
+
+function getSectionTitle(sectionId) {
+    if (isParameterSection(sectionId)) {
+        return t('admin.header.parameters', 'Parameters');
+    }
+
+    const titles = {
+        menu: t('admin.header.menu_management', 'Menu Management'),
+        categories: t('admin.nav.categories', 'Categories'),
+        supercategories: t('admin.nav.supercategories', 'Super Categories'),
+        hours: t('admin.nav.hours', 'Hours'),
+        gallery: t('admin.nav.gallery', 'Gallery'),
+        stats: t('admin.nav.stats', 'Statistics'),
+        'data-tools': t('admin.nav.data_tools', 'Seller Tools')
+    };
+
+    return titles[sectionId] || t('admin.header.menu_management', 'Menu Management');
+}
+
+function renderParameterShells() {
+    const shells = Array.from(document.querySelectorAll('[data-parameter-shell]'));
+    if (shells.length === 0) return;
+
+    const tabsMarkup = `
+        <div class="parameter-tabs">
+            <button type="button" class="parameter-tab-btn" data-parameter-target="branding" onclick="openParameterSection('branding')">${t('admin.parameters.branding', 'Brand Identity')}</button>
+            <button type="button" class="parameter-tab-btn" data-parameter-target="landing" onclick="openParameterSection('landing')">${t('admin.parameters.landing', 'Website Content')}</button>
+            <button type="button" class="parameter-tab-btn" data-parameter-target="wifi" onclick="openParameterSection('wifi')">${t('admin.parameters.wifi', 'WiFi & Contact')}</button>
+            <button type="button" class="parameter-tab-btn" data-parameter-target="security" onclick="openParameterSection('security')">${t('admin.parameters.security', 'Access')}</button>
+        </div>
+        <p class="parameter-panel-intro">${t('admin.parameters.subtitle', 'Manage the public website identity, key customer info, WiFi, and admin access from one configuration area.')}</p>
+    `;
+
+    shells.forEach((shell) => {
+        shell.innerHTML = tabsMarkup;
+    });
+}
+
+function syncParameterTabs(activeSectionId) {
+    document.querySelectorAll('.parameter-tab-btn').forEach((button) => {
+        button.classList.toggle('active', button.dataset.parameterTarget === activeSectionId);
+    });
+}
+
+function applyAdminCapabilities() {
+    const sellerToolsNavBtn = document.getElementById('sellerToolsNavBtn');
+    const dataToolsSection = document.getElementById('data-tools');
+    const clearCacheBtn = document.getElementById('clearCacheBtn');
+    const aiMediaCard = document.getElementById('aiMediaStudioCard');
+
+    if (sellerToolsNavBtn) {
+        sellerToolsNavBtn.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
+    }
+    if (dataToolsSection) {
+        dataToolsSection.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
+    }
+    if (clearCacheBtn) {
+        clearCacheBtn.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
+    }
+    if (aiMediaCard) {
+        aiMediaCard.style.display = adminCapabilities.aiMediaToolsEnabled ? '' : 'none';
+    }
+
+    if (!adminCapabilities.sellerToolsEnabled && dataToolsSection?.classList.contains('active')) {
+        const menuBtn = document.getElementById('menuNavBtn');
+        if (menuBtn) showSection('menu', menuBtn);
+    }
+}
+
+async function loadAdminCapabilities() {
+    try {
+        const res = await fetch('/api/admin/capabilities', { credentials: 'include' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+            adminCapabilities = { sellerToolsEnabled: false, aiMediaToolsEnabled: false };
+            return;
+        }
+        adminCapabilities = {
+            sellerToolsEnabled: Boolean(data.sellerToolsEnabled),
+            aiMediaToolsEnabled: Boolean(data.aiMediaToolsEnabled)
+        };
+    } catch (error) {
+        console.error('Capabilities load error:', error);
+        adminCapabilities = { sellerToolsEnabled: false, aiMediaToolsEnabled: false };
+    }
+}
+
+window.openParameterSection = function (sectionId) {
+    const parametersNavBtn = document.getElementById('parametersNavBtn');
+    if (!parametersNavBtn) return;
+    showSection(sectionId, parametersNavBtn);
+};
+
 async function performAdminLogin() {
     console.log('[LOGIN] performAdminLogin triggered');
     const userEl = document.getElementById('loginUser');
@@ -781,7 +882,7 @@ async function showDashboard() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminSidebar').style.display = 'flex';
     document.getElementById('adminMain').style.display = 'block';
-    await loadDataFromServer();
+    await Promise.all([loadDataFromServer(), loadAdminCapabilities()]);
     refreshUI();
     initForms();
 }
@@ -792,6 +893,7 @@ async function adminLogout() {
 }
 
 function refreshUI() {
+    renderParameterShells();
     renderAdminSaveState();
     renderCategoryFilters();
     renderMenuTable();
@@ -812,6 +914,9 @@ function refreshUI() {
     renderMediaStudioOutputs(lastGeneratedMedia);
     renderLaunchReadinessCard();
     updateStats();
+    applyAdminCapabilities();
+    const activeSectionId = document.querySelector('.section.active')?.id || 'menu';
+    syncParameterTabs(activeSectionId);
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
     }
@@ -966,10 +1071,19 @@ function getMediaSlotAction(slot) {
 
 window.openReadinessSection = function (sectionId) {
     if (!sectionId) return;
-    const btn = Array.from(document.querySelectorAll('.nav-btn')).find((element) => {
-        const handler = element.getAttribute('onclick') || '';
-        return handler.includes(`showSection('${sectionId}'`);
-    });
+    let btn = null;
+    if (isParameterSection(sectionId)) {
+        btn = document.getElementById('parametersNavBtn');
+    } else if (sectionId === 'data-tools') {
+        btn = document.getElementById('sellerToolsNavBtn');
+    } else if (sectionId === 'menu') {
+        btn = document.getElementById('menuNavBtn');
+    } else {
+        btn = Array.from(document.querySelectorAll('.nav-btn')).find((element) => {
+            const handler = element.getAttribute('onclick') || '';
+            return handler.includes(`showSection('${sectionId}'`);
+        });
+    }
 
     if (btn && typeof showSection === 'function') {
         showSection(sectionId, btn);
@@ -2979,12 +3093,12 @@ window.applyOnboardingPreset = async function () {
     try {
         await saveAndRefresh();
         refreshUI();
-        const dataToolsButton = Array.from(document.querySelectorAll('.nav-btn')).find((button) => {
-            const handler = button.getAttribute('onclick') || '';
-            return handler.includes(`showSection('data-tools'`);
-        });
-        if (dataToolsButton) {
-            showSection('data-tools', dataToolsButton);
+        const targetButton = adminCapabilities.sellerToolsEnabled
+            ? document.getElementById('sellerToolsNavBtn')
+            : document.getElementById('parametersNavBtn');
+        const targetSection = adminCapabilities.sellerToolsEnabled ? 'data-tools' : 'branding';
+        if (targetButton) {
+            showSection(targetSection, targetButton);
         }
         showToast('Quick launch preset applied.');
     } catch (error) {
@@ -3378,10 +3492,25 @@ function clearImageCache() {
     showToast(`✅ Cache image vidé pour ${count} produit(s).Stockage libéré!`);
 }
 function showSection(id, btn) {
+    const navButton = btn || (isParameterSection(id)
+        ? document.getElementById('parametersNavBtn')
+        : id === 'data-tools'
+            ? document.getElementById('sellerToolsNavBtn')
+            : id === 'menu'
+                ? document.getElementById('menuNavBtn')
+                : null);
+    const sectionTitle = document.getElementById('section-title');
+
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    btn.classList.add('active');
+    if (navButton) {
+        navButton.classList.add('active');
+    }
+    if (sectionTitle) {
+        sectionTitle.textContent = getSectionTitle(id);
+    }
+    syncParameterTabs(id);
 
     // Auto-close sidebar on mobile after choosing
     if (window.innerWidth <= 992) {

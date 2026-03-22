@@ -225,6 +225,7 @@ function setStaticAssetHeaders(res, filePath) {
 
 module.exports = {
   MAX_JSON_BYTES,
+  booleanFromEnv,
   clearSessionCookie,
   createBuildFingerprint,
   createSessionManager,
