@@ -82,7 +82,10 @@ const SECTION_VISIBILITY_FIELDS = {
     hours: 'lpSectionHours',
     contact: 'lpSectionContact'
 };
-const PARAMETER_SECTION_IDS = ['branding', 'landing', 'wifi', 'security'];
+const INFO_SECTION_IDS = ['info', 'landing', 'wifi', 'hours', 'security'];
+const BRANDING_SECTION_IDS = ['branding', 'gallery'];
+const MENU_WORKSPACE_SECTION_IDS = ['menu', 'categories', 'supercategories'];
+const MENU_WORKSPACE_STEPS = ['supercategories', 'categories', 'items'];
 const ADMIN_SECTION_ORDER_KEYS = ['about', 'payments', 'events', 'gallery', 'hours', 'contact'];
 const SECTION_ORDER_LABELS = {
     about: 'admin.section_order.about',
@@ -93,6 +96,7 @@ const SECTION_ORDER_LABELS = {
     contact: 'admin.section_order.contact'
 };
 let landingSectionOrderDraft = [...ADMIN_SECTION_ORDER_KEYS];
+let currentMenuWorkspaceStep = 'supercategories';
 const PRESET_THEME_TOKENS = {
     fast_food: {
         presetId: 'fast_food',
@@ -423,6 +427,10 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function toInlineJsString(value) {
+    return JSON.stringify(String(value ?? ''));
+}
+
 function replacePresetVars(value, vars) {
     if (typeof value !== 'string') return '';
     return value.replace(/\{\{(\w+)\}\}/g, (_match, key) => vars[key] || '');
@@ -741,51 +749,102 @@ function setAdminSaveState(type, message) {
     renderAdminSaveState();
 }
 
-function isParameterSection(sectionId) {
-    return PARAMETER_SECTION_IDS.includes(sectionId);
+function isInfoSection(sectionId) {
+    return INFO_SECTION_IDS.includes(sectionId);
+}
+
+function isBrandingSection(sectionId) {
+    return BRANDING_SECTION_IDS.includes(sectionId);
+}
+
+function isMenuWorkspaceSection(sectionId) {
+    return MENU_WORKSPACE_SECTION_IDS.includes(sectionId);
+}
+
+function resolveTopLevelSection(sectionId) {
+    if (isMenuWorkspaceSection(sectionId)) return 'menu';
+    if (isInfoSection(sectionId)) return 'info';
+    if (isBrandingSection(sectionId)) return 'branding';
+    return sectionId;
+}
+
+function getMenuWorkspaceStepForSection(sectionId) {
+    if (sectionId === 'supercategories') return 'supercategories';
+    if (sectionId === 'categories') return 'categories';
+    if (sectionId === 'menu') return currentMenuWorkspaceStep || 'supercategories';
+    return 'items';
 }
 
 function getSectionTitle(sectionId) {
-    if (isParameterSection(sectionId)) {
-        return t('admin.header.parameters', 'Parameters');
-    }
-
     const titles = {
-        menu: t('admin.header.menu_management', 'Menu Management'),
-        categories: t('admin.nav.categories', 'Categories'),
-        supercategories: t('admin.nav.supercategories', 'Super Categories'),
-        hours: t('admin.nav.hours', 'Hours'),
-        gallery: t('admin.nav.gallery', 'Gallery'),
-        stats: t('admin.nav.stats', 'Statistics'),
+        menu: 'Menu',
+        info: 'Info',
+        branding: 'Branding',
         'data-tools': t('admin.nav.data_tools', 'Seller Tools')
     };
 
-    return titles[sectionId] || t('admin.header.menu_management', 'Menu Management');
+    return titles[sectionId] || 'Menu';
 }
 
 function renderParameterShells() {
     const shells = Array.from(document.querySelectorAll('[data-parameter-shell]'));
     if (shells.length === 0) return;
-
-    const tabsMarkup = `
-        <div class="parameter-tabs">
-            <button type="button" class="parameter-tab-btn" data-parameter-target="branding" onclick="openParameterSection('branding')">${t('admin.parameters.branding', 'Brand Identity')}</button>
-            <button type="button" class="parameter-tab-btn" data-parameter-target="landing" onclick="openParameterSection('landing')">${t('admin.parameters.landing', 'Website Content')}</button>
-            <button type="button" class="parameter-tab-btn" data-parameter-target="wifi" onclick="openParameterSection('wifi')">${t('admin.parameters.wifi', 'WiFi & Contact')}</button>
-            <button type="button" class="parameter-tab-btn" data-parameter-target="security" onclick="openParameterSection('security')">${t('admin.parameters.security', 'Access')}</button>
-        </div>
-        <p class="parameter-panel-intro">${t('admin.parameters.subtitle', 'Manage the public website identity, key customer info, WiFi, and admin access from one configuration area.')}</p>
-    `;
-
     shells.forEach((shell) => {
-        shell.innerHTML = tabsMarkup;
+        shell.innerHTML = '';
+        shell.style.display = 'none';
     });
 }
 
-function syncParameterTabs(activeSectionId) {
-    document.querySelectorAll('.parameter-tab-btn').forEach((button) => {
-        button.classList.toggle('active', button.dataset.parameterTarget === activeSectionId);
+function syncParameterTabs() {
+}
+
+function moveSectionChildren(sourceId, targetId) {
+    const source = document.getElementById(sourceId);
+    const target = document.getElementById(targetId);
+    if (!source || !target || target.dataset.mounted === 'true') return;
+
+    Array.from(source.children).forEach((child) => {
+        if (child.hasAttribute('data-parameter-shell')) return;
+        target.appendChild(child);
     });
+
+    target.dataset.mounted = 'true';
+}
+
+function mountOwnerAdminLayout() {
+    moveSectionChildren('supercategories', 'menuSuperCategoryMount');
+    moveSectionChildren('categories', 'menuCategoryMount');
+    moveSectionChildren('landing', 'infoLandingMount');
+    moveSectionChildren('hours', 'infoHoursMount');
+    moveSectionChildren('wifi', 'infoWifiMount');
+    moveSectionChildren('security', 'infoSecurityMount');
+    moveSectionChildren('gallery', 'brandingGalleryMount');
+}
+
+function syncMenuWorkspaceStepButtons() {
+    MENU_WORKSPACE_STEPS.forEach((step) => {
+        const button = document.getElementById(`menuWorkspaceBtn-${step}`);
+        const panel = document.getElementById(`menuStepPanel-${step}`);
+        if (button) {
+            button.classList.toggle('active', step === currentMenuWorkspaceStep);
+        }
+        if (panel) {
+            panel.classList.toggle('active', step === currentMenuWorkspaceStep);
+        }
+    });
+}
+
+window.setMenuWorkspaceStep = function (step) {
+    if (!MENU_WORKSPACE_STEPS.includes(step)) return;
+    currentMenuWorkspaceStep = step;
+    syncMenuWorkspaceStepButtons();
+};
+
+function scrollToAdminSubsection(sectionId) {
+    const subsection = document.querySelector(`[data-admin-subsection="${sectionId}"]`);
+    if (subsection) {
+        subsection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function applyAdminCapabilities() {
@@ -832,9 +891,7 @@ async function loadAdminCapabilities() {
 }
 
 window.openParameterSection = function (sectionId) {
-    const parametersNavBtn = document.getElementById('parametersNavBtn');
-    if (!parametersNavBtn) return;
-    showSection(sectionId, parametersNavBtn);
+    showSection(sectionId);
 };
 
 async function performAdminLogin() {
@@ -884,6 +941,7 @@ async function showDashboard() {
     document.getElementById('adminSidebar').style.display = 'flex';
     document.getElementById('adminMain').style.display = 'block';
     await Promise.all([loadDataFromServer(), loadAdminCapabilities()]);
+    mountOwnerAdminLayout();
     refreshUI();
     initForms();
 }
@@ -894,6 +952,7 @@ async function adminLogout() {
 }
 
 function refreshUI() {
+    mountOwnerAdminLayout();
     renderParameterShells();
     renderAdminSaveState();
     renderCategoryFilters();
@@ -916,8 +975,8 @@ function refreshUI() {
     renderLaunchReadinessCard();
     updateStats();
     applyAdminCapabilities();
-    const activeSectionId = document.querySelector('.section.active')?.id || 'menu';
-    syncParameterTabs(activeSectionId);
+    syncParameterTabs();
+    syncMenuWorkspaceStepButtons();
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
     }
@@ -1035,17 +1094,17 @@ function getLaunchReadinessAction(check) {
         case 'branding_media':
             return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
         case 'core_contact_details':
-            return { sectionId: 'landing', label: t('admin.actions.open_landing', 'Open Landing') };
+            return { sectionId: 'info', label: 'Open Info' };
         case 'opening_hours':
-            return { sectionId: 'hours', label: t('admin.actions.open_hours', 'Open Hours') };
+            return { sectionId: 'info', label: 'Open Info' };
         case 'menu_coverage':
         case 'menu_translations':
         case 'item_imagery':
             return { sectionId: 'menu', label: t('admin.actions.open_menu', 'Open Menu') };
         case 'gallery':
-            return { sectionId: 'gallery', label: t('admin.actions.open_gallery', 'Open Gallery') };
+            return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
         case 'admin_security':
-            return { sectionId: 'security', label: t('admin.actions.open_security', 'Open Security') };
+            return { sectionId: 'info', label: 'Open Info' };
         default:
             return null;
     }
@@ -1060,7 +1119,7 @@ function getMediaSlotAction(slot) {
         case 'branding.hero.slide3':
             return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
         case 'homepage.gallery':
-            return { sectionId: 'gallery', label: t('admin.actions.open_gallery', 'Open Gallery') };
+            return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
         case 'menu.featured':
         case 'menu.promo':
         case 'menu.items':
@@ -1072,17 +1131,20 @@ function getMediaSlotAction(slot) {
 
 window.openReadinessSection = function (sectionId) {
     if (!sectionId) return;
+    const topLevelSection = resolveTopLevelSection(sectionId);
     let btn = null;
-    if (isParameterSection(sectionId)) {
-        btn = document.getElementById('parametersNavBtn');
+    if (topLevelSection === 'branding') {
+        btn = document.getElementById('brandingNavBtn');
+    } else if (topLevelSection === 'info') {
+        btn = document.getElementById('infoNavBtn');
     } else if (sectionId === 'data-tools') {
         btn = document.getElementById('sellerToolsNavBtn');
-    } else if (sectionId === 'menu') {
+    } else if (topLevelSection === 'menu') {
         btn = document.getElementById('menuNavBtn');
     } else {
         btn = Array.from(document.querySelectorAll('.nav-btn')).find((element) => {
             const handler = element.getAttribute('onclick') || '';
-            return handler.includes(`showSection('${sectionId}'`);
+            return handler.includes(`showSection('${topLevelSection}'`);
         });
     }
 
@@ -1486,24 +1548,25 @@ function renderMenuTable() {
             const itemDesc = escapeHtml(getAdminItemDisplayDescription(item));
             const itemCat = escapeHtml(item.cat || 'Uncategorized');
             const translationBadges = renderMenuTranslationBadges(item);
+            const inlineItemId = toInlineJsString(item.id);
             return `
             <tr>
                 <td>
-                    <div style="width:50px; height:50px; background:#eee; border-radius:8px; overflow:hidden; border:1px solid #ddd; cursor:pointer" onclick="openImageModal(${item.id})">
+                    <div style="width:50px; height:50px; background:#eee; border-radius:8px; overflow:hidden; border:1px solid #ddd; cursor:pointer" onclick='openImageModal(${inlineItemId})'>
                         ${firstImg ? `<img src="${firstImg}" style="width:100%; height:100%; object-fit:cover" onerror="this.src='images/menu-item-placeholder.svg'">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px">📷</div>'}
                     </div>
-                    ${images.length > 0 ? `<small style="display:block;text-align:center;font-size:10px;color:var(--primary);cursor:pointer;margin-top:2px" onclick="openImageModal(${item.id})">${images.length} image(s)</small>` : ''}
+                    ${images.length > 0 ? `<small style="display:block;text-align:center;font-size:10px;color:var(--primary);cursor:pointer;margin-top:2px" onclick='openImageModal(${inlineItemId})'>${images.length} image(s)</small>` : ''}
                 </td>
                 <td><strong>${itemName}</strong><div class="item-copy-meta"><div class="translation-badges">${translationBadges}</div></div><small style="color:#888">${itemDesc}</small></td>
                 <td>${itemCat}</td>
                 <td>MAD ${safePrice.toFixed(2)}</td>
                 <td><span style="color:#e01e2f">❤️</span> ${likeCount}</td>
-                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick="togglePromo(${item.id})">⭐</span></td>
-                <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick="toggleFeatured(${item.id})" style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">✨</span></td>
+                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>⭐</span></td>
+                <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick='toggleFeatured(${inlineItemId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">✨</span></td>
                 <td>
-                    <button class="action-btn" onclick="editItem(${item.id})" title="Modifier les détails">✏️</button>
-                    <button class="action-btn" onclick="openImageModal(${item.id})" title="Gérer les images">🖼️</button>
-                    <button class="action-btn" onclick="deleteItem(${item.id})">🗑️</button>
+                    <button class="action-btn" onclick='editItem(${inlineItemId})' title="Modifier les détails">✏️</button>
+                    <button class="action-btn" onclick='openImageModal(${inlineItemId})' title="Gérer les images">🖼️</button>
+                    <button class="action-btn" onclick='deleteItem(${inlineItemId})'>🗑️</button>
                 </td>
             </tr > `;
         }).join('');
@@ -1528,6 +1591,8 @@ function editItem(id) {
     if (!item) return;
 
     editingItemId = id;
+    currentMenuWorkspaceStep = 'items';
+    syncMenuWorkspaceStepButtons();
     document.getElementById('itemName').value = item.name || getAdminItemDisplayName(item);
     document.getElementById('itemCat').value = item.cat;
     document.getElementById('itemDesc').value = item.desc || getAdminItemDisplayDescription(item);
@@ -1564,7 +1629,8 @@ function editItem(id) {
     if (imgInput) imgInput.value = urlImages.join(', ');
 
     // Change form title and button
-    document.querySelector('#menu h3').textContent = "✏️ Modifier: " + getAdminItemDisplayName(item);
+    const itemEditorTitle = document.getElementById('menuItemEditorTitle');
+    if (itemEditorTitle) itemEditorTitle.textContent = "✏️ Modifier: " + getAdminItemDisplayName(item);
     document.querySelector('#foodForm .primary-btn').textContent = "💾 Mettre à jour le produit";
 
     // Scroll to form
@@ -1580,7 +1646,8 @@ function resetFoodForm() {
     const availableCb = document.getElementById('itemAvailable');
     if (availableCb) availableCb.checked = true;
     toggleSizesUI();
-    document.querySelector('#menu h3').textContent = "Add New Food Item";
+    const itemEditorTitle = document.getElementById('menuItemEditorTitle');
+    if (itemEditorTitle) itemEditorTitle.textContent = "Add New Food Item";
     document.querySelector('#foodForm .primary-btn').textContent = "➕ Save Product";
 }
 
@@ -2473,6 +2540,8 @@ function renderSuperCatTable() {
 function editSuperCat(id) {
     const sc = restaurantConfig.superCategories.find(s => s.id === id);
     if (!sc) return;
+    currentMenuWorkspaceStep = 'supercategories';
+    syncMenuWorkspaceStepButtons();
     const editingIdInput = document.getElementById('scEditingId');
     if (editingIdInput) editingIdInput.value = sc.id;
     document.getElementById('scName').value = sc.name;
@@ -2484,7 +2553,7 @@ function editSuperCat(id) {
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
 
-    document.getElementById('supercategories').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
 }
 
 function deleteSuperCat(id) {
@@ -3263,7 +3332,7 @@ window.applyOnboardingPreset = async function () {
         refreshUI();
         const targetButton = adminCapabilities.sellerToolsEnabled
             ? document.getElementById('sellerToolsNavBtn')
-            : document.getElementById('parametersNavBtn');
+            : document.getElementById('brandingNavBtn');
         const targetSection = adminCapabilities.sellerToolsEnabled ? 'data-tools' : 'branding';
         if (targetButton) {
             showSection(targetSection, targetButton);
@@ -3660,25 +3729,36 @@ function clearImageCache() {
     showToast(`✅ Cache image vidé pour ${count} produit(s).Stockage libéré!`);
 }
 function showSection(id, btn) {
-    const navButton = btn || (isParameterSection(id)
-        ? document.getElementById('parametersNavBtn')
-        : id === 'data-tools'
-            ? document.getElementById('sellerToolsNavBtn')
-            : id === 'menu'
+    const topLevelSection = resolveTopLevelSection(id);
+    const navButton = btn || (topLevelSection === 'branding'
+        ? document.getElementById('brandingNavBtn')
+        : topLevelSection === 'info'
+            ? document.getElementById('infoNavBtn')
+            : topLevelSection === 'data-tools'
+        ? document.getElementById('sellerToolsNavBtn')
+        : topLevelSection === 'menu'
                 ? document.getElementById('menuNavBtn')
                 : null);
     const sectionTitle = document.getElementById('section-title');
 
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    document.getElementById(topLevelSection).classList.add('active');
     if (navButton) {
         navButton.classList.add('active');
     }
     if (sectionTitle) {
-        sectionTitle.textContent = getSectionTitle(id);
+        sectionTitle.textContent = getSectionTitle(topLevelSection);
     }
-    syncParameterTabs(id);
+    syncParameterTabs(topLevelSection);
+
+    if (topLevelSection === 'menu') {
+        setMenuWorkspaceStep(getMenuWorkspaceStepForSection(id));
+    } else if (id !== topLevelSection) {
+        requestAnimationFrame(() => {
+            scrollToAdminSubsection(id);
+        });
+    }
 
     // Auto-close sidebar on mobile after choosing
     if (window.innerWidth <= 992) {
@@ -3701,12 +3781,14 @@ function renderCatTable() {
     if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">✏️</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">🗑️</button></td></tr>`).join('');
 }
 function editCat(cat) {
+    currentMenuWorkspaceStep = 'categories';
+    syncMenuWorkspaceStepButtons();
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = cat;
     document.getElementById('catName').value = cat;
     document.getElementById('catEmoji').value = catEmojis[cat] || '';
     setCategoryTranslationFields(cat);
-    document.getElementById('categories').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
 }
 function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Supprimez d\'abord les produits de cette catégorie !'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
 function initWifiForm() {

@@ -153,6 +153,84 @@
             animation: fadeIn 0.4s ease;
         }
 
+        .owner-section-stack {
+            display: grid;
+            gap: 22px;
+        }
+
+        .owner-section-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .menu-workspace-intro {
+            margin-bottom: 18px;
+            color: var(--text2);
+            max-width: 780px;
+        }
+
+        .menu-workspace-nav {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .menu-workspace-btn {
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text2);
+            border-radius: 18px;
+            padding: 16px 18px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .menu-workspace-btn strong {
+            display: block;
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .menu-workspace-btn span {
+            display: block;
+            font-size: 0.88rem;
+        }
+
+        .menu-workspace-btn.active {
+            background: linear-gradient(135deg, var(--primary), #ff7b00);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 16px 32px rgba(255, 141, 8, 0.22);
+        }
+
+        .menu-workspace-btn.active strong {
+            color: #fff;
+        }
+
+        .menu-step-panel {
+            display: none;
+        }
+
+        .menu-step-panel.active {
+            display: block;
+        }
+
+        .menu-step-panel > *:first-child {
+            margin-top: 0;
+        }
+
+        .menu-step-copy {
+            margin: 0 0 18px;
+            color: var(--text2);
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -2106,18 +2184,11 @@
 
     <div class="sidebar" id="adminSidebar" style="display:none">
         <h1 id="adminSidebarTitleText" data-i18n="admin.sidebar_title">🍽️ Restaurant Admin</h1>
-        <button class="nav-btn active" id="menuNavBtn" onclick="showSection('menu', this)" data-i18n="admin.nav.menu">🍴 Menu Items</button>
-        <button class="nav-btn" onclick="showSection('categories', this)" data-i18n="admin.nav.categories">📂 Categories</button>
-        <button class="nav-btn" id="parametersNavBtn" onclick="showSection('branding', this)" data-i18n="admin.nav.parameters">⚙️ Parameters</button>
-        <button class="nav-btn" onclick="showSection('supercategories', this)" data-i18n="admin.nav.supercategories">📂 Super Categories</button>
-        <button class="nav-btn" onclick="showSection('hours', this)" data-i18n="admin.nav.hours">🕐 Horaires</button>
+        <button class="nav-btn active" id="menuNavBtn" onclick="showSection('menu', this)">🍴 Menu</button>
+        <button class="nav-btn" id="infoNavBtn" onclick="showSection('info', this)">🧾 Info</button>
+        <button class="nav-btn" id="brandingNavBtn" onclick="showSection('branding', this)">🎨 Branding</button>
         <button class="nav-btn" id="sellerToolsNavBtn" onclick="showSection('data-tools', this)" data-i18n="admin.nav.data_tools">🧰 Data Tools</button>
-        <button class="nav-btn" onclick="showSection('stats', this)" data-i18n="admin.nav.stats">📊 Statistics</button>
-        <button class="nav-btn" onclick="showSection('gallery', this)" data-i18n="admin.nav.gallery">🖼️ Galerie</button>
         <div class="sidebar-actions">
-            <button class="nav-btn sidebar-save-btn" onclick="forceSaveChanges()" data-i18n="admin.nav.save_changes">
-                💾 Enregistrer les modifications
-            </button>
             <button class="nav-btn sidebar-logout-btn" onclick="adminLogout()" data-i18n="admin.nav.logout">🚪 Déconnexion</button>
         </div>
     </div>
@@ -2133,7 +2204,31 @@
 
         <!-- MENU SECTION -->
         <div id="menu" class="section active">
-            <h3 data-i18n="admin.menu.title">Add New Food Item</h3>
+            <p class="menu-workspace-intro">Keep the entire menu builder in one place. Start with super categories, move to categories, then finish with items.</p>
+            <div class="menu-workspace-nav">
+                <button type="button" id="menuWorkspaceBtn-supercategories" class="menu-workspace-btn active" onclick="setMenuWorkspaceStep('supercategories')">
+                    <strong>1. Super Categories</strong>
+                    <span>Meal groups and category organization</span>
+                </button>
+                <button type="button" id="menuWorkspaceBtn-categories" class="menu-workspace-btn" onclick="setMenuWorkspaceStep('categories')">
+                    <strong>2. Categories</strong>
+                    <span>Sections shown to customers inside the menu</span>
+                </button>
+                <button type="button" id="menuWorkspaceBtn-items" class="menu-workspace-btn" onclick="setMenuWorkspaceStep('items')">
+                    <strong>3. Items</strong>
+                    <span>Dishes, prices, translations, and images</span>
+                </button>
+            </div>
+            <div id="menuStepPanel-supercategories" class="menu-step-panel active">
+                <p class="menu-step-copy">Group categories into the first level of the menu. Customers see these before opening category lists.</p>
+                <div id="menuSuperCategoryMount" class="owner-section-stack"></div>
+            </div>
+            <div id="menuStepPanel-categories" class="menu-step-panel">
+                <p class="menu-step-copy">Build the categories that will appear inside each super category.</p>
+                <div id="menuCategoryMount" class="owner-section-stack"></div>
+            </div>
+            <div id="menuStepPanel-items" class="menu-step-panel">
+            <h3 id="menuItemEditorTitle" data-i18n="admin.menu.title">Add New Food Item</h3>
             <form id="foodForm">
                 <div class="form-grid form-grid-2">
                     <div class="form-group">
@@ -2256,6 +2351,25 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+            </div>
+        </div>
+
+        <div id="info" class="section">
+            <p class="copy-muted">Keep restaurant contact, public information, hours, WiFi, and admin access in one place.</p>
+            <div class="owner-section-stack">
+                <div class="owner-section-card" data-admin-subsection="landing">
+                    <div id="infoLandingMount"></div>
+                </div>
+                <div class="owner-section-card" data-admin-subsection="hours">
+                    <div id="infoHoursMount"></div>
+                </div>
+                <div class="owner-section-card" data-admin-subsection="wifi">
+                    <div id="infoWifiMount"></div>
+                </div>
+                <div class="owner-section-card" data-admin-subsection="security">
+                    <div id="infoSecurityMount"></div>
+                </div>
             </div>
         </div>
 
@@ -2586,6 +2700,9 @@
                 </div>
                 <button type="submit" class="primary-btn" data-i18n="admin.branding.save">Save Branding</button>
             </form>
+            <div class="owner-section-card" data-admin-subsection="gallery" style="margin-top:22px;">
+                <div id="brandingGalleryMount"></div>
+            </div>
         </div>
 
         <!-- LANDING PAGE SECTION -->
@@ -3102,12 +3219,6 @@
     <!-- CLEAR CACHE BUTTON -->
     <button id="clearCacheBtn" class="floating-action floating-action--cache" onclick="clearImageCache()" title="Clear local image cache">
         <span class="floating-action-icon">CC</span><span>Clear Image Cache</span>
-    </button>
-
-    <!-- FLOATING SAVE BUTTON -->
-    <button id="floatSaveBtn" class="floating-action floating-action--save" onclick="forceSaveChanges()" title="Save changes" data-i18n-title="admin.floating_save_title">
-        <span class="floating-action-icon">SV</span>
-        <span data-i18n="admin.floating_save">Publish Changes</span>
     </button>
 
     <style>
