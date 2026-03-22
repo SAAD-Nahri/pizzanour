@@ -1530,6 +1530,105 @@
             align-items: center;
         }
 
+        .importer-review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        .importer-review-stat {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #fff;
+            padding: 12px 14px;
+        }
+
+        .importer-review-stat strong {
+            display: block;
+            font-size: 1.15rem;
+            margin-bottom: 4px;
+        }
+
+        .importer-review-stat span {
+            color: var(--text2);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .importer-apply-panel {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: #fff;
+            padding: 16px;
+            margin: 14px 0;
+        }
+
+        .importer-apply-panel h5 {
+            margin: 0 0 8px;
+            font-size: 0.98rem;
+        }
+
+        .importer-apply-panel p {
+            margin-bottom: 12px;
+        }
+
+        .importer-scope-grid {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .importer-scope-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #fafbfc;
+        }
+
+        .importer-scope-option input {
+            width: auto;
+            margin: 2px 0 0;
+        }
+
+        .importer-scope-option strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .importer-scope-option span {
+            color: var(--text2);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        .importer-apply-note {
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.84rem;
+            line-height: 1.45;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .importer-apply-note.is-block {
+            display: block;
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid rgba(220, 38, 38, 0.14);
+        }
+
+        .importer-apply-note.is-warn {
+            display: block;
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid rgba(245, 158, 11, 0.16);
+        }
+
         .security-layout {
             display: grid;
             gap: 20px;
@@ -2799,8 +2898,8 @@
                 <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow">Importer</div>
                     <h4>AI Import Studio</h4>
-                    <p>Upload menu images or a menu PDF plus optional logo and venue photos. This seller-only importer generates a reviewable draft for menu data, categories, super-categories, translations, and starter branding suggestions before anything is applied live.</p>
-                    <p class="muted-copy">Current scope: up to 8 total menu files and 6 venue photos per run. Every run is also saved into a local seller job folder for review and retry.</p>
+                    <p>Upload menu images or a menu PDF. This seller-only importer extracts menu items, prices, categories, super-categories, and FR / EN / AR translations into a reviewable draft before anything is applied live.</p>
+                    <p class="muted-copy">Current scope: menu structure only. Branding, landing copy, gallery, and site identity are not changed by this importer.</p>
                     <div class="form-group">
                         <label for="importStudioRestaurantName">Restaurant Name</label>
                         <input type="text" id="importStudioRestaurantName" placeholder="e.g. Matsco" />
@@ -2814,21 +2913,38 @@
                         <input type="file" id="importStudioMenuFiles" accept="image/*,.pdf,application/pdf" multiple />
                     </div>
                     <div class="form-group">
-                        <label for="importStudioLogoFile">Logo Image (optional)</label>
-                        <input type="file" id="importStudioLogoFile" accept="image/*" />
-                    </div>
-                    <div class="form-group">
-                        <label for="importStudioVenueFiles">Restaurant Photos (optional)</label>
-                        <input type="file" id="importStudioVenueFiles" accept="image/*" multiple />
-                    </div>
-                    <div class="form-group">
                         <label for="importStudioNotes">Seller Notes (optional)</label>
-                        <textarea id="importStudioNotes" rows="3" placeholder="Add context such as cuisine type, preferred tone, or which photos are cover images."></textarea>
+                        <textarea id="importStudioNotes" rows="3" placeholder="Add menu context such as cuisine type, language, or how to group ambiguous dishes."></textarea>
                     </div>
                     <div class="tool-actions">
                         <button type="button" class="primary-btn btn-auto" onclick="generateImporterDraft()">Generate AI Draft</button>
-                        <button type="button" class="brand-secondary-btn" onclick="applyImporterDraft()">Apply Draft</button>
                         <button type="button" class="brand-secondary-btn" onclick="copyImporterDraftJson()">Copy Draft JSON</button>
+                    </div>
+                    <div id="importStudioReviewGrid" class="importer-review-grid"></div>
+                    <div class="importer-apply-panel">
+                        <h5>Apply Scope</h5>
+                        <p>Choose how much of the reviewed menu draft should replace the current site data.</p>
+                        <div class="importer-scope-grid">
+                            <label class="importer-scope-option">
+                                <input type="radio" name="importApplyScope" value="menu_only" checked />
+                                <div>
+                                    <strong>Menu items only</strong>
+                                    <span>Apply dishes, prices, descriptions, and translations, while keeping the current category structure untouched.</span>
+                                </div>
+                            </label>
+                            <label class="importer-scope-option">
+                                <input type="radio" name="importApplyScope" value="menu_structure" />
+                                <div>
+                                    <strong>Menu + category structure</strong>
+                                    <span>Apply dishes plus imported categories and super-categories. Site identity, landing, gallery, and branding remain unchanged.</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="tool-actions">
+                            <button type="button" id="applyImporterMenuOnlyBtn" class="primary-btn btn-auto" onclick="applyImporterDraft('menu_only')">Apply Menu Only</button>
+                            <button type="button" id="applyImporterStructureBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_structure')">Apply Menu + Structure</button>
+                        </div>
+                        <div id="importStudioApplyNote" class="importer-apply-note"></div>
                     </div>
                     <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft generated yet. Upload menu images, generate a draft, then review blockers and warnings here."></textarea>
                     <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON will appear here for seller review before apply."></textarea>

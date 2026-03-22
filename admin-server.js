@@ -69,9 +69,10 @@ const loginAttempts = new Map();
 
 const IMPORTER_SYSTEM_PROMPT = [
   "You generate seller-side draft JSON for a white-label restaurant website.",
-  "Use the uploaded menu images as the source of truth for menu items, prices, categories, and descriptions.",
+  "Use the uploaded menu images or PDFs as the source of truth for menu items, prices, categories, and descriptions.",
   "Infer FR, EN, and AR names and descriptions for menu items, categories, and super-categories when confidence is reasonable.",
   "Do not invent contact details, maps, hours, WiFi, or social links.",
+  "Do not invent branding, hero media, gallery media, website copy, or restaurant story content.",
   "If information is missing, leave the field empty and record a warning.",
   "Prefer clean restaurant website categories and group them into super-categories only when the grouping is clear.",
   "Flag uncertainty in review.warnings or review.blockers instead of pretending confidence.",
@@ -123,9 +124,7 @@ const IMPORTER_TEXT_FORMAT = {
         required: [
           "menu",
           "categories",
-          "superCategories",
-          "branding",
-          "contentTranslations"
+          "superCategories"
         ],
         properties: {
           menu: {
@@ -173,66 +172,6 @@ const IMPORTER_TEXT_FORMAT = {
                   items: { type: "string" }
                 },
                 translations: IMPORTER_TRANSLATIONS_SCHEMA
-              }
-            }
-          },
-          branding: {
-            type: "object",
-            additionalProperties: false,
-            required: ["presetId", "restaurantName", "shortName", "tagline", "primaryColor", "secondaryColor", "accentColor"],
-            properties: {
-              presetId: { type: "string" },
-              restaurantName: { type: "string" },
-              shortName: { type: "string" },
-              tagline: { type: "string" },
-              primaryColor: { type: "string" },
-              secondaryColor: { type: "string" },
-              accentColor: { type: "string" }
-            }
-          },
-          contentTranslations: {
-            type: "object",
-            additionalProperties: false,
-            required: ["fr", "en", "ar"],
-            properties: {
-              fr: {
-                type: "object",
-                additionalProperties: false,
-                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
-                properties: {
-                  homeTitle: { type: "string" },
-                  homeSubtitle: { type: "string" },
-                  aboutTitle: { type: "string" },
-                  aboutText: { type: "string" },
-                  footerNote: { type: "string" },
-                  footerRights: { type: "string" }
-                }
-              },
-              en: {
-                type: "object",
-                additionalProperties: false,
-                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
-                properties: {
-                  homeTitle: { type: "string" },
-                  homeSubtitle: { type: "string" },
-                  aboutTitle: { type: "string" },
-                  aboutText: { type: "string" },
-                  footerNote: { type: "string" },
-                  footerRights: { type: "string" }
-                }
-              },
-              ar: {
-                type: "object",
-                additionalProperties: false,
-                required: ["homeTitle", "homeSubtitle", "aboutTitle", "aboutText", "footerNote", "footerRights"],
-                properties: {
-                  homeTitle: { type: "string" },
-                  homeSubtitle: { type: "string" },
-                  aboutTitle: { type: "string" },
-                  aboutText: { type: "string" },
-                  footerNote: { type: "string" },
-                  footerRights: { type: "string" }
-                }
               }
             }
           }
@@ -445,6 +384,7 @@ function fillTranslationSet(translations, fallbackName = "", fallbackDesc = "") 
 
 function buildImporterDraftSkeleton(input) {
   const menuImageUrls = Array.isArray(input.menuImageUrls) ? input.menuImageUrls : [];
+  const menuPdfUrls = Array.isArray(input.menuPdfUrls) ? input.menuPdfUrls : [];
   const restaurantPhotoUrls = Array.isArray(input.restaurantPhotoUrls) ? input.restaurantPhotoUrls : [];
   const restaurantName = typeof input.restaurantName === "string" ? input.restaurantName.trim() : "";
   const shortName = typeof input.shortName === "string" ? input.shortName.trim() : "";
@@ -513,7 +453,7 @@ function buildImporterDraftSkeleton(input) {
       }
     },
     review: {
-      sourceFiles: [...menuImageUrls, ...restaurantPhotoUrls, ...(logoImageUrl ? [logoImageUrl] : [])],
+      sourceFiles: [...menuImageUrls, ...menuPdfUrls],
       summary: "",
       blockers: [],
       warnings: [],
@@ -1267,6 +1207,7 @@ async function generateImporterDraft(input) {
         restaurantName,
         shortName,
         menuImageUrls,
+        menuPdfUrls,
         logoImageUrl,
         restaurantPhotoUrls
       });
@@ -1325,6 +1266,7 @@ async function generateImporterDraft(input) {
       restaurantName,
       shortName,
       menuImageUrls,
+      menuPdfUrls,
       logoImageUrl,
       restaurantPhotoUrls
     });

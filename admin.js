@@ -5,6 +5,7 @@ let restaurantConfig = window.restaurantConfig || window.defaultConfig || {};
 let promoIds = [];
 let lastImporterDraft = null;
 let lastImporterDraftMeta = null;
+let lastImporterReviewReport = null;
 let lastGeneratedMedia = null;
 const IMPORT_STUDIO_MAX_MENU_IMAGES = 8;
 const IMPORT_STUDIO_MAX_VENUE_IMAGES = 6;
@@ -2602,11 +2603,23 @@ window.importRestaurantBackup = async function () {
 function renderImporterDraftOutputs(draft) {
     const summaryEl = document.getElementById('importStudioSummaryOutput');
     const jsonEl = document.getElementById('importStudioJsonOutput');
+    const reviewGridEl = document.getElementById('importStudioReviewGrid');
+    const applyNoteEl = document.getElementById('importStudioApplyNote');
+    const applyMenuOnlyBtn = document.getElementById('applyImporterMenuOnlyBtn');
+    const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
     if (!summaryEl || !jsonEl) return;
 
     if (!draft) {
         summaryEl.value = 'No draft generated yet.';
         jsonEl.value = '';
+        lastImporterReviewReport = null;
+        if (reviewGridEl) reviewGridEl.innerHTML = '';
+        if (applyNoteEl) {
+            applyNoteEl.className = 'importer-apply-note';
+            applyNoteEl.textContent = '';
+        }
+        if (applyMenuOnlyBtn) applyMenuOnlyBtn.disabled = true;
+        if (applyStructureBtn) applyStructureBtn.disabled = true;
         return;
     }
 
@@ -2617,6 +2630,8 @@ function renderImporterDraftOutputs(draft) {
     const blockers = Array.isArray(review.blockers) ? review.blockers : [];
     const warnings = Array.isArray(review.warnings) ? review.warnings : [];
     const untranslatedItems = Array.isArray(review.untranslatedItems) ? review.untranslatedItems : [];
+    const reviewReport = getImporterReviewReport(draft);
+    lastImporterReviewReport = reviewReport;
 
     summaryEl.value = [
         `Job id: ${lastImporterDraftMeta?.jobId || 'n/a'}`,
@@ -2638,6 +2653,102 @@ function renderImporterDraftOutputs(draft) {
     ].join('\n');
 
     jsonEl.value = JSON.stringify(draft, null, 2);
+
+    if (reviewGridEl) {
+        reviewGridEl.innerHTML = [
+            { value: reviewReport.menuItemCount, label: 'Items' },
+            { value: reviewReport.categoryCount, label: 'Categories' },
+            { value: reviewReport.superCategoryCount, label: 'Super Categories' },
+            { value: reviewReport.missingPriceCount, label: 'Missing Prices' },
+            { value: reviewReport.missingTranslationCount, label: 'Missing Names' },
+            { value: reviewReport.uncategorizedCount, label: 'Unmapped Items' }
+        ].map((entry) => `
+            <div class="importer-review-stat">
+                <strong>${entry.value}</strong>
+                <span>${entry.label}</span>
+            </div>
+        `).join('');
+    }
+
+    if (applyMenuOnlyBtn) {
+        applyMenuOnlyBtn.disabled = !reviewReport.canApplyMenuOnly;
+    }
+    if (applyStructureBtn) {
+        applyStructureBtn.disabled = !reviewReport.canApplyMenuStructure;
+    }
+
+    if (applyNoteEl) {
+        if (reviewReport.blockers.length) {
+            applyNoteEl.className = 'importer-apply-note is-block';
+            applyNoteEl.textContent = `Blockers found: ${reviewReport.blockers.join(' | ')}`;
+        } else if (reviewReport.warnings.length) {
+            applyNoteEl.className = 'importer-apply-note is-warn';
+            applyNoteEl.textContent = `Warnings: ${reviewReport.warnings.slice(0, 4).join(' | ')}`;
+        } else {
+            applyNoteEl.className = 'importer-apply-note';
+            applyNoteEl.textContent = '';
+        }
+    }
+}
+
+function getImporterReviewReport(draft) {
+    const restaurantData = draft?.restaurantData || {};
+    const review = draft?.review || {};
+    const menuItems = Array.isArray(restaurantData.menu) ? restaurantData.menu : [];
+    const catMap = restaurantData.catEmojis && typeof restaurantData.catEmojis === 'object' ? restaurantData.catEmojis : {};
+    const categoryTranslationMap = restaurantData.categoryTranslations && typeof restaurantData.categoryTranslations === 'object'
+        ? restaurantData.categoryTranslations
+        : {};
+    const superCategories = Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : [];
+
+    const missingPriceCount = menuItems.filter((item) => item?.price === null || item?.price === '' || typeof item?.price === 'undefined').length;
+    const missingTranslationCount = menuItems.filter((item) => {
+        const translations = normalizeMenuItemTranslations(item?.translations);
+        return ['fr', 'en', 'ar'].some((lang) => !translations[lang]?.name);
+    }).length;
+    const missingDescriptionCount = menuItems.filter((item) => {
+        const desc = typeof item?.desc === 'string' ? item.desc.trim() : '';
+        return !desc;
+    }).length;
+    const uncategorizedCount = menuItems.filter((item) => {
+        const cat = typeof item?.cat === 'string' ? item.cat.trim() : '';
+        return !cat || !catMap[cat];
+    }).length;
+    const currentCategoryKeys = Object.keys(catEmojis || {});
+    const menuOnlyCategoryMismatchCount = menuItems.filter((item) => {
+        const cat = typeof item?.cat === 'string' ? item.cat.trim() : '';
+        return cat && !currentCategoryKeys.includes(cat);
+    }).length;
+    const categoryKeys = Object.keys(catMap);
+
+    const derivedBlockers = [];
+    if (!menuItems.length) derivedBlockers.push('No menu items were extracted.');
+    if (!categoryKeys.length) derivedBlockers.push('No categories were extracted.');
+    if (uncategorizedCount > 0) derivedBlockers.push(`${uncategorizedCount} menu item(s) are not mapped to a valid category.`);
+
+    const baseBlockers = Array.isArray(review.blockers) ? review.blockers.filter(Boolean) : [];
+    const warnings = [
+        ...(Array.isArray(review.warnings) ? review.warnings.filter(Boolean) : []),
+        ...(missingPriceCount > 0 ? [`${missingPriceCount} item(s) still miss a price.`] : []),
+        ...(missingTranslationCount > 0 ? [`${missingTranslationCount} item(s) still miss one or more translated names.`] : []),
+        ...(missingDescriptionCount > 0 ? [`${missingDescriptionCount} item(s) still miss a description.`] : []),
+        ...(menuOnlyCategoryMismatchCount > 0 ? [`${menuOnlyCategoryMismatchCount} item(s) use categories that do not exist in the current site. Use "Menu + category structure" instead of "Menu only".`] : [])
+    ];
+
+    return {
+        menuItemCount: menuItems.length,
+        categoryCount: categoryKeys.length || Object.keys(categoryTranslationMap).length,
+        superCategoryCount: superCategories.length,
+        missingPriceCount,
+        missingTranslationCount,
+        missingDescriptionCount,
+        uncategorizedCount,
+        menuOnlyCategoryMismatchCount,
+        blockers: [...baseBlockers, ...derivedBlockers],
+        warnings,
+        canApplyMenuOnly: menuItems.length > 0 && menuOnlyCategoryMismatchCount === 0,
+        canApplyMenuStructure: menuItems.length > 0 && categoryKeys.length > 0 && uncategorizedCount === 0
+    };
 }
 
 function renderMediaStudioOutputs(result) {
@@ -2709,9 +2820,8 @@ async function uploadFilesForImporter(fileList, label) {
     return urls;
 }
 
-function buildImporterApplyPayload(draft) {
+function buildImporterApplyPayload(draft, scope = 'menu_only') {
     const imported = draft?.restaurantData || {};
-    const importedContent = imported.contentTranslations || {};
     const importedMenu = Array.isArray(imported.menu) && imported.menu.length ? imported.menu : menu;
     const preparedMenu = importedMenu.map((item) => {
         const images = Array.isArray(item?.images)
@@ -2741,56 +2851,53 @@ function buildImporterApplyPayload(draft) {
         return item;
     });
 
+    const applyStructure = scope === 'menu_structure';
+
     return {
         menu: preparedMenu,
-        catEmojis: {
-            ...catEmojis,
-            ...(imported.catEmojis || {})
-        },
-        categoryTranslations: {
-            ...categoryTranslations,
-            ...(imported.categoryTranslations || {})
-        },
+        catEmojis: applyStructure
+            ? { ...(imported.catEmojis || {}) }
+            : { ...catEmojis },
+        categoryTranslations: applyStructure
+            ? { ...(imported.categoryTranslations || {}) }
+            : { ...categoryTranslations },
         wifi: {
-            ssid: imported.wifi?.ssid || restaurantConfig.wifi?.name || '',
-            pass: imported.wifi?.pass || restaurantConfig.wifi?.code || ''
+            ssid: restaurantConfig.wifi?.name || '',
+            pass: restaurantConfig.wifi?.code || ''
         },
         social: {
-            ...(restaurantConfig.socials || {}),
-            ...(imported.social || {})
+            ...(restaurantConfig.socials || {})
         },
-        guestExperience: imported.guestExperience || restaurantConfig.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] },
-        sectionVisibility: imported.sectionVisibility || restaurantConfig.sectionVisibility || window.defaultConfig?.sectionVisibility || {},
-        sectionOrder: imported.sectionOrder || restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
+        guestExperience: restaurantConfig.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] },
+        sectionVisibility: restaurantConfig.sectionVisibility || window.defaultConfig?.sectionVisibility || {},
+        sectionOrder: restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
         branding: {
-            ...(restaurantConfig.branding || window.defaultBranding || {}),
-            ...(imported.branding || {})
+            ...(restaurantConfig.branding || window.defaultBranding || {})
         },
         contentTranslations: {
-            fr: { ...(restaurantConfig.contentTranslations?.fr || {}), ...(importedContent.fr || {}) },
-            en: { ...(restaurantConfig.contentTranslations?.en || {}), ...(importedContent.en || {}) },
-            ar: { ...(restaurantConfig.contentTranslations?.ar || {}), ...(importedContent.ar || {}) }
+            fr: { ...(restaurantConfig.contentTranslations?.fr || {}) },
+            en: { ...(restaurantConfig.contentTranslations?.en || {}) },
+            ar: { ...(restaurantConfig.contentTranslations?.ar || {}) }
         },
-        promoId: Array.isArray(imported.promoIds) && imported.promoIds.length ? imported.promoIds[0] : (imported.promoId ?? (promoIds.length > 0 ? promoIds[0] : null)),
-        promoIds: Array.isArray(imported.promoIds) ? imported.promoIds : promoIds,
-        superCategories: Array.isArray(imported.superCategories) && imported.superCategories.length ? imported.superCategories : (restaurantConfig.superCategories || []),
-        hours: Array.isArray(imported.hours) && imported.hours.length ? imported.hours : (restaurantConfig._hours || null),
-        hoursNote: imported.hoursNote || restaurantConfig._hoursNote || '',
-        gallery: Array.isArray(imported.gallery) && imported.gallery.length ? imported.gallery : (restaurantConfig.gallery || []),
+        promoId: promoIds.length > 0 ? promoIds[0] : null,
+        promoIds: promoIds,
+        superCategories: applyStructure
+            ? (Array.isArray(imported.superCategories) && imported.superCategories.length ? imported.superCategories : [])
+            : (restaurantConfig.superCategories || []),
+        hours: restaurantConfig._hours || null,
+        hoursNote: restaurantConfig._hoursNote || '',
+        gallery: restaurantConfig.gallery || [],
         landing: {
             location: {
-                ...(restaurantConfig.location || {}),
-                ...(imported.landing?.location || {})
+                ...(restaurantConfig.location || {})
             },
-            phone: imported.landing?.phone || restaurantConfig.phone || ''
+            phone: restaurantConfig.phone || ''
         }
     };
 }
 
 window.generateImporterDraft = async function () {
     const menuFiles = Array.from(document.getElementById('importStudioMenuFiles')?.files || []);
-    const logoFile = document.getElementById('importStudioLogoFile')?.files?.[0] || null;
-    const venueFiles = document.getElementById('importStudioVenueFiles')?.files;
     const restaurantName = (document.getElementById('importStudioRestaurantName')?.value || '').trim();
     const shortName = (document.getElementById('importStudioShortName')?.value || '').trim();
     const notes = (document.getElementById('importStudioNotes')?.value || '').trim();
@@ -2807,17 +2914,10 @@ window.generateImporterDraft = async function () {
         return;
     }
 
-    if (venueFiles && venueFiles.length > IMPORT_STUDIO_MAX_VENUE_IMAGES) {
-        showToast(`Use up to ${IMPORT_STUDIO_MAX_VENUE_IMAGES} restaurant photos per draft.`);
-        return;
-    }
-
     try {
         showToast('Uploading import assets...');
         const menuImageUrls = await uploadFilesForImporter(menuImageFiles, 'menu image');
         const menuPdfUrls = await uploadFilesForImporter(menuPdfFiles, 'menu PDF');
-        const restaurantPhotoUrls = await uploadFilesForImporter(venueFiles, 'restaurant photo');
-        const logoImageUrl = logoFile ? await uploadImageToServer(logoFile) : '';
 
         showToast('Generating AI import draft...');
         const response = await fetch('/api/importer/draft', {
@@ -2830,8 +2930,8 @@ window.generateImporterDraft = async function () {
                 notes,
                 menuImageUrls,
                 menuPdfUrls,
-                logoImageUrl,
-                restaurantPhotoUrls
+                logoImageUrl: '',
+                restaurantPhotoUrls: []
             })
         });
 
@@ -2860,18 +2960,31 @@ window.generateImporterDraft = async function () {
     }
 };
 
-window.applyImporterDraft = async function () {
+window.applyImporterDraft = async function (scope = 'menu_only') {
     if (!lastImporterDraft) {
         showToast('Generate a draft first.');
         return;
     }
 
-    if (!confirm('Apply this importer draft to the current restaurant instance? Review the JSON first if you are unsure.')) {
+    const report = lastImporterReviewReport || getImporterReviewReport(lastImporterDraft);
+    if (scope === 'menu_structure' && !report.canApplyMenuStructure) {
+        showToast('Fix the importer blockers before applying category structure.');
+        return;
+    }
+    if (scope === 'menu_only' && !report.canApplyMenuOnly) {
+        showToast('The draft does not contain any menu items to apply.');
+        return;
+    }
+
+    const confirmText = scope === 'menu_structure'
+        ? 'Apply menu items and imported category structure to the current restaurant instance? Branding, landing, gallery, and other site identity settings will stay unchanged.'
+        : 'Apply menu items only to the current restaurant instance? Category structure and site identity settings will stay unchanged.';
+    if (!confirm(confirmText)) {
         return;
     }
 
     try {
-        const payload = buildImporterApplyPayload(lastImporterDraft);
+        const payload = buildImporterApplyPayload(lastImporterDraft, scope);
         const response = await fetch('/api/data/import', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2886,7 +2999,7 @@ window.applyImporterDraft = async function () {
 
         await loadDataFromServer();
         refreshUI();
-        showToast('Importer draft applied.');
+        showToast(scope === 'menu_structure' ? 'Menu and structure applied.' : 'Menu items applied.');
     } catch (error) {
         console.error('Apply importer draft error:', error);
         showToast(`Draft apply failed: ${error.message}`);

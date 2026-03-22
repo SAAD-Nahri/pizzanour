@@ -15,7 +15,7 @@ It is now a seller-oriented white-label restaurant website template with:
 - preset-aware branding controls for colors, surfaces, text, and menu mood
 - a branding preview that mirrors homepage/menu mood more closely during setup
 - preset-specific public styling so each main preset feels more distinct on homepage and menu
-- a seller-only AI Import Studio that turns uploaded menu images into a reviewable schema draft
+- a seller-only AI Import Studio that turns uploaded menu PDFs or menu images into a reviewable menu draft
 - a seller-only AI Media Studio that generates hero or generic gallery visuals into local uploads
 - section visibility and ordering controls
 - quick-launch presets for new restaurants
@@ -35,7 +35,7 @@ The current goal is to turn this into a dependable first sellable product that c
 - [MEDIA_IMPORT_BASIS.md](./MEDIA_IMPORT_BASIS.md): future-facing basis for seller-side asset libraries, static media assignment, and PDF/image import
 - [IMPORTER_PAYLOAD_SPEC.md](./IMPORTER_PAYLOAD_SPEC.md): implementable importer contract against the live restaurant schema
 - [SELLER_IMAGE_PIPELINE.md](./SELLER_IMAGE_PIPELINE.md): seller-only image sourcing and generation workflow for hero, gallery, and product imagery
-- [SELLER_BUNDLE_PIPELINE.md](./SELLER_BUNDLE_PIPELINE.md): staged seller-only job flow for turning menu/logo/venue files into a reviewable website bundle
+- [SELLER_BUNDLE_PIPELINE.md](./SELLER_BUNDLE_PIPELINE.md): staged seller-only job flow for turning menu source files into a reviewable restaurant setup bundle
 - [LOCAL_IMAGE_LIBRARY_PLAN.md](./LOCAL_IMAGE_LIBRARY_PLAN.md): deeper architecture plan for deterministic local asset reuse and controlled AI generation
 
 ## Current Product Status
@@ -61,8 +61,8 @@ Already working in the codebase:
 - rerender-safe staged motion on the menu landing, promo, featured, category, and item flows instead of one-shot paint-only animation
 - hashed admin credentials with throttling and security status
 - safer public handling for broken URLs and missing images
-- seller-side AI menu import drafts from uploaded menu images plus optional logo/venue photos
-- seller-side AI menu import support for menu PDFs as well as menu images
+- seller-side AI menu import drafts from uploaded menu PDFs or menu images
+- importer apply scopes so menu data can be applied without touching branding or public-site identity
 - local seller job folders that preserve importer inputs and draft artifacts for review/retry
 - local seller-side media-library catalog foundation for reusable hero, gallery, and future product assets
 
@@ -173,8 +173,8 @@ The future importer and launcher should write into that same normalized shape in
 
 Current importer status:
 
-- image-based input works now through `Seller Tools -> AI Import Studio`
-- the seller uploads menu images first, then optionally a logo and venue photos
+- PDF and image menu input work through `Seller Tools -> AI Import Studio`
+- the importer is menu-scoped: it extracts dishes, prices, categories, super-categories, and FR / EN / AR translations without overwriting branding or landing identity
 - the server generates a review draft against the live restaurant schema
 - the draft must be reviewed and explicitly applied
 - PDF parsing is still a later slice

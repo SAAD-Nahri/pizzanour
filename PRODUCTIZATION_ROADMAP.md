@@ -8,6 +8,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The seller importer is now being tightened into a menu-scoped workflow instead of a broad website generator: the review UI now highlights extraction quality and apply scopes, and the apply path is being limited to menu items plus optional category structure so branding, landing copy, gallery, and site identity stay under explicit manual control
 - The admin is being simplified toward launch-ready client use: seller-only tools are now behind server capabilities, AI media can be disabled independently, and the client-facing configuration path is being consolidated under a single `Parameters` entry instead of scattering identity settings across multiple top-level nav items
 - Public/admin deployment verification is stronger now: both services expose a build fingerprint in `/health` and `/build.json`, and HTML/JS/CSS responses are sent with no-store headers so stale public assets are easier to detect and less likely to stick after redeploy
 - The seller-only importer now accepts menu PDFs as well as menu images, persists each run into a local `seller-jobs/` workspace, and can prefill imported menu items with approved local-library product images before seller apply
