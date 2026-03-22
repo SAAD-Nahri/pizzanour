@@ -846,6 +846,9 @@ window.setMenuWorkspaceStep = function (step) {
 function scrollToAdminSubsection(sectionId) {
     const subsection = document.querySelector(`[data-admin-subsection="${sectionId}"]`);
     if (subsection) {
+        if (subsection.tagName === 'DETAILS') {
+            subsection.open = true;
+        }
         subsection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -1257,10 +1260,6 @@ function refreshUI() {
     mountOwnerAdminLayout();
     renderParameterShells();
     renderAdminSaveState();
-    renderCategoryFilters();
-    renderMenuTable();
-    renderCatTable();
-    renderSuperCatTable();
     renderMenuBuilder();
     populateCatDropdown();
     initBrandingForm();

@@ -166,6 +166,23 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         }
 
+        .admin-panel-disclosure {
+            margin: 0;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .admin-panel-disclosure summary {
+            padding: 20px 24px;
+        }
+
+        .admin-panel-disclosure .admin-disclosure-body {
+            padding: 0 24px 24px;
+        }
+
         .menu-workspace-intro {
             margin-bottom: 18px;
             color: var(--text2);
@@ -2613,15 +2630,39 @@
                 <div class="owner-section-card" data-admin-subsection="landing">
                     <div id="infoLandingMount"></div>
                 </div>
-                <div class="owner-section-card" data-admin-subsection="hours">
-                    <div id="infoHoursMount"></div>
-                </div>
-                <div class="owner-section-card" data-admin-subsection="wifi">
-                    <div id="infoWifiMount"></div>
-                </div>
-                <div class="owner-section-card" data-admin-subsection="security">
-                    <div id="infoSecurityMount"></div>
-                </div>
+                <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="hours">
+                    <summary>
+                        <span>
+                            <span>Hours</span>
+                            <span class="admin-disclosure-copy">Open this only when the restaurant schedule changes.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <div id="infoHoursMount"></div>
+                    </div>
+                </details>
+                <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="wifi">
+                    <summary>
+                        <span>
+                            <span>WiFi</span>
+                            <span class="admin-disclosure-copy">Open this only when the network name or password changes.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <div id="infoWifiMount"></div>
+                    </div>
+                </details>
+                <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="security">
+                    <summary>
+                        <span>
+                            <span>Admin Access</span>
+                            <span class="admin-disclosure-copy">Open this only when login credentials need to be changed.</span>
+                        </span>
+                    </summary>
+                    <div class="admin-disclosure-body">
+                        <div id="infoSecurityMount"></div>
+                    </div>
+                </details>
             </div>
         </div>
 
@@ -2987,9 +3028,17 @@
                 </div>
                 <button type="submit" class="primary-btn" data-i18n="admin.branding.save">Save Branding</button>
             </form>
-            <div class="owner-section-card" data-admin-subsection="gallery" style="margin-top:22px;">
-                <div id="brandingGalleryMount"></div>
-            </div>
+            <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="gallery" style="margin-top:22px;">
+                <summary>
+                    <span>
+                        <span>Gallery</span>
+                        <span class="admin-disclosure-copy">Open this only when you need to manage homepage gallery images.</span>
+                    </span>
+                </summary>
+                <div class="admin-disclosure-body">
+                    <div id="brandingGalleryMount"></div>
+                </div>
+            </details>
         </div>
 
         <!-- LANDING PAGE SECTION -->
