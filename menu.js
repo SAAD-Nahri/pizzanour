@@ -1171,9 +1171,9 @@ function renderHistory() {
     if (!container) return;
     container.innerHTML = history.length === 0
         ? `<p class="history-empty">${t('history_empty', 'Aucune commande récente.')}</p>`
-        : history.map((t, i) => `
+        : history.map((ticketHtml, i) => `
             <div class="history-ticket history-ticket-wrap">
-                ${t}
+                ${ticketHtml}
                 <button onclick="deleteHistoryItem(${i})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}">🗑️</button>
             </div>
         `).join('');

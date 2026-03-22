@@ -8,6 +8,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The public history modal no longer crashes on open: `renderHistory()` now keeps the shared `t()` translation helper intact instead of shadowing it with a loop variable, so the history delete title/button can render without throwing `TypeError: t is not a function`
 - The public menu runtime is now safer for imported data: item interactions use string-safe ids instead of assuming numeric ids, so imported dishes can open detail/add-to-cart correctly, and background `/api/data` sync now retries hydration safely while polling less aggressively instead of hammering the server every 2 seconds
 - The public menu now self-heals when saved super-categories are stale or incomplete: it derives effective runtime super-category cards from the actual live menu categories, so imports/reset states cannot leave the first menu sheet pointing at dead default groups that no longer match the current dishes
 - The seller importer now does stronger deterministic cleanup before review/apply: OCR/mojibake text is normalized, inline name/description text is split more safely, missing prices are recovered from extracted menu text when possible, duplicate menu items are collapsed, duplicate ids are rebuilt, fallback super-categories are generated to keep the public menu navigable, and the review gate now blocks apply on duplicate ids, orphan super-category refs, duplicate item names inside a category, and weak fallback-only translations
