@@ -166,6 +166,46 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         }
 
+        .admin-summary-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin: 18px 0 22px;
+        }
+
+        .admin-summary-card {
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: #fff;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.04);
+        }
+
+        .admin-summary-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text2);
+            margin-bottom: 6px;
+        }
+
+        .admin-summary-value {
+            display: block;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .admin-summary-note {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: var(--text2);
+            line-height: 1.4;
+        }
+
         .admin-panel-disclosure {
             margin: 0;
             border: 1px solid var(--border);
@@ -2434,6 +2474,7 @@
                         <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto" onclick="openMenuBuilderAdd()">Add</button>
                     </div>
                 </div>
+                <div id="menuSummaryStrip" class="admin-summary-strip"></div>
                 <div class="table-container">
                     <table id="menuBuilderTable" class="menu-builder-table">
                         <thead></thead>
@@ -2626,6 +2667,7 @@
 
         <div id="info" class="section">
             <p class="copy-muted">Keep restaurant contact, public information, hours, WiFi, and admin access in one place.</p>
+            <div id="infoSummaryStrip" class="admin-summary-strip"></div>
             <div class="owner-section-stack">
                 <div class="owner-section-card" data-admin-subsection="landing">
                     <div id="infoLandingMount"></div>
@@ -2806,6 +2848,7 @@
             <h3 data-i18n="admin.branding.title">Brand & Theme System</h3>
             <p data-i18n="admin.branding.subtitle">Configure the reusable identity that should follow this restaurant across the public website and menu.
             </p>
+            <div id="brandingSummaryStrip" class="admin-summary-strip"></div>
             <form id="brandingForm">
                 <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
