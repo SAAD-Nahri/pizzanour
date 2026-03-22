@@ -231,6 +231,98 @@
             color: var(--text2);
         }
 
+        .menu-builder-shell {
+            display: grid;
+            gap: 18px;
+        }
+
+        .menu-builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .menu-builder-breadcrumbs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            color: var(--text2);
+            font-size: 0.9rem;
+        }
+
+        .menu-builder-crumb {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            border: 1px solid var(--border);
+        }
+
+        .menu-builder-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .menu-builder-table tbody tr {
+            cursor: pointer;
+        }
+
+        .menu-builder-table tbody tr:hover {
+            background: #fff8f0;
+        }
+
+        .menu-builder-row-copy {
+            color: var(--text2);
+            font-size: 0.9rem;
+        }
+
+        .menu-builder-row-meta {
+            color: var(--text2);
+            font-size: 0.85rem;
+        }
+
+        .menu-builder-empty {
+            display: none;
+            padding: 18px;
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            background: #fafafa;
+            color: var(--text2);
+        }
+
+        .menu-crud-modal-card {
+            background: #fff;
+            width: min(1100px, 92vw);
+            max-height: 88vh;
+            overflow: auto;
+            padding: 28px;
+            border-radius: 24px;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+        }
+
+        .menu-crud-modal-title {
+            margin: 0 0 18px;
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .menu-crud-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            border: none;
+            background: #f3f4f6;
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -2204,8 +2296,41 @@
 
         <!-- MENU SECTION -->
         <div id="menu" class="section active">
-            <p class="menu-workspace-intro">Keep the entire menu builder in one place. Start with super categories, move to categories, then finish with items.</p>
-            <div class="menu-workspace-nav">
+            <div class="menu-builder-shell">
+                <div class="menu-builder-header">
+                    <div>
+                        <div id="menuBuilderBreadcrumbs" class="menu-builder-breadcrumbs"></div>
+                        <h3 id="menuBuilderTitle" style="margin:0;">Super Categories</h3>
+                        <p id="menuBuilderCopy" class="copy-muted" style="margin-top:8px;">Start from the top of the menu tree, then drill into categories and items.</p>
+                    </div>
+                    <div class="menu-builder-actions">
+                        <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn" onclick="goBackMenuBuilder()">Back</button>
+                        <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto" onclick="openMenuBuilderAdd()">Add</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="menuBuilderTable" class="menu-builder-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="menuBuilderEmpty" class="menu-builder-empty"></div>
+            </div>
+            <div id="menuCrudHosts" style="display:none;">
+                <div id="menuCrudSuperHost"></div>
+                <div id="menuCrudCategoryHost"></div>
+                <div id="menuCrudItemHost"></div>
+            </div>
+            <div id="menuCrudModal" class="modal-overlay"
+                style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:2200; align-items:center; justify-content:center; padding:24px;">
+                <div class="menu-crud-modal-card">
+                    <button type="button" class="menu-crud-close" onclick="closeMenuCrudModal()">✕</button>
+                    <h3 id="menuCrudModalTitle" class="menu-crud-modal-title">Edit</h3>
+                    <div id="menuCrudModalBody"></div>
+                </div>
+            </div>
+            <p class="menu-workspace-intro" style="display:none;">Keep the entire menu builder in one place. Start with super categories, move to categories, then finish with items.</p>
+            <div class="menu-workspace-nav" style="display:none;">
                 <button type="button" id="menuWorkspaceBtn-supercategories" class="menu-workspace-btn active" onclick="setMenuWorkspaceStep('supercategories')">
                     <strong>1. Super Categories</strong>
                     <span>Meal groups and category organization</span>
@@ -2219,15 +2344,15 @@
                     <span>Dishes, prices, translations, and images</span>
                 </button>
             </div>
-            <div id="menuStepPanel-supercategories" class="menu-step-panel active">
+            <div id="menuStepPanel-supercategories" class="menu-step-panel active" style="display:none;">
                 <p class="menu-step-copy">Group categories into the first level of the menu. Customers see these before opening category lists.</p>
                 <div id="menuSuperCategoryMount" class="owner-section-stack"></div>
             </div>
-            <div id="menuStepPanel-categories" class="menu-step-panel">
+            <div id="menuStepPanel-categories" class="menu-step-panel" style="display:none;">
                 <p class="menu-step-copy">Build the categories that will appear inside each super category.</p>
                 <div id="menuCategoryMount" class="owner-section-stack"></div>
             </div>
-            <div id="menuStepPanel-items" class="menu-step-panel">
+            <div id="menuStepPanel-items" class="menu-step-panel" style="display:none;">
             <h3 id="menuItemEditorTitle" data-i18n="admin.menu.title">Add New Food Item</h3>
             <form id="foodForm">
                 <div class="form-grid form-grid-2">

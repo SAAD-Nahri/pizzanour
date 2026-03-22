@@ -97,6 +97,8 @@ const SECTION_ORDER_LABELS = {
 };
 let landingSectionOrderDraft = [...ADMIN_SECTION_ORDER_KEYS];
 let currentMenuWorkspaceStep = 'supercategories';
+let menuBuilderSelectedSuperCategoryId = '';
+let menuBuilderSelectedCategoryKey = '';
 const PRESET_THEME_TOKENS = {
     fast_food: {
         presetId: 'fast_food',
@@ -819,6 +821,7 @@ function mountOwnerAdminLayout() {
     moveSectionChildren('wifi', 'infoWifiMount');
     moveSectionChildren('security', 'infoSecurityMount');
     moveSectionChildren('gallery', 'brandingGalleryMount');
+    mountMenuCrudForms();
 }
 
 function syncMenuWorkspaceStepButtons() {
@@ -846,6 +849,292 @@ function scrollToAdminSubsection(sectionId) {
         subsection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
+
+function mountNodeIntoHost(nodeId, hostId) {
+    const node = document.getElementById(nodeId);
+    const host = document.getElementById(hostId);
+    const modalBody = document.getElementById('menuCrudModalBody');
+    if (!node || !host) return;
+    if (modalBody && modalBody.contains(node)) return;
+    if (node.parentElement !== host) {
+        host.appendChild(node);
+    }
+}
+
+function mountMenuCrudForms() {
+    mountNodeIntoHost('superCatForm', 'menuCrudSuperHost');
+    mountNodeIntoHost('catForm', 'menuCrudCategoryHost');
+    mountNodeIntoHost('foodForm', 'menuCrudItemHost');
+}
+
+function getAdminMenuSuperCategoryRows() {
+    const configured = Array.isArray(restaurantConfig.superCategories) ? restaurantConfig.superCategories : [];
+    const categoryKeys = Object.keys(catEmojis || {});
+    const assigned = new Set(configured.flatMap((entry) => Array.isArray(entry.cats) ? entry.cats : []));
+    const rows = configured.map((entry) => ({ ...entry, isVirtual: false }));
+    const unassigned = categoryKeys.filter((cat) => !assigned.has(cat));
+
+    if (unassigned.length > 0) {
+        rows.push({
+            id: '__unassigned__',
+            name: 'Unassigned Categories',
+            desc: 'Categories not linked to a super category yet.',
+            emoji: '🧩',
+            cats: unassigned,
+            time: '',
+            isVirtual: true
+        });
+    }
+
+    return rows;
+}
+
+function getMenuBuilderCurrentSuperCategory() {
+    const rows = getAdminMenuSuperCategoryRows();
+    return rows.find((row) => row.id === menuBuilderSelectedSuperCategoryId) || null;
+}
+
+function getMenuBuilderCurrentCategories() {
+    const superCategory = getMenuBuilderCurrentSuperCategory();
+    if (!superCategory) return [];
+    const categoryKeys = Array.isArray(superCategory.cats) ? superCategory.cats : [];
+    return categoryKeys
+        .map((catKey) => ({
+            key: catKey,
+            emoji: catEmojis?.[catKey] || '•',
+            name: window.getLocalizedCategoryName(catKey, catKey),
+            itemCount: menu.filter((item) => item.cat === catKey).length
+        }))
+        .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function getMenuBuilderCurrentItems() {
+    if (!menuBuilderSelectedCategoryKey) return [];
+    return menu
+        .filter((item) => item.cat === menuBuilderSelectedCategoryKey)
+        .sort((left, right) => getAdminItemDisplayName(left).localeCompare(getAdminItemDisplayName(right)));
+}
+
+function resetMenuBuilderNavigation() {
+    currentMenuWorkspaceStep = 'supercategories';
+    menuBuilderSelectedSuperCategoryId = '';
+    menuBuilderSelectedCategoryKey = '';
+}
+
+function renderMenuBuilder() {
+    const table = document.getElementById('menuBuilderTable');
+    const empty = document.getElementById('menuBuilderEmpty');
+    const title = document.getElementById('menuBuilderTitle');
+    const copy = document.getElementById('menuBuilderCopy');
+    const crumbs = document.getElementById('menuBuilderBreadcrumbs');
+    const addBtn = document.getElementById('menuBuilderAddBtn');
+    const backBtn = document.getElementById('menuBuilderBackBtn');
+    if (!table || !empty || !title || !copy || !crumbs || !addBtn || !backBtn) return;
+
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    if (!thead || !tbody) return;
+
+    if (currentMenuWorkspaceStep !== 'supercategories' && !getMenuBuilderCurrentSuperCategory()) {
+        currentMenuWorkspaceStep = 'supercategories';
+        menuBuilderSelectedSuperCategoryId = '';
+        menuBuilderSelectedCategoryKey = '';
+    }
+
+    if (currentMenuWorkspaceStep === 'items' && !getMenuBuilderCurrentItems().length && menuBuilderSelectedCategoryKey) {
+        const currentCategories = getMenuBuilderCurrentCategories().map((entry) => entry.key);
+        if (!currentCategories.includes(menuBuilderSelectedCategoryKey)) {
+            currentMenuWorkspaceStep = 'categories';
+            menuBuilderSelectedCategoryKey = '';
+        }
+    }
+
+    let rows = [];
+    let columns = [];
+    let addLabel = 'Add';
+    let emptyText = '';
+    const breadcrumbParts = ['Menu'];
+
+    if (currentMenuWorkspaceStep === 'supercategories') {
+        rows = getAdminMenuSuperCategoryRows();
+        columns = ['Super Category', 'Includes', 'Actions'];
+        addLabel = 'Add Super Category';
+        emptyText = 'No super categories yet. Add one to structure the menu.';
+        title.textContent = 'Super Categories';
+        copy.textContent = 'These are the first groups customers open before they see categories.';
+    } else if (currentMenuWorkspaceStep === 'categories') {
+        const superCategory = getMenuBuilderCurrentSuperCategory();
+        rows = getMenuBuilderCurrentCategories();
+        columns = ['Category', 'Items', 'Actions'];
+        addLabel = 'Add Category';
+        emptyText = 'This super category does not have categories yet.';
+        title.textContent = superCategory ? `${superCategory.name} / Categories` : 'Categories';
+        copy.textContent = 'Click a category to open its items. Add or edit categories from this table only.';
+        if (superCategory) breadcrumbParts.push(superCategory.name);
+    } else {
+        const superCategory = getMenuBuilderCurrentSuperCategory();
+        const categoryLabel = menuBuilderSelectedCategoryKey
+            ? window.getLocalizedCategoryName(menuBuilderSelectedCategoryKey, menuBuilderSelectedCategoryKey)
+            : 'Items';
+        rows = getMenuBuilderCurrentItems();
+        columns = ['Item', 'Price', 'Actions'];
+        addLabel = 'Add Item';
+        emptyText = 'No items in this category yet.';
+        title.textContent = `${categoryLabel} / Items`;
+        copy.textContent = 'Add or edit products for the selected category. Product forms only open when needed.';
+        if (superCategory) breadcrumbParts.push(superCategory.name);
+        if (menuBuilderSelectedCategoryKey) breadcrumbParts.push(categoryLabel);
+    }
+
+    crumbs.innerHTML = breadcrumbParts.map((entry) => `<span class="menu-builder-crumb">${escapeHtml(entry)}</span>`).join('');
+    addBtn.textContent = addLabel;
+    backBtn.style.display = currentMenuWorkspaceStep === 'supercategories' ? 'none' : '';
+    thead.innerHTML = `<tr>${columns.map((label) => `<th>${escapeHtml(label)}</th>`).join('')}</tr>`;
+
+    if (rows.length === 0) {
+        tbody.innerHTML = '';
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        empty.textContent = emptyText;
+        return;
+    }
+
+    table.style.display = '';
+    empty.style.display = 'none';
+
+    if (currentMenuWorkspaceStep === 'supercategories') {
+        tbody.innerHTML = rows.map((entry) => {
+            const inlineId = toInlineJsString(entry.id);
+            const categoriesCount = Array.isArray(entry.cats) ? entry.cats.length : 0;
+            return `
+                <tr onclick='openMenuBuilderRow(${inlineId})'>
+                    <td>
+                        <strong>${escapeHtml(entry.emoji || '•')} ${escapeHtml(entry.name || 'Super Category')}</strong>
+                        <div class="menu-builder-row-copy">${escapeHtml(entry.desc || '')}</div>
+                    </td>
+                    <td><span class="menu-builder-row-meta">${categoriesCount} categories</span></td>
+                    <td>
+                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>✏️</button>`}
+                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>🗑️</button>`}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        return;
+    }
+
+    if (currentMenuWorkspaceStep === 'categories') {
+        tbody.innerHTML = rows.map((entry) => {
+            const inlineKey = toInlineJsString(entry.key);
+            return `
+                <tr onclick='openMenuBuilderCategory(${inlineKey})'>
+                    <td><strong>${escapeHtml(entry.emoji)} ${escapeHtml(entry.name)}</strong></td>
+                    <td><span class="menu-builder-row-meta">${entry.itemCount} items</span></td>
+                    <td>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>✏️</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>🗑️</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        return;
+    }
+
+    tbody.innerHTML = rows.map((item) => {
+        const inlineId = toInlineJsString(item.id);
+        const displayName = getAdminItemDisplayName(item);
+        const price = Number(item.price) || 0;
+        return `
+            <tr onclick='editItem(${inlineId})'>
+                <td>
+                    <strong>${escapeHtml(displayName)}</strong>
+                    <div class="menu-builder-row-copy">${escapeHtml(getAdminItemDisplayDescription(item))}</div>
+                </td>
+                <td><span class="menu-builder-row-meta">MAD ${price.toFixed(2)}</span></td>
+                <td>
+                    <button type="button" class="action-btn" onclick='event.stopPropagation(); editItem(${inlineId})'>✏️</button>
+                    <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteItem(${inlineId})'>🗑️</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+window.openMenuBuilderRow = function (superCategoryId) {
+    menuBuilderSelectedSuperCategoryId = superCategoryId;
+    menuBuilderSelectedCategoryKey = '';
+    currentMenuWorkspaceStep = 'categories';
+    renderMenuBuilder();
+};
+
+window.openMenuBuilderCategory = function (categoryKey) {
+    menuBuilderSelectedCategoryKey = categoryKey;
+    currentMenuWorkspaceStep = 'items';
+    renderMenuBuilder();
+};
+
+window.goBackMenuBuilder = function () {
+    if (currentMenuWorkspaceStep === 'items') {
+        currentMenuWorkspaceStep = 'categories';
+        menuBuilderSelectedCategoryKey = '';
+    } else if (currentMenuWorkspaceStep === 'categories') {
+        currentMenuWorkspaceStep = 'supercategories';
+        menuBuilderSelectedSuperCategoryId = '';
+        menuBuilderSelectedCategoryKey = '';
+    }
+    renderMenuBuilder();
+};
+
+function openMenuCrudModal(type, title) {
+    mountMenuCrudForms();
+    const modal = document.getElementById('menuCrudModal');
+    const body = document.getElementById('menuCrudModalBody');
+    const titleEl = document.getElementById('menuCrudModalTitle');
+    const formId = type === 'supercategory' ? 'superCatForm' : type === 'category' ? 'catForm' : 'foodForm';
+    const form = document.getElementById(formId);
+    if (!modal || !body || !titleEl || !form) return;
+    body.innerHTML = '';
+    body.appendChild(form);
+    titleEl.textContent = title;
+    modal.style.display = 'flex';
+}
+
+window.closeMenuCrudModal = function () {
+    const modal = document.getElementById('menuCrudModal');
+    if (modal) modal.style.display = 'none';
+    mountMenuCrudForms();
+};
+
+window.openMenuBuilderAdd = function () {
+    if (currentMenuWorkspaceStep === 'supercategories') {
+        resetSuperCategoryFormState();
+        openMenuCrudModal('supercategory', 'Add Super Category');
+        return;
+    }
+    if (currentMenuWorkspaceStep === 'categories') {
+        resetCategoryFormState();
+        openMenuCrudModal('category', 'Add Category');
+        return;
+    }
+    resetFoodForm();
+    if (menuBuilderSelectedCategoryKey) {
+        const itemCat = document.getElementById('itemCat');
+        if (itemCat) itemCat.value = menuBuilderSelectedCategoryKey;
+    }
+    openMenuCrudModal('item', 'Add Item');
+};
+
+window.openMenuBuilderEdit = function (type, id) {
+    if (type === 'supercategory') {
+        editSuperCat(id);
+        return;
+    }
+    if (type === 'category') {
+        editCat(id);
+        return;
+    }
+    editItem(id);
+};
 
 function applyAdminCapabilities() {
     const sellerToolsNavBtn = document.getElementById('sellerToolsNavBtn');
@@ -959,6 +1248,7 @@ function refreshUI() {
     renderMenuTable();
     renderCatTable();
     renderSuperCatTable();
+    renderMenuBuilder();
     populateCatDropdown();
     initBrandingForm();
     initWifiForm();
@@ -1592,7 +1882,7 @@ function editItem(id) {
 
     editingItemId = id;
     currentMenuWorkspaceStep = 'items';
-    syncMenuWorkspaceStepButtons();
+    menuBuilderSelectedCategoryKey = item.cat || '';
     document.getElementById('itemName').value = item.name || getAdminItemDisplayName(item);
     document.getElementById('itemCat').value = item.cat;
     document.getElementById('itemDesc').value = item.desc || getAdminItemDisplayDescription(item);
@@ -1633,8 +1923,7 @@ function editItem(id) {
     if (itemEditorTitle) itemEditorTitle.textContent = "✏️ Modifier: " + getAdminItemDisplayName(item);
     document.querySelector('#foodForm .primary-btn').textContent = "💾 Mettre à jour le produit";
 
-    // Scroll to form
-    document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
+    openMenuCrudModal('item', `Edit Item · ${getAdminItemDisplayName(item)}`);
 }
 
 function resetFoodForm() {
@@ -1755,11 +2044,14 @@ function initForms() {
             showToast('✅ Produit ajouté !');
         }
 
-        saveAndRefresh();
-        resetFoodForm();
+        const saved = await saveAndRefresh();
+        if (saved) {
+            resetFoodForm();
+            closeMenuCrudModal();
+        }
     };
 
-    document.getElementById('catForm').onsubmit = (e) => {
+    document.getElementById('catForm').onsubmit = async (e) => {
         e.preventDefault();
         const editingKeyInput = document.getElementById('catEditingKey');
         const previousKey = editingKeyInput ? editingKeyInput.value.trim() : '';
@@ -1786,9 +2078,12 @@ function initForms() {
 
         catEmojis[categoryName] = nextEmoji;
         categoryTranslations[categoryName] = nextTranslations;
-        saveAndRefresh();
-        resetCategoryFormState();
-        showToast(previousKey ? 'Catégorie mise à jour !' : 'Catégorie ajoutée !');
+        const saved = await saveAndRefresh();
+        if (saved) {
+            resetCategoryFormState();
+            closeMenuCrudModal();
+            showToast(previousKey ? 'Catégorie mise à jour !' : 'Catégorie ajoutée !');
+        }
     };
 
     document.getElementById('wifiForm').onsubmit = (e) => {
@@ -1890,7 +2185,7 @@ function initForms() {
         showToast('Landing page et contenu multilingue sauvegardés !');
     };
 
-    document.getElementById('superCatForm').onsubmit = (e) => {
+    document.getElementById('superCatForm').onsubmit = async (e) => {
         e.preventDefault();
         const editingIdInput = document.getElementById('scEditingId');
         const editingId = editingIdInput ? editingIdInput.value.trim() : '';
@@ -1912,9 +2207,12 @@ function initForms() {
             restaurantConfig.superCategories.push(newSC);
         }
 
-        saveAndRefresh();
-        resetSuperCategoryFormState();
-        showToast(existingIdx !== -1 ? 'Super Catégorie mise à jour !' : 'Super Catégorie sauvegardée !');
+        const saved = await saveAndRefresh();
+        if (saved) {
+            resetSuperCategoryFormState();
+            closeMenuCrudModal();
+            showToast(existingIdx !== -1 ? 'Super Catégorie mise à jour !' : 'Super Catégorie sauvegardée !');
+        }
     };
 }
 
@@ -2541,7 +2839,6 @@ function editSuperCat(id) {
     const sc = restaurantConfig.superCategories.find(s => s.id === id);
     if (!sc) return;
     currentMenuWorkspaceStep = 'supercategories';
-    syncMenuWorkspaceStepButtons();
     const editingIdInput = document.getElementById('scEditingId');
     if (editingIdInput) editingIdInput.value = sc.id;
     document.getElementById('scName').value = sc.name;
@@ -2553,7 +2850,7 @@ function editSuperCat(id) {
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
 
-    document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
+    openMenuCrudModal('supercategory', `Edit Super Category · ${sc.name}`);
 }
 
 function deleteSuperCat(id) {
@@ -3753,7 +4050,12 @@ function showSection(id, btn) {
     syncParameterTabs(topLevelSection);
 
     if (topLevelSection === 'menu') {
-        setMenuWorkspaceStep(getMenuWorkspaceStepForSection(id));
+        if (id === 'menu') {
+            resetMenuBuilderNavigation();
+        } else {
+            currentMenuWorkspaceStep = getMenuWorkspaceStepForSection(id);
+        }
+        renderMenuBuilder();
     } else if (id !== topLevelSection) {
         requestAnimationFrame(() => {
             scrollToAdminSubsection(id);
@@ -3782,13 +4084,13 @@ function renderCatTable() {
 }
 function editCat(cat) {
     currentMenuWorkspaceStep = 'categories';
-    syncMenuWorkspaceStepButtons();
+    menuBuilderSelectedCategoryKey = cat;
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = cat;
     document.getElementById('catName').value = cat;
     document.getElementById('catEmoji').value = catEmojis[cat] || '';
     setCategoryTranslationFields(cat);
-    document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
+    openMenuCrudModal('category', `Edit Category · ${window.getLocalizedCategoryName(cat, cat)}`);
 }
 function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Supprimez d\'abord les produits de cette catégorie !'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
 function initWifiForm() {
