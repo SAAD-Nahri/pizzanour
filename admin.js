@@ -1188,10 +1188,14 @@ window.openMenuBuilderEdit = function (type, id) {
 
 function applyAdminCapabilities() {
     const sellerToolsNavBtn = document.getElementById('sellerToolsNavBtn');
+    const sellerToolsMobileNavBtn = document.getElementById('sellerToolsMobileNavBtn');
     const dataToolsSection = document.getElementById('data-tools');
 
     if (sellerToolsNavBtn) {
         sellerToolsNavBtn.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
+    }
+    if (sellerToolsMobileNavBtn) {
+        sellerToolsMobileNavBtn.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
     }
     if (dataToolsSection) {
         dataToolsSection.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
@@ -4078,9 +4082,8 @@ function showSection(id, btn) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(topLevelSection).classList.add('active');
-    if (navButton) {
-        navButton.classList.add('active');
-    }
+    document.querySelectorAll(`.nav-btn[data-section="${topLevelSection}"]`).forEach(b => b.classList.add('active'));
+    if (navButton) navButton.classList.add('active');
     if (sectionTitle) {
         sectionTitle.textContent = getSectionTitle(topLevelSection);
     }
@@ -4100,7 +4103,7 @@ function showSection(id, btn) {
     }
 
     // Auto-close sidebar on mobile after choosing
-    if (window.innerWidth <= 992) {
+    if (window.innerWidth <= 992 && document.getElementById('adminSidebar')?.classList.contains('mobile-open')) {
         toggleSidebar();
     }
 }
