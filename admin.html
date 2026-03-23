@@ -2194,22 +2194,25 @@
             .sidebar {
                 position: fixed;
                 left: 0;
-                top: 0;
+                right: 0;
+                top: auto;
                 bottom: 0;
-                width: min(86vw, 320px);
-                padding: calc(env(safe-area-inset-top, 0px) + 18px) 18px 18px;
-                transform: translateX(-100%);
+                width: auto;
+                max-height: min(68vh, 520px);
+                padding: 22px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+                border-radius: 24px 24px 0 0;
+                transform: translateY(100%);
                 z-index: 1000;
-                box-shadow: none;
+                box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.26);
             }
 
             .sidebar.mobile-open {
-                transform: translateX(0);
-                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+                transform: translateY(0);
+                box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.3);
             }
 
             .main {
-                padding: calc(env(safe-area-inset-top, 0px) + 84px) 16px calc(108px + env(safe-area-inset-bottom, 0px));
+                padding: 16px 16px calc(108px + env(safe-area-inset-bottom, 0px));
                 width: 100%;
                 box-sizing: border-box;
             }
@@ -2235,24 +2238,12 @@
             }
 
             .mobile-header {
-                display: flex !important;
-                background: linear-gradient(180deg, rgba(17, 19, 24, 0.96) 0%, rgba(17, 19, 24, 0.88) 100%);
-                color: #fff;
-                padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 14px;
-                align-items: center;
-                justify-content: space-between;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: 900;
-                backdrop-filter: blur(16px);
-                box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+                display: none !important;
             }
 
             .mobile-bottom-nav {
                 display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 10px;
                 position: fixed;
                 left: 12px;
@@ -2293,8 +2284,12 @@
                 line-height: 1;
             }
 
-            .sidebar-nav-primary {
+            .sidebar-nav-mobile-hidden {
                 display: none !important;
+            }
+
+            #adminSidebarTitleText {
+                display: none;
             }
 
             .menu-toggle {
@@ -2397,13 +2392,11 @@
 
         @media (max-width: 768px) {
             .main {
-                padding: calc(env(safe-area-inset-top, 0px) + 82px) 14px 22px;
-                padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+                padding: 14px 14px calc(104px + env(safe-area-inset-bottom, 0px));
             }
 
             .header {
-                gap: 12px;
-                margin-bottom: 14px;
+                display: none;
             }
 
             .header h2 {
@@ -2473,9 +2466,7 @@
             }
 
             .menu-builder-breadcrumbs {
-                gap: 6px;
-                font-size: 0.82rem;
-                margin-bottom: 2px;
+                display: none;
             }
 
             .menu-builder-crumb {
@@ -2929,13 +2920,9 @@
             <span class="mobile-bottom-nav-icon">🧾</span>
             <span>Info</span>
         </button>
-        <button class="nav-btn mobile-bottom-nav-btn" id="brandingMobileNavBtn" data-section="branding" onclick="showSection('branding', this)">
-            <span class="mobile-bottom-nav-icon">🎨</span>
-            <span>Branding</span>
-        </button>
-        <button class="nav-btn mobile-bottom-nav-btn" id="sellerToolsMobileNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">
-            <span class="mobile-bottom-nav-icon">📥</span>
-            <span>Import</span>
+        <button class="nav-btn mobile-bottom-nav-btn" id="parametersMobileNavBtn" data-section="parameters" onclick="toggleSidebar()">
+            <span class="mobile-bottom-nav-icon">⚙️</span>
+            <span>Parameters</span>
         </button>
     </nav>
 
@@ -2944,10 +2931,10 @@
 
     <div class="sidebar" id="adminSidebar" style="display:none">
         <h1 id="adminSidebarTitleText" data-i18n="admin.sidebar_title">🍽️ Restaurant Admin</h1>
-        <button class="nav-btn active sidebar-nav-primary" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)">🍴 Menu</button>
-        <button class="nav-btn sidebar-nav-primary" id="infoNavBtn" data-section="info" onclick="showSection('info', this)">🧾 Info</button>
-        <button class="nav-btn sidebar-nav-primary" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)">🎨 Branding</button>
-        <button class="nav-btn sidebar-nav-primary" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">📥 Import</button>
+        <button class="nav-btn sidebar-nav-mobile-hidden active" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)">🍴 Menu</button>
+        <button class="nav-btn sidebar-nav-mobile-hidden" id="infoNavBtn" data-section="info" onclick="showSection('info', this)">🧾 Info</button>
+        <button class="nav-btn" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)">🎨 Branding</button>
+        <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">📥 Import</button>
         <div class="sidebar-actions">
             <button class="nav-btn sidebar-logout-btn" onclick="adminLogout()" data-i18n="admin.nav.logout">🚪 Déconnexion</button>
         </div>

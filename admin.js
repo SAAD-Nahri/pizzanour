@@ -1189,14 +1189,10 @@ window.openMenuBuilderEdit = function (type, id) {
 
 function applyAdminCapabilities() {
     const sellerToolsNavBtn = document.getElementById('sellerToolsNavBtn');
-    const sellerToolsMobileNavBtn = document.getElementById('sellerToolsMobileNavBtn');
     const dataToolsSection = document.getElementById('data-tools');
 
     if (sellerToolsNavBtn) {
         sellerToolsNavBtn.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
-    }
-    if (sellerToolsMobileNavBtn) {
-        sellerToolsMobileNavBtn.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
     }
     if (dataToolsSection) {
         dataToolsSection.style.display = adminCapabilities.sellerToolsEnabled ? '' : 'none';
@@ -4084,6 +4080,7 @@ function showSection(id, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(topLevelSection).classList.add('active');
     document.querySelectorAll(`.nav-btn[data-section="${topLevelSection}"]`).forEach(b => b.classList.add('active'));
+    syncMobileParametersButton(topLevelSection);
     if (navButton) navButton.classList.add('active');
     if (sectionTitle) {
         sectionTitle.textContent = getSectionTitle(topLevelSection);
@@ -4109,11 +4106,21 @@ function showSection(id, btn) {
     }
 }
 
+function syncMobileParametersButton(activeSection) {
+    const sidebarOpen = document.getElementById('adminSidebar')?.classList.contains('mobile-open');
+    const shouldActivate = sidebarOpen || activeSection === 'branding' || activeSection === 'data-tools';
+    document.querySelectorAll('.nav-btn[data-section="parameters"]').forEach((button) => {
+        button.classList.toggle('active', shouldActivate);
+    });
+}
+
 function toggleSidebar() {
     const sidebar = document.getElementById('adminSidebar');
     const overlay = document.getElementById('sidebarOverlay');
     sidebar.classList.toggle('mobile-open');
     overlay.classList.toggle('active');
+    const activeSection = document.querySelector('.section.active')?.id || 'menu';
+    syncMobileParametersButton(activeSection);
 }
 function populateCatDropdown() {
     const el = document.getElementById('itemCat');
