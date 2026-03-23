@@ -2293,6 +2293,10 @@
                 line-height: 1;
             }
 
+            .sidebar-nav-primary {
+                display: none;
+            }
+
             .menu-toggle {
                 background: rgba(255, 255, 255, 0.08);
                 border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2399,10 +2403,12 @@
 
             .header {
                 gap: 12px;
+                margin-bottom: 14px;
             }
 
             .header h2 {
-                font-size: 1.3rem;
+                font-size: 1.16rem;
+                line-height: 1.15;
             }
 
             .copy-muted,
@@ -2414,25 +2420,56 @@
                 display: none !important;
             }
 
+            .admin-save-status {
+                margin-top: 8px;
+                padding: 8px 12px;
+                font-size: 0.82rem;
+                line-height: 1.35;
+            }
+
+            .back-btn {
+                align-self: flex-start;
+                padding: 7px 14px;
+                font-size: 0.88rem;
+                border-radius: 999px;
+            }
+
             .menu-builder-header {
                 gap: 12px;
                 position: sticky;
                 top: calc(env(safe-area-inset-top, 0px) + 72px);
                 z-index: 5;
-                margin: -6px -6px 12px;
-                padding: 8px 6px 12px;
+                margin: -4px -4px 10px;
+                padding: 6px 4px 10px;
                 background: linear-gradient(180deg, rgba(245, 247, 250, 0.98) 0%, rgba(245, 247, 250, 0.88) 75%, rgba(245, 247, 250, 0) 100%);
                 backdrop-filter: blur(10px);
             }
 
             .menu-builder-actions {
                 width: 100%;
+                gap: 8px;
             }
 
             .menu-builder-actions .primary-btn,
             .menu-builder-actions .brand-secondary-btn {
                 flex: 1 1 0;
                 width: auto;
+                min-height: 46px;
+                padding: 0 14px;
+                border-radius: 16px;
+                font-size: 0.92rem;
+            }
+
+            .menu-builder-actions .menu-icon-btn {
+                font-size: 0;
+                position: relative;
+            }
+
+            .menu-builder-actions .menu-icon-btn::before {
+                content: attr(data-mobile-icon);
+                font-size: 1.2rem;
+                font-weight: 800;
+                line-height: 1;
             }
 
             .menu-builder-breadcrumbs {
@@ -2473,24 +2510,24 @@
 
             #menuBuilderTable tr {
                 border: 1px solid var(--border);
-                border-radius: 18px;
-                padding: 8px 0;
+                border-radius: 16px;
+                padding: 2px 0;
                 background: #fff;
-                box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-                margin-bottom: 12px;
+                box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+                margin-bottom: 10px;
             }
 
             #menuBuilderTable td {
                 min-width: 0;
                 border: none;
-                padding: 10px 14px;
+                padding: 8px 12px;
             }
 
             #menuBuilderTable td::before {
                 content: attr(data-label);
                 display: block;
-                margin-bottom: 4px;
-                font-size: 0.74rem;
+                margin-bottom: 3px;
+                font-size: 0.68rem;
                 font-weight: 800;
                 letter-spacing: 0.04em;
                 text-transform: uppercase;
@@ -2499,21 +2536,42 @@
 
             .menu-builder-item-main {
                 align-items: flex-start;
-            }
-
-            .menu-builder-item-thumb {
-                width: 52px;
-                height: 52px;
-                flex-basis: 52px;
-            }
-
-            .menu-builder-item-actions {
                 gap: 10px;
             }
 
-            .menu-builder-toggle {
-                min-width: 46px;
+            .menu-builder-item-thumb {
+                width: 46px;
                 height: 46px;
+                flex-basis: 46px;
+                border-radius: 12px;
+            }
+
+            .menu-builder-item-meta {
+                gap: 3px;
+            }
+
+            .menu-builder-row-copy {
+                font-size: 0.84rem;
+                line-height: 1.35;
+            }
+
+            .menu-builder-row-meta {
+                font-size: 0.78rem;
+            }
+
+            .menu-builder-item-actions {
+                gap: 8px;
+                justify-content: flex-start;
+            }
+
+            .menu-builder-toggle {
+                min-width: 40px;
+                height: 40px;
+                border-radius: 12px;
+            }
+
+            .menu-builder-likes {
+                font-size: 0.84rem;
             }
 
             .menu-crud-modal-card {
@@ -2544,8 +2602,8 @@
 
             .owner-section-card {
                 border-radius: 18px;
-                padding-top: 18px;
-                padding-bottom: 18px;
+                padding-top: 16px;
+                padding-bottom: 16px;
             }
 
             .admin-panel-disclosure,
@@ -2610,6 +2668,10 @@
             .menu-builder-actions .primary-btn,
             .menu-builder-actions .brand-secondary-btn {
                 width: 100%;
+            }
+
+            .menu-builder-actions .menu-icon-btn {
+                min-height: 44px;
             }
 
             .parameter-tab-btn {
@@ -2815,10 +2877,10 @@
 
     <div class="sidebar" id="adminSidebar" style="display:none">
         <h1 id="adminSidebarTitleText" data-i18n="admin.sidebar_title">🍽️ Restaurant Admin</h1>
-        <button class="nav-btn active" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)">🍴 Menu</button>
-        <button class="nav-btn" id="infoNavBtn" data-section="info" onclick="showSection('info', this)">🧾 Info</button>
-        <button class="nav-btn" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)">🎨 Branding</button>
-        <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">📥 Import</button>
+        <button class="nav-btn active sidebar-nav-primary" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)">🍴 Menu</button>
+        <button class="nav-btn sidebar-nav-primary" id="infoNavBtn" data-section="info" onclick="showSection('info', this)">🧾 Info</button>
+        <button class="nav-btn sidebar-nav-primary" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)">🎨 Branding</button>
+        <button class="nav-btn sidebar-nav-primary" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">📥 Import</button>
         <div class="sidebar-actions">
             <button class="nav-btn sidebar-logout-btn" onclick="adminLogout()" data-i18n="admin.nav.logout">🚪 Déconnexion</button>
         </div>
@@ -2843,8 +2905,8 @@
                         <p id="menuBuilderCopy" class="copy-muted" style="margin-top:8px;">Start from the top of the menu tree, then drill into categories and items.</p>
                     </div>
                     <div class="menu-builder-actions">
-                        <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn" onclick="goBackMenuBuilder()">Back</button>
-                        <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto" onclick="openMenuBuilderAdd()">Add</button>
+                        <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="←" onclick="goBackMenuBuilder()">Back</button>
+                        <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto menu-icon-btn" data-mobile-icon="+" onclick="openMenuBuilderAdd()">Add</button>
                     </div>
                 </div>
                 <div class="table-container">
