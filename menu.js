@@ -1102,11 +1102,15 @@ function saveCart() {
 }
 
 function updateCartUI() {
-    const hubBtn = document.getElementById('cartHubBtn');
-    const badge = document.getElementById('cartBadge');
     const count = cart.reduce((s, c) => s + c.qty, 0);
-    if (count > 0) { if (hubBtn) hubBtn.style.display = 'flex'; if (badge) badge.textContent = count; }
-    else { if (hubBtn) hubBtn.style.display = 'none'; }
+    ['cartNavBtnLanding', 'cartNavBtnMenu'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.style.display = count > 0 ? 'flex' : 'none';
+    });
+    ['cartBadgeLanding', 'cartBadgeMenu'].forEach(id => {
+        const badge = document.getElementById(id);
+        if (badge) badge.textContent = count;
+    });
 }
 
 // ═══════════════════════ MODALS ═══════════════════════

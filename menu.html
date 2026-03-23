@@ -1741,6 +1741,10 @@
                     </div>
                 </div>
                 <div class="top-nav-right">
+                    <button id="cartNavBtnLanding" class="nav-icon-btn nav-cart-btn" onclick="openDrawer()" style="display:none;"
+                        data-i18n-title="confirm_cart_label" title="Cart">
+                        🛒 <span id="cartBadgeLanding" class="cart-badge">0</span>
+                    </button>
                     <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" title="History">
                         🕒 <span id="histBadgeLanding" class="history-badge">0</span>
                     </button>
@@ -1849,6 +1853,10 @@
                     <div class="nav-breadcrumb" id="navBreadcrumb"></div>
                 </div>
                 <div class="top-nav-right">
+                    <button id="cartNavBtnMenu" class="nav-icon-btn nav-cart-btn" onclick="openDrawer()" style="display:none;"
+                        data-i18n-title="confirm_cart_label" title="Cart">
+                        🛒 <span id="cartBadgeMenu" class="cart-badge">0</span>
+                    </button>
                     <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" title="History">
                         🕒 <span id="histBadgeMenu" class="history-badge">0</span>
                     </button>
@@ -1892,11 +1900,6 @@
         <!-- END MENU NAVIGATION VIEW -->
 
         <!-- GLOBAL UI ELEMENTS -->
-        <!-- Cart floating -->
-        <div id="cartHubBtn" class="cart-floating-hub" onclick="openDrawer()" style="display:none;">
-            🛒 <span id="cartBadge" class="cart-badge">0</span>
-        </div>
-
         <!-- Global Home Bubble -->
         <div class="home-floating-hub" onclick="showLanding()">
             🏠
