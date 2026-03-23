@@ -138,7 +138,10 @@
         }
 
         body.menu-page {
-            background: var(--menu-bg);
+            background:
+                radial-gradient(circle at top, rgba(255, 159, 67, 0.14), transparent 26%),
+                radial-gradient(circle at 18% 18%, rgba(230, 57, 70, 0.12), transparent 22%),
+                linear-gradient(180deg, #101218 0%, #171a22 48%, #12151c 100%);
             color: #fff;
             font-family: 'Outfit', sans-serif;
             margin: 0;
@@ -146,46 +149,47 @@
         }
 
         .menu-header {
-            padding: 58px 20px 34px;
+            padding: 62px 20px 38px;
             text-align: center;
             background:
-                radial-gradient(circle at top, rgba(255, 159, 67, 0.18), transparent 48%),
-                linear-gradient(180deg, rgba(10, 11, 15, 0.94) 0%, rgba(10, 11, 15, 0.18) 100%);
+                radial-gradient(circle at top, rgba(255, 159, 67, 0.26), transparent 48%),
+                linear-gradient(180deg, rgba(10, 11, 15, 0.96) 0%, rgba(10, 11, 15, 0.22) 100%);
             animation: menuFadeLift 0.68s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         .menu-header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2.65rem;
-            margin-bottom: 7px;
-            letter-spacing: -1.2px;
-            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+            font-size: clamp(2.35rem, 5vw, 3rem);
+            margin-bottom: 8px;
+            letter-spacing: -1.5px;
+            text-shadow: 0 16px 36px rgba(0, 0, 0, 0.32);
         }
 
         .menu-header p {
             color: var(--text-muted);
-            font-size: 0.98rem;
-            line-height: 1.65;
-            max-width: 520px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 560px;
             margin: 0 auto;
+            text-wrap: balance;
         }
 
         .menu-container {
             max-width: 860px;
             margin: 0 auto;
-            padding: 0 18px;
+            padding: 0 18px 8px;
         }
 
         .cat-nav-wrapper {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(15, 17, 21, 0.84);
-            backdrop-filter: blur(16px);
-            padding: 18px 0 18px;
-            margin-bottom: 34px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
+            background: linear-gradient(180deg, rgba(18, 21, 28, 0.92) 0%, rgba(18, 21, 28, 0.76) 100%);
+            backdrop-filter: blur(18px);
+            padding: 14px 0 16px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
         }
 
         .cat-nav-scroll {
@@ -202,15 +206,15 @@
 
         .menu-cat-btn {
             white-space: nowrap;
-            background: linear-gradient(180deg, rgba(43, 47, 57, 0.96) 0%, rgba(27, 30, 37, 0.96) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(180deg, rgba(46, 50, 60, 0.98) 0%, rgba(28, 31, 39, 0.98) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.09);
             color: #fff;
-            padding: 11px 18px;
+            padding: 12px 18px;
             border-radius: 999px;
             font-size: 0.88rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.2);
             transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
 
@@ -285,17 +289,17 @@
         }
 
         .menu-section {
-            margin-bottom: 62px;
+            margin-bottom: 56px;
         }
 
         .menu-section-title {
-            font-size: 1.28rem;
-            font-weight: 600;
-            margin-bottom: 24px;
+            font-size: 1.34rem;
+            font-weight: 700;
+            margin-bottom: 22px;
             display: flex;
             align-items: center;
             gap: 10px;
-            letter-spacing: -0.2px;
+            letter-spacing: -0.35px;
         }
 
         .menu-section-title.subcat-title {
@@ -312,20 +316,32 @@
 
         .menu-grid {
             display: grid;
-            gap: 20px;
+            gap: 18px;
         }
 
         .menu-item-card {
             background: linear-gradient(180deg, rgba(37, 41, 50, 0.98) 0%, rgba(23, 26, 32, 0.98) 100%);
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 26px;
+            padding: 18px 18px 18px 16px;
             display: flex;
-            gap: 20px;
+            gap: 16px;
             position: relative;
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.07);
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+            box-shadow: 0 22px 40px rgba(0, 0, 0, 0.24);
+            overflow: hidden;
+        }
+
+        .menu-item-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top right, rgba(255, 173, 86, 0.16), transparent 32%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 48%);
+            pointer-events: none;
+            opacity: 0.9;
         }
 
         .menu-item-card:active {
@@ -340,44 +356,50 @@
 
         .menu-item-info {
             flex: 1;
-            padding-right: 28px;
+            padding-right: 44px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
         }
 
         .menu-item-name {
-            font-weight: 600;
-            font-size: 1.08rem;
-            margin-bottom: 6px;
-            line-height: 1.3;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 7px;
+            line-height: 1.28;
+            text-wrap: balance;
         }
 
         .menu-item-desc {
-            color: var(--text-muted);
-            font-size: 0.88rem;
-            line-height: 1.62;
+            color: rgba(226, 228, 234, 0.66);
+            font-size: 0.87rem;
+            line-height: 1.58;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
         .menu-item-price {
-            margin-top: 14px;
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 0.98rem;
+            margin-top: auto;
+            padding-top: 14px;
+            font-weight: 800;
+            color: #ff645d;
+            font-size: 1.04rem;
+            letter-spacing: 0.01em;
         }
 
         .menu-item-img {
-            width: 102px;
-            height: 102px;
-            background: #252932;
-            border-radius: 18px;
+            width: 98px;
+            height: 98px;
+            background: linear-gradient(180deg, rgba(52, 57, 69, 0.98) 0%, rgba(31, 35, 43, 0.98) 100%);
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
             overflow: hidden;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 12px 22px rgba(0, 0, 0, 0.22);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 14px 26px rgba(0, 0, 0, 0.22);
             flex-shrink: 0;
         }
 
@@ -391,18 +413,18 @@
             position: absolute;
             bottom: 14px;
             right: 14px;
-            width: 42px;
-            height: 42px;
+            width: 46px;
+            height: 46px;
             z-index: 5;
             background: linear-gradient(135deg, #ff9f43 0%, #e63946 100%);
             border: none;
-            border-radius: 16px;
+            border-radius: 18px;
             color: #fff;
-            font-size: 1.2rem;
+            font-size: 1.26rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 14px 24px rgba(230, 57, 70, 0.24);
+            box-shadow: 0 16px 28px rgba(230, 57, 70, 0.26);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -413,7 +435,7 @@
 
         /* Search Bar overlay-ish */
         .menu-search-box {
-            margin-bottom: 30px;
+            margin-bottom: 24px;
             position: relative;
         }
 
@@ -478,14 +500,14 @@
 
         .menu-search-box input {
             width: 100%;
-            background: linear-gradient(180deg, rgba(39, 43, 53, 0.98) 0%, rgba(24, 27, 34, 0.98) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            border-radius: 20px;
-            padding: 14px 16px 14px 46px;
+            background: linear-gradient(180deg, rgba(38, 42, 52, 0.98) 0%, rgba(25, 29, 36, 0.98) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 15px 18px 15px 48px;
             color: #fff;
             font-size: 0.92rem;
             box-sizing: border-box;
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
             transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
         }
 
@@ -887,17 +909,18 @@
             }
 
             .menu-item-card {
-                padding: 18px;
-                gap: 16px;
+                padding: 18px 16px 18px 14px;
+                gap: 14px;
             }
 
             .menu-item-info {
-                padding-right: 22px;
+                padding-right: 48px;
             }
 
             .menu-item-img {
-                width: 88px;
-                height: 88px;
+                width: 82px;
+                height: 82px;
+                border-radius: 20px;
             }
 
             .promo-card-vibrant {
