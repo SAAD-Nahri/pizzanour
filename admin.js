@@ -1137,6 +1137,7 @@ function openMenuCrudModal(type, title) {
     const modal = document.getElementById('menuCrudModal');
     const body = document.getElementById('menuCrudModalBody');
     const titleEl = document.getElementById('menuCrudModalTitle');
+    const card = modal?.querySelector('.menu-crud-modal-card');
     const formId = type === 'supercategory' ? 'superCatForm' : type === 'category' ? 'catForm' : 'foodForm';
     const form = document.getElementById(formId);
     if (!modal || !body || !titleEl || !form) return;
@@ -1148,9 +1149,11 @@ function openMenuCrudModal(type, title) {
     modal.style.display = 'flex';
     modal.scrollTop = 0;
     body.scrollTop = 0;
+    if (card) card.scrollTop = 0;
     requestAnimationFrame(() => {
         modal.scrollTop = 0;
         body.scrollTop = 0;
+        if (card) card.scrollTop = 0;
     });
 }
 
