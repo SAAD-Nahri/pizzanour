@@ -99,6 +99,16 @@ const IMPORTER_SOURCE_EXTRACTION_SYSTEM_PROMPT = [
   "Follow the JSON schema exactly."
 ].join("\n");
 
+const IMPORTER_SOURCE_TEXT_FALLBACK_SYSTEM_PROMPT = [
+  "You extract raw restaurant menu text from one uploaded menu image or PDF.",
+  "Return plain text only.",
+  "Preserve the visible menu reading order as faithfully as possible.",
+  "Keep item names, prices, and short descriptions together when they clearly belong together.",
+  "Do not translate, summarize, explain, or output JSON.",
+  "Skip obvious decorative marketing copy when it is clearly not part of the menu.",
+  "If some text is unreadable, omit it instead of inventing content."
+].join("\n");
+
 const IMPORTER_REPAIR_SYSTEM_PROMPT = [
   "You repair malformed seller-side restaurant draft output into valid JSON.",
   "The input may contain near-JSON, markdown fences, extra commentary, or partially malformed structure.",
@@ -865,32 +875,87 @@ function dedupeImporterSourcePages(pages) {
   };
 }
 
+function splitOversizedImporterSourcePage(page, maxCharsPerPage) {
+  const label = normalizeImporterText(page?.label) || "Page";
+  const text = normalizeImporterSourceText(page?.text);
+  if (!text) return [];
+  if (!maxCharsPerPage || text.length <= maxCharsPerPage) {
+    return [{ label, text }];
+  }
+
+  const blocks = text.split(/\n{2,}/).map((block) => normalizeImporterSourceText(block)).filter(Boolean);
+  if (!blocks.length) {
+    const segments = [];
+    for (let cursor = 0; cursor < text.length; cursor += maxCharsPerPage) {
+      segments.push({
+        label: `${label} (Part ${segments.length + 1})`,
+        text: text.slice(cursor, cursor + maxCharsPerPage).trim()
+      });
+    }
+    return segments.filter((entry) => entry.text);
+  }
+
+  const parts = [];
+  let currentText = "";
+  blocks.forEach((block) => {
+    const candidate = currentText ? `${currentText}\n\n${block}` : block;
+    if (candidate.length <= maxCharsPerPage) {
+      currentText = candidate;
+      return;
+    }
+
+    if (currentText) {
+      parts.push(currentText);
+    }
+
+    if (block.length <= maxCharsPerPage) {
+      currentText = block;
+      return;
+    }
+
+    for (let cursor = 0; cursor < block.length; cursor += maxCharsPerPage) {
+      parts.push(block.slice(cursor, cursor + maxCharsPerPage).trim());
+    }
+    currentText = "";
+  });
+
+  if (currentText) {
+    parts.push(currentText);
+  }
+
+  return parts
+    .map((partText, index) => ({
+      label: `${label} (Part ${index + 1})`,
+      text: normalizeImporterSourceText(partText)
+    }))
+    .filter((entry) => entry.text);
+}
+
 function prepareImporterSourceForStructuring(source, limits = {}) {
   const pages = Array.isArray(source?.pages) ? source.pages : [];
   const warnings = Array.isArray(source?.warnings) ? source.warnings.slice() : [];
   const preparedPages = [];
-  let trimmedPageCount = 0;
+  let splitPageCount = 0;
 
   pages.forEach((page, index) => {
     const label = normalizeImporterText(page?.label) || `Page ${index + 1}`;
-    let text = normalizeImporterSourceText(page?.text);
+    const text = normalizeImporterSourceText(page?.text);
     if (!text) return;
 
     const maxChars = Number(limits.maxCharsPerPage) || 0;
-    if (maxChars > 0 && text.length > maxChars) {
-      text = text.slice(0, maxChars).trim();
-      trimmedPageCount += 1;
+    const splitPages = splitOversizedImporterSourcePage({ label, text }, maxChars);
+    if (splitPages.length > 1) {
+      splitPageCount += 1;
     }
-
-    preparedPages.push({ label, text });
+    preparedPages.push(...splitPages);
   });
 
   const deduped = dedupeImporterSourcePages(preparedPages);
   if (deduped.removedCount > 0) {
     warnings.push(`Removed ${deduped.removedCount} duplicate extracted page(s) before structuring.`);
   }
-  if (trimmedPageCount > 0) {
-    warnings.push(`Trimmed ${trimmedPageCount} oversized extracted page(s) before structuring.`);
+  if (splitPageCount > 0) {
+    warnings.push(`Split ${splitPageCount} oversized extracted page(s) into smaller parts before structuring.`);
   }
 
   return {
@@ -1535,7 +1600,7 @@ async function repairImporterJsonText(rawText) {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: OPENAI_IMPORT_MODEL,
+      model: OPENAI_IMPORT_PDF_MODEL,
       instructions: IMPORTER_REPAIR_SYSTEM_PROMPT,
       input: [
         {
@@ -1583,6 +1648,63 @@ async function repairImporterJsonText(rawText) {
   return {
     rawText: repairedText,
     parsed: parseModelJsonText(repairedText)
+  };
+}
+
+async function buildImporterDraftFromPlainTextFallback(input, context = {}) {
+  const assets = buildImporterAssetDescriptors(input);
+  const warnings = Array.isArray(context?.warnings) ? context.warnings.slice() : [];
+  const extractedResults = [];
+
+  for (const asset of assets) {
+    try {
+      extractedResults.push(await extractImporterMenuSourceTextFallbackFromAsset(input, asset));
+    } catch (error) {
+      console.error(`IMPORTER DIRECT PLAIN-TEXT FALLBACK ERROR [${asset.label}]:`, error);
+      warnings.push(`${asset.label}: ${error.message}`);
+    }
+  }
+
+  const fallbackSource = prepareImporterSourceForStructuring({
+    pages: extractedResults.flatMap((entry) => entry.pages || []),
+    warnings: [
+      ...warnings,
+      ...extractedResults.flatMap((entry) => Array.isArray(entry.warnings) ? entry.warnings : [])
+    ]
+  }, {
+    maxCharsPerPage: 4500
+  });
+
+  if (!fallbackSource.pages.length) {
+    const error = new Error("empty_plain_text_importer_fallback");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  const chunks = splitImporterSourceIntoChunks(fallbackSource);
+  const structuredDrafts = [];
+  for (let index = 0; index < chunks.length; index += 1) {
+    structuredDrafts.push(await buildImporterDraftFromSource(input, chunks[index], {
+      chunkIndex: index,
+      totalChunks: chunks.length
+    }));
+  }
+
+  const parsed = mergeStructuredImporterDrafts(structuredDrafts);
+  const review = parsed.review && typeof parsed.review === "object" ? parsed.review : {};
+  const reviewWarnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+  parsed.review = {
+    ...review,
+    warnings: [
+      ...reviewWarnings,
+      "Plain-text extraction fallback used because direct multimodal structuring returned invalid JSON.",
+      ...fallbackSource.warnings
+    ].filter(Boolean)
+  };
+
+  return {
+    parsed,
+    fallbackSource
   };
 }
 
@@ -2002,6 +2124,74 @@ async function extractImporterMenuSourceFromAsset(input, asset) {
   };
 }
 
+async function extractImporterMenuSourceTextFallbackFromAsset(input, asset) {
+  const notes = asImporterString(input?.notes);
+  const restaurantName = asImporterString(input?.restaurantName);
+  const shortName = asImporterString(input?.shortName);
+  const importerModel = getImporterModelForAsset(asset);
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: importerModel,
+      instructions: IMPORTER_SOURCE_TEXT_FALLBACK_SYSTEM_PROMPT,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: [
+                `Restaurant name: ${restaurantName || "(not provided)"}`,
+                `Short brand name: ${shortName || "(not provided)"}`,
+                `Seller notes: ${notes || "(none)"}`,
+                `Extract raw menu text only from this asset: ${asset.label}`
+              ].join("\n")
+            },
+            asset.contentInput
+          ]
+        }
+      ],
+      store: false,
+      temperature: 0,
+      max_output_tokens: asset.kind === "pdf" ? 12000 : 3500
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || "openai_source_text_fallback_failed";
+    const error = new Error(message);
+    error.statusCode = response.status || 502;
+    throw error;
+  }
+
+  const rawText = normalizeImporterSourceText(extractResponseText(payload));
+  if (!rawText) {
+    const error = new Error(payload?.status === "incomplete" ? "incomplete_source_text_fallback_response" : "empty_source_text_fallback_response");
+    error.statusCode = 502;
+    throw error;
+  }
+
+  return {
+    asset: {
+      kind: asset.kind,
+      label: asset.label,
+      url: asset.url,
+      model: importerModel,
+      mode: "text_fallback"
+    },
+    pages: splitOversizedImporterSourcePage({
+      label: asset.label,
+      text: rawText
+    }, 3200),
+    warnings: [`${asset.label}: Plain-text source fallback used because structured source extraction did not return usable pages.`]
+  };
+}
+
 async function extractImporterMenuSource(input) {
   const assets = buildImporterAssetDescriptors(input);
   if (!assets.length) {
@@ -2013,10 +2203,22 @@ async function extractImporterMenuSource(input) {
 
   for (const asset of assets) {
     try {
-      results.push(await extractImporterMenuSourceFromAsset(input, asset));
+      const primaryResult = await extractImporterMenuSourceFromAsset(input, asset);
+      if (Array.isArray(primaryResult.pages) && primaryResult.pages.length) {
+        results.push(primaryResult);
+        continue;
+      }
+      throw new Error("empty_structured_source_extraction");
     } catch (error) {
       console.error(`IMPORTER ASSET SOURCE EXTRACTION ERROR [${asset.label}]:`, error);
-      warnings.push(`${asset.label}: ${error.message}`);
+      try {
+        const fallbackResult = await extractImporterMenuSourceTextFallbackFromAsset(input, asset);
+        results.push(fallbackResult);
+        warnings.push(`${asset.label}: structured source extraction fallback used (${error.message}).`);
+      } catch (fallbackError) {
+        console.error(`IMPORTER ASSET SOURCE TEXT FALLBACK ERROR [${asset.label}]:`, fallbackError);
+        warnings.push(`${asset.label}: ${fallbackError.message}`);
+      }
     }
   }
 
@@ -2081,8 +2283,8 @@ async function buildImporterDraftFromSource(input, sourceExtraction, options = {
         format: IMPORTER_TEXT_FORMAT
       },
       store: false,
-      temperature: 0.2,
-      max_output_tokens: 6000
+      temperature: 0,
+      max_output_tokens: 7000
     })
   });
 
@@ -2149,8 +2351,8 @@ async function buildImporterDraftDirectFromAssets(input) {
         format: IMPORTER_TEXT_FORMAT
       },
       store: false,
-      temperature: 0.2,
-      max_output_tokens: 6000
+      temperature: 0,
+      max_output_tokens: 9000
     })
   });
 
@@ -2186,13 +2388,29 @@ async function buildImporterDraftDirectFromAssets(input) {
     };
   } catch (_error) {
     console.error("IMPORTER RAW OPENAI TEXT:", rawText.slice(0, 1200));
-    const repaired = await repairImporterJsonText(rawText);
-    return {
-      payload,
-      parsed: repaired.parsed,
-      rawText,
-      repairedRawText: repaired.rawText
-    };
+    try {
+      const repaired = await repairImporterJsonText(rawText);
+      return {
+        payload,
+        parsed: repaired.parsed,
+        rawText,
+        repairedRawText: repaired.rawText
+      };
+    } catch (repairError) {
+      console.error("IMPORTER JSON REPAIR ERROR:", repairError);
+      const plainTextFallback = await buildImporterDraftFromPlainTextFallback(input, {
+        warnings: [
+          `Direct multimodal structuring repair fallback used: ${repairError.message}`
+        ]
+      });
+      return {
+        payload,
+        parsed: plainTextFallback.parsed,
+        rawText,
+        repairedRawText: "",
+        plainTextFallbackSource: plainTextFallback.fallbackSource
+      };
+    }
   }
 }
 
@@ -2351,6 +2569,10 @@ async function generateImporterDraft(input) {
       }
       if (directDraft.repairedRawText) {
         writeSellerJobText(job.jobId, "extraction/repaired-output.txt", directDraft.repairedRawText);
+      }
+      if (directDraft.plainTextFallbackSource) {
+        writeSellerJobJson(job.jobId, "extraction/plain-text-fallback-source.json", directDraft.plainTextFallbackSource);
+        writeSellerJobText(job.jobId, "extraction/plain-text-fallback-source.txt", formatImporterSourceForPrompt(directDraft.plainTextFallbackSource));
       }
       parsedDraft = directDraft.parsed;
     }
