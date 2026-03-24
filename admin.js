@@ -3014,6 +3014,9 @@ function toggleFeatured(id) {
         saveAndRefresh();
     }
 }
+
+window.togglePromo = togglePromo;
+window.toggleFeatured = toggleFeatured;
 // Legacy save handlers kept only as a fallback reference while the newer save flow remains below.
 async function forceSaveChangesLegacy() {
     try {
