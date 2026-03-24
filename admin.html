@@ -781,12 +781,15 @@
             margin-top: 18px;
             border: 1px solid var(--border);
             border-radius: 18px;
-            background: #fafafa;
+            background: linear-gradient(180deg, rgba(255, 250, 244, 0.96) 0%, rgba(255, 246, 236, 0.9) 100%);
             overflow: hidden;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
 
         .admin-disclosure[open] {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(255, 141, 8, 0.18);
+            box-shadow: 0 16px 30px rgba(75, 47, 24, 0.05);
         }
 
         .admin-disclosure summary {
@@ -798,6 +801,11 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            transition: background 0.18s ease;
+        }
+
+        .admin-disclosure summary:hover {
+            background: rgba(255, 255, 255, 0.52);
         }
 
         .admin-disclosure summary::-webkit-details-marker {
@@ -823,6 +831,10 @@
 
         .admin-disclosure-body {
             padding: 0 18px 18px;
+        }
+
+        .admin-disclosure[open] summary::after {
+            content: '-';
         }
 
         .menu-crud-form-shell {
@@ -965,18 +977,25 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding-top: 25px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.86);
+            min-height: 56px;
         }
 
         .inline-check label {
             margin-bottom: 0;
             cursor: pointer;
+            font-weight: 700;
         }
 
         .check-input {
             width: 20px;
             height: 20px;
             cursor: pointer;
+            accent-color: var(--primary);
+            flex: 0 0 20px;
         }
 
         .multi-price-group {
@@ -984,14 +1003,31 @@
             grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #eee;
+            background: linear-gradient(180deg, rgba(255, 250, 244, 0.96) 0%, rgba(255, 247, 238, 0.94) 100%);
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
         }
 
         .file-input-spaced {
             margin-bottom: 10px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px dashed rgba(232, 216, 197, 0.96);
+            background: linear-gradient(180deg, #fffdf9 0%, #fff8ef 100%);
+            color: var(--text2);
+        }
+
+        .file-input-spaced::file-selector-button {
+            margin-right: 12px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.98);
+            color: var(--text);
+            font-weight: 700;
+            cursor: pointer;
         }
 
         .secondary-btn {
@@ -1055,11 +1091,44 @@
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 5px;
-            padding: 10px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            min-height: 40px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            border-radius: 18px;
+            min-height: 52px;
+        }
+
+        .chip-select-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #f7f1e7;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .chip-select-option input {
+            width: 16px !important;
+            height: 16px;
+            margin: 0 !important;
+            accent-color: var(--primary);
+        }
+
+        .chip-select-option:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 141, 8, 0.24);
+            box-shadow: 0 10px 20px rgba(75, 47, 24, 0.06);
+        }
+
+        .chip-select-option:has(input:checked) {
+            background: linear-gradient(135deg, rgba(226, 27, 27, 0.1), rgba(255, 141, 8, 0.12));
+            border-color: rgba(255, 141, 8, 0.3);
+            box-shadow: 0 10px 20px rgba(255, 141, 8, 0.12);
         }
 
         .landing-copy-grid {

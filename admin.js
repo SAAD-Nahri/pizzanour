@@ -2472,10 +2472,10 @@ function initSuperCatForm() {
     if (!container) return;
     const cats = Object.keys(catEmojis);
     container.innerHTML = cats.map(cat => `
-            <label style="display:flex; align-items:center; gap:5px; background:#f0f0f0; padding:5px 10px; border-radius:20px; font-size:0.8rem; cursor:pointer;">
-                <input type="checkbox" value="${cat}" class="sc-cat-check" style="width:auto; margin:0;">
-                    ${escapeHtml(window.getLocalizedCategoryName(cat, cat))}
-                </label>
+            <label class="chip-select-option">
+                <input type="checkbox" value="${cat}" class="sc-cat-check">
+                <span>${escapeHtml(window.getLocalizedCategoryName(cat, cat))}</span>
+            </label>
         `).join('');
 }
 
