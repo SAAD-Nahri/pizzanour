@@ -2197,18 +2197,23 @@
                 right: 12px;
                 top: auto;
                 bottom: calc(84px + env(safe-area-inset-bottom, 0px));
-                width: min(216px, calc(100vw - 24px));
+                width: min(208px, calc(100vw - 24px));
                 max-height: none;
-                padding: 8px;
-                border-radius: 18px;
-                transform: translateY(10px) scale(0.98);
+                padding: 10px;
+                border-radius: 20px;
+                transform: translateY(10px) scale(0.96);
+                transform-origin: bottom right;
                 opacity: 0;
                 visibility: hidden;
                 pointer-events: none;
                 z-index: 1000;
-                background: rgba(20, 20, 20, 0.96);
+                background:
+                    linear-gradient(180deg, rgba(40, 40, 44, 0.98), rgba(18, 18, 20, 0.98));
                 border: 1px solid rgba(255, 255, 255, 0.08);
-                box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
+                box-shadow:
+                    0 18px 40px rgba(0, 0, 0, 0.28),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+                transition: transform 0.18s ease, opacity 0.18s ease, visibility 0.18s ease;
             }
 
             .sidebar.mobile-open {
@@ -2216,7 +2221,22 @@
                 opacity: 1;
                 visibility: visible;
                 pointer-events: auto;
-                box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+                box-shadow:
+                    0 22px 48px rgba(0, 0, 0, 0.32),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            }
+
+            .sidebar::after {
+                content: "";
+                position: absolute;
+                right: 26px;
+                bottom: -8px;
+                width: 16px;
+                height: 16px;
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(18, 18, 20, 0.98);
+                transform: rotate(45deg);
             }
 
             .main {
@@ -2296,17 +2316,47 @@
             .sidebar .nav-btn {
                 margin-bottom: 4px;
                 padding: 12px 13px;
-                border-radius: 14px;
-                font-size: 0.9rem;
-                min-height: 44px;
+                border-radius: 15px;
+                font-size: 0.88rem;
+                font-weight: 700;
+                line-height: 1.15;
+                min-height: 46px;
                 justify-content: flex-start;
                 text-align: left;
+                color: rgba(255, 255, 255, 0.88);
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                box-shadow: none;
             }
 
             .sidebar-actions {
-                margin-top: 2px;
-                padding-top: 6px;
+                margin-top: 4px;
+                padding-top: 8px;
                 border-top: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .sidebar .nav-btn:hover,
+            .sidebar .nav-btn:focus-visible {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.08);
+            }
+
+            .sidebar .nav-btn.active {
+                color: #fff;
+                background: linear-gradient(135deg, rgba(230, 57, 70, 0.94), rgba(255, 123, 0, 0.94));
+                border-color: transparent;
+                box-shadow: 0 10px 22px rgba(230, 57, 70, 0.26);
+            }
+
+            .sidebar .sidebar-logout-btn {
+                color: #ffb0b0;
+            }
+
+            .sidebar .sidebar-logout-btn:hover,
+            .sidebar .sidebar-logout-btn:focus-visible {
+                color: #fff;
+                background: rgba(224, 30, 47, 0.16);
+                border-color: rgba(224, 30, 47, 0.16);
             }
 
             #adminSidebar {
