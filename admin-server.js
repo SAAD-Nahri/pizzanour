@@ -1418,16 +1418,29 @@ function buildMenuItemImagePrompt(input) {
   const categoryKey = asImporterString(input?.categoryKey);
   const categoryName = asImporterString(input?.categoryName) || categoryKey;
   const cuisineHint = asImporterString(input?.cuisineHint);
+  const lookup = [itemName, itemDescription, categoryName, cuisineHint]
+    .join(" ")
+    .toLowerCase();
+  const isDrink = /(coffee|cafe|espresso|latte|mocha|tea|th[eé]|juice|smoothie|cocktail|mocktail|drink|boisson|soda|cola|water|eau|milkshake)/.test(lookup);
+  const isDessert = /(dessert|cake|tarte|tart|chocolate|fondant|brownie|cookie|glace|ice cream|crepe|gaufre|waffle|cheesecake)/.test(lookup);
+  const presentationHint = isDrink
+    ? "Present it as a real beverage in the correct cup or glass, with believable texture, foam, ice, or garnish only if appropriate."
+    : isDessert
+      ? "Present it as a plated dessert portion with realistic garnish and restaurant-style dessert presentation."
+      : "Present it as a plated savory restaurant dish, with a believable portion size and garnish only when it fits the described recipe.";
 
   return [
-    "Create a realistic restaurant menu image for a mobile ordering app.",
-    "Return one single appetizing food or drink photo.",
-    "No text, no labels, no logos, no watermark, no collage, no split layout, no packaging mockup, no UI.",
-    "Use clean lighting, premium restaurant presentation, and a composition that crops well for a square menu thumbnail.",
+    "Create a realistic restaurant menu photo for a mobile ordering app.",
+    "Return one single real-looking food or drink photograph, not an illustration or generic stock-style mockup.",
+    "The image should look like a dish actually served by a real restaurant: believable plating, natural texture, realistic lighting, and normal restaurant tableware.",
+    "Compose it like professional menu photography: close-up or 3/4 angle, one clear subject, clean background, strong focus on the dish, and a crop that works for a square menu thumbnail.",
+    presentationHint,
     categoryName ? `Category: ${categoryName}.` : "",
     cuisineHint ? `Cuisine hint: ${cuisineHint}.` : "",
     `Dish name: ${itemName}.`,
     itemDescription ? `Dish description and ingredients: ${itemDescription}.` : "",
+    "Follow the dish name and description closely. Do not substitute the main ingredients with something else.",
+    "Avoid text, labels, logos, watermark, collage, split layout, packaging mockup, cutaway views, floating ingredients, duplicated plates, hands, or visible people.",
     "Keep the main dish centered and clearly readable at small mobile sizes."
   ].filter(Boolean).join(" ");
 }
@@ -1616,7 +1629,7 @@ async function generateMenuItemMediaImage(input) {
         approved: true,
         model: generationResult.model,
         prompt,
-        promptVersion: "menu-item-image-v1",
+        promptVersion: "menu-item-image-v2",
         notes: "Generated from the item image modal.",
         createdFrom: "menu_item_image_modal"
       });
