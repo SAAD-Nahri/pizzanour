@@ -1527,6 +1527,8 @@ function editItem(id) {
     editingItemId = id;
     currentMenuWorkspaceStep = 'items';
     menuBuilderSelectedCategoryKey = item.cat || '';
+    openMenuCrudModal('item', `Edit Item - ${getAdminItemDisplayName(item)}`);
+
     document.getElementById('itemName').value = item.name || getAdminItemDisplayName(item);
     document.getElementById('itemCat').value = item.cat;
     document.getElementById('itemDesc').value = item.desc || getAdminItemDisplayDescription(item);
@@ -1566,8 +1568,6 @@ function editItem(id) {
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = `Edit Item - ${getAdminItemDisplayName(item)}`;
     document.querySelector('#foodForm .primary-btn').textContent = 'Save';
-
-    openMenuCrudModal('item', `Edit Item - ${getAdminItemDisplayName(item)}`);
 }
 
 function resetFoodForm() {
@@ -2483,6 +2483,8 @@ function editSuperCat(id) {
     const sc = restaurantConfig.superCategories.find(s => s.id === id);
     if (!sc) return;
     currentMenuWorkspaceStep = 'supercategories';
+    openMenuCrudModal('supercategory', `Edit Super Category - ${sc.name}`);
+
     const editingIdInput = document.getElementById('scEditingId');
     if (editingIdInput) editingIdInput.value = sc.id;
     document.getElementById('scName').value = sc.name;
@@ -2493,8 +2495,6 @@ function editSuperCat(id) {
 
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
-
-    openMenuCrudModal('supercategory', `Edit Super Category - ${sc.name}`);
 }
 
 function deleteSuperCat(id) {
@@ -3402,12 +3402,15 @@ function renderCatTable() {
 function editCat(cat) {
     currentMenuWorkspaceStep = 'categories';
     menuBuilderSelectedCategoryKey = cat;
+    openMenuCrudModal('category', `Edit Category - ${window.getLocalizedCategoryName(cat, cat)}`);
+
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = cat;
-    document.getElementById('catName').value = cat;
-    document.getElementById('catEmoji').value = catEmojis[cat] || '';
+    const catNameInput = document.getElementById('catName');
+    if (catNameInput) catNameInput.value = cat;
+    const catEmojiInput = document.getElementById('catEmoji');
+    if (catEmojiInput) catEmojiInput.value = catEmojis[cat] || '';
     setCategoryTranslationFields(cat);
-    openMenuCrudModal('category', `Edit Category - ${window.getLocalizedCategoryName(cat, cat)}`);
 }
 function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Delete the products in this category first.'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
 function initWifiForm() {
