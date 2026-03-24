@@ -18,6 +18,16 @@ let adminSaveState = {
     message: '',
     updatedAt: null
 };
+const ADMIN_ICON = Object.freeze({
+    bullet: String.fromCodePoint(0x2022),
+    heart: String.fromCodePoint(0x2764, 0xFE0F),
+    star: String.fromCodePoint(0x2B50),
+    sparkle: String.fromCodePoint(0x2728),
+    edit: String.fromCodePoint(0x270F, 0xFE0F),
+    image: String.fromCodePoint(0x1F5BC, 0xFE0F),
+    trash: String.fromCodePoint(0x1F5D1, 0xFE0F),
+    camera: String.fromCodePoint(0x1F4F7)
+});
 
 function t(key, fallback = '', vars = {}) {
     if (typeof window.formatTranslation === 'function') {
@@ -908,7 +918,7 @@ function getMenuBuilderCurrentCategories() {
     return categoryKeys
         .map((catKey) => ({
             key: catKey,
-            emoji: catEmojis?.[catKey] || 'â€¢',
+            emoji: catEmojis?.[catKey] || ADMIN_ICON.bullet,
             name: window.getLocalizedCategoryName(catKey, catKey),
             itemCount: menu.filter((item) => item.cat === catKey).length
         }))
@@ -1017,13 +1027,13 @@ function renderMenuBuilder() {
             return `
                 <tr onclick='openMenuBuilderRow(${inlineId})'>
                     <td data-label="Super Category">
-                        <strong>${escapeHtml(entry.emoji || 'â€¢')} ${escapeHtml(entry.name || 'Super Category')}</strong>
+                        <strong>${escapeHtml(entry.emoji || ADMIN_ICON.bullet)} ${escapeHtml(entry.name || 'Super Category')}</strong>
                         <div class="menu-builder-row-copy">${escapeHtml(entry.desc || '')}</div>
                     </td>
                     <td data-label="Includes"><span class="menu-builder-row-meta">${categoriesCount} categories</span></td>
                     <td data-label="Actions">
-                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>âœï¸</button>`}
-                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>ðŸ—‘ï¸</button>`}
+                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>${ADMIN_ICON.edit}</button>`}
+                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>${ADMIN_ICON.trash}</button>`}
                     </td>
                 </tr>
             `;
@@ -1039,8 +1049,8 @@ function renderMenuBuilder() {
                     <td data-label="Category"><strong>${escapeHtml(entry.emoji)} ${escapeHtml(entry.name)}</strong></td>
                     <td data-label="Items"><span class="menu-builder-row-meta">${entry.itemCount} items</span></td>
                     <td data-label="Actions">
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>âœï¸</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>ðŸ—‘ï¸</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.edit}</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>${ADMIN_ICON.trash}</button>
                     </td>
                 </tr>
             `;
@@ -1066,14 +1076,14 @@ function renderMenuBuilder() {
                     </div>
                 </td>
                 <td data-label="Price"><span class="menu-builder-row-meta">MAD ${price.toFixed(2)}</span></td>
-                <td data-label="Likes"><span class="menu-builder-likes">ðŸ’— ${likes}</span></td>
-                <td data-label="Promo"><button type="button" class="promo-star action-btn menu-builder-toggle ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='event.stopPropagation(); togglePromo(${inlineId})'>â­</button></td>
-                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">âœ¨</button></td>
+                <td data-label="Likes"><span class="menu-builder-likes">${ADMIN_ICON.heart} ${likes}</span></td>
+                <td data-label="Promo"><button type="button" class="promo-star action-btn menu-builder-toggle ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='event.stopPropagation(); togglePromo(${inlineId})'>${ADMIN_ICON.star}</button></td>
+                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</button></td>
                 <td data-label="Actions">
                     <div class="menu-builder-item-actions">
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); editItem(${inlineId})'>âœï¸</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openImageModal(${inlineId})'>ðŸ–¼ï¸</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteItem(${inlineId})'>ðŸ—‘ï¸</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); editItem(${inlineId})'>${ADMIN_ICON.edit}</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openImageModal(${inlineId})'>${ADMIN_ICON.image}</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteItem(${inlineId})'>${ADMIN_ICON.trash}</button>
                     </div>
                 </td>
             </tr>
@@ -1477,20 +1487,20 @@ function renderMenuTable() {
             <tr>
                 <td>
                     <div style="width:50px; height:50px; background:#eee; border-radius:8px; overflow:hidden; border:1px solid #ddd; cursor:pointer" onclick='openImageModal(${inlineItemId})'>
-                        ${firstImg ? `<img src="${firstImg}" loading="lazy" decoding="async" fetchpriority="low" style="width:100%; height:100%; object-fit:cover" onerror="this.src='images/menu-item-placeholder.svg'">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px">ðŸ“·</div>'}
+                        ${firstImg ? `<img src="${firstImg}" loading="lazy" decoding="async" fetchpriority="low" style="width:100%; height:100%; object-fit:cover" onerror="this.src='images/menu-item-placeholder.svg'">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px">${ADMIN_ICON.camera}</div>`}
                     </div>
                     ${images.length > 0 ? `<small style="display:block;text-align:center;font-size:10px;color:var(--primary);cursor:pointer;margin-top:2px" onclick='openImageModal(${inlineItemId})'>${images.length} image(s)</small>` : ''}
                 </td>
                 <td><strong>${itemName}</strong><div class="item-copy-meta"><div class="translation-badges">${translationBadges}</div></div><small style="color:#888">${itemDesc}</small></td>
                 <td>${itemCat}</td>
                 <td>MAD ${safePrice.toFixed(2)}</td>
-                <td><span style="color:#e01e2f">â¤ï¸</span> ${likeCount}</td>
-                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>â­</span></td>
-                <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick='toggleFeatured(${inlineItemId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">âœ¨</span></td>
+                <td><span style="color:#e01e2f">${ADMIN_ICON.heart}</span> ${likeCount}</td>
+                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>${ADMIN_ICON.star}</span></td>
+                <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick='toggleFeatured(${inlineItemId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</span></td>
                 <td>
-                    <button class="action-btn" onclick='editItem(${inlineItemId})' title="Modifier les dÃ©tails">âœï¸</button>
-                    <button class="action-btn" onclick='openImageModal(${inlineItemId})' title="GÃ©rer les images">ðŸ–¼ï¸</button>
-                    <button class="action-btn" onclick='deleteItem(${inlineItemId})'>ðŸ—‘ï¸</button>
+                    <button class="action-btn" onclick='editItem(${inlineItemId})' title="Modifier les dÃ©tails">${ADMIN_ICON.edit}</button>
+                    <button class="action-btn" onclick='openImageModal(${inlineItemId})' title="GÃ©rer les images">${ADMIN_ICON.image}</button>
+                    <button class="action-btn" onclick='deleteItem(${inlineItemId})'>${ADMIN_ICON.trash}</button>
                 </td>
             </tr > `;
         }).join('');
@@ -2462,8 +2472,8 @@ function renderSuperCatTable() {
             <td><strong>${sc.name}</strong><br><small>${sc.time || ''}</small></td>
             <td>${sc.cats.join(', ')}</td>
             <td>
-                <button class="action-btn" onclick="editSuperCat('${sc.id}')">âœï¸</button>
-                <button class="action-btn" onclick="deleteSuperCat('${sc.id}')">ðŸ—‘ï¸</button>
+                <button class="action-btn" onclick="editSuperCat('${sc.id}')">${ADMIN_ICON.edit}</button>
+                <button class="action-btn" onclick="deleteSuperCat('${sc.id}')">${ADMIN_ICON.trash}</button>
             </td>
         </tr>
             `).join('');
@@ -3387,7 +3397,7 @@ function populateCatDropdown() {
 }
 function renderCatTable() {
     const el = document.querySelector('#catTable tbody');
-    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">âœï¸</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">ðŸ—‘ï¸</button></td></tr>`).join('');
+    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`).join('');
 }
 function editCat(cat) {
     currentMenuWorkspaceStep = 'categories';
