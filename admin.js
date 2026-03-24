@@ -4054,6 +4054,8 @@ window.generateModalImageWithAI = async function () {
         console.error('Menu item AI image generation error:', error);
         const message = error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY before using AI image generation.'
+            : /verify organization|verified to use the model/i.test(error?.message || '')
+                ? 'Your OpenAI organization is not verified for the configured image model. Use OPENAI_ITEM_MEDIA_MODEL=dall-e-3 or wait for verification to propagate.'
             : error.message;
         showToast(`AI image generation failed: ${message}`);
     } finally {

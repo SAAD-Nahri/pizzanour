@@ -43,12 +43,14 @@ const LOGIN_LOCK_MS = 15 * 60 * 1000;
 const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
 const OPENAI_IMPORT_PDF_MODEL = process.env.OPENAI_IMPORT_PDF_MODEL || "gpt-4o";
 const OPENAI_MEDIA_MODEL = process.env.OPENAI_MEDIA_MODEL || "gpt-4.1";
+const OPENAI_ITEM_MEDIA_MODEL = process.env.OPENAI_ITEM_MEDIA_MODEL || "dall-e-3";
 const SELLER_TOOLS_ENABLED = booleanFromEnv(
   process.env.SELLER_TOOLS_ENABLED,
   process.env.NODE_ENV !== "production"
 );
 const AI_MEDIA_TOOLS_ENABLED = booleanFromEnv(process.env.AI_MEDIA_TOOLS_ENABLED, false);
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+const OPENAI_IMAGES_URL = "https://api.openai.com/v1/images/generations";
 const IMPORTER_MAX_MENU_IMAGES = 8;
 const IMPORTER_MAX_VENUE_IMAGES = 6;
 
@@ -1374,6 +1376,17 @@ function extractGeneratedImageBase64(payload) {
   return imageCall?.result || "";
 }
 
+function extractImagesApiBase64(payload) {
+  const data = Array.isArray(payload?.data) ? payload.data : [];
+  const imageRecord = data.find((entry) => typeof entry?.b64_json === "string" && entry.b64_json.trim());
+  return imageRecord?.b64_json || "";
+}
+
+function isOrgVerificationError(message) {
+  return typeof message === "string"
+    && /verify organization|verified to use the model|verification/i.test(message);
+}
+
 function buildSellerMediaPrompt(input) {
   const slot = input?.slot === "gallery" ? "gallery" : "hero";
   const restaurantName = asImporterString(input?.restaurantName) || "Restaurant";
@@ -1543,36 +1556,41 @@ async function generateMenuItemMediaImage(input) {
   };
   const prompt = buildMenuItemImagePrompt(input);
 
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: OPENAI_MEDIA_MODEL,
-      input: [
-        {
-          role: "user",
-          content: [
-            { type: "input_text", text: prompt }
-          ]
-        }
-      ],
-      tools: [{ type: "image_generation", quality: "high" }],
-      store: false
-    })
-  });
+  async function requestMenuItemImage(model) {
+    const response = await fetch(OPENAI_IMAGES_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model,
+        prompt,
+        size: "1024x1024",
+        quality: model === "dall-e-3" ? "standard" : "medium",
+        response_format: "b64_json"
+      })
+    });
+    const payload = await response.json().catch(() => ({}));
+    return { response, payload, model };
+  }
 
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = payload?.error?.message || payload?.message || "openai_menu_item_media_request_failed";
+  let generationResult = await requestMenuItemImage(OPENAI_ITEM_MEDIA_MODEL);
+  if (!generationResult.response.ok) {
+    const initialMessage = generationResult.payload?.error?.message || generationResult.payload?.message || "openai_menu_item_media_request_failed";
+    if (OPENAI_ITEM_MEDIA_MODEL !== "dall-e-3" && isOrgVerificationError(initialMessage)) {
+      generationResult = await requestMenuItemImage("dall-e-3");
+    }
+  }
+
+  if (!generationResult.response.ok) {
+    const message = generationResult.payload?.error?.message || generationResult.payload?.message || "openai_menu_item_media_request_failed";
     const error = new Error(message);
-    error.statusCode = response.status || 502;
+    error.statusCode = generationResult.response.status || 502;
     throw error;
   }
 
-  const base64Image = extractGeneratedImageBase64(payload);
+  const base64Image = extractImagesApiBase64(generationResult.payload);
   if (!base64Image) {
     const error = new Error("empty_generated_image");
     error.statusCode = 502;
@@ -1596,7 +1614,7 @@ async function generateMenuItemMediaImage(input) {
         languageVariants: itemLike.translations,
         tags: [itemLike.cat, "menu-item", itemName].filter(Boolean),
         approved: true,
-        model: OPENAI_MEDIA_MODEL,
+        model: generationResult.model,
         prompt,
         promptVersion: "menu-item-image-v1",
         notes: "Generated from the item image modal.",
@@ -1611,7 +1629,8 @@ async function generateMenuItemMediaImage(input) {
   return {
     url,
     prompt,
-    libraryAssetId
+    libraryAssetId,
+    model: generationResult.model
   };
 }
 
