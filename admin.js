@@ -1094,7 +1094,7 @@ function renderMenuBuilder() {
                 </td>
                 <td data-label="Price"><span class="menu-builder-row-meta">MAD ${price.toFixed(2)}</span></td>
                 <td data-label="Likes"><span class="menu-builder-likes">${ADMIN_ICON.heart} ${likes}</span></td>
-                <td data-label="Promo"><button type="button" class="promo-star action-btn menu-builder-toggle ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='event.stopPropagation(); togglePromo(${inlineId})'>${ADMIN_ICON.star}</button></td>
+                <td data-label="Promo"><button type="button" class="promo-star action-btn menu-builder-toggle ${hasPromoId(item.id) ? 'promo-active' : ''}" onclick='event.stopPropagation(); togglePromo(${inlineId})'>${ADMIN_ICON.star}</button></td>
                 <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</button></td>
                 <td data-label="Actions">
                     <div class="menu-builder-item-actions">
@@ -1150,10 +1150,10 @@ function openMenuCrudModal(type, title) {
     document.body.style.top = `-${menuCrudLockedScrollY}px`;
     modal.style.display = 'flex';
     modal.scrollTop = 0;
+    body.scrollTop = 0;
     requestAnimationFrame(() => {
         modal.scrollTop = 0;
-        const modalCard = modal.querySelector('.menu-crud-modal-card');
-        if (modalCard) modalCard.scrollTop = 0;
+        body.scrollTop = 0;
     });
 }
 
@@ -1526,7 +1526,7 @@ function renderMenuTable() {
                 <td>${itemCat}</td>
                 <td>MAD ${safePrice.toFixed(2)}</td>
                 <td><span style="color:#e01e2f">${ADMIN_ICON.heart}</span> ${likeCount}</td>
-                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>${ADMIN_ICON.star}</span></td>
+                <td><span class="promo-star action-btn ${hasPromoId(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>${ADMIN_ICON.star}</span></td>
                 <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick='toggleFeatured(${inlineItemId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</span></td>
                 <td>
                     <button class="action-btn" onclick='editItem(${inlineItemId})' title="Edit item">${ADMIN_ICON.edit}</button>
@@ -2998,9 +2998,12 @@ window.copyImporterDraftJson = async function () {
 const toImageUrl = (img) => img;
 
 function deleteItem(id) { if (confirm('Supprimer cet article ?')) { menu = menu.filter(m => m.id != id); promoIds = promoIds.filter(pid => pid != id); saveAndRefresh(); } }
+function hasPromoId(id) {
+    return promoIds.some((pid) => String(pid) === String(id));
+}
 function togglePromo(id) {
-    if (promoIds.includes(id)) {
-        promoIds = promoIds.filter(pid => pid != id);
+    if (hasPromoId(id)) {
+        promoIds = promoIds.filter(pid => String(pid) !== String(id));
     } else {
         promoIds.push(id);
     }

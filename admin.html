@@ -612,14 +612,11 @@
             position: relative;
             border: 1px solid rgba(232, 216, 197, 0.88);
             box-shadow: 0 36px 80px rgba(15, 23, 42, 0.2);
-            display: grid;
-            gap: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             place-self: center;
             scrollbar-gutter: stable both-edges;
-            align-content: start;
-            grid-template-columns: minmax(0, 1fr) auto;
-            grid-template-rows: auto minmax(0, 1fr);
-            align-items: start;
         }
 
         .menu-crud-modal-card::before {
@@ -634,12 +631,23 @@
             opacity: 0.9;
         }
 
-        #menuCrudModalBody {
-            display: grid;
+        .menu-crud-modal-header {
+            display: flex;
+            align-items: center;
             gap: 12px;
-            grid-column: 1 / -1;
-            justify-items: center;
+            flex: 0 0 auto;
+            min-height: 42px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: linear-gradient(180deg, rgba(255, 251, 244, 0.99) 0%, rgba(255, 251, 244, 0.95) 72%, rgba(255, 251, 244, 0) 100%);
+            padding-top: 6px;
+        }
+
+        #menuCrudModalBody {
+            display: block;
             min-height: 0;
+            flex: 1 1 auto;
             overflow-y: auto;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
@@ -665,12 +673,11 @@
             line-height: 1.2;
             letter-spacing: -0.02em;
             max-width: none;
-            padding-top: 6px;
+            flex: 1 1 auto;
         }
 
         .menu-crud-close {
-            position: sticky;
-            top: 6px;
+            position: relative;
             border: 1px solid rgba(232, 216, 197, 0.92);
             background: rgba(255, 255, 255, 0.94);
             width: 36px;
@@ -680,8 +687,7 @@
             cursor: pointer;
             box-shadow: 0 10px 18px rgba(15, 23, 42, 0.07);
             transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-            justify-self: end;
-            align-self: start;
+            flex: 0 0 36px;
             z-index: 4;
         }
 
@@ -734,6 +740,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 6px;
+            z-index: 2;
         }
 
         .menu-crud-modal-card .modal-form-actions .primary-btn,
@@ -3505,8 +3512,6 @@
             }
 
             .menu-crud-modal-card {
-                position: relative;
-                inset: auto;
                 width: min(80vw, 560px);
                 height: 80dvh;
                 max-width: min(80vw, 560px);
@@ -3514,37 +3519,24 @@
                 max-height: 80dvh;
                 border-radius: 26px;
                 padding: 12px;
-                grid-template-columns: auto minmax(0, 1fr);
-                grid-template-rows: auto minmax(0, 1fr);
-                grid-template-areas:
-                    "close title"
-                    "body body";
-                row-gap: 10px;
-                transform: none;
-                align-self: center;
-                place-self: center;
                 overflow: hidden;
                 box-shadow: 0 26px 60px rgba(15, 23, 42, 0.2);
             }
 
+            .menu-crud-modal-header {
+                gap: 10px;
+                min-height: 38px;
+                padding-top: 4px;
+            }
+
             .menu-crud-modal-title {
-                grid-area: title;
-                position: sticky;
-                top: 0;
-                z-index: 5;
                 font-size: 0.95rem;
-                padding: 8px 0 8px;
-                padding-right: 0;
-                background: linear-gradient(180deg, rgba(255, 251, 244, 0.98) 0%, rgba(255, 251, 244, 0.94) 72%, rgba(255, 251, 244, 0) 100%);
             }
 
             .menu-crud-close {
-                grid-area: close;
-                top: 0;
                 width: 34px;
                 height: 34px;
-                justify-self: start;
-                z-index: 6;
+                flex-basis: 34px;
             }
 
             .owner-section-card,
@@ -3595,9 +3587,6 @@
             }
 
             #menuCrudModalBody {
-                grid-area: body;
-                min-height: 0;
-                display: block;
                 overflow-y: auto;
                 overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
@@ -3659,7 +3648,6 @@
             #menuCrudModalBody > #superCatForm {
                 width: min(100%, 100%);
                 max-width: 100%;
-                min-height: max-content;
             }
 
             body.menu-crud-open .mobile-bottom-nav,
@@ -4037,8 +4025,10 @@
             <div id="menuCrudModal" class="modal-overlay"
                 style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:2200; align-items:center; justify-content:center; padding:24px;">
                 <div class="menu-crud-modal-card">
-                    <button type="button" class="menu-crud-close" onclick="closeMenuCrudModal()">&times;</button>
-                    <h3 id="menuCrudModalTitle" class="menu-crud-modal-title">Edit</h3>
+                    <div class="menu-crud-modal-header">
+                        <button type="button" class="menu-crud-close" onclick="closeMenuCrudModal()">&times;</button>
+                        <h3 id="menuCrudModalTitle" class="menu-crud-modal-title">Edit</h3>
+                    </div>
                     <div id="menuCrudModalBody"></div>
                 </div>
             </div>
