@@ -3565,23 +3565,26 @@
 
             #menuCrudModalBody {
                 grid-area: body;
+                padding-bottom: 170px;
             }
 
             .menu-crud-modal-card .modal-form-actions {
-                position: sticky;
-                bottom: -18px;
-                margin: 18px -16px -18px;
-                padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-                background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.98) 45%);
+                position: fixed;
+                left: max(14px, env(safe-area-inset-left, 0px));
+                right: max(14px, env(safe-area-inset-right, 0px));
+                bottom: calc(12dvh + env(safe-area-inset-bottom, 0px));
+                margin: 0;
+                padding: 10px 12px;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.985) 65%);
                 backdrop-filter: blur(12px);
+                border: 1px solid rgba(232, 216, 197, 0.9);
+                border-radius: 18px;
+                box-shadow: 0 18px 34px rgba(15, 23, 42, 0.16);
+                z-index: 9;
             }
 
             .menu-crud-modal-card .modal-form-actions {
                 justify-content: stretch;
-                margin-left: -16px;
-                margin-right: -16px;
-                margin-bottom: -18px;
-                padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
                 gap: 8px;
             }
 
