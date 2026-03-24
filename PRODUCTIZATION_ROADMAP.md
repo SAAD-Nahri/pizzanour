@@ -8,6 +8,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 
 ### Latest Progress
 
+- The menu importer is now being hardened for larger real-world menus too: menu images and PDFs are extracted asset-by-asset into seller-job artifacts, duplicate extracted pages are removed before structuring, and long extracted sources are structured in smaller chunks so 10-page menus do not depend on one oversized model pass
 - The owner-facing admin layout is being tightened again: the summary boxes at the top of `Menu`, `Info`, and `Branding` are removed, `Info` is now limited to contact/social/facilities/hours/WiFi/admin access, and `Homepage Layout` plus `Homepage Copy` are moved under `Branding`
 - The `Branding` area now has an internal workspace nav so identity settings, homepage presentation, and gallery management are separated cleanly instead of living in one long mixed form
 - The seller-only admin surface is now being pruned down to the importer that is actually in use: launch-readiness, handoff, menu-image suggestion, AI media, quick-launch, backup/import, reset, and cache-clear controls have been removed from the visible admin interface so the internal setup flow stays focused on menu import only

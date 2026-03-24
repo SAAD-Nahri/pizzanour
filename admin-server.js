@@ -51,8 +51,10 @@ const SELLER_TOOLS_ENABLED = booleanFromEnv(
 const AI_MEDIA_TOOLS_ENABLED = booleanFromEnv(process.env.AI_MEDIA_TOOLS_ENABLED, false);
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_IMAGES_URL = "https://api.openai.com/v1/images/generations";
-const IMPORTER_MAX_MENU_IMAGES = 8;
+const IMPORTER_MAX_MENU_IMAGES = 16;
 const IMPORTER_MAX_VENUE_IMAGES = 6;
+const IMPORTER_SOURCE_STRUCTURING_MAX_PAGES = 3;
+const IMPORTER_SOURCE_STRUCTURING_MAX_CHARS = 6500;
 
 const app = express();
 const port = parsePort(process.env.PORT, 3102);
@@ -89,6 +91,8 @@ const IMPORTER_SOURCE_EXTRACTION_SYSTEM_PROMPT = [
   "You extract raw restaurant menu source text from uploaded menu images or PDFs.",
   "Return page-by-page text only.",
   "Preserve headings, item names, prices, and short descriptions with meaningful line breaks.",
+  "If names, descriptions, and prices are visually separated, keep the closest related lines together in reading order.",
+  "For PDFs, return one page entry per PDF page in order. For single menu images, return one page entry for the visible menu content in that image.",
   "Keep the original language and wording. Do not translate, summarize, group, or normalize the menu.",
   "Skip clearly decorative non-menu copy when it is obvious.",
   "If a region is unreadable or ambiguous, omit invented text and record the problem in warnings.",
@@ -370,6 +374,44 @@ function importerHasPdfInput(input) {
 
 function getImporterModelForInput(input) {
   return importerHasPdfInput(input) ? OPENAI_IMPORT_PDF_MODEL : OPENAI_IMPORT_MODEL;
+}
+
+function getImporterModelForAsset(asset) {
+  return asset?.kind === "pdf" ? OPENAI_IMPORT_PDF_MODEL : OPENAI_IMPORT_MODEL;
+}
+
+function buildImporterAssetLabel(kind, index, url) {
+  const fallback = kind === "pdf" ? `Menu PDF ${index + 1}` : `Menu Image ${index + 1}`;
+  const filePath = resolveLocalUploadPath(url);
+  if (!filePath) return fallback;
+
+  const rawBaseName = path.basename(filePath, path.extname(filePath)).replace(/[_-]+/g, " ");
+  const normalizedBaseName = normalizeImporterText(rawBaseName);
+  return normalizedBaseName ? `${fallback}: ${normalizedBaseName}` : fallback;
+}
+
+function buildImporterAssetDescriptors(input) {
+  const imageAssets = (Array.isArray(input?.menuImageUrls) ? input.menuImageUrls : [])
+    .map((url, index) => ({
+      kind: "image",
+      index,
+      url,
+      label: buildImporterAssetLabel("image", index, url),
+      contentInput: buildInputImageFromUploadUrl(url)
+    }))
+    .filter((asset) => asset.contentInput);
+
+  const pdfAssets = (Array.isArray(input?.menuPdfUrls) ? input.menuPdfUrls : [])
+    .map((url, index) => ({
+      kind: "pdf",
+      index,
+      url,
+      label: buildImporterAssetLabel("pdf", index, url),
+      contentInput: buildInputFileFromUploadUrl(url)
+    }))
+    .filter((asset) => asset.contentInput);
+
+  return [...pdfAssets, ...imageAssets];
 }
 
 function copyUploadUrlsToSellerJob(jobId, relativeDir, urls = []) {
@@ -786,6 +828,180 @@ function normalizeImporterSourceExtraction(parsed) {
       ? source.warnings.map((value) => normalizeImporterText(value)).filter(Boolean)
       : []
   };
+}
+
+function fingerprintImporterSourcePage(page) {
+  return canonicalImporterLookup(page?.text)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function dedupeImporterSourcePages(pages) {
+  const seen = new Set();
+  const dedupedPages = [];
+  let removedCount = 0;
+
+  (Array.isArray(pages) ? pages : []).forEach((page) => {
+    const text = normalizeImporterSourceText(page?.text);
+    if (!text) return;
+
+    const fingerprint = fingerprintImporterSourcePage({ text });
+    if (!fingerprint) return;
+    if (seen.has(fingerprint)) {
+      removedCount += 1;
+      return;
+    }
+
+    seen.add(fingerprint);
+    dedupedPages.push({
+      label: normalizeImporterText(page?.label) || `Page ${dedupedPages.length + 1}`,
+      text
+    });
+  });
+
+  return {
+    pages: dedupedPages,
+    removedCount
+  };
+}
+
+function prepareImporterSourceForStructuring(source, limits = {}) {
+  const pages = Array.isArray(source?.pages) ? source.pages : [];
+  const warnings = Array.isArray(source?.warnings) ? source.warnings.slice() : [];
+  const preparedPages = [];
+  let trimmedPageCount = 0;
+
+  pages.forEach((page, index) => {
+    const label = normalizeImporterText(page?.label) || `Page ${index + 1}`;
+    let text = normalizeImporterSourceText(page?.text);
+    if (!text) return;
+
+    const maxChars = Number(limits.maxCharsPerPage) || 0;
+    if (maxChars > 0 && text.length > maxChars) {
+      text = text.slice(0, maxChars).trim();
+      trimmedPageCount += 1;
+    }
+
+    preparedPages.push({ label, text });
+  });
+
+  const deduped = dedupeImporterSourcePages(preparedPages);
+  if (deduped.removedCount > 0) {
+    warnings.push(`Removed ${deduped.removedCount} duplicate extracted page(s) before structuring.`);
+  }
+  if (trimmedPageCount > 0) {
+    warnings.push(`Trimmed ${trimmedPageCount} oversized extracted page(s) before structuring.`);
+  }
+
+  return {
+    pages: deduped.pages,
+    warnings: [...new Set(warnings.filter(Boolean))]
+  };
+}
+
+function splitImporterSourceIntoChunks(source) {
+  const pages = Array.isArray(source?.pages) ? source.pages : [];
+  if (!pages.length) return [];
+
+  const chunks = [];
+  let currentPages = [];
+  let currentChars = 0;
+
+  pages.forEach((page) => {
+    const estimatedChars = (page?.label?.length || 0) + (page?.text?.length || 0) + 64;
+    const shouldBreak = currentPages.length > 0
+      && (
+        currentPages.length >= IMPORTER_SOURCE_STRUCTURING_MAX_PAGES
+        || currentChars + estimatedChars > IMPORTER_SOURCE_STRUCTURING_MAX_CHARS
+      );
+
+    if (shouldBreak) {
+      chunks.push({ pages: currentPages, warnings: [] });
+      currentPages = [];
+      currentChars = 0;
+    }
+
+    currentPages.push(page);
+    currentChars += estimatedChars;
+  });
+
+  if (currentPages.length) {
+    chunks.push({ pages: currentPages, warnings: [] });
+  }
+
+  return chunks;
+}
+
+function mergeStructuredImporterDrafts(drafts) {
+  const safeDrafts = Array.isArray(drafts) ? drafts.filter((entry) => entry && typeof entry === "object") : [];
+  if (!safeDrafts.length) {
+    return {
+      restaurantData: {
+        menu: [],
+        categories: [],
+        superCategories: []
+      },
+      review: {
+        summary: "",
+        blockers: [],
+        warnings: [],
+        untranslatedItems: []
+      }
+    };
+  }
+
+  if (safeDrafts.length === 1) {
+    return safeDrafts[0];
+  }
+
+  const merged = {
+    restaurantData: {
+      menu: [],
+      categories: [],
+      superCategories: []
+    },
+    review: {
+      summary: "",
+      blockers: [],
+      warnings: [],
+      untranslatedItems: []
+    }
+  };
+
+  safeDrafts.forEach((draft, index) => {
+    const restaurantData = draft.restaurantData && typeof draft.restaurantData === "object"
+      ? draft.restaurantData
+      : {};
+    const review = draft.review && typeof draft.review === "object"
+      ? draft.review
+      : {};
+
+    if (Array.isArray(restaurantData.menu)) {
+      merged.restaurantData.menu.push(...restaurantData.menu);
+    }
+    if (Array.isArray(restaurantData.categories)) {
+      merged.restaurantData.categories.push(...restaurantData.categories);
+    }
+    if (Array.isArray(restaurantData.superCategories)) {
+      merged.restaurantData.superCategories.push(...restaurantData.superCategories);
+    }
+
+    if (Array.isArray(review.blockers)) {
+      merged.review.blockers.push(...review.blockers);
+    }
+    if (Array.isArray(review.warnings)) {
+      merged.review.warnings.push(...review.warnings.map((value) => `Chunk ${index + 1}: ${value}`));
+    }
+    if (Array.isArray(review.untranslatedItems)) {
+      merged.review.untranslatedItems.push(...review.untranslatedItems);
+    }
+  });
+
+  merged.review.summary = `Structured ${merged.restaurantData.menu.length} menu item(s) from ${safeDrafts.length} extracted source chunk(s).`;
+  merged.review.blockers = [...new Set(merged.review.blockers.filter(Boolean))];
+  merged.review.warnings = [...new Set(merged.review.warnings.filter(Boolean))];
+  merged.review.untranslatedItems = [...new Set(merged.review.untranslatedItems.filter(Boolean))];
+  return merged;
 }
 
 function formatImporterSourceForPrompt(source) {
@@ -1696,20 +1912,11 @@ function applyImporterProductLibraryMatches(draft) {
   return { draft: nextDraft, matchedCount };
 }
 
-async function extractImporterMenuSource(input) {
-  const menuImageUrls = Array.isArray(input?.menuImageUrls) ? input.menuImageUrls : [];
-  const menuPdfUrls = Array.isArray(input?.menuPdfUrls) ? input.menuPdfUrls : [];
+async function extractImporterMenuSourceFromAsset(input, asset) {
   const notes = asImporterString(input?.notes);
   const restaurantName = asImporterString(input?.restaurantName);
   const shortName = asImporterString(input?.shortName);
-  const importerModel = getImporterModelForInput(input);
-  const imageInputs = menuImageUrls.map(buildInputImageFromUploadUrl).filter(Boolean);
-  const fileInputs = menuPdfUrls.map(buildInputFileFromUploadUrl).filter(Boolean);
-
-  if (!imageInputs.length && !fileInputs.length) {
-    return { pages: [], warnings: [] };
-  }
-
+  const importerModel = getImporterModelForAsset(asset);
   const response = await fetch(OPENAI_RESPONSES_URL, {
     method: "POST",
     headers: {
@@ -1728,11 +1935,14 @@ async function extractImporterMenuSource(input) {
               text: [
                 `Restaurant name: ${restaurantName || "(not provided)"}`,
                 `Short brand name: ${shortName || "(not provided)"}`,
-                `Seller notes: ${notes || "(none)"}`
+                `Seller notes: ${notes || "(none)"}`,
+                `Extract source text only from this asset: ${asset.label}`,
+                asset.kind === "pdf"
+                  ? "This asset is a PDF. Return one page entry per PDF page in reading order."
+                  : "This asset is a menu image. Return one page entry for the visible menu content in this image."
               ].join("\n")
             },
-            ...fileInputs,
-            ...imageInputs
+            asset.contentInput
           ]
         }
       ],
@@ -1741,7 +1951,7 @@ async function extractImporterMenuSource(input) {
       },
       store: false,
       temperature: 0,
-      max_output_tokens: 8000
+      max_output_tokens: asset.kind === "pdf" ? 12000 : 3000
     })
   });
 
@@ -1753,29 +1963,98 @@ async function extractImporterMenuSource(input) {
     throw error;
   }
 
+  let normalized;
   const parsedPayload = extractStructuredParsedOutput(payload);
   if (parsedPayload) {
-    return normalizeImporterSourceExtraction(parsedPayload);
+    normalized = normalizeImporterSourceExtraction(parsedPayload);
+  } else {
+    const rawText = extractResponseText(payload);
+    if (!rawText) {
+      const error = new Error(payload?.status === "incomplete" ? "incomplete_source_extraction_response" : "empty_source_extraction_response");
+      error.statusCode = 502;
+      throw error;
+    }
+
+    normalized = normalizeImporterSourceExtraction(parseModelJsonText(rawText));
   }
 
-  const rawText = extractResponseText(payload);
-  if (!rawText) {
-    const error = new Error(payload?.status === "incomplete" ? "incomplete_source_extraction_response" : "empty_source_extraction_response");
-    error.statusCode = 502;
-    throw error;
-  }
+  const pages = normalized.pages.map((page, index) => {
+    const rawLabel = normalizeImporterText(page?.label);
+    const pageLabel = asset.kind === "pdf"
+      ? `${asset.label} - ${rawLabel || `Page ${index + 1}`}`
+      : (normalized.pages.length > 1 ? `${asset.label} - Part ${index + 1}` : asset.label);
 
-  return normalizeImporterSourceExtraction(parseModelJsonText(rawText));
+    return {
+      label: pageLabel,
+      text: normalizeImporterSourceText(page?.text)
+    };
+  }).filter((page) => page.text);
+
+  return {
+    asset: {
+      kind: asset.kind,
+      label: asset.label,
+      url: asset.url,
+      model: importerModel
+    },
+    pages,
+    warnings: normalized.warnings.map((warning) => `${asset.label}: ${warning}`)
+  };
 }
 
-async function buildImporterDraftFromSource(input, sourceExtraction) {
-  const importerModel = getImporterModelForInput(input);
+async function extractImporterMenuSource(input) {
+  const assets = buildImporterAssetDescriptors(input);
+  if (!assets.length) {
+    return { pages: [], warnings: [], assets: [] };
+  }
+
+  const warnings = [];
+  const results = [];
+
+  for (const asset of assets) {
+    try {
+      results.push(await extractImporterMenuSourceFromAsset(input, asset));
+    } catch (error) {
+      console.error(`IMPORTER ASSET SOURCE EXTRACTION ERROR [${asset.label}]:`, error);
+      warnings.push(`${asset.label}: ${error.message}`);
+    }
+  }
+
+  const merged = prepareImporterSourceForStructuring({
+    pages: results.flatMap((entry) => entry.pages || []),
+    warnings: [
+      ...warnings,
+      ...results.flatMap((entry) => Array.isArray(entry.warnings) ? entry.warnings : [])
+    ]
+  }, {
+    maxCharsPerPage: 4500
+  });
+
+  return {
+    ...merged,
+    assets: results.map((entry) => ({
+      ...entry.asset,
+      pages: Array.isArray(entry.pages) ? entry.pages : [],
+      warnings: Array.isArray(entry.warnings) ? entry.warnings : []
+    }))
+  };
+}
+
+async function buildImporterDraftFromSource(input, sourceExtraction, options = {}) {
+  const chunkIndex = Number(options?.chunkIndex) || 0;
+  const totalChunks = Number(options?.totalChunks) || 1;
+  const importerModel = totalChunks > 1
+    ? OPENAI_IMPORT_PDF_MODEL
+    : getImporterModelForInput(input);
   const userContext = [
     `Restaurant name: ${input.restaurantName || "(not provided)"}`,
     `Short brand name: ${input.shortName || "(not provided)"}`,
     `Menu image count: ${Array.isArray(input.menuImageUrls) ? input.menuImageUrls.length : 0}`,
     `Menu PDF count: ${Array.isArray(input.menuPdfUrls) ? input.menuPdfUrls.length : 0}`,
-    `Seller notes: ${input.notes || "(none)"}`
+    `Seller notes: ${input.notes || "(none)"}`,
+    totalChunks > 1
+      ? `Source chunk: ${chunkIndex + 1} of ${totalChunks}. Structure only the items and groups present in this chunk.`
+      : "Source chunk: full extracted source."
   ].join("\n");
 
   const response = await fetch(OPENAI_RESPONSES_URL, {
@@ -2012,11 +2291,48 @@ async function generateImporterDraft(input) {
       importerStage = "source_extraction";
       sourceExtraction = await extractImporterMenuSource(inputContext);
       writeSellerJobJson(job.jobId, "extraction/menu-source.json", sourceExtraction);
+      if (Array.isArray(sourceExtraction.assets)) {
+        sourceExtraction.assets.forEach((asset, index) => {
+          const assetKey = String(index + 1).padStart(2, "0");
+          writeSellerJobJson(job.jobId, `extraction/source-assets/${assetKey}.json`, asset);
+          if (Array.isArray(asset.pages) && asset.pages.length) {
+            writeSellerJobText(job.jobId, `extraction/source-assets/${assetKey}.txt`, formatImporterSourceForPrompt({
+              pages: asset.pages,
+              warnings: Array.isArray(asset.warnings) ? asset.warnings : []
+            }));
+          }
+        });
+      }
 
       if (sourceExtraction.pages.length) {
         writeSellerJobText(job.jobId, "extraction/menu-source.txt", formatImporterSourceForPrompt(sourceExtraction));
-        importerStage = "source_structuring";
-        parsedDraft = await buildImporterDraftFromSource(inputContext, sourceExtraction);
+        const sourceChunks = splitImporterSourceIntoChunks(sourceExtraction);
+        writeSellerJobJson(job.jobId, "extraction/source-chunks/index.json", sourceChunks.map((chunk, index) => ({
+          chunk: index + 1,
+          pages: Array.isArray(chunk.pages) ? chunk.pages.map((page) => page.label) : [],
+          pageCount: Array.isArray(chunk.pages) ? chunk.pages.length : 0
+        })));
+
+        if (sourceChunks.length > 1) {
+          importerWarnings.push(`Structured extracted source in ${sourceChunks.length} chunk(s) for a more reliable large-menu import.`);
+        }
+
+        const structuredChunks = [];
+        for (let index = 0; index < sourceChunks.length; index += 1) {
+          const chunk = sourceChunks[index];
+          const chunkKey = String(index + 1).padStart(2, "0");
+          writeSellerJobJson(job.jobId, `extraction/source-chunks/${chunkKey}.json`, chunk);
+          writeSellerJobText(job.jobId, `extraction/source-chunks/${chunkKey}.txt`, formatImporterSourceForPrompt(chunk));
+          importerStage = sourceChunks.length > 1 ? `source_structuring_chunk_${index + 1}` : "source_structuring";
+          const structuredChunk = await buildImporterDraftFromSource(inputContext, chunk, {
+            chunkIndex: index,
+            totalChunks: sourceChunks.length
+          });
+          structuredChunks.push(structuredChunk);
+          writeSellerJobJson(job.jobId, `extraction/structured-from-source/${chunkKey}.json`, structuredChunk);
+        }
+
+        parsedDraft = mergeStructuredImporterDrafts(structuredChunks);
         writeSellerJobJson(job.jobId, "extraction/structured-from-source.json", parsedDraft);
       } else {
         importerWarnings.push("Source extraction produced no usable page text, so the importer fell back to direct multimodal structuring.");

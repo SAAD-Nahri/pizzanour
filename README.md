@@ -15,7 +15,7 @@ It is now a seller-oriented white-label restaurant website template with:
 - preset-aware branding controls for colors, surfaces, text, and menu mood
 - a branding preview that mirrors homepage/menu mood more closely during setup
 - preset-specific public styling so each main preset feels more distinct on homepage and menu
-- a seller-only AI Import Studio that turns uploaded menu PDFs or menu images into a reviewable menu draft
+- a seller-only AI Import Studio that turns uploaded menu PDFs or menu images into a reviewable menu draft with staged source extraction and chunked structuring for larger menus
 - a seller-only AI Media Studio that generates hero or generic gallery visuals into local uploads
 - section visibility and ordering controls
 - quick-launch presets for new restaurants
