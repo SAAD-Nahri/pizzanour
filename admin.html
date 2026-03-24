@@ -3473,14 +3473,19 @@
             }
 
             .menu-crud-modal-card {
-                width: min(80vw, 760px);
-                max-width: 80vw;
+                position: fixed;
+                top: 10dvh;
+                right: 10vw;
+                bottom: 10dvh;
+                left: 10vw;
+                width: auto;
+                max-width: none;
                 min-height: 0;
-                max-height: 80dvh;
+                max-height: none;
                 border-radius: 24px;
                 padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
                 grid-template-columns: minmax(0, 1fr) auto;
-                align-self: center;
+                align-self: auto;
             }
 
             .menu-crud-modal-title {
@@ -3536,9 +3541,9 @@
             }
 
             #menuCrudModal {
-                padding: max(10px, env(safe-area-inset-top, 0px)) 6px max(10px, env(safe-area-inset-bottom, 0px)) !important;
-                align-items: center !important;
-                justify-content: center !important;
+                padding: 0 !important;
+                align-items: stretch !important;
+                justify-content: stretch !important;
             }
 
             .menu-crud-modal-card .modal-form-actions {
