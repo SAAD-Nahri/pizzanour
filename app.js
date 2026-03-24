@@ -857,7 +857,7 @@ function openProductModal(id) {
         });
         thumbStrip.innerHTML = images.map((img, i) =>
             `<div class="thumb ${i === 0 ? 'active' : ''}" onclick="setDetailImg('${img}', this)">
-                <img src="${img}" alt="Thumb" />
+                <img src="${img}" alt="Thumb" loading="lazy" decoding="async" fetchpriority="low" />
              </div>`
         ).join('');
         thumbStrip.querySelectorAll('img').forEach((imgEl) => {

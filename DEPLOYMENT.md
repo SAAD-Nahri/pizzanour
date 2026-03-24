@@ -47,7 +47,6 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `OPENAI_API_KEY=<server-side-key>` if you want seller-side menu import or per-item AI image generation
 - `OPENAI_IMPORT_MODEL=gpt-4o` optional override for image-based menu imports; recommended for reliability
 - `OPENAI_IMPORT_PDF_MODEL=gpt-4o` optional override for PDF menu imports; use a stronger model here
-- `OPENAI_MEDIA_MODEL=gpt-4.1` optional override for per-item AI menu image generation
 - `OPENAI_ITEM_MEDIA_MODEL=dall-e-3` recommended default for per-item AI dish/drink images; this avoids depending on `gpt-4.1` image-tool access for the owner flow
 - `SELLER_TOOLS_ENABLED=false` for clean client handoff admin; enable only on seller setup instances
 - `AI_MEDIA_TOOLS_ENABLED=false` unless you explicitly want the per-item AI image button available inside the item image modal

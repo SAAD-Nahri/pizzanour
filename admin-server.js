@@ -42,7 +42,6 @@ const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
 const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
 const OPENAI_IMPORT_PDF_MODEL = process.env.OPENAI_IMPORT_PDF_MODEL || "gpt-4o";
-const OPENAI_MEDIA_MODEL = process.env.OPENAI_MEDIA_MODEL || "gpt-4.1";
 const OPENAI_ITEM_MEDIA_MODEL = process.env.OPENAI_ITEM_MEDIA_MODEL || "dall-e-3";
 const SELLER_TOOLS_ENABLED = booleanFromEnv(
   process.env.SELLER_TOOLS_ENABLED,
@@ -1725,31 +1724,6 @@ function isOrgVerificationError(message) {
     && /verify organization|verified to use the model|verification/i.test(message);
 }
 
-function buildSellerMediaPrompt(input) {
-  const slot = input?.slot === "gallery" ? "gallery" : "hero";
-  const restaurantName = asImporterString(input?.restaurantName) || "Restaurant";
-  const shortName = asImporterString(input?.shortName) || restaurantName;
-  const cuisineHint = asImporterString(input?.cuisineHint);
-  const notes = asImporterString(input?.notes);
-  const baseDirection = slot === "hero"
-    ? "Generate a polished restaurant homepage hero image in a premium editorial food-photography style."
-    : "Generate a polished restaurant atmosphere/gallery image in a premium editorial hospitality-photography style.";
-
-  return [
-    baseDirection,
-    `Restaurant: ${restaurantName}.`,
-    `Short brand: ${shortName}.`,
-    cuisineHint ? `Cuisine or concept: ${cuisineHint}.` : "",
-    "Use the reference images only for palette, atmosphere, plating cues, interior cues, and visual direction.",
-    "Do not render any text, watermark, UI, menu, or legible logo inside the image.",
-    "Make the image realistic, commercially usable, and appropriate for a restaurant website launch.",
-    slot === "hero"
-      ? "Compose for a strong website hero: inviting, spacious, warm lighting, clean focal point, landscape-friendly."
-      : "Compose for a generic website/gallery slot: interior ambiance, plating detail, service mood, or atmosphere without looking like stock filler.",
-    notes ? `Seller notes: ${notes}.` : ""
-  ].filter(Boolean).join(" ");
-}
-
 function buildMenuItemImagePrompt(input) {
   const itemName = asImporterString(input?.name) || "Dish";
   const itemDescription = asImporterString(input?.description);
@@ -1781,108 +1755,6 @@ function buildMenuItemImagePrompt(input) {
     "Avoid text, labels, logos, watermark, collage, split layout, packaging mockup, cutaway views, floating ingredients, duplicated plates, hands, or visible people.",
     "Keep the main dish centered and clearly readable at small mobile sizes."
   ].filter(Boolean).join(" ");
-}
-
-async function generateSellerMediaImage(input) {
-  if (!process.env.OPENAI_API_KEY) {
-    const error = new Error("openai_not_configured");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const slot = input?.slot === "gallery" ? "gallery" : "hero";
-  const restaurantName = asImporterString(input?.restaurantName) || "Restaurant";
-  const shortName = asImporterString(input?.shortName) || restaurantName;
-  const cuisineHint = asImporterString(input?.cuisineHint);
-  const notes = asImporterString(input?.notes);
-  const logoImageUrl = asImporterString(input?.logoImageUrl);
-  const referenceImageUrls = Array.isArray(input?.referenceImageUrls)
-    ? input.referenceImageUrls.filter((value) => typeof value === "string" && value.trim()).slice(0, 4)
-    : [];
-  const imageInputs = [
-    ...(logoImageUrl ? [buildInputImageFromUploadUrl(logoImageUrl)].filter(Boolean) : []),
-    ...referenceImageUrls.map(buildInputImageFromUploadUrl).filter(Boolean)
-  ];
-  const prompt = buildSellerMediaPrompt(input);
-
-  const toolConfig = imageInputs.length
-    ? { type: "image_generation", quality: "high", input_fidelity: "high", action: "edit" }
-    : { type: "image_generation", quality: "high" };
-
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: OPENAI_MEDIA_MODEL,
-      input: [
-        {
-          role: "user",
-          content: [
-            { type: "input_text", text: prompt },
-            ...imageInputs
-          ]
-        }
-      ],
-      tools: [toolConfig],
-      store: false
-    })
-  });
-
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = payload?.error?.message || payload?.message || "openai_media_request_failed";
-    const error = new Error(message);
-    error.statusCode = response.status || 502;
-    throw error;
-  }
-
-  const base64Image = extractGeneratedImageBase64(payload);
-  if (!base64Image) {
-    const error = new Error("empty_generated_image");
-    error.statusCode = 502;
-    throw error;
-  }
-
-  const url = saveGeneratedImage(base64Image, slot === "hero" ? "hero-generated" : "gallery-generated");
-  let libraryAssetId = "";
-  let libraryAssetStatus = "";
-
-  try {
-    const uploadPath = resolveLocalUploadPath(url);
-    if (uploadPath) {
-      const libraryAsset = registerLibraryAsset({
-        sourceFilePath: uploadPath,
-        slotType: slot,
-        sourceType: "generated",
-        displayName: `${shortName} ${slot}`,
-        description: notes || `${slot} visual for ${restaurantName}`,
-        cuisineTags: cuisineHint ? [cuisineHint] : [],
-        tags: [slot, "seller-ai-media", shortName, restaurantName].filter(Boolean),
-        approved: false,
-        model: OPENAI_MEDIA_MODEL,
-        prompt,
-        promptVersion: "seller-media-studio-v1",
-        notes: `Generated in AI Media Studio with ${imageInputs.length} reference image(s).`,
-        createdFrom: "ai_media_studio"
-      });
-      libraryAssetId = libraryAsset?.assetId || "";
-      libraryAssetStatus = libraryAsset?.approvalStatus || "";
-    }
-  } catch (error) {
-    console.error("MEDIA LIBRARY REGISTER ERROR:", error);
-  }
-
-  return {
-    slot,
-    prompt,
-    url,
-    referenceCount: imageInputs.length,
-    libraryAssetId,
-    libraryAssetStatus
-  };
 }
 
 async function generateMenuItemMediaImage(input) {
@@ -2977,20 +2849,6 @@ app.post("/api/importer/draft", requireAuth, requireSellerTools, async (req, res
       error: error.message || "importer_draft_failed",
       jobId: error.jobId || "",
       stage: error.importerStage || ""
-    });
-  }
-});
-
-app.post("/api/media/generate", requireAuth, requireSellerTools, requireAiMediaTools, async (req, res) => {
-  try {
-    const payload = req.body && typeof req.body === "object" ? req.body : {};
-    const result = await generateSellerMediaImage(payload);
-    res.json({ ok: true, ...result });
-  } catch (error) {
-    console.error("MEDIA GENERATION ERROR:", error);
-    res.status(error.statusCode || 500).json({
-      ok: false,
-      error: error.message || "media_generation_failed"
     });
   }
 });

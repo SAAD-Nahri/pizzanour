@@ -16,7 +16,6 @@ It is now a seller-oriented white-label restaurant website template with:
 - a branding preview that mirrors homepage/menu mood more closely during setup
 - preset-specific public styling so each main preset feels more distinct on homepage and menu
 - a seller-only AI Import Studio that turns uploaded menu PDFs or menu images into a reviewable menu draft with staged source extraction and chunked structuring for larger menus
-- a seller-only AI Media Studio that generates hero or generic gallery visuals into local uploads
 - section visibility and ordering controls
 - quick-launch presets for new restaurants
 - a local menu-image suggestion library for missing dish visuals
@@ -147,7 +146,7 @@ What they do:
 - The admin security panel should not show the default-credentials warning at handoff time.
 - Keep AI keys and future automation credentials out of the live restaurant admin.
 - If you want to use `Seller Tools -> AI Import Studio`, set `OPENAI_API_KEY` server-side and optionally `OPENAI_IMPORT_MODEL`; for PDF-heavy workflows, also set `OPENAI_IMPORT_PDF_MODEL`.
-- If you want to use `Seller Tools -> AI Media Studio`, set `OPENAI_API_KEY` server-side and optionally `OPENAI_MEDIA_MODEL`.
+- If you want to use per-item AI dish image generation inside the item image modal, set `OPENAI_API_KEY` server-side and optionally `OPENAI_ITEM_MEDIA_MODEL`.
 
 ## Data And Product Model
 
@@ -183,7 +182,7 @@ Current importer status:
 
 Current seller-side media status:
 
-- `Seller Tools -> AI Media Studio` can now generate hero or generic gallery visuals server-side
+- per-item AI image generation can create dish/drink visuals directly from the item image modal
 - generated images are saved locally under `/uploads`
 - the recommended product-image path is still client photos first, local library second, AI later
 

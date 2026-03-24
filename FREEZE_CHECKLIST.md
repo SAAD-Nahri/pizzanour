@@ -34,7 +34,6 @@ If AI import or AI item-image generation is enabled during setup:
 - `OPENAI_API_KEY=<server-side-key>`
 - `OPENAI_IMPORT_MODEL=gpt-4o`
 - `OPENAI_IMPORT_PDF_MODEL=gpt-4o`
-- `OPENAI_MEDIA_MODEL=gpt-4.1`
 - `OPENAI_ITEM_MEDIA_MODEL=dall-e-3`
 
 ## Content Freeze

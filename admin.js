@@ -1,4 +1,4 @@
-let menu = [];
+﻿let menu = [];
 let catEmojis = window.defaultCatEmojis || {};
 let categoryTranslations = window.defaultCategoryTranslations || {};
 let restaurantConfig = window.restaurantConfig || window.defaultConfig || {};
@@ -141,7 +141,7 @@ function getPresetThemePack(presetId) {
 const ONBOARDING_PRESETS = {
     fast_food: {
         branding: {
-            logoMark: '🍔',
+            logoMark: 'ðŸ”',
             primaryColor: '#c62828',
             secondaryColor: '#ff8f00',
             accentColor: '#ffd54f',
@@ -164,25 +164,25 @@ const ONBOARDING_PRESETS = {
             fr: {
                 hero_sub1: 'Une adresse pour',
                 hero_title1: 'FAIM <span>BIEN SERVIE</span>',
-                hero_sub2: 'Découvrez les',
+                hero_sub2: 'DÃ©couvrez les',
                 hero_title2: 'INCONTOURNABLES <span>{{shortName}}</span>',
-                hero_desc2: 'Des recettes généreuses, rapides et pensées pour revenir souvent.',
-                hero_sub3: 'Sur place, à emporter',
+                hero_desc2: 'Des recettes gÃ©nÃ©reuses, rapides et pensÃ©es pour revenir souvent.',
+                hero_sub3: 'Sur place, Ã  emporter',
                 hero_title3: 'CHAUD <span>ET RAPIDE</span>',
-                hero_desc3: 'Une expérience simple, gourmande et efficace toute la journée.',
-                about_p1: '{{restaurantName}} propose une cuisine réconfortante, bien exécutée et facile à recommander.',
-                about_p2: 'Nous misons sur des recettes lisibles, des portions généreuses et un service régulier pour toutes les visites du quotidien.',
+                hero_desc3: 'Une expÃ©rience simple, gourmande et efficace toute la journÃ©e.',
+                about_p1: '{{restaurantName}} propose une cuisine rÃ©confortante, bien exÃ©cutÃ©e et facile Ã  recommander.',
+                about_p2: 'Nous misons sur des recettes lisibles, des portions gÃ©nÃ©reuses et un service rÃ©gulier pour toutes les visites du quotidien.',
                 about_p3: 'Notre ambition est simple : devenir une adresse fiable pour manger vite, bien, et avec plaisir.',
                 event_birthday: 'Anniversaires',
                 event_birthday_desc: 'Un format simple et convivial pour les petits groupes.',
                 event_family: 'Repas entre amis',
-                event_family_desc: 'Des plats à partager et une ambiance décontractée.',
+                event_family_desc: 'Des plats Ã  partager et une ambiance dÃ©contractÃ©e.',
                 event_corporate: 'Commandes de groupe',
-                event_corporate_desc: 'Une solution rapide pour les équipes et les commandes en volume.',
-                event_party: 'Soirées privées',
+                event_corporate_desc: 'Une solution rapide pour les Ã©quipes et les commandes en volume.',
+                event_party: 'SoirÃ©es privÃ©es',
                 event_party_desc: 'Un point de rencontre gourmand pour vos moments informels.',
-                events_cta_text: 'Besoin d’un format groupe ou d’une privatisation légère ? Contactez-nous.',
-                footer_note: 'Cuisine généreuse, service rapide et adresse facile à recommander.'
+                events_cta_text: 'Besoin dâ€™un format groupe ou dâ€™une privatisation lÃ©gÃ¨re ? Contactez-nous.',
+                footer_note: 'Cuisine gÃ©nÃ©reuse, service rapide et adresse facile Ã  recommander.'
             },
             en: {
                 hero_sub1: 'A place for',
@@ -208,33 +208,33 @@ const ONBOARDING_PRESETS = {
                 footer_note: 'Generous dishes, quick service, and a local address worth revisiting.'
             },
             ar: {
-                hero_sub1: 'عنوان من أجل',
-                hero_title1: 'الجوع <span>المشبَع</span>',
-                hero_sub2: 'اكتشف',
-                hero_title2: 'مفضلات <span>{{shortName}}</span>',
-                hero_desc2: 'وصفات سخية وخدمة سريعة وتجربة تشجع على العودة.',
-                hero_sub3: 'داخل المطعم أو للطلب',
-                hero_title3: 'ساخن <span>وسريع</span>',
-                hero_desc3: 'تجربة بسيطة ومشبعة تناسب اليوم كله.',
-                about_p1: '{{restaurantName}} يقدم أكلات مريحة وسهلة التوصية بها من أول زيارة.',
-                about_p2: 'نركز على وصفات واضحة وحصص سخية وخدمة منتظمة تناسب الزيارات اليومية.',
-                about_p3: 'هدفنا واضح: أن نصبح عنواناً موثوقاً لمن يريد أكلاً سريعاً ولذيذاً ومشبعاً.',
-                event_birthday: 'أعياد الميلاد',
-                event_birthday_desc: 'صيغة بسيطة وممتعة للمجموعات الصغيرة.',
-                event_family: 'لقاءات الأصدقاء والعائلة',
-                event_family_desc: 'أطباق للمشاركة في أجواء مريحة.',
-                event_corporate: 'طلبات المجموعات',
-                event_corporate_desc: 'حل سريع للفرق والطلبات الكبيرة.',
-                event_party: 'أمسيات خاصة',
-                event_party_desc: 'مكان مريح للاحتفالات غير الرسمية.',
-                events_cta_text: 'هل تحتاج إلى صيغة جماعية أو حجز خفيف؟ تواصل معنا.',
-                footer_note: 'أكل سخي وخدمة سريعة وعنوان يستحق الزيارة من جديد.'
+                hero_sub1: 'Ø¹Ù†ÙˆØ§Ù† Ù…Ù† Ø£Ø¬Ù„',
+                hero_title1: 'Ø§Ù„Ø¬ÙˆØ¹ <span>Ø§Ù„Ù…Ø´Ø¨ÙŽØ¹</span>',
+                hero_sub2: 'Ø§ÙƒØªØ´Ù',
+                hero_title2: 'Ù…ÙØ¶Ù„Ø§Øª <span>{{shortName}}</span>',
+                hero_desc2: 'ÙˆØµÙØ§Øª Ø³Ø®ÙŠØ© ÙˆØ®Ø¯Ù…Ø© Ø³Ø±ÙŠØ¹Ø© ÙˆØªØ¬Ø±Ø¨Ø© ØªØ´Ø¬Ø¹ Ø¹Ù„Ù‰ Ø§Ù„Ø¹ÙˆØ¯Ø©.',
+                hero_sub3: 'Ø¯Ø§Ø®Ù„ Ø§Ù„Ù…Ø·Ø¹Ù… Ø£Ùˆ Ù„Ù„Ø·Ù„Ø¨',
+                hero_title3: 'Ø³Ø§Ø®Ù† <span>ÙˆØ³Ø±ÙŠØ¹</span>',
+                hero_desc3: 'ØªØ¬Ø±Ø¨Ø© Ø¨Ø³ÙŠØ·Ø© ÙˆÙ…Ø´Ø¨Ø¹Ø© ØªÙ†Ø§Ø³Ø¨ Ø§Ù„ÙŠÙˆÙ… ÙƒÙ„Ù‡.',
+                about_p1: '{{restaurantName}} ÙŠÙ‚Ø¯Ù… Ø£ÙƒÙ„Ø§Øª Ù…Ø±ÙŠØ­Ø© ÙˆØ³Ù‡Ù„Ø© Ø§Ù„ØªÙˆØµÙŠØ© Ø¨Ù‡Ø§ Ù…Ù† Ø£ÙˆÙ„ Ø²ÙŠØ§Ø±Ø©.',
+                about_p2: 'Ù†Ø±ÙƒØ² Ø¹Ù„Ù‰ ÙˆØµÙØ§Øª ÙˆØ§Ø¶Ø­Ø© ÙˆØ­ØµØµ Ø³Ø®ÙŠØ© ÙˆØ®Ø¯Ù…Ø© Ù…Ù†ØªØ¸Ù…Ø© ØªÙ†Ø§Ø³Ø¨ Ø§Ù„Ø²ÙŠØ§Ø±Ø§Øª Ø§Ù„ÙŠÙˆÙ…ÙŠØ©.',
+                about_p3: 'Ù‡Ø¯ÙÙ†Ø§ ÙˆØ§Ø¶Ø­: Ø£Ù† Ù†ØµØ¨Ø­ Ø¹Ù†ÙˆØ§Ù†Ø§Ù‹ Ù…ÙˆØ«ÙˆÙ‚Ø§Ù‹ Ù„Ù…Ù† ÙŠØ±ÙŠØ¯ Ø£ÙƒÙ„Ø§Ù‹ Ø³Ø±ÙŠØ¹Ø§Ù‹ ÙˆÙ„Ø°ÙŠØ°Ø§Ù‹ ÙˆÙ…Ø´Ø¨Ø¹Ø§Ù‹.',
+                event_birthday: 'Ø£Ø¹ÙŠØ§Ø¯ Ø§Ù„Ù…ÙŠÙ„Ø§Ø¯',
+                event_birthday_desc: 'ØµÙŠØºØ© Ø¨Ø³ÙŠØ·Ø© ÙˆÙ…Ù…ØªØ¹Ø© Ù„Ù„Ù…Ø¬Ù…ÙˆØ¹Ø§Øª Ø§Ù„ØµØºÙŠØ±Ø©.',
+                event_family: 'Ù„Ù‚Ø§Ø¡Ø§Øª Ø§Ù„Ø£ØµØ¯Ù‚Ø§Ø¡ ÙˆØ§Ù„Ø¹Ø§Ø¦Ù„Ø©',
+                event_family_desc: 'Ø£Ø·Ø¨Ø§Ù‚ Ù„Ù„Ù…Ø´Ø§Ø±ÙƒØ© ÙÙŠ Ø£Ø¬ÙˆØ§Ø¡ Ù…Ø±ÙŠØ­Ø©.',
+                event_corporate: 'Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø§Øª',
+                event_corporate_desc: 'Ø­Ù„ Ø³Ø±ÙŠØ¹ Ù„Ù„ÙØ±Ù‚ ÙˆØ§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„ÙƒØ¨ÙŠØ±Ø©.',
+                event_party: 'Ø£Ù…Ø³ÙŠØ§Øª Ø®Ø§ØµØ©',
+                event_party_desc: 'Ù…ÙƒØ§Ù† Ù…Ø±ÙŠØ­ Ù„Ù„Ø§Ø­ØªÙØ§Ù„Ø§Øª ØºÙŠØ± Ø§Ù„Ø±Ø³Ù…ÙŠØ©.',
+                events_cta_text: 'Ù‡Ù„ ØªØ­ØªØ§Ø¬ Ø¥Ù„Ù‰ ØµÙŠØºØ© Ø¬Ù…Ø§Ø¹ÙŠØ© Ø£Ùˆ Ø­Ø¬Ø² Ø®ÙÙŠÙØŸ ØªÙˆØ§ØµÙ„ Ù…Ø¹Ù†Ø§.',
+                footer_note: 'Ø£ÙƒÙ„ Ø³Ø®ÙŠ ÙˆØ®Ø¯Ù…Ø© Ø³Ø±ÙŠØ¹Ø© ÙˆØ¹Ù†ÙˆØ§Ù† ÙŠØ³ØªØ­Ù‚ Ø§Ù„Ø²ÙŠØ§Ø±Ø© Ù…Ù† Ø¬Ø¯ÙŠØ¯.'
             }
         }
     },
     cafe: {
         branding: {
-            logoMark: '☕',
+            logoMark: 'â˜•',
             primaryColor: '#5d4037',
             secondaryColor: '#c08b5c',
             accentColor: '#f4d6a0',
@@ -256,26 +256,26 @@ const ONBOARDING_PRESETS = {
         contentTranslations: {
             fr: {
                 hero_sub1: 'Un lieu pour',
-                hero_title1: 'CAFÉ <span>& BRUNCH</span>',
+                hero_title1: 'CAFÃ‰ <span>& BRUNCH</span>',
                 hero_sub2: 'Savourez les',
                 hero_title2: 'INSTANTS <span>{{shortName}}</span>',
-                hero_desc2: 'Une adresse chaleureuse pour le café, les douceurs et les rendez-vous du quotidien.',
-                hero_sub3: 'Du matin au goûter',
-                hero_title3: 'DOUX <span>& SOIGNÉ</span>',
-                hero_desc3: 'Des recettes maison et une atmosphère pensée pour prendre son temps.',
-                about_p1: '{{restaurantName}} est pensé comme une adresse lumineuse pour le café, le brunch et les pauses qui font du bien.',
-                about_p2: 'Nous travaillons une carte simple, soignée et accueillante, idéale pour un rendez-vous, une pause ou un moment à partager.',
-                about_p3: 'Notre promesse : une expérience douce, régulière et agréable, du premier café au dernier dessert.',
-                event_birthday: 'Brunchs privés',
-                event_birthday_desc: 'Un format convivial pour les matinées et anniversaires en petit comité.',
+                hero_desc2: 'Une adresse chaleureuse pour le cafÃ©, les douceurs et les rendez-vous du quotidien.',
+                hero_sub3: 'Du matin au goÃ»ter',
+                hero_title3: 'DOUX <span>& SOIGNÃ‰</span>',
+                hero_desc3: 'Des recettes maison et une atmosphÃ¨re pensÃ©e pour prendre son temps.',
+                about_p1: '{{restaurantName}} est pensÃ© comme une adresse lumineuse pour le cafÃ©, le brunch et les pauses qui font du bien.',
+                about_p2: 'Nous travaillons une carte simple, soignÃ©e et accueillante, idÃ©ale pour un rendez-vous, une pause ou un moment Ã  partager.',
+                about_p3: 'Notre promesse : une expÃ©rience douce, rÃ©guliÃ¨re et agrÃ©able, du premier cafÃ© au dernier dessert.',
+                event_birthday: 'Brunchs privÃ©s',
+                event_birthday_desc: 'Un format convivial pour les matinÃ©es et anniversaires en petit comitÃ©.',
                 event_family: 'Rencontres entre proches',
-                event_family_desc: 'Un lieu calme et chaleureux pour se retrouver autour d’une belle table.',
-                event_corporate: 'Réunions café',
-                event_corporate_desc: 'Un cadre détendu pour les rendez-vous professionnels et pauses d’équipe.',
-                event_party: 'Goûters & célébrations',
-                event_party_desc: 'Une ambiance douce pour les moments à partager.',
-                events_cta_text: 'Vous préparez un brunch, une réunion ou un goûter privé ? Écrivez-nous.',
-                footer_note: 'Café, brunch et douceurs servis dans une ambiance chaleureuse.'
+                event_family_desc: 'Un lieu calme et chaleureux pour se retrouver autour dâ€™une belle table.',
+                event_corporate: 'RÃ©unions cafÃ©',
+                event_corporate_desc: 'Un cadre dÃ©tendu pour les rendez-vous professionnels et pauses dâ€™Ã©quipe.',
+                event_party: 'GoÃ»ters & cÃ©lÃ©brations',
+                event_party_desc: 'Une ambiance douce pour les moments Ã  partager.',
+                events_cta_text: 'Vous prÃ©parez un brunch, une rÃ©union ou un goÃ»ter privÃ© ? Ã‰crivez-nous.',
+                footer_note: 'CafÃ©, brunch et douceurs servis dans une ambiance chaleureuse.'
             },
             en: {
                 hero_sub1: 'A place for',
@@ -301,33 +301,33 @@ const ONBOARDING_PRESETS = {
                 footer_note: 'Coffee, brunch, and house-made treats in a warm setting.'
             },
             ar: {
-                hero_sub1: 'مكان من أجل',
-                hero_title1: 'القهوة <span>والبرنش</span>',
-                hero_sub2: 'استمتع بـ',
-                hero_title2: 'لحظات <span>{{shortName}}</span>',
-                hero_desc2: 'عنوان دافئ للقهوة والحلويات واللقاءات اليومية.',
-                hero_sub3: 'من الصباح إلى العصر',
-                hero_title3: 'هادئ <span>ومتقن</span>',
-                hero_desc3: 'وصفات منزلية وأجواء تمنحك وقتاً أجمل.',
-                about_p1: '{{restaurantName}} صُمم كعنوان مريح للقهوة والبرنش والاستراحات اليومية.',
-                about_p2: 'نقدم قائمة بسيطة وأنيقة تناسب المواعيد واللقاءات واللحظات الهادئة.',
-                about_p3: 'وعدنا هو تجربة لطيفة وثابتة من أول فنجان قهوة إلى آخر حلوى.',
-                event_birthday: 'برنشات خاصة',
-                event_birthday_desc: 'صيغة ودية للاحتفالات الصباحية والمناسبات الصغيرة.',
-                event_family: 'لقاءات عائلية',
-                event_family_desc: 'مكان هادئ ودافئ للاجتماع حول طاولة جميلة.',
-                event_corporate: 'لقاءات عمل مع القهوة',
-                event_corporate_desc: 'جو مريح للاجتماعات المهنية واستراحات الفرق.',
-                event_party: 'شاي العصر والاحتفالات',
-                event_party_desc: 'أجواء لطيفة للحظات المشتركة.',
-                events_cta_text: 'هل تخطط لبرنش أو لقاء أو مناسبة خاصة؟ تواصل معنا.',
-                footer_note: 'قهوة وبرنش وحلويات منزلية في أجواء دافئة.'
+                hero_sub1: 'Ù…ÙƒØ§Ù† Ù…Ù† Ø£Ø¬Ù„',
+                hero_title1: 'Ø§Ù„Ù‚Ù‡ÙˆØ© <span>ÙˆØ§Ù„Ø¨Ø±Ù†Ø´</span>',
+                hero_sub2: 'Ø§Ø³ØªÙ…ØªØ¹ Ø¨Ù€',
+                hero_title2: 'Ù„Ø­Ø¸Ø§Øª <span>{{shortName}}</span>',
+                hero_desc2: 'Ø¹Ù†ÙˆØ§Ù† Ø¯Ø§ÙØ¦ Ù„Ù„Ù‚Ù‡ÙˆØ© ÙˆØ§Ù„Ø­Ù„ÙˆÙŠØ§Øª ÙˆØ§Ù„Ù„Ù‚Ø§Ø¡Ø§Øª Ø§Ù„ÙŠÙˆÙ…ÙŠØ©.',
+                hero_sub3: 'Ù…Ù† Ø§Ù„ØµØ¨Ø§Ø­ Ø¥Ù„Ù‰ Ø§Ù„Ø¹ØµØ±',
+                hero_title3: 'Ù‡Ø§Ø¯Ø¦ <span>ÙˆÙ…ØªÙ‚Ù†</span>',
+                hero_desc3: 'ÙˆØµÙØ§Øª Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ£Ø¬ÙˆØ§Ø¡ ØªÙ…Ù†Ø­Ùƒ ÙˆÙ‚ØªØ§Ù‹ Ø£Ø¬Ù…Ù„.',
+                about_p1: '{{restaurantName}} ØµÙÙ…Ù… ÙƒØ¹Ù†ÙˆØ§Ù† Ù…Ø±ÙŠØ­ Ù„Ù„Ù‚Ù‡ÙˆØ© ÙˆØ§Ù„Ø¨Ø±Ù†Ø´ ÙˆØ§Ù„Ø§Ø³ØªØ±Ø§Ø­Ø§Øª Ø§Ù„ÙŠÙˆÙ…ÙŠØ©.',
+                about_p2: 'Ù†Ù‚Ø¯Ù… Ù‚Ø§Ø¦Ù…Ø© Ø¨Ø³ÙŠØ·Ø© ÙˆØ£Ù†ÙŠÙ‚Ø© ØªÙ†Ø§Ø³Ø¨ Ø§Ù„Ù…ÙˆØ§Ø¹ÙŠØ¯ ÙˆØ§Ù„Ù„Ù‚Ø§Ø¡Ø§Øª ÙˆØ§Ù„Ù„Ø­Ø¸Ø§Øª Ø§Ù„Ù‡Ø§Ø¯Ø¦Ø©.',
+                about_p3: 'ÙˆØ¹Ø¯Ù†Ø§ Ù‡Ùˆ ØªØ¬Ø±Ø¨Ø© Ù„Ø·ÙŠÙØ© ÙˆØ«Ø§Ø¨ØªØ© Ù…Ù† Ø£ÙˆÙ„ ÙÙ†Ø¬Ø§Ù† Ù‚Ù‡ÙˆØ© Ø¥Ù„Ù‰ Ø¢Ø®Ø± Ø­Ù„ÙˆÙ‰.',
+                event_birthday: 'Ø¨Ø±Ù†Ø´Ø§Øª Ø®Ø§ØµØ©',
+                event_birthday_desc: 'ØµÙŠØºØ© ÙˆØ¯ÙŠØ© Ù„Ù„Ø§Ø­ØªÙØ§Ù„Ø§Øª Ø§Ù„ØµØ¨Ø§Ø­ÙŠØ© ÙˆØ§Ù„Ù…Ù†Ø§Ø³Ø¨Ø§Øª Ø§Ù„ØµØºÙŠØ±Ø©.',
+                event_family: 'Ù„Ù‚Ø§Ø¡Ø§Øª Ø¹Ø§Ø¦Ù„ÙŠØ©',
+                event_family_desc: 'Ù…ÙƒØ§Ù† Ù‡Ø§Ø¯Ø¦ ÙˆØ¯Ø§ÙØ¦ Ù„Ù„Ø§Ø¬ØªÙ…Ø§Ø¹ Ø­ÙˆÙ„ Ø·Ø§ÙˆÙ„Ø© Ø¬Ù…ÙŠÙ„Ø©.',
+                event_corporate: 'Ù„Ù‚Ø§Ø¡Ø§Øª Ø¹Ù…Ù„ Ù…Ø¹ Ø§Ù„Ù‚Ù‡ÙˆØ©',
+                event_corporate_desc: 'Ø¬Ùˆ Ù…Ø±ÙŠØ­ Ù„Ù„Ø§Ø¬ØªÙ…Ø§Ø¹Ø§Øª Ø§Ù„Ù…Ù‡Ù†ÙŠØ© ÙˆØ§Ø³ØªØ±Ø§Ø­Ø§Øª Ø§Ù„ÙØ±Ù‚.',
+                event_party: 'Ø´Ø§ÙŠ Ø§Ù„Ø¹ØµØ± ÙˆØ§Ù„Ø§Ø­ØªÙØ§Ù„Ø§Øª',
+                event_party_desc: 'Ø£Ø¬ÙˆØ§Ø¡ Ù„Ø·ÙŠÙØ© Ù„Ù„Ø­Ø¸Ø§Øª Ø§Ù„Ù…Ø´ØªØ±ÙƒØ©.',
+                events_cta_text: 'Ù‡Ù„ ØªØ®Ø·Ø· Ù„Ø¨Ø±Ù†Ø´ Ø£Ùˆ Ù„Ù‚Ø§Ø¡ Ø£Ùˆ Ù…Ù†Ø§Ø³Ø¨Ø© Ø®Ø§ØµØ©ØŸ ØªÙˆØ§ØµÙ„ Ù…Ø¹Ù†Ø§.',
+                footer_note: 'Ù‚Ù‡ÙˆØ© ÙˆØ¨Ø±Ù†Ø´ ÙˆØ­Ù„ÙˆÙŠØ§Øª Ù…Ù†Ø²Ù„ÙŠØ© ÙÙŠ Ø£Ø¬ÙˆØ§Ø¡ Ø¯Ø§ÙØ¦Ø©.'
             }
         }
     },
     traditional: {
         branding: {
-            logoMark: '🍲',
+            logoMark: 'ðŸ²',
             primaryColor: '#8d2f23',
             secondaryColor: '#b97745',
             accentColor: '#d6b17a',
@@ -352,23 +352,23 @@ const ONBOARDING_PRESETS = {
                 hero_title1: 'SAVEURS <span>TRADITIONNELLES</span>',
                 hero_sub2: 'Retrouvez les',
                 hero_title2: 'RECETTES <span>{{shortName}}</span>',
-                hero_desc2: 'Des plats sincères, une table familiale et un accueil généreux.',
-                hero_sub3: 'Pour les repas à partager',
+                hero_desc2: 'Des plats sincÃ¨res, une table familiale et un accueil gÃ©nÃ©reux.',
+                hero_sub3: 'Pour les repas Ã  partager',
                 hero_title3: 'AUTHENTIQUE <span>& CHALEUREUX</span>',
-                hero_desc3: 'Une cuisine de tradition pensée pour les grandes et petites occasions.',
+                hero_desc3: 'Une cuisine de tradition pensÃ©e pour les grandes et petites occasions.',
                 about_p1: '{{restaurantName}} valorise la cuisine traditionnelle, les recettes de transmission et les repas qui rassemblent.',
-                about_p2: 'Nous privilégions la générosité, les saveurs connues, et une atmosphère familiale qui met les invités à l’aise.',
-                about_p3: 'Notre objectif est d’offrir une adresse de confiance pour les repas du quotidien comme pour les moments importants.',
+                about_p2: 'Nous privilÃ©gions la gÃ©nÃ©rositÃ©, les saveurs connues, et une atmosphÃ¨re familiale qui met les invitÃ©s Ã  lâ€™aise.',
+                about_p3: 'Notre objectif est dâ€™offrir une adresse de confiance pour les repas du quotidien comme pour les moments importants.',
                 event_birthday: 'Repas de famille',
-                event_birthday_desc: 'Une table accueillante pour célébrer les temps forts en famille.',
+                event_birthday_desc: 'Une table accueillante pour cÃ©lÃ©brer les temps forts en famille.',
                 event_family: 'Retrouvailles',
-                event_family_desc: 'Un cadre adapté aux repas généreux et aux longues conversations.',
-                event_corporate: 'Repas d’équipe',
-                event_corporate_desc: 'Un format chaleureux pour accueillir collègues et partenaires.',
-                event_party: 'Fêtes traditionnelles',
-                event_party_desc: 'Une cuisine de partage pour les célébrations privées.',
-                events_cta_text: 'Vous préparez un repas de groupe ou une célébration ? Contactez-nous.',
-                footer_note: 'Recettes traditionnelles, table familiale et hospitalité généreuse.'
+                event_family_desc: 'Un cadre adaptÃ© aux repas gÃ©nÃ©reux et aux longues conversations.',
+                event_corporate: 'Repas dâ€™Ã©quipe',
+                event_corporate_desc: 'Un format chaleureux pour accueillir collÃ¨gues et partenaires.',
+                event_party: 'FÃªtes traditionnelles',
+                event_party_desc: 'Une cuisine de partage pour les cÃ©lÃ©brations privÃ©es.',
+                events_cta_text: 'Vous prÃ©parez un repas de groupe ou une cÃ©lÃ©bration ? Contactez-nous.',
+                footer_note: 'Recettes traditionnelles, table familiale et hospitalitÃ© gÃ©nÃ©reuse.'
             },
             en: {
                 hero_sub1: 'A home for',
@@ -394,27 +394,27 @@ const ONBOARDING_PRESETS = {
                 footer_note: 'Traditional recipes, family tables, and generous hospitality.'
             },
             ar: {
-                hero_sub1: 'بيت لـ',
-                hero_title1: 'النكهات <span>التقليدية</span>',
-                hero_sub2: 'اكتشف من جديد',
-                hero_title2: 'وصفات <span>{{shortName}}</span>',
-                hero_desc2: 'أطباق صادقة وطاولة عائلية واستقبال كريم.',
-                hero_sub3: 'للوجبات المشتركة',
-                hero_title3: 'أصيل <span>ودافئ</span>',
-                hero_desc3: 'مطبخ تقليدي يناسب الأيام العادية والمناسبات الخاصة.',
-                about_p1: '{{restaurantName}} يحتفي بالمطبخ التقليدي والوصفات المتوارثة والوجبات التي تجمع الناس.',
-                about_p2: 'نركز على الكرم والنكهات المألوفة وأجواء عائلية تجعل الضيوف يشعرون بالراحة.',
-                about_p3: 'هدفنا أن نقدم عنواناً موثوقاً للوجبات اليومية وللمناسبات المهمة أيضاً.',
-                event_birthday: 'وجبات عائلية',
-                event_birthday_desc: 'طاولة مرحبة للاحتفال بالمناسبات مع الأحباب.',
-                event_family: 'لقاءات ولمّات',
-                event_family_desc: 'مكان مناسب للوجبات السخية والأحاديث الطويلة.',
-                event_corporate: 'وجبات الفرق',
-                event_corporate_desc: 'صيغة دافئة لاستقبال الزملاء والشركاء.',
-                event_party: 'احتفالات تقليدية',
-                event_party_desc: 'مطبخ قائم على المشاركة للمناسبات الخاصة.',
-                events_cta_text: 'هل تخطط لوجبة جماعية أو احتفال؟ تواصل معنا.',
-                footer_note: 'وصفات تقليدية وطاولة عائلية وضيافة كريمة.'
+                hero_sub1: 'Ø¨ÙŠØª Ù„Ù€',
+                hero_title1: 'Ø§Ù„Ù†ÙƒÙ‡Ø§Øª <span>Ø§Ù„ØªÙ‚Ù„ÙŠØ¯ÙŠØ©</span>',
+                hero_sub2: 'Ø§ÙƒØªØ´Ù Ù…Ù† Ø¬Ø¯ÙŠØ¯',
+                hero_title2: 'ÙˆØµÙØ§Øª <span>{{shortName}}</span>',
+                hero_desc2: 'Ø£Ø·Ø¨Ø§Ù‚ ØµØ§Ø¯Ù‚Ø© ÙˆØ·Ø§ÙˆÙ„Ø© Ø¹Ø§Ø¦Ù„ÙŠØ© ÙˆØ§Ø³ØªÙ‚Ø¨Ø§Ù„ ÙƒØ±ÙŠÙ….',
+                hero_sub3: 'Ù„Ù„ÙˆØ¬Ø¨Ø§Øª Ø§Ù„Ù…Ø´ØªØ±ÙƒØ©',
+                hero_title3: 'Ø£ØµÙŠÙ„ <span>ÙˆØ¯Ø§ÙØ¦</span>',
+                hero_desc3: 'Ù…Ø·Ø¨Ø® ØªÙ‚Ù„ÙŠØ¯ÙŠ ÙŠÙ†Ø§Ø³Ø¨ Ø§Ù„Ø£ÙŠØ§Ù… Ø§Ù„Ø¹Ø§Ø¯ÙŠØ© ÙˆØ§Ù„Ù…Ù†Ø§Ø³Ø¨Ø§Øª Ø§Ù„Ø®Ø§ØµØ©.',
+                about_p1: '{{restaurantName}} ÙŠØ­ØªÙÙŠ Ø¨Ø§Ù„Ù…Ø·Ø¨Ø® Ø§Ù„ØªÙ‚Ù„ÙŠØ¯ÙŠ ÙˆØ§Ù„ÙˆØµÙØ§Øª Ø§Ù„Ù…ØªÙˆØ§Ø±Ø«Ø© ÙˆØ§Ù„ÙˆØ¬Ø¨Ø§Øª Ø§Ù„ØªÙŠ ØªØ¬Ù…Ø¹ Ø§Ù„Ù†Ø§Ø³.',
+                about_p2: 'Ù†Ø±ÙƒØ² Ø¹Ù„Ù‰ Ø§Ù„ÙƒØ±Ù… ÙˆØ§Ù„Ù†ÙƒÙ‡Ø§Øª Ø§Ù„Ù…Ø£Ù„ÙˆÙØ© ÙˆØ£Ø¬ÙˆØ§Ø¡ Ø¹Ø§Ø¦Ù„ÙŠØ© ØªØ¬Ø¹Ù„ Ø§Ù„Ø¶ÙŠÙˆÙ ÙŠØ´Ø¹Ø±ÙˆÙ† Ø¨Ø§Ù„Ø±Ø§Ø­Ø©.',
+                about_p3: 'Ù‡Ø¯ÙÙ†Ø§ Ø£Ù† Ù†Ù‚Ø¯Ù… Ø¹Ù†ÙˆØ§Ù†Ø§Ù‹ Ù…ÙˆØ«ÙˆÙ‚Ø§Ù‹ Ù„Ù„ÙˆØ¬Ø¨Ø§Øª Ø§Ù„ÙŠÙˆÙ…ÙŠØ© ÙˆÙ„Ù„Ù…Ù†Ø§Ø³Ø¨Ø§Øª Ø§Ù„Ù…Ù‡Ù…Ø© Ø£ÙŠØ¶Ø§Ù‹.',
+                event_birthday: 'ÙˆØ¬Ø¨Ø§Øª Ø¹Ø§Ø¦Ù„ÙŠØ©',
+                event_birthday_desc: 'Ø·Ø§ÙˆÙ„Ø© Ù…Ø±Ø­Ø¨Ø© Ù„Ù„Ø§Ø­ØªÙØ§Ù„ Ø¨Ø§Ù„Ù…Ù†Ø§Ø³Ø¨Ø§Øª Ù…Ø¹ Ø§Ù„Ø£Ø­Ø¨Ø§Ø¨.',
+                event_family: 'Ù„Ù‚Ø§Ø¡Ø§Øª ÙˆÙ„Ù…Ù‘Ø§Øª',
+                event_family_desc: 'Ù…ÙƒØ§Ù† Ù…Ù†Ø§Ø³Ø¨ Ù„Ù„ÙˆØ¬Ø¨Ø§Øª Ø§Ù„Ø³Ø®ÙŠØ© ÙˆØ§Ù„Ø£Ø­Ø§Ø¯ÙŠØ« Ø§Ù„Ø·ÙˆÙŠÙ„Ø©.',
+                event_corporate: 'ÙˆØ¬Ø¨Ø§Øª Ø§Ù„ÙØ±Ù‚',
+                event_corporate_desc: 'ØµÙŠØºØ© Ø¯Ø§ÙØ¦Ø© Ù„Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ø§Ù„Ø²Ù…Ù„Ø§Ø¡ ÙˆØ§Ù„Ø´Ø±ÙƒØ§Ø¡.',
+                event_party: 'Ø§Ø­ØªÙØ§Ù„Ø§Øª ØªÙ‚Ù„ÙŠØ¯ÙŠØ©',
+                event_party_desc: 'Ù…Ø·Ø¨Ø® Ù‚Ø§Ø¦Ù… Ø¹Ù„Ù‰ Ø§Ù„Ù…Ø´Ø§Ø±ÙƒØ© Ù„Ù„Ù…Ù†Ø§Ø³Ø¨Ø§Øª Ø§Ù„Ø®Ø§ØµØ©.',
+                events_cta_text: 'Ù‡Ù„ ØªØ®Ø·Ø· Ù„ÙˆØ¬Ø¨Ø© Ø¬Ù…Ø§Ø¹ÙŠØ© Ø£Ùˆ Ø§Ø­ØªÙØ§Ù„ØŸ ØªÙˆØ§ØµÙ„ Ù…Ø¹Ù†Ø§.',
+                footer_note: 'ÙˆØµÙØ§Øª ØªÙ‚Ù„ÙŠØ¯ÙŠØ© ÙˆØ·Ø§ÙˆÙ„Ø© Ø¹Ø§Ø¦Ù„ÙŠØ© ÙˆØ¶ÙŠØ§ÙØ© ÙƒØ±ÙŠÙ…Ø©.'
             }
         }
     }
@@ -886,7 +886,7 @@ function getAdminMenuSuperCategoryRows() {
             id: '__unassigned__',
             name: 'Unassigned Categories',
             desc: 'Categories not linked to a super category yet.',
-            emoji: '🧩',
+            emoji: 'ðŸ§©',
             cats: unassigned,
             time: '',
             isVirtual: true
@@ -908,7 +908,7 @@ function getMenuBuilderCurrentCategories() {
     return categoryKeys
         .map((catKey) => ({
             key: catKey,
-            emoji: catEmojis?.[catKey] || '•',
+            emoji: catEmojis?.[catKey] || 'â€¢',
             name: window.getLocalizedCategoryName(catKey, catKey),
             itemCount: menu.filter((item) => item.cat === catKey).length
         }))
@@ -1017,13 +1017,13 @@ function renderMenuBuilder() {
             return `
                 <tr onclick='openMenuBuilderRow(${inlineId})'>
                     <td data-label="Super Category">
-                        <strong>${escapeHtml(entry.emoji || '•')} ${escapeHtml(entry.name || 'Super Category')}</strong>
+                        <strong>${escapeHtml(entry.emoji || 'â€¢')} ${escapeHtml(entry.name || 'Super Category')}</strong>
                         <div class="menu-builder-row-copy">${escapeHtml(entry.desc || '')}</div>
                     </td>
                     <td data-label="Includes"><span class="menu-builder-row-meta">${categoriesCount} categories</span></td>
                     <td data-label="Actions">
-                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>✏️</button>`}
-                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>🗑️</button>`}
+                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>âœï¸</button>`}
+                        ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>ðŸ—‘ï¸</button>`}
                     </td>
                 </tr>
             `;
@@ -1039,8 +1039,8 @@ function renderMenuBuilder() {
                     <td data-label="Category"><strong>${escapeHtml(entry.emoji)} ${escapeHtml(entry.name)}</strong></td>
                     <td data-label="Items"><span class="menu-builder-row-meta">${entry.itemCount} items</span></td>
                     <td data-label="Actions">
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>✏️</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>🗑️</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>âœï¸</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>ðŸ—‘ï¸</button>
                     </td>
                 </tr>
             `;
@@ -1058,7 +1058,7 @@ function renderMenuBuilder() {
             <tr onclick='editItem(${inlineId})'>
                 <td data-label="Item">
                     <div class="menu-builder-item-main">
-                        <div class="menu-builder-item-thumb">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="${escapeHtml(displayName)}" />` : ''}</div>
+                        <div class="menu-builder-item-thumb">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="${escapeHtml(displayName)}" loading="lazy" decoding="async" fetchpriority="low" />` : ''}</div>
                         <div class="menu-builder-item-meta">
                             <strong>${escapeHtml(displayName)}</strong>
                             <div class="menu-builder-row-copy">${escapeHtml(getAdminItemDisplayDescription(item))}</div>
@@ -1066,14 +1066,14 @@ function renderMenuBuilder() {
                     </div>
                 </td>
                 <td data-label="Price"><span class="menu-builder-row-meta">MAD ${price.toFixed(2)}</span></td>
-                <td data-label="Likes"><span class="menu-builder-likes">💗 ${likes}</span></td>
-                <td data-label="Promo"><button type="button" class="promo-star action-btn menu-builder-toggle ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='event.stopPropagation(); togglePromo(${inlineId})'>⭐</button></td>
-                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">✨</button></td>
+                <td data-label="Likes"><span class="menu-builder-likes">ðŸ’— ${likes}</span></td>
+                <td data-label="Promo"><button type="button" class="promo-star action-btn menu-builder-toggle ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='event.stopPropagation(); togglePromo(${inlineId})'>â­</button></td>
+                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">âœ¨</button></td>
                 <td data-label="Actions">
                     <div class="menu-builder-item-actions">
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); editItem(${inlineId})'>✏️</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openImageModal(${inlineId})'>🖼️</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteItem(${inlineId})'>🗑️</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); editItem(${inlineId})'>âœï¸</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openImageModal(${inlineId})'>ðŸ–¼ï¸</button>
+                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteItem(${inlineId})'>ðŸ—‘ï¸</button>
                     </div>
                 </td>
             </tr>
@@ -1231,7 +1231,7 @@ async function performAdminLogin() {
         console.log('[LOGIN] Server response:', data);
         if (!res.ok || !data.ok) {
             if (errorEl) {
-                errorEl.textContent = '❌ Identifiants incorrects';
+                errorEl.textContent = 'âŒ Identifiants incorrects';
                 errorEl.style.display = 'block';
             }
             return;
@@ -1240,7 +1240,7 @@ async function performAdminLogin() {
     } catch (e) {
         console.error('[LOGIN] Request error:', e);
         if (errorEl) {
-            errorEl.textContent = '❌ Erreur de connexion au serveur';
+            errorEl.textContent = 'âŒ Erreur de connexion au serveur';
             errorEl.style.display = 'block';
         }
     }
@@ -1287,386 +1287,6 @@ function refreshUI() {
         window.applyBranding();
     }
 }
-
-function getLaunchReadinessChecks() {
-    const config = window.restaurantConfig || {};
-    const branding = config.branding || {};
-    const location = config.location || {};
-    const galleryItems = Array.isArray(config.gallery) ? config.gallery.filter(Boolean) : [];
-    const hours = Array.isArray(config._hours) ? config._hours.filter(Boolean) : [];
-    const mapUrl = typeof window.getSafeExternalUrl === 'function'
-        ? window.getSafeExternalUrl(location.url)
-        : location.url;
-    const menuItems = Array.isArray(menu) ? menu : [];
-
-    let missingTranslationCount = 0;
-    let missingImageCount = 0;
-    let managedLibraryImageCount = 0;
-
-    menuItems.forEach((item) => {
-        const translations = normalizeMenuItemTranslations(item.translations);
-        const hasAllNames = ['fr', 'en', 'ar'].every((lang) => translations[lang]?.name);
-        if (!hasAllNames) missingTranslationCount += 1;
-
-        const primaryImage = typeof window.getPrimaryMenuItemImage === 'function'
-            ? window.getPrimaryMenuItemImage(item)
-            : ((Array.isArray(item.images) ? item.images.filter(Boolean)[0] : '') || item.img || '');
-
-        if (!primaryImage) missingImageCount += 1;
-        if (typeof window.isManagedMenuLibraryImage === 'function' && window.isManagedMenuLibraryImage(primaryImage)) {
-            managedLibraryImageCount += 1;
-        }
-    });
-
-    return [
-        {
-            id: 'branding_media',
-            label: t('admin.readiness.branding_media', 'Branding media'),
-            ok: Boolean(branding.logoImage && branding.heroImage),
-            detail: branding.logoImage && branding.heroImage
-                ? t('admin.readiness.branding_media_ok', 'Logo and hero image are configured.')
-                : t('admin.readiness.branding_media_missing', 'Add both a logo and a hero image before delivery.')
-        },
-        {
-            id: 'core_contact_details',
-            label: t('admin.readiness.core_contact_details', 'Core contact details'),
-            ok: Boolean(location.address && mapUrl && config.phone),
-            detail: location.address && mapUrl && config.phone
-                ? t('admin.readiness.core_contact_details_ok', 'Address, map link, and phone are present.')
-                : t('admin.readiness.core_contact_details_missing', 'Address, map URL, or phone is still incomplete.')
-        },
-        {
-            id: 'opening_hours',
-            label: t('admin.readiness.opening_hours', 'Opening hours'),
-            ok: hours.length > 0,
-            detail: hours.length > 0
-                ? t('admin.readiness.opening_hours_ok', '{count} hour rows configured.', { count: hours.length })
-                : t('admin.readiness.opening_hours_missing', 'Add opening hours before handoff.')
-        },
-        {
-            id: 'menu_coverage',
-            label: t('admin.readiness.menu_coverage', 'Menu coverage'),
-            ok: menuItems.length > 0,
-            detail: menuItems.length > 0
-                ? t('admin.readiness.menu_coverage_ok', '{count} menu items configured.', { count: menuItems.length })
-                : t('admin.readiness.menu_coverage_missing', 'No menu items are configured yet.')
-        },
-        {
-            id: 'menu_translations',
-            label: t('admin.readiness.menu_translations', 'Menu translations'),
-            ok: menuItems.length > 0 && missingTranslationCount === 0,
-            detail: menuItems.length === 0
-                ? t('admin.readiness.menu_translations_empty', 'Add menu items before reviewing translations.')
-                : missingTranslationCount === 0
-                    ? t('admin.readiness.menu_translations_ok', 'All menu items have FR / EN / AR names.')
-                    : t('admin.readiness.menu_translations_missing', '{count} menu item(s) still miss one or more translated names.', { count: missingTranslationCount })
-        },
-        {
-            id: 'item_imagery',
-            label: t('admin.readiness.item_imagery', 'Item imagery'),
-            ok: menuItems.length > 0 && missingImageCount === 0,
-            detail: menuItems.length === 0
-                ? t('admin.readiness.item_imagery_empty', 'Add menu items before reviewing dish imagery.')
-                : missingImageCount === 0
-                    ? managedLibraryImageCount > 0
-                        ? t('admin.readiness.item_imagery_managed', 'Every menu item has an image source. {count} item(s) still use managed library placeholders.', { count: managedLibraryImageCount })
-                        : t('admin.readiness.item_imagery_ok', 'Every menu item has an image source.')
-                    : t('admin.readiness.item_imagery_missing', '{count} menu item(s) still miss an image.', { count: missingImageCount })
-        },
-        {
-            id: 'gallery',
-            label: t('admin.readiness.gallery', 'Gallery'),
-            ok: galleryItems.length > 0,
-            detail: galleryItems.length > 0
-                ? t('admin.readiness.gallery_ok', '{count} gallery image(s) configured.', { count: galleryItems.length })
-                : t('admin.readiness.gallery_missing', 'Add at least one gallery image for a more complete delivery.')
-        },
-        {
-            id: 'admin_security',
-            label: t('admin.readiness.admin_security', 'Admin security'),
-            ok: Boolean(adminSecurityStatus) && !adminSecurityStatus.usesDefaultCredentials,
-            detail: !adminSecurityStatus
-                ? t('admin.readiness.admin_security_loading', 'Security status has not loaded yet.')
-                : adminSecurityStatus.usesDefaultCredentials
-                ? t('admin.readiness.admin_security_default', 'Default admin credentials are still active.')
-                : t('admin.readiness.admin_security_ok', 'Custom admin credentials are active.')
-        }
-    ];
-}
-
-function getLaunchReadinessAction(check) {
-    const source = check && typeof check === 'object' ? check : {};
-    switch (source.id) {
-        case 'branding_media':
-            return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
-        case 'core_contact_details':
-            return { sectionId: 'info', label: 'Open Info' };
-        case 'opening_hours':
-            return { sectionId: 'info', label: 'Open Info' };
-        case 'menu_coverage':
-        case 'menu_translations':
-        case 'item_imagery':
-            return { sectionId: 'menu', label: t('admin.actions.open_menu', 'Open Menu') };
-        case 'gallery':
-            return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
-        case 'admin_security':
-            return { sectionId: 'info', label: 'Open Info' };
-        default:
-            return null;
-    }
-}
-
-function getMediaSlotAction(slot) {
-    const source = slot && typeof slot === 'object' ? slot : {};
-    switch (source.id) {
-        case 'branding.logo':
-        case 'branding.hero.primary':
-        case 'branding.hero.slide2':
-        case 'branding.hero.slide3':
-            return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
-        case 'homepage.gallery':
-            return { sectionId: 'branding', label: t('admin.actions.open_branding', 'Open Branding') };
-        case 'menu.featured':
-        case 'menu.promo':
-        case 'menu.items':
-            return { sectionId: 'menu', label: t('admin.actions.open_menu', 'Open Menu') };
-        default:
-            return null;
-    }
-}
-
-window.openReadinessSection = function (sectionId) {
-    if (!sectionId) return;
-    const topLevelSection = resolveTopLevelSection(sectionId);
-    let btn = null;
-    if (topLevelSection === 'branding') {
-        btn = document.getElementById('brandingNavBtn');
-    } else if (topLevelSection === 'info') {
-        btn = document.getElementById('infoNavBtn');
-    } else if (sectionId === 'data-tools') {
-        btn = document.getElementById('sellerToolsNavBtn');
-    } else if (topLevelSection === 'menu') {
-        btn = document.getElementById('menuNavBtn');
-    } else {
-        btn = Array.from(document.querySelectorAll('.nav-btn')).find((element) => {
-            const handler = element.getAttribute('onclick') || '';
-            return handler.includes(`showSection('${topLevelSection}'`);
-        });
-    }
-
-    if (btn && typeof showSection === 'function') {
-        showSection(sectionId, btn);
-    }
-
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-};
-
-function renderLaunchReadinessCard() {
-    const summaryEl = document.getElementById('launchReadinessSummary');
-    const listEl = document.getElementById('launchReadinessList');
-    const mediaEl = document.getElementById('launchReadinessMedia');
-    const noteEl = document.getElementById('launchReadinessNote');
-    if (!summaryEl || !listEl || !mediaEl || !noteEl) return;
-
-    const checks = getLaunchReadinessChecks();
-    const mediaSlots = typeof window.getMediaSlotAudit === 'function'
-        ? window.getMediaSlotAudit(window.restaurantConfig || {}, Array.isArray(menu) ? menu : [], promoIds)
-        : [];
-    const mediaBlockers = mediaSlots.filter((slot) => slot.blocksHandoff);
-    const mediaWarnings = mediaSlots.filter((slot) => !slot.blocksHandoff && slot.state !== 'ready');
-    const mediaManaged = mediaSlots.filter((slot) => slot.state === 'managed');
-    const mediaMissing = mediaSlots.filter((slot) => slot.state === 'missing');
-    const mediaPartial = mediaSlots.filter((slot) => slot.state === 'partial');
-
-    const okCount = checks.filter((check) => check.ok).length;
-    const totalCount = checks.length;
-    const allReady = okCount === totalCount && mediaBlockers.length === 0;
-    const summaryLabel = allReady
-        ? t('admin.readiness.summary_ready', 'Ready for final review')
-        : mediaBlockers.length > 0
-            ? t('admin.readiness.summary_blockers', '{count} handoff blocker(s)', { count: mediaBlockers.length })
-            : t('admin.readiness.summary_progress', '{ok}/{total} checks passed', { ok: okCount, total: totalCount });
-
-    summaryEl.innerHTML = `
-        <span class="readiness-summary-dot"></span>
-        <span>${summaryLabel}</span>
-    `;
-    summaryEl.style.background = allReady ? '#ecfdf5' : (mediaBlockers.length > 0 ? '#fef2f2' : '#fffbeb');
-    summaryEl.style.color = allReady ? '#166534' : (mediaBlockers.length > 0 ? '#991b1b' : '#92400e');
-
-    listEl.innerHTML = checks.map((check) => {
-        const action = getLaunchReadinessAction(check);
-        return `
-            <div class="readiness-item ${check.ok ? 'is-ok' : 'is-warn'}">
-                <div class="readiness-item-main">
-                    <strong>${check.label}</strong>
-                    <small>${check.detail}</small>
-                    ${action ? `<button type="button" class="readiness-action" onclick="openReadinessSection('${action.sectionId}')">${action.label}</button>` : ''}
-                </div>
-                <span class="readiness-badge">${check.ok ? t('admin.readiness.badge_ok', 'OK') : t('admin.readiness.badge_needs_work', 'Needs work')}</span>
-            </div>
-        `;
-    }).join('');
-
-    mediaEl.innerHTML = `
-        <div class="readiness-section-title">${t('admin.media.status_title', 'Media Delivery Status')}</div>
-        <div class="readiness-metrics">
-            <span class="readiness-metric ${mediaBlockers.length > 0 ? 'is-block' : 'is-muted'}">${t('admin.media.metric_blockers', '{count} blocker(s)', { count: mediaBlockers.length })}</span>
-            <span class="readiness-metric ${mediaWarnings.length > 0 ? 'is-warn' : 'is-muted'}">${t('admin.media.metric_warnings', '{count} warning(s)', { count: mediaWarnings.length })}</span>
-            <span class="readiness-metric ${mediaManaged.length > 0 ? 'is-managed' : 'is-muted'}">${t('admin.media.metric_managed', '{count} managed', { count: mediaManaged.length })}</span>
-            <span class="readiness-metric ${mediaMissing.length > 0 || mediaPartial.length > 0 ? 'is-warn' : 'is-muted'}">${t('admin.media.metric_missing_partial', '{missing} missing / {partial} partial', { missing: mediaMissing.length, partial: mediaPartial.length })}</span>
-        </div>
-        ${mediaSlots.length === 0
-            ? `<div class="readiness-item is-warn"><div><strong>${t('admin.media.audit_unavailable_title', 'Media audit unavailable')}</strong><small>${t('admin.media.audit_unavailable_detail', 'Run again after the restaurant data loads fully.')}</small></div><span class="readiness-badge">${t('admin.media.badge_pending', 'Pending')}</span></div>`
-            : mediaSlots.map((slot) => {
-                const variantClass = slot.blocksHandoff
-                    ? 'is-block'
-                    : (slot.state === 'ready' ? 'is-ok' : 'is-warn');
-                const badgeLabel = slot.blocksHandoff
-                    ? t('admin.media.badge_blocks_handoff', 'Blocks handoff')
-                    : (slot.state === 'ready' ? t('admin.media.badge_ready', 'Ready') : t('admin.media.badge_warning', 'Warning'));
-                const action = getMediaSlotAction(slot);
-                return `
-                    <div class="readiness-item ${variantClass}">
-                        <div class="readiness-item-main">
-                            <strong>${slot.label}</strong>
-                            <small>${slot.detail} ${slot.sellerRule}</small>
-                            ${action ? `<button type="button" class="readiness-action" onclick="openReadinessSection('${action.sectionId}')">${action.label}</button>` : ''}
-                        </div>
-                        <span class="readiness-badge">${badgeLabel}</span>
-                    </div>
-                `;
-            }).join('')}
-    `;
-
-    noteEl.style.display = 'block';
-    noteEl.innerHTML = `
-        <strong>${t('admin.media.policy_title', 'Seller policy')}</strong>
-        ${mediaBlockers.length > 0
-            ? t('admin.media.policy_blockers', '{blockers} media blocker(s) must be fixed before delivery. {warnings} other slot(s) are warnings only.', { blockers: mediaBlockers.length, warnings: mediaWarnings.length })
-            : mediaWarnings.length > 0
-                ? t('admin.media.policy_warnings', 'No media blockers remain. {warnings} optional media warning(s) can still be improved before handoff.', { warnings: mediaWarnings.length })
-                : t('admin.media.policy_ready', 'Core media requirements are ready for delivery.')}
-    `;
-}
-
-function inferHandoffUrls() {
-    const current = window.location;
-    const adminUrl = current.origin + current.pathname.replace(/\/$/, '');
-    let websiteUrl = current.origin;
-
-    if (/^admin\./i.test(current.hostname)) {
-        websiteUrl = `${current.protocol}//${current.hostname.replace(/^admin\./i, '')}`;
-    } else if (/\/admin\/?$/i.test(current.pathname)) {
-        websiteUrl = current.origin;
-    }
-
-    return { websiteUrl, adminUrl };
-}
-
-window.generateHandoffSummary = function () {
-    const output = document.getElementById('handoffSummaryOutput');
-    if (!output) return;
-
-    const config = window.restaurantConfig || {};
-    const branding = config.branding || {};
-    const location = config.location || {};
-    const galleryItems = Array.isArray(config.gallery) ? config.gallery.filter(Boolean) : [];
-    const hours = Array.isArray(config._hours) ? config._hours.filter(Boolean) : [];
-    const menuItems = Array.isArray(menu) ? menu : [];
-    const checks = getLaunchReadinessChecks();
-    const warnChecks = checks.filter((check) => !check.ok);
-    const urls = inferHandoffUrls();
-    const mediaSlots = typeof window.getMediaSlotAudit === 'function'
-        ? window.getMediaSlotAudit(config, menuItems, promoIds)
-        : [];
-    const mediaBlockers = mediaSlots.filter((slot) => slot.blocksHandoff);
-    const mediaWarnings = mediaSlots.filter((slot) => !slot.blocksHandoff && slot.state !== 'ready');
-    const managedLibraryImageCount = menuItems.filter((item) => {
-        const primaryImage = typeof window.getPrimaryMenuItemImage === 'function'
-            ? window.getPrimaryMenuItemImage(item)
-            : ((Array.isArray(item.images) ? item.images.filter(Boolean)[0] : '') || item.img || '');
-        return typeof window.isManagedMenuLibraryImage === 'function' && window.isManagedMenuLibraryImage(primaryImage);
-    }).length;
-
-    output.value = [
-        `${t('admin.handoff.restaurant', 'Restaurant')}: ${branding.restaurantName || branding.shortName || t('admin.common.not_set', 'Not set')}`,
-        `${t('admin.handoff.short_brand', 'Short brand')}: ${branding.shortName || t('admin.common.not_set', 'Not set')}`,
-        `${t('admin.handoff.website_url', 'Website URL')}: ${urls.websiteUrl}`,
-        `${t('admin.handoff.admin_url', 'Admin URL')}: ${urls.adminUrl}`,
-        `${t('admin.handoff.admin_user', 'Admin user')}: ${adminAuth.user || t('admin.common.not_set', 'Not set')}`,
-        `${t('admin.handoff.phone', 'Phone')}: ${config.phone || t('admin.common.not_set', 'Not set')}`,
-        `${t('admin.handoff.address', 'Address')}: ${location.address || t('admin.common.not_set', 'Not set')}`,
-        `${t('admin.handoff.menu_items', 'Menu items')}: ${menuItems.length}`,
-        `${t('admin.handoff.library_placeholders', 'Library image placeholders')}: ${managedLibraryImageCount}`,
-        `${t('admin.handoff.gallery_images', 'Gallery images')}: ${galleryItems.length}`,
-        `${t('admin.handoff.hours_rows', 'Hours rows')}: ${hours.length}`,
-        `${t('admin.handoff.launch_readiness', 'Launch readiness')}: ${t('admin.readiness.summary_progress', '{ok}/{total} checks passed', { ok: checks.filter((check) => check.ok).length, total: checks.length })}`,
-        `${t('admin.handoff.media_blockers', 'Media blockers')}: ${mediaBlockers.length}`,
-        `${t('admin.handoff.media_warnings', 'Media warnings')}: ${mediaWarnings.length}`,
-        '',
-        mediaSlots.length
-            ? `${t('admin.handoff.media_slots', 'Media slots')}:`
-            : `${t('admin.handoff.media_slots', 'Media slots')}: ${t('admin.common.unavailable', 'unavailable.')}`,
-        ...mediaSlots.map((slot) => `- ${slot.label}: ${slot.state}${slot.blocksHandoff ? ' [BLOCKS HANDOFF]' : ''}. ${slot.detail} ${slot.sellerRule}`),
-        '',
-        mediaBlockers.length
-            ? `${t('admin.handoff.media_blockers', 'Media blockers')}:`
-            : `${t('admin.handoff.media_blockers', 'Media blockers')}: ${t('admin.common.none', 'none.')}`,
-        ...mediaBlockers.map((slot) => `- ${slot.label}: ${slot.sellerRule}`),
-        '',
-        warnChecks.length
-            ? `${t('admin.handoff.open_issues', 'Open issues')}:`
-            : `${t('admin.handoff.open_issues', 'Open issues')}: ${t('admin.handoff.open_issues_none', 'none. Ready for final review.')}`,
-        ...warnChecks.map((check) => `- ${check.label}: ${check.detail}`)
-    ].join('\n');
-
-    showToast(t('admin.handoff.generated', 'Handoff summary generated.'));
-};
-
-window.copyHandoffSummary = async function () {
-    const output = document.getElementById('handoffSummaryOutput');
-    if (!output) return;
-    if (!output.value.trim()) {
-        window.generateHandoffSummary();
-    }
-
-    try {
-        await navigator.clipboard.writeText(output.value);
-        showToast(t('admin.handoff.copied', 'Handoff summary copied.'));
-    } catch (_error) {
-        output.focus();
-        output.select();
-        showToast(t('admin.common.copy_failed', 'Copy failed. Select the summary manually.'));
-    }
-};
-
-window.downloadHandoffSummary = function () {
-    const output = document.getElementById('handoffSummaryOutput');
-    if (!output) return;
-    if (!output.value.trim()) {
-        window.generateHandoffSummary();
-    }
-
-    const restaurantSlug = String(window.restaurantConfig?.branding?.shortName || 'restaurant')
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'restaurant';
-    const blob = new Blob([output.value], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${restaurantSlug}-handoff-summary.txt`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-    showToast(t('admin.handoff.downloaded', 'Handoff summary downloaded.'));
-};
 
 window.suggestMissingMenuImages = async function () {
     const output = document.getElementById('menuImageSuggestionOutput');
@@ -1779,7 +1399,7 @@ window.copyMenuImageSuggestionSummary = async function () {
     }
 };
 
-// ─── CATEGORY FILTERS LOGIC ──────────────────────────────────────────────
+// â”€â”€â”€ CATEGORY FILTERS LOGIC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderCategoryFilters() {
     const container = document.getElementById('adminCategoryFilters');
     if (!container) return;
@@ -1826,7 +1446,7 @@ window.setAdminCategoryFilter = function (cat) {
 
     renderMenuTable();
 }
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function renderMenuTable() {
     const tbody = document.querySelector('#menuTable tbody');
@@ -1838,7 +1458,7 @@ function renderMenuTable() {
             : menu.filter(item => (item.cat || 'Uncategorized') === currentAdminCategory);
 
         if (filteredMenu.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#888;">Aucun produit dans la catégorie "${currentAdminCategory}".</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#888;">Aucun produit dans la catÃ©gorie "${currentAdminCategory}".</td></tr>`;
             return;
         }
 
@@ -1857,20 +1477,20 @@ function renderMenuTable() {
             <tr>
                 <td>
                     <div style="width:50px; height:50px; background:#eee; border-radius:8px; overflow:hidden; border:1px solid #ddd; cursor:pointer" onclick='openImageModal(${inlineItemId})'>
-                        ${firstImg ? `<img src="${firstImg}" style="width:100%; height:100%; object-fit:cover" onerror="this.src='images/menu-item-placeholder.svg'">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px">📷</div>'}
+                        ${firstImg ? `<img src="${firstImg}" loading="lazy" decoding="async" fetchpriority="low" style="width:100%; height:100%; object-fit:cover" onerror="this.src='images/menu-item-placeholder.svg'">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px">ðŸ“·</div>'}
                     </div>
                     ${images.length > 0 ? `<small style="display:block;text-align:center;font-size:10px;color:var(--primary);cursor:pointer;margin-top:2px" onclick='openImageModal(${inlineItemId})'>${images.length} image(s)</small>` : ''}
                 </td>
                 <td><strong>${itemName}</strong><div class="item-copy-meta"><div class="translation-badges">${translationBadges}</div></div><small style="color:#888">${itemDesc}</small></td>
                 <td>${itemCat}</td>
                 <td>MAD ${safePrice.toFixed(2)}</td>
-                <td><span style="color:#e01e2f">❤️</span> ${likeCount}</td>
-                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>⭐</span></td>
-                <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick='toggleFeatured(${inlineItemId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">✨</span></td>
+                <td><span style="color:#e01e2f">â¤ï¸</span> ${likeCount}</td>
+                <td><span class="promo-star action-btn ${promoIds.includes(item.id) ? 'promo-active' : ''}" onclick='togglePromo(${inlineItemId})'>â­</span></td>
+                <td><span class="promo-star action-btn ${item.featured ? 'promo-active' : ''}" onclick='toggleFeatured(${inlineItemId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">âœ¨</span></td>
                 <td>
-                    <button class="action-btn" onclick='editItem(${inlineItemId})' title="Modifier les détails">✏️</button>
-                    <button class="action-btn" onclick='openImageModal(${inlineItemId})' title="Gérer les images">🖼️</button>
-                    <button class="action-btn" onclick='deleteItem(${inlineItemId})'>🗑️</button>
+                    <button class="action-btn" onclick='editItem(${inlineItemId})' title="Modifier les dÃ©tails">âœï¸</button>
+                    <button class="action-btn" onclick='openImageModal(${inlineItemId})' title="GÃ©rer les images">ðŸ–¼ï¸</button>
+                    <button class="action-btn" onclick='deleteItem(${inlineItemId})'>ðŸ—‘ï¸</button>
                 </td>
             </tr > `;
         }).join('');
@@ -1934,10 +1554,10 @@ function editItem(id) {
 
     // Change form title and button
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
-    if (itemEditorTitle) itemEditorTitle.textContent = "✏️ Modifier: " + getAdminItemDisplayName(item);
-    document.querySelector('#foodForm .primary-btn').textContent = "💾 Mettre à jour le produit";
+    if (itemEditorTitle) itemEditorTitle.textContent = "âœï¸ Modifier: " + getAdminItemDisplayName(item);
+    document.querySelector('#foodForm .primary-btn').textContent = "ðŸ’¾ Mettre Ã  jour le produit";
 
-    openMenuCrudModal('item', `Edit Item · ${getAdminItemDisplayName(item)}`);
+    openMenuCrudModal('item', `Edit Item Â· ${getAdminItemDisplayName(item)}`);
 }
 
 function resetFoodForm() {
@@ -1951,7 +1571,7 @@ function resetFoodForm() {
     toggleSizesUI();
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = "Add New Food Item";
-    document.querySelector('#foodForm .primary-btn').textContent = "➕ Save Product";
+    document.querySelector('#foodForm .primary-btn').textContent = "âž• Save Product";
 }
 
 function initForms() {
@@ -1965,20 +1585,20 @@ function initForms() {
         const fileInput = document.getElementById('itemFile');
         const urlInput = document.getElementById('itemImg').value;
 
-        // Parse URL images — split by NEWLINE only
+        // Parse URL images â€” split by NEWLINE only
         let urlImages = urlInput.split(/\n/).map(s => s.trim()).filter(s => s.length > 0 && !s.startsWith('data:'));
 
         // Upload new files to server (stored on disk, returned as /uploads/... URL)
         let newUploadedUrls = [];
         if (fileInput && fileInput.files.length > 0) {
-            showToast('⏳ Téléchargement des images en cours...');
+            showToast('â³ TÃ©lÃ©chargement des images en cours...');
             for (let file of fileInput.files) {
                 try {
                     const url = await uploadImageToServer(file);
                     newUploadedUrls.push(url);
                 } catch (err) {
                     console.error('Image upload failed:', err);
-                    showToast('⚠️ Échec du téléchargement de l\'image — réessayez.');
+                    showToast('âš ï¸ Ã‰chec du tÃ©lÃ©chargement de l\'image â€” rÃ©essayez.');
                 }
             }
         }
@@ -1990,13 +1610,13 @@ function initForms() {
         if (editingItemId) {
             const existingImages = window._editingImages || [];
             if (newUploadedUrls.length > 0) {
-                // New uploads provided — use URL list + new server images
+                // New uploads provided â€” use URL list + new server images
                 finalImages = [...urlImages, ...newUploadedUrls];
             } else if (urlImages.length > 0) {
-                // URL field was updated — use those (no new uploads)
+                // URL field was updated â€” use those (no new uploads)
                 finalImages = [...urlImages];
             } else {
-                // Nothing changed — keep all existing images
+                // Nothing changed â€” keep all existing images
                 finalImages = [...existingImages];
             }
         } else {
@@ -2026,7 +1646,7 @@ function initForms() {
             price = parseFloat(document.getElementById('itemPrice').value) || 0;
         }
 
-        if (!name) { showToast('⚠️ Le nom du produit est obligatoire !'); return; }
+        if (!name) { showToast('âš ï¸ Le nom du produit est obligatoire !'); return; }
 
         if (editingItemId) {
             const index = menu.findIndex(m => m.id == editingItemId);
@@ -2041,7 +1661,7 @@ function initForms() {
                     available
                 };
             }
-            showToast('✅ Produit mis à jour !');
+            showToast('âœ… Produit mis Ã  jour !');
         } else {
             const newItem = {
                 id: Date.now(),
@@ -2055,7 +1675,7 @@ function initForms() {
                 badge: ''
             };
             menu.push(newItem);
-            showToast('✅ Produit ajouté !');
+            showToast('âœ… Produit ajoutÃ© !');
         }
 
         const saved = await saveAndRefresh();
@@ -2096,7 +1716,7 @@ function initForms() {
         if (saved) {
             resetCategoryFormState();
             closeMenuCrudModal();
-            showToast(previousKey ? 'Catégorie mise à jour !' : 'Catégorie ajoutée !');
+            showToast(previousKey ? 'CatÃ©gorie mise Ã  jour !' : 'CatÃ©gorie ajoutÃ©e !');
         }
     };
 
@@ -2105,7 +1725,7 @@ function initForms() {
         restaurantConfig.wifi.name = document.getElementById('wifiSSID').value;
         restaurantConfig.wifi.code = document.getElementById('wifiPassInput').value;
         saveAndRefresh();
-        showToast('WiFi mis à jour !');
+        showToast('WiFi mis Ã  jour !');
     };
 
     document.getElementById('brandingForm').onsubmit = (e) => {
@@ -2136,7 +1756,7 @@ function initForms() {
 
         window.updateBrandingPreview();
         saveAndRefresh();
-        showToast('Branding sauvegardé !');
+        showToast('Branding sauvegardÃ© !');
     };
 
     document.getElementById('landingPageForm').onsubmit = (e) => {
@@ -2196,7 +1816,7 @@ function initForms() {
         }
 
         saveAndRefresh();
-        showToast('Landing page et contenu multilingue sauvegardés !');
+        showToast('Landing page et contenu multilingue sauvegardÃ©s !');
     };
 
     document.getElementById('superCatForm').onsubmit = async (e) => {
@@ -2225,7 +1845,7 @@ function initForms() {
         if (saved) {
             resetSuperCategoryFormState();
             closeMenuCrudModal();
-            showToast(existingIdx !== -1 ? 'Super Catégorie mise à jour !' : 'Super Catégorie sauvegardée !');
+            showToast(existingIdx !== -1 ? 'Super CatÃ©gorie mise Ã  jour !' : 'Super CatÃ©gorie sauvegardÃ©e !');
         }
     };
 }
@@ -2842,8 +2462,8 @@ function renderSuperCatTable() {
             <td><strong>${sc.name}</strong><br><small>${sc.time || ''}</small></td>
             <td>${sc.cats.join(', ')}</td>
             <td>
-                <button class="action-btn" onclick="editSuperCat('${sc.id}')">✏️</button>
-                <button class="action-btn" onclick="deleteSuperCat('${sc.id}')">🗑️</button>
+                <button class="action-btn" onclick="editSuperCat('${sc.id}')">âœï¸</button>
+                <button class="action-btn" onclick="deleteSuperCat('${sc.id}')">ðŸ—‘ï¸</button>
             </td>
         </tr>
             `).join('');
@@ -2864,11 +2484,11 @@ function editSuperCat(id) {
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
 
-    openMenuCrudModal('supercategory', `Edit Super Category · ${sc.name}`);
+    openMenuCrudModal('supercategory', `Edit Super Category Â· ${sc.name}`);
 }
 
 function deleteSuperCat(id) {
-    if (confirm('Supprimer cette super catégorie ?')) {
+    if (confirm('Supprimer cette super catÃ©gorie ?')) {
         restaurantConfig.superCategories = restaurantConfig.superCategories.filter(s => s.id !== id);
         saveAndRefresh();
     }
@@ -2886,7 +2506,7 @@ async function uploadImageToServer(file) {
 
     if (!response.ok) {
         if (response.status === 401) {
-            alert('⚠️ Session expirée. Veuillez vous reconnecter.');
+            alert('âš ï¸ Session expirÃ©e. Veuillez vous reconnecter.');
             location.reload();
             return;
         }
@@ -2903,85 +2523,6 @@ async function uploadImageToServer(file) {
     throw new Error('No URL returned from server');
 }
 
-window.exportRestaurantBackup = async function () {
-    try {
-        showToast('Preparing backup export...');
-        const response = await fetch('/api/data/export', {
-            method: 'GET',
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                alert('⚠️ Session expired. Please sign in again.');
-                location.reload();
-                return;
-            }
-            throw new Error('Export failed: ' + response.statusText);
-        }
-
-        const blob = await response.blob();
-        const disposition = response.headers.get('content-disposition') || '';
-        const match = disposition.match(/filename=\"?([^\";]+)\"?/i);
-        const filename = match ? match[1] : 'restaurant-backup.json';
-        const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(downloadUrl);
-        showToast('Backup exported successfully.');
-    } catch (error) {
-        console.error('Export backup error:', error);
-        showToast('Backup export failed.');
-    }
-};
-
-window.importRestaurantBackup = async function () {
-    const input = document.getElementById('dataImportFile');
-    const file = input && input.files ? input.files[0] : null;
-
-    if (!file) {
-        showToast('Choose a JSON backup file first.');
-        return;
-    }
-
-    if (!confirm('Importing a backup will replace the current restaurant data. Continue?')) {
-        return;
-    }
-
-    try {
-        showToast('Importing backup...');
-        const raw = await file.text();
-        const parsed = JSON.parse(raw);
-        const response = await fetch('/api/data/import', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ data: parsed })
-        });
-        const data = await response.json();
-
-        if (!response.ok || !data.ok) {
-            if (response.status === 401) {
-                alert('⚠️ Session expired. Please sign in again.');
-                location.reload();
-                return;
-            }
-            throw new Error(data.error || 'Import failed');
-        }
-
-        input.value = '';
-        await loadDataFromServer();
-        refreshUI();
-        showToast('Backup imported successfully.');
-    } catch (error) {
-        console.error('Import backup error:', error);
-        showToast('Backup import failed. Use a valid JSON export file.');
-    }
-};
 
 function renderImporterDraftOutputs(draft) {
     const summaryEl = document.getElementById('importStudioSummaryOutput');
@@ -3440,22 +2981,22 @@ async function forceSaveChangesLegacy() {
             await window.commitFormItem();
         } else {
             await saveAndRefresh();
-            showToast('✅ Toutes les modifications ont été enregistrées !');
+            showToast('âœ… Toutes les modifications ont Ã©tÃ© enregistrÃ©es !');
         }
 
         // Visual feedback on float button
         const btn = document.getElementById('floatSaveBtn');
         if (btn) {
             btn.classList.add('saved');
-            btn.innerHTML = '<span style="font-size:1.3rem;">✅</span><span>Sauvegardé !</span>';
+            btn.innerHTML = '<span style="font-size:1.3rem;">âœ…</span><span>SauvegardÃ© !</span>';
             setTimeout(() => {
                 btn.classList.remove('saved');
-                btn.innerHTML = '<span style="font-size:1.3rem;">💾</span><span>Sauvegarder</span>';
+                btn.innerHTML = '<span style="font-size:1.3rem;">ðŸ’¾</span><span>Sauvegarder</span>';
             }, 2500);
         }
     } catch (e) {
         console.error('Save Error:', e);
-        alert('❌ Erreur de sauvegarde: ' + e.message);
+        alert('âŒ Erreur de sauvegarde: ' + e.message);
     }
 }
 async function saveAndRefreshLegacy() {
@@ -3506,7 +3047,7 @@ async function saveAndRefreshLegacy() {
         });
         if (!res.ok) {
             if (res.status === 401) {
-                alert('⚠️ Session expirée. Veuillez vous reconnecter.');
+                alert('âš ï¸ Session expirÃ©e. Veuillez vous reconnecter.');
                 location.reload();
                 return;
             }
@@ -3516,7 +3057,7 @@ async function saveAndRefreshLegacy() {
         refreshUI();
     } catch (e) {
         console.error('Save Error:', e);
-        showToast('❌ Erreur de sauvegarde: ' + e.message);
+        showToast('âŒ Erreur de sauvegarde: ' + e.message);
     }
 }
 
@@ -3781,18 +3322,6 @@ async function saveAndRefresh() {
 }
 
 function showToast(msg) { const t = document.getElementById('adminToast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function clearImageCache() {
-    const count = menu.filter(item => (item.images || []).some(img => img.startsWith('data:')) || (item.img || '').startsWith('data:')).length;
-    if (count === 0) { showToast('✅ Aucune image en cache à supprimer.'); return; }
-    if (!confirm(`Supprimer les images en cache de ${count} produit(s) ? Les images URL seront conservées.`)) return;
-    menu = menu.map(item => {
-        const imgs = Array.isArray(item.images) ? item.images : (item.img ? [item.img] : []);
-        const urlOnly = imgs.filter(img => !img.startsWith('data:'));
-        return { ...item, images: urlOnly, img: urlOnly[0] || '' };
-    });
-    saveAndRefresh();
-    showToast(`✅ Cache image vidé pour ${count} produit(s).Stockage libéré!`);
-}
 function showSection(id, btn) {
     const topLevelSection = resolveTopLevelSection(id);
     const navButton = btn || (topLevelSection === 'branding'
@@ -3858,7 +3387,7 @@ function populateCatDropdown() {
 }
 function renderCatTable() {
     const el = document.querySelector('#catTable tbody');
-    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">✏️</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">🗑️</button></td></tr>`).join('');
+    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">âœï¸</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">ðŸ—‘ï¸</button></td></tr>`).join('');
 }
 function editCat(cat) {
     currentMenuWorkspaceStep = 'categories';
@@ -3868,9 +3397,9 @@ function editCat(cat) {
     document.getElementById('catName').value = cat;
     document.getElementById('catEmoji').value = catEmojis[cat] || '';
     setCategoryTranslationFields(cat);
-    openMenuCrudModal('category', `Edit Category · ${window.getLocalizedCategoryName(cat, cat)}`);
+    openMenuCrudModal('category', `Edit Category Â· ${window.getLocalizedCategoryName(cat, cat)}`);
 }
-function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Supprimez d\'abord les produits de cette catégorie !'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
+function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Supprimez d\'abord les produits de cette catÃ©gorie !'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
 function initWifiForm() {
     const fields = {
         'wifiSSID': restaurantConfig.wifi.name,
@@ -3905,7 +3434,7 @@ function syncImageModalAiControls() {
     }
     if (buttonEl) {
         buttonEl.disabled = false;
-        buttonEl.textContent = "✨ Générer avec l'IA";
+        buttonEl.textContent = "âœ¨ GÃ©nÃ©rer avec l'IA";
     }
 }
 
@@ -3939,8 +3468,8 @@ function renderModalImages() {
 
     grid.innerHTML = images.map((img, index) => `
             <div style="position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:1px solid #ddd;">
-                <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
-                    <button onclick="deleteModalImage(${index})" style="position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.8); color:#fff; border:none; border-radius:5px; cursor:pointer; padding:2px 6px; font-size:12px;">✕</button>
+                <img src="${img}" loading="lazy" decoding="async" fetchpriority="low" style="width:100%; height:100%; object-fit:cover;">
+                    <button onclick="deleteModalImage(${index})" style="position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.8); color:#fff; border:none; border-radius:5px; cursor:pointer; padding:2px 6px; font-size:12px;">âœ•</button>
                 </div>
         `).join('') + (images.length === 0 ? '<p style="grid-column: span 3; color:#888; text-align:center;">Aucune image pour le moment.</p>' : '');
 }
@@ -3958,7 +3487,7 @@ async function handleModalImageUpload(input) {
             item.images.push(url);
         } catch (err) {
             console.error('Modal upload failed:', err);
-            showToast('⚠️ Échec de l\'upload');
+            showToast('âš ï¸ Ã‰chec de l\'upload');
         }
     }
 
@@ -3968,7 +3497,7 @@ async function handleModalImageUpload(input) {
     input.value = '';
     saveAndRefresh();
     renderModalImages();
-    showToast('Image(s) ajoutée(s)!');
+    showToast('Image(s) ajoutÃ©e(s)!');
 }
 
 function addModalImageUrl() {
@@ -3986,7 +3515,7 @@ function addModalImageUrl() {
     document.getElementById('modalImgUrl').value = '';
     saveAndRefresh();
     renderModalImages();
-    showToast('Image ajoutée via URL!');
+    showToast('Image ajoutÃ©e via URL!');
 }
 
 function deleteModalImage(index) {
@@ -4000,7 +3529,7 @@ function deleteModalImage(index) {
 
     saveAndRefresh();
     renderModalImages();
-    showToast('Image supprimée');
+    showToast('Image supprimÃ©e');
 }
 
 window.generateModalImageWithAI = async function () {
@@ -4019,7 +3548,7 @@ window.generateModalImageWithAI = async function () {
 
     const originalLabel = buttonEl.textContent;
     buttonEl.disabled = true;
-    buttonEl.textContent = 'Génération...';
+    buttonEl.textContent = 'GÃ©nÃ©ration...';
 
     try {
         const response = await fetch('/api/media/generate-menu-item', {
@@ -4064,22 +3593,8 @@ window.generateModalImageWithAI = async function () {
     }
 }
 
-async function resetDefaults() {
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser TOUTES les données du menu et de la configuration aux valeurs par défaut ? Cette action est irréversible.')) {
-        try {
-            const res = await fetch('/api/data/reset', { method: 'POST', credentials: 'include' });
-            if (res.ok) {
-                await loadDataFromServer();
-                refreshUI();
-                showToast('✅ Données réinitialisées !');
-            }
-        } catch (e) {
-            console.error('Reset error:', e);
-        }
-    }
-}
 
-// ═══════════════════════ HOURS MANAGEMENT ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HOURS MANAGEMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const HOUR_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 function initHoursForm() {
@@ -4127,12 +3642,12 @@ function initHoursForm() {
             restaurantConfig._hours = updatedHours;
             restaurantConfig._hoursNote = updatedNote;
             saveAndRefresh();
-            showToast('✅ Horaires mis à jour !');
+            showToast('âœ… Horaires mis Ã  jour !');
         };
     }
 }
 
-// ═══════════════════════ GALLERY MANAGEMENT ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GALLERY MANAGEMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function initGalleryForm() {
     const form = document.getElementById('galleryForm');
@@ -4154,14 +3669,14 @@ function initGalleryForm() {
 
         // Handle Files
         if (fileInput.files.length > 0) {
-            showToast('⏳ Téléchargement gallery...');
+            showToast('â³ TÃ©lÃ©chargement gallery...');
             for (let file of fileInput.files) {
                 try {
                     const url = await uploadImageToServer(file);
                     restaurantConfig.gallery.push(url);
                 } catch (err) {
                     console.error('Gallery upload failed:', err);
-                    showToast('⚠️ Échec gallery');
+                    showToast('âš ï¸ Ã‰chec gallery');
                 }
             }
             fileInput.value = '';
@@ -4169,7 +3684,7 @@ function initGalleryForm() {
 
         saveAndRefresh();
         renderGalleryAdmin();
-        showToast('🖼️ Images ajoutées à la galerie !');
+        showToast('ðŸ–¼ï¸ Images ajoutÃ©es Ã  la galerie !');
     };
 }
 
@@ -4181,8 +3696,8 @@ function renderGalleryAdmin() {
 
     grid.innerHTML = images.map((img, index) => `
             <div style="position:relative; aspect-ratio:1.5; border-radius:12px; overflow:hidden; border:1px solid #ddd; background:#eee;">
-                <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
-                    <button onclick="deleteGalleryImage(${index})" style="position:absolute; top:8px; right:8px; background:rgba(255,0,0,0.8); color:#fff; border:none; border-radius:6px; cursor:pointer; padding:4px 8px; font-size:14px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">✕</button>
+                <img src="${img}" loading="lazy" decoding="async" fetchpriority="low" style="width:100%; height:100%; object-fit:cover;">
+                    <button onclick="deleteGalleryImage(${index})" style="position:absolute; top:8px; right:8px; background:rgba(255,0,0,0.8); color:#fff; border:none; border-radius:6px; cursor:pointer; padding:4px 8px; font-size:14px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">âœ•</button>
                 </div>
         `).join('') + (images.length === 0 ? '<p style="grid-column: 1/-1; color:#888; text-align:center; padding:40px; border:2px dashed #eee; border-radius:15px;">La galerie est vide.</p>' : '');
 }
@@ -4192,6 +3707,6 @@ function deleteGalleryImage(index) {
         restaurantConfig.gallery.splice(index, 1);
         saveAndRefresh();
         renderGalleryAdmin();
-        showToast('Image supprimée');
+        showToast('Image supprimÃ©e');
     }
 }

@@ -80,7 +80,7 @@
         <h1 class="slide-title" data-i18n="hero_title1">SAVEURS <span>AUTHENTIQUES</span></h1>
         <button class="slide-cta" onclick="location.href='menu.html'" data-i18n="hero_cta">COMMANDER EN LIGNE</button>
       </div>
-      <div class="slide-img"><img id="heroSlideImage1" src="images/hero-default.svg" alt="Restaurant hero preview" /></div>
+      <div class="slide-img"><img id="heroSlideImage1" src="images/hero-default.svg" alt="Restaurant hero preview" decoding="async" fetchpriority="high" /></div>
     </div>
     <div class="slide" id="slide2">
       <div class="slide-content">
@@ -90,7 +90,7 @@
         <button class="slide-cta" onclick="location.href='menu.html'" data-i18n="hero_cta">COMMANDER EN LIGNE</button>
       </div>
       <div class="slide-img"><img id="heroSlideImage2" src="images/hero-cafe.svg"
-          alt="Restaurant atmosphere preview" /></div>
+          alt="Restaurant atmosphere preview" loading="lazy" decoding="async" fetchpriority="low" /></div>
     </div>
     <div class="slide" id="slide3">
       <div class="slide-content">
@@ -101,7 +101,7 @@
           data-i18n="hero_cta">COMMANDER EN LIGNE</button>
       </div>
       <div class="slide-img"><img id="heroSlideImage3" src="images/hero-traditional.svg"
-          alt="Restaurant service preview" /></div>
+          alt="Restaurant service preview" loading="lazy" decoding="async" fetchpriority="low" /></div>
     </div>
     <div class="slide-dots">
       <button class="dot dot-active" onclick="goSlide(0)"></button>
@@ -362,7 +362,7 @@
             onclick="copyWifi()">📋</button></p>
       </div>
       <div class="qr-container">
-        <img id="wifiQR" src="" alt="WiFi QR Code" />
+        <img id="wifiQR" src="" alt="WiFi QR Code" decoding="async" />
         <p class="qr-hint" data-i18n="wifi_scan">Scannez pour vous connecter</p>
       </div>
     </div>
@@ -388,7 +388,7 @@
     <div class="product-modal-grid">
       <div class="product-modal-gallery">
         <div class="main-img-wrap">
-          <img id="mainDetailImg" src="" alt="Product" />
+          <img id="mainDetailImg" src="" alt="Product" decoding="async" />
         </div>
         <div class="thumb-strip" id="thumbStrip"></div>
       </div>

@@ -331,6 +331,8 @@
             border: 1px solid rgba(255, 255, 255, 0.07);
             box-shadow: 0 22px 40px rgba(0, 0, 0, 0.24);
             overflow: hidden;
+            content-visibility: auto;
+            contain-intrinsic-size: 140px;
         }
 
         .menu-item-card::before {
@@ -1754,14 +1756,14 @@
 
             <!-- Hero Image -->
             <div class="landing-hero">
-                <img src="images/hero-default.svg" alt="Restaurant" class="landing-hero-img" id="landingHeroImage">
+                <img src="images/hero-default.svg" alt="Restaurant" class="landing-hero-img" id="landingHeroImage" decoding="async" fetchpriority="high">
                 <div class="landing-hero-overlay"></div>
             </div>
 
             <!-- Logo Overlap -->
             <div class="landing-logo-wrap menu-reveal-observe">
                 <div class="landing-logo-circle">
-                    <img src="" alt="Restaurant Logo" class="landing-logo-img" id="landingLogoImage" style="display:none;">
+                    <img src="" alt="Restaurant Logo" class="landing-logo-img" id="landingLogoImage" style="display:none;" decoding="async" fetchpriority="high">
                     <div class="landing-logo-fallback" id="landingLogoFallback">R</div>
                 </div>
             </div>
@@ -1866,7 +1868,7 @@
 
             <!-- Hero banner in menu -->
             <div class="menu-nav-hero">
-                <img src="images/hero-default.svg" alt="" class="menu-nav-hero-img" id="menuHeroImage">
+                <img src="images/hero-default.svg" alt="" class="menu-nav-hero-img" id="menuHeroImage" decoding="async" fetchpriority="low">
                 <div class="menu-nav-hero-overlay"></div>
                 <div class="menu-nav-hero-title menu-reveal-observe" id="menuNavTitle" data-i18n="nav_menu">Menu</div>
             </div>
@@ -1921,7 +1923,7 @@
     <div id="dishPage" class="dish-page">
         <button class="dish-page-close" onclick="closeDishPage()">✕</button>
         <div class="dish-page-header">
-            <img id="dishPageImg" src="" alt="" class="dish-page-img">
+            <img id="dishPageImg" src="" alt="" class="dish-page-img" decoding="async">
         </div>
         <div class="dish-page-body">
             <h2 id="dishPageName" class="dish-page-name"></h2>
@@ -2036,7 +2038,7 @@
         <button class="gallery-close" onclick="closeGallery()">✕</button>
         <div class="gallery-container" onclick="event.stopPropagation()">
             <button class="gallery-nav gallery-prev" onclick="prevGalleryImage()">❮</button>
-            <img id="galleryImg" src="" alt="Gallery Image">
+            <img id="galleryImg" src="" alt="Gallery Image" decoding="async">
             <button class="gallery-nav gallery-next" onclick="nextGalleryImage()">❯</button>
         </div>
         <div class="gallery-info" onclick="event.stopPropagation()">

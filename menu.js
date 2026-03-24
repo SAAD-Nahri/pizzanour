@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Menu JS - 3-Tier Navigation
- * Landing → Super Category → Sub Category → Items
+ * Landing â†’ Super Category â†’ Sub Category â†’ Items
  */
 
 let menu = window.defaultMenu || [];
@@ -34,7 +34,7 @@ async function fetchPublicDataWithTimeout() {
     }
 }
 
-// ═══ SYNC DATA FROM SERVER ═══
+// â•â•â• SYNC DATA FROM SERVER â•â•â•
 async function syncDataFromServer() {
     if (syncInFlight) return syncInFlight;
     lastPublicSyncStartedAt = Date.now();
@@ -143,7 +143,7 @@ window.addEventListener('focus', () => {
     }
 });
 
-// ═══════════════════════ RESTAURANT CONFIG ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESTAURANT CONFIG â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const config = window.restaurantConfig;
 
 function getSuperCategories() {
@@ -242,7 +242,7 @@ function scheduleMenuMotionRefresh() {
     });
 }
 
-// ═══════════════════════ INIT ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 document.addEventListener('DOMContentLoaded', async () => {
     initMenuApp();
@@ -382,7 +382,7 @@ function renderLandingHours() {
         return `
             <div class="hour-row">
                 <span data-i18n="${hour.i18n}">${translatedDay}</span>
-                <span>${hour.open} – ${hour.close}</span>
+                <span>${hour.open} â€“ ${hour.close}</span>
             </div>
         `;
     }).join('');
@@ -392,7 +392,7 @@ function renderLandingSocialLinks() {
     const container = document.getElementById('menuLandingSocialLinks');
     if (!container) return;
 
-    const links = ['<a href="index.html" class="social-icon-link">🏠</a>'];
+    const links = ['<a href="index.html" class="social-icon-link">ðŸ </a>'];
     const socials = { ...(window.restaurantConfig?.socials || {}) };
     socials.facebook = window.getSafeExternalUrl(socials.facebook);
     socials.instagram = window.getSafeExternalUrl(socials.instagram);
@@ -400,16 +400,16 @@ function renderLandingSocialLinks() {
     socials.whatsapp = window.getWhatsAppNumber();
 
     if (socials.facebook) {
-        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link">📘</a>`);
+        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link">ðŸ“˜</a>`);
     }
     if (socials.instagram) {
-        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link">📸</a>`);
+        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link">ðŸ“¸</a>`);
     }
     if (socials.tiktok) {
-        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link">🎵</a>`);
+        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link">ðŸŽµ</a>`);
     }
     if (socials.whatsapp) {
-        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link">📞</a>`);
+        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link">ðŸ“ž</a>`);
     }
 
     if (links.length === 1) {
@@ -427,7 +427,7 @@ function openWiFiModal() {
     const closeLabel = t('modal_close', 'CLOSE');
     const content = `
         <div class="modal-body menu-modal-body is-centered">
-            <div class="menu-modal-icon">📶</div>
+            <div class="menu-modal-icon">ðŸ“¶</div>
             <h2 class="menu-modal-title">${wifiTitle}</h2>
             <p class="menu-modal-subtitle">${networkLabel}: <strong>${config.wifi.name}</strong></p>
             <div class="menu-modal-code-card">
@@ -454,11 +454,11 @@ function openSocialModal() {
     config.socials.tiktok = window.getSafeExternalUrl(config.socials.tiktok);
     config.socials.tripadvisor = window.getSafeExternalUrl(config.socials.tripadvisor);
     const socials = [
-        config.socials.instagram ? `<a href="${config.socials.instagram}" target="_blank" class="social-item"><span class="social-item-icon">📸</span> <strong>${t('social_instagram', 'Instagram')}</strong></a>` : '',
-        config.socials.facebook ? `<a href="${config.socials.facebook}" target="_blank" class="social-item"><span class="social-item-icon">📘</span> <strong>${t('social_facebook', 'Facebook')}</strong></a>` : '',
-        config.socials.tiktok ? `<a href="${config.socials.tiktok}" target="_blank" class="social-item"><span class="social-item-icon">🎵</span> <strong>${t('social_tiktok', 'TikTok')}</strong></a>` : '',
-        config.socials.tripadvisor ? `<a href="${config.socials.tripadvisor}" target="_blank" class="social-item"><span class="social-item-icon">⭐</span> <strong>${t('social_tripadvisor', 'TripAdvisor')}</strong></a>` : '',
-        whatsappNumber ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" class="social-item"><span class="social-item-icon">📞</span> <strong>${t('social_whatsapp', 'WhatsApp')}</strong></a>` : ''
+        config.socials.instagram ? `<a href="${config.socials.instagram}" target="_blank" class="social-item"><span class="social-item-icon">ðŸ“¸</span> <strong>${t('social_instagram', 'Instagram')}</strong></a>` : '',
+        config.socials.facebook ? `<a href="${config.socials.facebook}" target="_blank" class="social-item"><span class="social-item-icon">ðŸ“˜</span> <strong>${t('social_facebook', 'Facebook')}</strong></a>` : '',
+        config.socials.tiktok ? `<a href="${config.socials.tiktok}" target="_blank" class="social-item"><span class="social-item-icon">ðŸŽµ</span> <strong>${t('social_tiktok', 'TikTok')}</strong></a>` : '',
+        config.socials.tripadvisor ? `<a href="${config.socials.tripadvisor}" target="_blank" class="social-item"><span class="social-item-icon">â­</span> <strong>${t('social_tripadvisor', 'TripAdvisor')}</strong></a>` : '',
+        whatsappNumber ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" class="social-item"><span class="social-item-icon">ðŸ“ž</span> <strong>${t('social_whatsapp', 'WhatsApp')}</strong></a>` : ''
     ].filter(Boolean).join('');
     const content = `
         <div class="modal-body menu-modal-body">
@@ -487,7 +487,7 @@ function renderPromoCarousel() {
     const promoItems = menu.filter(m => promoIds.includes(m.id));
 
     if (promoItems.length === 0) {
-        container.innerHTML = `<div class="promo-empty-msg">${t('promo_empty', '🔥 Découvrez nos promos du jour bientôt !')}</div>`;
+        container.innerHTML = `<div class="promo-empty-msg">${t('promo_empty', 'ðŸ”¥ DÃ©couvrez nos promos du jour bientÃ´t !')}</div>`;
         scheduleMenuMotionRefresh();
         return;
     }
@@ -543,7 +543,7 @@ function startPromoAutoSlide(container) {
 }
 
 
-// ═══════════════════════ LANDING & VIEWS ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANDING & VIEWS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function showLanding() {
     // Close ALL overlays and modals first to prevent blank screen
@@ -584,9 +584,9 @@ function renderFeaturedSlider(items, containerId) {
     container.style.display = 'block';
     container.innerHTML = `
         <div class="featured-header-sexy menu-reveal-observe">
-            <span class="featured-header-label">${t('featured_label', 'Sélection Signature')}</span>
+            <span class="featured-header-label">${t('featured_label', 'SÃ©lection Signature')}</span>
             <h2 class="featured-header-title">
-                <span>${t('featured_best', 'Nos Coups de Coeur')}</span> ✨
+                <span>${t('featured_best', 'Nos Coups de Coeur')}</span> âœ¨
             </h2>
         </div>
         <div class="featured-slider">
@@ -641,7 +641,7 @@ function menuGoBack() {
 // DELETED - Replaced by direct calls in menuGoBack
 
 
-// ═══════════════════════ SUPER CATEGORY SHEET ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SUPER CATEGORY SHEET â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function renderSuperCatPills() {
     const container = document.getElementById('superCatPills');
@@ -665,7 +665,7 @@ function renderSuperCatSheet() {
                     <div class="super-cat-row-desc">${window.getLocalizedSuperCategoryDescription(sc, sc.desc)}</div>
                 </div>
             </div>
-            <span class="super-cat-row-arrow">›</span>
+            <span class="super-cat-row-arrow">â€º</span>
         </div>
     `).join('');
     scheduleMenuMotionRefresh();
@@ -690,7 +690,7 @@ function selectSuperCategory(scId) {
     showSubCategoryGrid(sc, true);
 }
 
-// ═══════════════════════ SUB CATEGORY GRID ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SUB CATEGORY GRID â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function showSubCategoryGrid(sc, addToStack = true) {
     if (addToStack) navigationStack.push(`subcats:${sc.id}`);
@@ -714,7 +714,7 @@ function showSubCategoryGrid(sc, addToStack = true) {
     const filteredCats = sc.cats.filter(c => currentCategories.includes(c));
     catNav.innerHTML = filteredCats.map(c => `
         <button class="menu-cat-btn menu-reveal-observe" data-cat="${c}" onclick="showCategoryItems('${c}')">
-            <span class="cat-emoji">${catEmojis[c] || '🍴'}</span>
+            <span class="cat-emoji">${catEmojis[c] || 'ðŸ´'}</span>
             <span class="cat-name">${window.getLocalizedCategoryName(c, c)}</span>
         </button>
     `).join('');
@@ -727,7 +727,7 @@ function showSubCategoryGrid(sc, addToStack = true) {
     scheduleMenuMotionRefresh();
 }
 
-// ═══════════════════════ CATEGORY ITEMS ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CATEGORY ITEMS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function showCategoryItems(cat, addToStack = true) {
     if (addToStack) navigationStack.push(`items:${cat}`);
@@ -796,7 +796,7 @@ if (baseMenuSetLang) {
     };
 }
 
-// ═══════════════════════ RENDERING ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RENDERING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function renderMenu() {
     const wrap = document.getElementById('menuContent');
@@ -808,20 +808,20 @@ function renderMenu() {
         const items = menu.filter(m => m.cat === cat && m.available !== false);
         return `
             <section class="menu-section menu-reveal-observe" id="cat-${cat.replace(/\s/g, '-')}">
-                <h2 class="menu-section-title">${catEmojis[cat] || '🍴'} ${window.getLocalizedCategoryName(cat, cat)}</h2>
+                <h2 class="menu-section-title">${catEmojis[cat] || 'ðŸ´'} ${window.getLocalizedCategoryName(cat, cat)}</h2>
                 <div class="menu-grid">
                     ${items.map((item, itemIndex) => `
                         <div class="menu-item-card menu-reveal-observe" onclick="openDishPage(${serializeInlineId(item.id)})">
                              <button class="love-btn ${window.getLikeCount(item.id) > 0 ? 'loved text-pop' : ''}" 
                                      onclick="event.stopPropagation(); window.handleToggleLike(${serializeInlineId(item.id)}, this)">
-                                ❤️<span class="love-count">${window.getLikeCount(item.id)}</span>
+                                â¤ï¸<span class="love-count">${window.getLikeCount(item.id)}</span>
                              </button>
                             <div class="menu-item-info">
                                 <div class="menu-item-name">${window.getLocalizedMenuName(item)} ${window.isItemInPromo(item.id) ? `<span class="promo-tag-small">${t('promo_small_badge', 'PROMO')}</span>` : ''}</div>
                                 <div class="menu-item-desc">${window.getLocalizedMenuDescription(item)}</div>
                                 <div class="menu-item-price">
                                     ${item.hasSizes
-                ? `<span style="font-size:0.7em; opacity:0.7;">${t('price_from', 'À partir de')}</span> ${window.getItemPrice(item, 'small').toFixed(0)} MAD`
+                ? `<span style="font-size:0.7em; opacity:0.7;">${t('price_from', 'Ã€ partir de')}</span> ${window.getItemPrice(item, 'small').toFixed(0)} MAD`
                 : (window.isItemInPromo(item.id)
                     ? `<span class="price-discounted">${window.getItemPrice(item).toFixed(0)} MAD</span> <span class="price-original-item">${item.price.toFixed(0)} MAD</span>`
                     : `${item.price.toFixed(0)} MAD`)}
@@ -845,12 +845,9 @@ function imgTag(item) {
     const safeFallbackEmoji = catEmojis[item.cat] || String.fromCodePoint(0x1F354);
     if (src) return `<img src="${src}" alt="${window.getLocalizedMenuName(item)}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'), { className: 'emoji-placeholder', textContent: ${JSON.stringify(safeFallbackEmoji)} }))">`;
     return `<span class="emoji-placeholder">${safeFallbackEmoji}</span>`;
-    const fallbackEmoji = catEmojis[item.cat] || 'ðŸ´';
-    if (src) return `<img src="${src}" alt="${window.getLocalizedMenuName(item)}" loading="lazy" onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'), { className: 'emoji-placeholder', textContent: ${JSON.stringify(catEmojis[item.cat] || 'ðŸ´')} }))">`;
-    return `<span class="emoji-placeholder">${catEmojis[item.cat] || '🍴'}</span>`;
 }
 
-// ═══════════════════════ DISH PAGE ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DISH PAGE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function openDishPage(id) {
     const item = menu.find(m => sameMenuItemId(m.id, id));
@@ -936,7 +933,7 @@ function openDishPage(id) {
 
     if (nameEl) nameEl.textContent = window.getLocalizedMenuName(item) + (window.isItemInPromo(item.id) ? t('dish_promo_suffix', ' (PROMO)') : '');
     updateSizePrice();
-    if (descEl) descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'Une préparation soignée avec les meilleurs ingrédients.'));
+    if (descEl) descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'Une prÃ©paration soignÃ©e avec les meilleurs ingrÃ©dients.'));
 
     if (addBtn) {
         addBtn.onclick = () => { addToCart(item.id, selectedSize); closeDishPage(); };
@@ -949,7 +946,7 @@ function openDishPage(id) {
             <button class="love-btn ${window.getLikeCount(item.id) > 0 ? 'loved' : ''}" 
                     style="position:static; width:40px; height:40px; font-size:1.2rem;"
                     onclick="window.handleToggleLike(${serializeInlineId(item.id)}, this)">
-                ❤️<span class="love-count" style="font-size:0.8rem;">${window.getLikeCount(item.id)}</span>
+                â¤ï¸<span class="love-count" style="font-size:0.8rem;">${window.getLikeCount(item.id)}</span>
             </button>
         `;
     }
@@ -963,7 +960,7 @@ function closeDishPage() {
     document.body.style.overflow = '';
 }
 
-// ═══════════════════════ IMAGE GALLERY ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• IMAGE GALLERY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let galleryItems = [];
 let currentGalleryIdx = 0;
 
@@ -1025,7 +1022,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ═══════════════════════ SEARCH ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SEARCH â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function searchMenu(q) {
     const query = q.toLowerCase().trim();
@@ -1042,7 +1039,7 @@ function searchMenu(q) {
     });
 }
 
-// ═══════════════════════ LANG DROPDOWN ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANG DROPDOWN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function toggleLangDropdown() {
     document.getElementById('langOptions')?.classList.toggle('open');
@@ -1054,7 +1051,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// ═══════════════════════ CART ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CART â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 window.addToCart = function (id, size) {
     const item = menu.find(m => sameMenuItemId(m.id, id));
@@ -1078,7 +1075,7 @@ window.addToCart = function (id, size) {
     saveCart();
     updateCartUI();
     const sizeLabel = size ? ` (${size.charAt(0).toUpperCase()})` : '';
-    window.showToast?.(t('toast_item_added', '✅ {item} ajouté !', {
+    window.showToast?.(t('toast_item_added', 'âœ… {item} ajoutÃ© !', {
         item: `${window.getLocalizedMenuName(item)}${sizeLabel}`
     }));
 };
@@ -1113,7 +1110,7 @@ function updateCartUI() {
     });
 }
 
-// ═══════════════════════ MODALS ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function openDrawer() {
     document.getElementById('sharedOverlay').classList.add('open');
@@ -1137,9 +1134,9 @@ function renderDrawer() {
         ? window.getRestaurantDisplayName()
         : 'Restaurant';
     const serviceOptions = [
-        { key: 'onsite', icon: '🍽️', label: t('service_onsite', 'Sur place') },
-        { key: 'takeaway', icon: '🛍️', label: t('service_takeaway', 'À Emporter') },
-        { key: 'delivery', icon: '🛵', label: t('service_delivery', 'Livraison') }
+        { key: 'onsite', icon: 'ðŸ½ï¸', label: t('service_onsite', 'Sur place') },
+        { key: 'takeaway', icon: 'ðŸ›ï¸', label: t('service_takeaway', 'Ã€ Emporter') },
+        { key: 'delivery', icon: 'ðŸ›µ', label: t('service_delivery', 'Livraison') }
     ];
 
     content.innerHTML = `
@@ -1180,8 +1177,8 @@ function renderDrawer() {
             </div>
             ${serviceType === 'delivery' ? `
             <div class="cart-delivery-block">
-                <label class="cart-delivery-label">${t('cart_delivery_label', '📍 Adresse de livraison')}</label>
-                <textarea id="deliveryAddress" rows="2" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, résidence, quartier...')}" oninput="window.currentDeliveryAddress = this.value" class="cart-delivery-input">${window.currentDeliveryAddress || ''}</textarea>
+                <label class="cart-delivery-label">${t('cart_delivery_label', 'ðŸ“ Adresse de livraison')}</label>
+                <textarea id="deliveryAddress" rows="2" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, rÃ©sidence, quartier...')}" oninput="window.currentDeliveryAddress = this.value" class="cart-delivery-input">${window.currentDeliveryAddress || ''}</textarea>
             </div>
             ` : ''}
             <div class="cart-total-card">
@@ -1200,7 +1197,7 @@ function renderDrawer() {
     }
 }
 
-// ═══════════════════════ HISTORY ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HISTORY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function openHistory() {
     renderHistory();
@@ -1220,11 +1217,11 @@ function renderHistory() {
     const container = document.getElementById('historyContent');
     if (!container) return;
     container.innerHTML = history.length === 0
-        ? `<p class="history-empty">${t('history_empty', 'Aucune commande récente.')}</p>`
+        ? `<p class="history-empty">${t('history_empty', 'Aucune commande rÃ©cente.')}</p>`
         : history.map((ticketHtml, i) => `
             <div class="history-ticket history-ticket-wrap">
                 ${ticketHtml}
-                <button onclick="deleteHistoryItem(${i})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}">🗑️</button>
+                <button onclick="deleteHistoryItem(${i})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}">ðŸ—‘ï¸</button>
             </div>
         `).join('');
 }
@@ -1268,7 +1265,7 @@ function updateHistoryBadge() {
     });
 }
 
-// ═══════════════════════ TICKET ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TICKET â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function generateTicket() {
     if (serviceType === 'delivery' && (!window.currentDeliveryAddress || window.currentDeliveryAddress.trim() === '')) {
         alert(t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.'));
@@ -1288,28 +1285,28 @@ function generateTicket() {
 
     const serviceLabels = {
         onsite: t('service_onsite', 'Sur place'),
-        takeaway: t('service_takeaway', 'À emporter'),
+        takeaway: t('service_takeaway', 'Ã€ emporter'),
         delivery: t('service_delivery', 'Livraison')
     };
     const serviceLabel = serviceLabels[serviceType];
 
     ticketContent.innerHTML = `
         <div class="ticket-content">
-            <button onclick="closeAllModals()" class="ticket-close-btn">✕</button>
+            <button onclick="closeAllModals()" class="ticket-close-btn">âœ•</button>
             <div class="ticket-brand">
                 <div class="ticket-brand-name">${restaurantName}</div>
                 <div class="ticket-brand-address">${restaurantAddress}</div>
             </div>
             <div class="ticket-summary">
                 <div class="ticket-number">${t('ticket_number_prefix', 'TICKET')} #${orderNo}</div>
-                <div class="ticket-datetime">${now.toLocaleDateString()} — ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                <div class="ticket-datetime">${now.toLocaleDateString()} â€” ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 <div class="ticket-service">${t('ticket_type_label', 'Type')}: ${serviceLabel}</div>
-                ${serviceType === 'delivery' ? `<div class="ticket-delivery-address">📍 ${window.currentDeliveryAddress}</div>` : ''}
+                ${serviceType === 'delivery' ? `<div class="ticket-delivery-address">ðŸ“ ${window.currentDeliveryAddress}</div>` : ''}
             </div>
             <div class="ticket-items">
                 ${cart.map(item => `
                     <div class="ticket-item-row">
-                        <div class="ticket-item-name"><strong class="ticket-item-qty">${item.qty} ×</strong> ${window.getLocalizedMenuName(item)}</div>
+                        <div class="ticket-item-name"><strong class="ticket-item-qty">${item.qty} Ã—</strong> ${window.getLocalizedMenuName(item)}</div>
                         <div class="ticket-item-price">${(item.price * item.qty).toFixed(0)} <span class="ticket-item-currency">dhs</span></div>
                     </div>
                 `).join('')}
@@ -1381,18 +1378,18 @@ function finalizeOrderSilent(orderNo, total, serviceLabel, btn) {
     parent.innerHTML = `
         <button onclick="closeAllModals(); showLanding();"
                 class="ticket-action-btn is-success">
-            ${t('ticket_saved', 'COMMANDE ENREGISTRÉE ✔')}
+            ${t('ticket_saved', 'COMMANDE ENREGISTRÃ‰E âœ”')}
         </button>
-        <div class="ticket-helper is-success">${t('ticket_saved_help', 'Ticket validé ! Cliquez pour fermer.')}</div>
+        <div class="ticket-helper is-success">${t('ticket_saved_help', 'Ticket validÃ© ! Cliquez pour fermer.')}</div>
     `;
 }
 
 function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
     // WhatsApp formatting
-    let waText = `*${t('wa_new_order_title', 'NOUVELLE COMMANDE – {restaurant}', { restaurant: `#${orderNo}` })}*\n`;
+    let waText = `*${t('wa_new_order_title', 'NOUVELLE COMMANDE â€“ {restaurant}', { restaurant: `#${orderNo}` })}*\n`;
     waText += `${t('ticket_type_label', 'Type')}: ${serviceLabel}\n`;
     if (serviceType === 'delivery') {
-        waText += `📍 ${t('ticket_addr', 'Adresse')}: ${window.currentDeliveryAddress.trim()}\n`;
+        waText += `ðŸ“ ${t('ticket_addr', 'Adresse')}: ${window.currentDeliveryAddress.trim()}\n`;
     }
     waText += `---------------------------\n`;
     cart.forEach(item => {
@@ -1403,7 +1400,7 @@ function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
 
     const phone = window.getWhatsAppNumber();
     if (!phone) {
-        window.showToast(t('social_empty', 'Aucun lien configuré.'));
+        window.showToast(t('social_empty', 'Aucun lien configurÃ©.'));
         return;
     }
 
@@ -1414,7 +1411,7 @@ function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
     window.openSafeExternalUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
 }
 
-// ═══════════════════════ LIKES HANDLER ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LIKES HANDLER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function handleToggleLike(id, btn) {
     const newCount = window.toggleLike(id);
@@ -1429,7 +1426,7 @@ function handleToggleLike(id, btn) {
 }
 window.handleToggleLike = handleToggleLike;
 
-// ═══════════════════════ GLOBALS ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GLOBALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 window.showLanding = showLanding;
 window.openSuperCatSheet = openSuperCatSheet;
 window.closeSuperCatSheet = closeSuperCatSheet;
