@@ -287,6 +287,7 @@ window.whiteLabelStarterSeed = {
         "Desserts": "🍰",
         "Boissons": "🥤"
     },
+    categoryImages: {},
     categoryTranslations: {
         "EntrÃ©es": {
             fr: { name: "EntrÃ©es" },
@@ -369,6 +370,7 @@ window.whiteLabelStarterSeed = {
 // The white-label starter pack is the active runtime default.
 window.defaultMenu = window.whiteLabelStarterSeed.menu.map(cloneStarterMenuItem);
 window.defaultCatEmojis = { ...window.whiteLabelStarterSeed.catEmojis };
+window.defaultCategoryImages = { ...(window.whiteLabelStarterSeed.categoryImages || {}) };
 window.defaultCategoryTranslations = cloneStarterTranslationMap(window.whiteLabelStarterSeed.categoryTranslations);
 window.defaultSuperCategories = window.whiteLabelStarterSeed.superCategories.map(cloneStarterSuperCategory);
 

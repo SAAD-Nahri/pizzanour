@@ -35,6 +35,8 @@ const defaultSectionOrder = Array.isArray(window.defaultConfig?.sectionOrder)
 
 let menu = defaultMenu.map(item => ({ ...item, images: Array.isArray(item.images) ? item.images : [], img: item.img || '' }));
 let catEmojis = { ...defaultCatEmojis };
+let categoryImages = { ...(window.defaultCategoryImages || {}) };
+window.categoryImages = categoryImages;
 let wifiData = { ...defaultWifiData };
 let promoId = null;
 let homePromoItem = null;
@@ -116,6 +118,10 @@ function applySiteData(data) {
     if (data?.catEmojis && typeof data.catEmojis === 'object') {
         catEmojis = data.catEmojis;
     }
+    if (data?.categoryImages && typeof data.categoryImages === 'object') {
+        categoryImages = data.categoryImages;
+        window.categoryImages = categoryImages;
+    }
     wifiData = { ...defaultWifiData, ...(data?.wifi && typeof data.wifi === 'object' ? data.wifi : {}) };
     socialLinks = { ...defaultSocialLinks, ...(data?.social && typeof data.social === 'object' ? data.social : {}) };
     guestExperience = {
@@ -178,6 +184,7 @@ function applySiteDataSnapshot(snapshot) {
     applySiteData({
         menu: Array.isArray(snapshot.menu) ? snapshot.menu : defaultMenu,
         catEmojis: snapshot.catEmojis || defaultCatEmojis,
+        categoryImages: snapshot.categoryImages || source.categoryImages || window.defaultCategoryImages || {},
         wifi: snapshotWifi,
         social: source.social || source.socials || defaultSocialLinks,
         guestExperience: source.guestExperience || defaultGuestExperience,
@@ -209,9 +216,11 @@ function persistMenuSnapshotFromSiteData(data, version = '') {
             version,
             menu,
             catEmojis,
+            categoryImages,
             promoIds: Array.isArray(window.promoIds) ? window.promoIds : [],
             restaurantData: {
                 superCategories: Array.isArray(window.restaurantConfig?.superCategories) ? window.restaurantConfig.superCategories : [],
+                categoryImages,
                 categoryTranslations: window.restaurantConfig?.categoryTranslations || {},
                 wifi: {
                     ssid: window.restaurantConfig?.wifi?.ssid || window.restaurantConfig?.wifi?.name || '',

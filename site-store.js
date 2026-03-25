@@ -9,6 +9,7 @@ const uploadsDir = process.env.UPLOADS_DIR || bundledUploadsDir;
 const FALLBACK_DATA = {
   menu: [],
   catEmojis: {},
+  categoryImages: {},
   categoryTranslations: {},
   wifi: {
     ssid: "",
@@ -175,6 +176,18 @@ function sanitizeWifi(input) {
     ssid: asString(source.ssid, 120) || "Restaurant WiFi",
     pass: asString(source.pass, 120) || "Ask the team"
   };
+}
+
+function sanitizeCategoryImages(input) {
+  const source = input && typeof input === "object" ? input : {};
+  const out = {};
+  for (const [key, value] of Object.entries(source)) {
+    const safeKey = asString(key, 120).trim();
+    const safeValue = asString(value, 8192).trim();
+    if (!safeKey || !safeValue) continue;
+    out[safeKey] = safeValue;
+  }
+  return out;
 }
 
 function sanitizeCategoryTranslations(input) {
@@ -361,6 +374,7 @@ function normalizeData(input) {
   // Sanitize known core fields
   result.menu = menu;
   result.catEmojis = sanitizeCatEmojis(source.catEmojis);
+  result.categoryImages = sanitizeCategoryImages(source.categoryImages);
   result.categoryTranslations = sanitizeCategoryTranslations(source.categoryTranslations);
   result.wifi = sanitizeWifi(source.wifi);
   result.social = sanitizeSocial(source.social);

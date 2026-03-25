@@ -170,6 +170,7 @@ function buildPublicSitePayload(data) {
   return {
     menu: Array.isArray(source.menu) ? source.menu.map(sanitizePublicMenuItem) : [],
     catEmojis: source.catEmojis && typeof source.catEmojis === "object" ? source.catEmojis : {},
+    categoryImages: source.categoryImages && typeof source.categoryImages === "object" ? source.categoryImages : {},
     wifi: {
       ssid: asPublicString(source.wifi?.ssid || source.wifi?.name, 120),
       pass: asPublicString(source.wifi?.pass || source.wifi?.code, 120)
@@ -235,6 +236,7 @@ function buildPublicHomePayload(data) {
     promoId,
     promoIds,
     promoItem: promoItem ? sanitizePublicMenuItem(promoItem) : null,
+    categoryImages: source.categoryImages && typeof source.categoryImages === "object" ? source.categoryImages : {},
     hours: Array.isArray(source.hours) ? source.hours.map(sanitizePublicHoursRow) : [],
     hoursNote: asPublicString(source.hoursNote, 240),
     gallery: sanitizePublicStringArray(source.gallery, 24, 8192),
@@ -267,6 +269,7 @@ function buildPublicMenuPayload(data) {
   return {
     menu: Array.isArray(source.menu) ? source.menu.map(sanitizePublicMenuPageItem) : [],
     catEmojis: source.catEmojis && typeof source.catEmojis === "object" ? source.catEmojis : {},
+    categoryImages: source.categoryImages && typeof source.categoryImages === "object" ? source.categoryImages : {},
     wifi: {
       ssid: asPublicString(source.wifi?.ssid || source.wifi?.name, 120),
       pass: asPublicString(source.wifi?.pass || source.wifi?.code, 120)

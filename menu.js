@@ -6,6 +6,8 @@
 let menu = window.defaultMenu || [];
 let catEmojis = window.defaultCatEmojis || {};
 window.catEmojis = catEmojis;
+let categoryImages = window.defaultCategoryImages || {};
+window.categoryImages = categoryImages;
 let cart = typeof window.getStoredCart === 'function'
     ? window.getStoredCart()
     : [];
@@ -107,9 +109,11 @@ function persistCurrentMenuSnapshot(version = '') {
             version,
             menu,
             catEmojis,
+            categoryImages,
             promoIds: Array.isArray(window.promoIds) ? window.promoIds : [],
             restaurantData: {
                 superCategories: Array.isArray(window.restaurantConfig?.superCategories) ? window.restaurantConfig.superCategories : [],
+                categoryImages,
                 categoryTranslations: window.restaurantConfig?.categoryTranslations || {},
                 wifi: {
                     ssid: window.restaurantConfig?.wifi?.ssid || window.restaurantConfig?.wifi?.name || '',
@@ -148,6 +152,14 @@ function applyMenuDataSnapshot(snapshot) {
     if (snapshot.catEmojis && typeof snapshot.catEmojis === 'object') {
         catEmojis = snapshot.catEmojis;
         window.catEmojis = catEmojis;
+        applied = true;
+    }
+    const snapshotCategoryImages = snapshot.categoryImages && typeof snapshot.categoryImages === 'object'
+        ? snapshot.categoryImages
+        : (source.categoryImages && typeof source.categoryImages === 'object' ? source.categoryImages : null);
+    if (snapshotCategoryImages) {
+        categoryImages = snapshotCategoryImages;
+        window.categoryImages = categoryImages;
         applied = true;
     }
     if (Array.isArray(snapshot.promoIds)) {
@@ -224,6 +236,8 @@ async function syncDataFromServer() {
         menu = Array.isArray(data.menu) ? data.menu : menu;
         catEmojis = data.catEmojis || catEmojis;
         window.catEmojis = catEmojis;
+        categoryImages = data.categoryImages || categoryImages;
+        window.categoryImages = categoryImages;
 
         // Update global config object
         if (typeof window.mergeRestaurantConfig === 'function') {
@@ -370,6 +384,16 @@ function getMenuCardImageSrc(src, variant = 'menu') {
 }
 
 function getCategoryPreviewSource(cat) {
+    const explicitCategoryImage = typeof categoryImages?.[cat] === 'string'
+        ? categoryImages[cat].trim()
+        : '';
+    if (explicitCategoryImage) {
+        return {
+            src: getMenuCardImageSrc(explicitCategoryImage, 'menu'),
+            originalSrc: explicitCategoryImage
+        };
+    }
+
     const representativeItem =
         menu.find((item) => item.cat === cat && item.available !== false && ((item.images && item.images[0]) || item.img))
         || menu.find((item) => item.cat === cat && ((item.images && item.images[0]) || item.img))

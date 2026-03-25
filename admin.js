@@ -1,5 +1,7 @@
 ﻿let menu = [];
 let catEmojis = window.defaultCatEmojis || {};
+let categoryImages = window.defaultCategoryImages || {};
+window.categoryImages = categoryImages;
 let categoryTranslations = window.defaultCategoryTranslations || {};
 let restaurantConfig = window.restaurantConfig || window.defaultConfig || {};
 let promoIds = [];
@@ -589,6 +591,75 @@ function resetCategoryFormState() {
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = '';
     setCategoryTranslationFields();
+    updateCategoryImagePreview();
+}
+
+function normalizeCategoryImagePath(value) {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function updateCategoryImagePreview() {
+    const previewShell = document.getElementById('catImagePreview');
+    const previewImg = document.getElementById('catImagePreviewImg');
+    const previewFallback = document.getElementById('catImagePreviewFallback');
+    const input = document.getElementById('catImage');
+    if (!previewShell || !previewImg || !previewFallback) return;
+
+    const nextImage = normalizeCategoryImagePath(input ? input.value : '');
+    if (nextImage) {
+        previewShell.classList.add('has-image');
+        previewImg.style.display = '';
+        previewFallback.style.display = 'none';
+        previewImg.src = nextImage;
+        previewImg.onerror = () => {
+            previewShell.classList.remove('has-image');
+            previewImg.style.display = 'none';
+            previewFallback.style.display = '';
+            previewImg.onerror = null;
+        };
+        return;
+    }
+
+    previewShell.classList.remove('has-image');
+    previewImg.style.display = 'none';
+    previewImg.removeAttribute('src');
+    previewFallback.style.display = '';
+}
+
+function bindCategoryImageFormEvents() {
+    const imageInput = document.getElementById('catImage');
+    const uploadInput = document.getElementById('catImageUpload');
+
+    if (imageInput && !imageInput.dataset.boundPreview) {
+        imageInput.dataset.boundPreview = 'true';
+        imageInput.addEventListener('input', updateCategoryImagePreview);
+        imageInput.addEventListener('change', updateCategoryImagePreview);
+    }
+
+    if (uploadInput && !uploadInput.dataset.boundPreview) {
+        uploadInput.dataset.boundPreview = 'true';
+        uploadInput.addEventListener('change', () => {
+            const file = uploadInput.files && uploadInput.files[0];
+            const previewShell = document.getElementById('catImagePreview');
+            const previewImg = document.getElementById('catImagePreviewImg');
+            const previewFallback = document.getElementById('catImagePreviewFallback');
+            if (!previewShell || !previewImg || !previewFallback) return;
+            if (!file) {
+                updateCategoryImagePreview();
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(file);
+            previewShell.classList.add('has-image');
+            previewImg.style.display = '';
+            previewFallback.style.display = 'none';
+            previewImg.src = objectUrl;
+            previewImg.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                previewImg.onload = null;
+            };
+        });
+    }
 }
 
 function resetSuperCategoryFormState() {
@@ -629,6 +700,10 @@ async function loadDataFromServer() {
         if (data.catEmojis && Object.keys(data.catEmojis).length > 0) {
             catEmojis = data.catEmojis;
         }
+        categoryImages = data.categoryImages && typeof data.categoryImages === 'object'
+            ? data.categoryImages
+            : (window.defaultCategoryImages || {});
+        window.categoryImages = categoryImages;
         categoryTranslations = data.categoryTranslations && typeof data.categoryTranslations === 'object'
             ? data.categoryTranslations
             : (window.defaultCategoryTranslations || {});
@@ -684,6 +759,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loginUser').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') document.getElementById('loginPass').focus();
     });
+    bindCategoryImageFormEvents();
+    updateCategoryImagePreview();
 });
 
 async function checkSession() {
@@ -1051,11 +1128,14 @@ function renderMenuBuilder() {
     if (currentMenuWorkspaceStep === 'categories') {
         tbody.innerHTML = rows.map((entry) => {
             const inlineKey = toInlineJsString(entry.key);
+            const categoryImage = typeof categoryImages?.[entry.key] === 'string' ? categoryImages[entry.key].trim() : '';
             return `
                 <tr onclick='openMenuBuilderCategory(${inlineKey})'>
                     <td data-label="Category">
                         <div class="menu-builder-entry">
-                            <span class="menu-builder-entry-emoji">${escapeHtml(entry.emoji)}</span>
+                            ${categoryImage
+                                ? `<span class="menu-builder-entry-thumb"><img src="${escapeHtml(categoryImage)}" alt="${escapeHtml(entry.name)}" loading="lazy" decoding="async"></span>`
+                                : `<span class="menu-builder-entry-emoji">${escapeHtml(entry.emoji)}</span>`}
                             <div class="menu-builder-entry-copy">
                                 <strong>${escapeHtml(entry.name)}</strong>
                             </div>
@@ -1751,6 +1831,20 @@ function initForms() {
         }
         const nextEmoji = document.getElementById('catEmoji').value;
         const nextTranslations = buildCategoryTranslations(categoryName);
+        const categoryImageInput = document.getElementById('catImage');
+        const categoryImageUpload = document.getElementById('catImageUpload');
+        let nextImage = normalizeCategoryImagePath(categoryImageInput ? categoryImageInput.value : '');
+
+        if (categoryImageUpload && categoryImageUpload.files && categoryImageUpload.files[0]) {
+            try {
+                nextImage = await uploadImageToServer(categoryImageUpload.files[0]);
+                if (categoryImageInput) categoryImageInput.value = nextImage;
+            } catch (error) {
+                console.error('Category image upload failed:', error);
+                showToast('Category image upload failed.');
+                return;
+            }
+        }
 
         if (previousKey && previousKey !== categoryName) {
             menu.forEach((item) => {
@@ -1763,9 +1857,13 @@ function initForms() {
             });
             delete catEmojis[previousKey];
             delete categoryTranslations[previousKey];
+            delete categoryImages[previousKey];
         }
 
         catEmojis[categoryName] = nextEmoji;
+        if (nextImage) categoryImages[categoryName] = nextImage;
+        else delete categoryImages[categoryName];
+        window.categoryImages = categoryImages;
         categoryTranslations[categoryName] = nextTranslations;
         const saved = await saveAndRefresh();
         if (saved) {
@@ -2840,6 +2938,7 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
         catEmojis: applyStructure
             ? { ...(imported.catEmojis || {}) }
             : { ...catEmojis },
+        categoryImages: { ...categoryImages },
         categoryTranslations: applyStructure
             ? { ...(imported.categoryTranslations || {}) }
             : { ...categoryTranslations },
@@ -3079,6 +3178,7 @@ async function saveAndRefreshLegacy() {
     const payload = {
         menu: cleanMenu,
         catEmojis: catEmojis,
+        categoryImages: categoryImages,
         categoryTranslations: categoryTranslations,
         wifi: { ssid: restaurantConfig.wifi?.name || '', pass: restaurantConfig.wifi?.code || '' },
         social: restaurantConfig.socials || {},
@@ -3331,6 +3431,7 @@ async function saveAndRefresh() {
     const payload = {
         menu: cleanMenu,
         catEmojis: catEmojis,
+        categoryImages: categoryImages,
         categoryTranslations: categoryTranslations,
         wifi: { ssid: restaurantConfig.wifi?.name || '', pass: restaurantConfig.wifi?.code || '' },
         social: restaurantConfig.socials || {},
@@ -3448,7 +3549,13 @@ function populateCatDropdown() {
 }
 function renderCatTable() {
     const el = document.querySelector('#catTable tbody');
-    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => `<tr><td>${catEmojis[cat]}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`).join('');
+    if (el) el.innerHTML = Object.keys(catEmojis).map(cat => {
+        const image = typeof categoryImages?.[cat] === 'string' ? categoryImages[cat].trim() : '';
+        const media = image
+            ? `<span class="menu-builder-entry-thumb"><img src="${escapeHtml(image)}" alt="${escapeHtml(cat)}" loading="lazy" decoding="async"></span>`
+            : `${catEmojis[cat]}`;
+        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
+    }).join('');
 }
 function editCat(cat) {
     currentMenuWorkspaceStep = 'categories';
@@ -3461,9 +3568,14 @@ function editCat(cat) {
     if (catNameInput) catNameInput.value = cat;
     const catEmojiInput = document.getElementById('catEmoji');
     if (catEmojiInput) catEmojiInput.value = catEmojis[cat] || '';
+    const catImageInput = document.getElementById('catImage');
+    if (catImageInput) catImageInput.value = categoryImages?.[cat] || '';
+    const catImageUpload = document.getElementById('catImageUpload');
+    if (catImageUpload) catImageUpload.value = '';
     setCategoryTranslationFields(cat);
+    updateCategoryImagePreview();
 }
-function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Delete the products in this category first.'); delete catEmojis[cat]; delete categoryTranslations[cat]; saveAndRefresh(); }
+function deleteCat(cat) { if (menu.some(m => m.cat === cat)) return alert('Delete the products in this category first.'); delete catEmojis[cat]; delete categoryTranslations[cat]; delete categoryImages[cat]; window.categoryImages = categoryImages; saveAndRefresh(); }
 function initWifiForm() {
     const fields = {
         'wifiSSID': restaurantConfig.wifi.name,

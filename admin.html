@@ -493,6 +493,27 @@
             flex: 0 0 42px;
         }
 
+        .menu-builder-entry-thumb {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            box-shadow: 0 10px 20px rgba(255, 141, 8, 0.08);
+            background: #fff7eb;
+            flex: 0 0 42px;
+        }
+
+        .menu-builder-entry-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .menu-builder-entry-copy {
             display: grid;
             gap: 5px;
@@ -1217,6 +1238,47 @@
             display: grid;
             grid-template-columns: 1fr 100px;
             gap: 15px;
+        }
+
+        .category-image-field {
+            display: grid;
+            grid-template-columns: 112px minmax(0, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        .category-image-preview {
+            width: 112px;
+            aspect-ratio: 1;
+            border-radius: 22px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: linear-gradient(180deg, #fff7eb 0%, #fff1db 100%);
+            box-shadow: 0 14px 26px rgba(75, 47, 24, 0.08);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text2);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .category-image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .category-image-controls {
+            display: grid;
+            gap: 12px;
+        }
+
+        .category-image-upload {
+            display: grid;
+            gap: 8px;
         }
 
         .panel-soft {
@@ -3644,7 +3706,8 @@
             .menu-crud-modal-card .inline-check-grid,
             .menu-crud-modal-card .form-grid-2,
             .menu-crud-modal-card .form-grid-name-emoji,
-            .menu-crud-modal-card .multi-price-group {
+            .menu-crud-modal-card .multi-price-group,
+            .category-image-field {
                 grid-template-columns: 1fr !important;
                 gap: 10px;
             }
@@ -4089,6 +4152,22 @@
                     <div class="form-group">
                         <label data-i18n="admin.menu.default_description">Default Description</label>
                         <input type="text" id="itemDesc" placeholder="Used as the fallback when a translation is missing" data-i18n-placeholder="admin.menu.default_description_placeholder" required />
+                    </div>
+                    <div class="category-image-field">
+                        <div id="catImagePreview" class="category-image-preview">
+                            <img id="catImagePreviewImg" src="" alt="Category preview" style="display:none;">
+                            <span id="catImagePreviewFallback">Image</span>
+                        </div>
+                        <div class="category-image-controls">
+                            <div class="form-group">
+                                <label>Category Image URL / Path</label>
+                                <input type="text" id="catImage" placeholder="/uploads/category-drinks.webp" />
+                            </div>
+                            <div class="category-image-upload">
+                                <label for="catImageUpload">Upload category image</label>
+                                <input type="file" id="catImageUpload" accept="image/*" />
+                            </div>
+                        </div>
                     </div>
                     <details class="admin-disclosure">
                         <summary>

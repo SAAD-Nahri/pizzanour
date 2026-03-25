@@ -75,12 +75,14 @@ function canonicalMenuLookupKey(value) {
 window.whiteLabelStarterSeed = {
     menu: [],
     catEmojis: {},
+    categoryImages: {},
     categoryTranslations: {},
     superCategories: []
 };
 
 window.defaultMenu = [];
 window.defaultCatEmojis = {};
+window.defaultCategoryImages = {};
 window.defaultCategoryTranslations = {};
 window.defaultSuperCategories = [];
 
