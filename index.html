@@ -306,44 +306,6 @@
     </div>
   </section>
 
-  <!-- ORDER CONFIRMATION PAGE -->
-  <div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirm()"></div>
-  <div class="confirm-page" id="confirmPage">
-    <div class="confirm-top">
-      <button class="confirm-back" onclick="closeConfirm()" data-i18n="confirm_back">← Back</button>
-      <div class="confirm-cart-info"><span data-i18n="confirm_cart_label">Your cart</span> <strong id="confirmTotal">MAD 0</strong></div>
-    </div>
-    <div class="confirm-items" id="confirmItems"></div>
-    <div class="complement-section" id="complementSection">
-      <h3 data-i18n="confirm_complement_title">Complement your order</h3>
-      <div class="complement-scroll" id="complementScroll"></div>
-    </div>
-    <div class="service-section">
-      <p data-i18n="confirm_service_prompt">Select the type of service:</p>
-      <div class="service-btns">
-        <button class="svc-btn active" data-svc="onsite" onclick="selectService('onsite',this)">🍽️ <span data-i18n="service_onsite">On Site</span></button>
-        <button class="svc-btn" data-svc="takeaway" onclick="selectService('takeaway',this)">🛍️ <span data-i18n="service_takeaway">Take Away</span></button>
-        <button class="svc-btn" data-svc="delivery" onclick="selectService('delivery',this)">🚚 <span data-i18n="service_delivery">Delivery</span></button>
-      </div>
-      <div class="delivery-fields" id="deliveryFields" style="display:none">
-        <input id="cName" placeholder="Votre nom..." data-i18n-placeholder="confirm_name_placeholder" class="cf-input" />
-        <input id="cAddr" placeholder="Adresse de livraison..." data-i18n-placeholder="confirm_address_placeholder" class="cf-input" />
-        <input id="cPhone" placeholder="Numéro de téléphone..." data-i18n-placeholder="confirm_phone_placeholder" class="cf-input" />
-      </div>
-    </div>
-    <div class="confirm-footer">
-      <button class="wa-btn" onclick="sendWA()">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-          <path
-            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-          <path
-            d="M12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.122 1.533 5.859L.057 23.743a.75.75 0 0 0 .943.882l6.066-1.587A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.694-.498-5.25-1.369L2.5 21.75l1.133-4.146A9.953 9.953 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-        </svg>
-        <span data-i18n="confirm_whatsapp">Confirmer sur WhatsApp</span>
-      </button>
-    </div>
-  </div>
-
   <!-- FOOTER -->
   <footer class="footer" id="footer">
     <div class="footer-inner">
@@ -386,34 +348,6 @@
       <h2 data-i18n="social_title">Suivez-nous</h2>
       <div class="social-modal-list" id="modalSocialList">
         <!-- Social links will be injected here -->
-      </div>
-    </div>
-  </div>
-
-  <!-- PRODUCT DETAIL MODAL -->
-  <div class="product-overlay" id="productOverlay" onclick="closeProductModal()"></div>
-  <div class="product-modal" id="productModal">
-    <button class="product-modal-close" onclick="closeProductModal()">✕</button>
-    <div class="product-modal-grid">
-      <div class="product-modal-gallery">
-        <div class="main-img-wrap">
-          <img id="mainDetailImg" src="" alt="Product" width="960" height="960" decoding="async" />
-        </div>
-        <div class="thumb-strip" id="thumbStrip"></div>
-      </div>
-      <div class="product-modal-info">
-        <h2 id="detailName"></h2>
-        <p class="detail-desc" id="detailDesc"></p>
-        <div class="detail-price" id="detailPrice">MAD 0.00</div>
-
-        <div class="detail-ingredients" id="detailIngredientsWrap">
-          <h3 data-i18n="ingredients_label">Ingrédients</h3>
-          <ul id="detailIngredientsList"></ul>
-        </div>
-
-        <button class="detail-add-btn" id="detailAddBtn">
-          <span data-i18n="add_to_cart">AJOUTER AU PANIER</span>
-        </button>
       </div>
     </div>
   </div>
