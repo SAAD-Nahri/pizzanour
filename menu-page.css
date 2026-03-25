@@ -213,6 +213,16 @@
             padding-top: 18px;
         }
 
+        #menuNavigationView[data-mode='items'] {
+            --menu-subnav-top: calc(env(safe-area-inset-top, 0px) + 78px);
+            --menu-subnav-width: min(calc(100vw - 36px), 860px);
+            --menu-subnav-height: 60px;
+        }
+
+        #menuNavigationView[data-mode='items'] .menu-content-area {
+            padding-top: calc(var(--menu-subnav-height) + 22px);
+        }
+
         #menuNavigationView[data-mode='categories'] .cat-nav-wrapper {
             margin: 0;
             padding: 0;
@@ -222,13 +232,19 @@
         }
 
         #menuNavigationView[data-mode='items'] .cat-nav-wrapper {
-            top: 78px;
-            margin: 0 -18px 14px;
+            position: fixed;
+            top: var(--menu-subnav-top);
+            left: 50%;
+            transform: translateX(-50%);
+            width: var(--menu-subnav-width);
+            margin: 0;
             padding: 10px 0 12px;
             background: linear-gradient(180deg, rgba(251, 247, 240, 0.98) 0%, rgba(251, 247, 240, 0.92) 72%, rgba(251, 247, 240, 0.82) 100%);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 190, 92, 0.12);
             box-shadow: 0 16px 28px rgba(75, 47, 24, 0.06);
+            border-radius: 20px;
+            z-index: 180;
         }
 
         #menuNavigationView[data-mode='items'] .menu-section-title.subcat-title {
@@ -1208,14 +1224,19 @@
             }
 
             #menuNavigationView[data-mode='items'] .cat-nav-wrapper {
-                top: 70px;
-                margin: 0 -12px 12px;
+                top: calc(env(safe-area-inset-top, 0px) + 68px);
+                width: calc(100vw - 20px);
                 padding: 8px 0 10px;
+                border-radius: 18px;
             }
 
             #menuNavigationView[data-mode='items'] .cat-nav-scroll,
             #menuNavigationView[data-mode='items'] .cat-nav-scroll.is-visual-list {
                 padding: 0 12px;
+            }
+
+            #menuNavigationView[data-mode='items'] .menu-content-area {
+                padding-top: 86px;
             }
 
             .menu-subnav-track {
