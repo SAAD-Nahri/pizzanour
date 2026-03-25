@@ -517,6 +517,14 @@ function renderPromoCarousel() {
 function startPromoAutoSlide(container) {
     if (!container) return;
 
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        container.onmouseenter = null;
+        container.onmouseleave = null;
+        container.ontouchstart = null;
+        container.ontouchend = null;
+        return;
+    }
+
     let isPaused = false;
     container.onmouseenter = () => isPaused = true;
     container.onmouseleave = () => isPaused = false;

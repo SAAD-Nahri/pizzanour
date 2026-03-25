@@ -655,6 +655,7 @@
             flex-direction: column !important;
             gap: 12px !important;
             box-shadow: 0 22px 40px rgba(0, 0, 0, 0.32) !important;
+            z-index: 2 !important;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1077,6 +1078,11 @@
                 min-width: 184px !important;
                 flex-basis: 184px !important;
             }
+        }
+
+        .promo-add-vibrant {
+            position: relative;
+            z-index: 3;
         }
 
         /* ═══════════════════════ IMAGE GALLERY MODAL ═══════════════════════ */
@@ -1874,8 +1880,7 @@
             }
 
             .promo-nav-btn {
-                width: 34px;
-                height: 34px;
+                display: none !important;
             }
 
             .menu-content-area {
