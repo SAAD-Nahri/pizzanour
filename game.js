@@ -99,15 +99,19 @@ async function openGameModal() {
     await ensureGameStylesheet();
     ensureGameModalShell();
     showGameStart();
+    const modal = document.getElementById('gameModal');
     document.getElementById('gameOverlay').classList.add('open');
-    document.getElementById('gameModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    modal.classList.add('open');
+    modal.scrollTop = 0;
+    document.documentElement.classList.add('game-modal-open');
+    document.body.classList.add('game-modal-open');
 }
 
 function closeGameModal() {
     document.getElementById('gameOverlay')?.classList.remove('open');
     document.getElementById('gameModal')?.classList.remove('open');
-    document.body.style.overflow = '';
+    document.documentElement.classList.remove('game-modal-open');
+    document.body.classList.remove('game-modal-open');
 }
 
 function updatePlayerSlider(val) {
