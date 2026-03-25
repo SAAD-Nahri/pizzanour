@@ -16,9 +16,11 @@ const build = createBuildFingerprint([
   path.join(__dirname, "website-server.js"),
   path.join(__dirname, "index.html"),
   path.join(__dirname, "menu.html"),
+  path.join(__dirname, "menu-page.css"),
   path.join(__dirname, "app.js"),
   path.join(__dirname, "menu.js"),
   path.join(__dirname, "shared.js"),
+  path.join(__dirname, "shared-public.js"),
   path.join(__dirname, "style.css")
 ]);
 
