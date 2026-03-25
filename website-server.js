@@ -28,6 +28,172 @@ app.use(compression({
   threshold: 1024
 }));
 
+function asPublicString(value, maxLength = 8192) {
+  return typeof value === "string" ? value.slice(0, maxLength) : "";
+}
+
+function sanitizePublicStringArray(values, maxItems = 12, maxLength = 8192) {
+  return Array.isArray(values)
+    ? values
+      .filter((value) => typeof value === "string" && value.trim())
+      .slice(0, maxItems)
+      .map((value) => value.trim().slice(0, maxLength))
+    : [];
+}
+
+function sanitizePublicTranslations(input) {
+  const source = input && typeof input === "object" ? input : {};
+  return {
+    fr: {
+      name: asPublicString(source.fr?.name, 160),
+      desc: asPublicString(source.fr?.desc, 2000)
+    },
+    en: {
+      name: asPublicString(source.en?.name, 160),
+      desc: asPublicString(source.en?.desc, 2000)
+    },
+    ar: {
+      name: asPublicString(source.ar?.name, 160),
+      desc: asPublicString(source.ar?.desc, 2000)
+    }
+  };
+}
+
+function sanitizePublicMenuItem(item) {
+  const source = item && typeof item === "object" ? item : {};
+  const images = sanitizePublicStringArray(source.images, 8);
+  return {
+    id: typeof source.id === "string" || Number.isFinite(source.id) ? source.id : "",
+    cat: asPublicString(source.cat, 120),
+    name: asPublicString(source.name, 160),
+    desc: asPublicString(source.desc, 2000),
+    price: Number.isFinite(Number(source.price)) ? Number(source.price) : 0,
+    badge: asPublicString(source.badge, 64),
+    img: asPublicString(source.img, 8192) || images[0] || "",
+    images,
+    ingredients: sanitizePublicStringArray(source.ingredients, 24, 160),
+    translations: sanitizePublicTranslations(source.translations),
+    likes: Number.isFinite(Number(source.likes)) ? Number(source.likes) : 0,
+    featured: Boolean(source.featured),
+    available: source.available !== false,
+    hasSizes: Boolean(source.hasSizes),
+    sizes: source.sizes && typeof source.sizes === "object" ? source.sizes : (Array.isArray(source.sizes) ? source.sizes : []),
+    discount: Number.isFinite(Number(source.discount)) ? Number(source.discount) : 0
+  };
+}
+
+function sanitizePublicBranding(input) {
+  const source = input && typeof input === "object" ? input : {};
+  return {
+    presetId: asPublicString(source.presetId, 40),
+    restaurantName: asPublicString(source.restaurantName, 160),
+    shortName: asPublicString(source.shortName, 80),
+    tagline: asPublicString(source.tagline, 160),
+    logoMark: asPublicString(source.logoMark, 16),
+    primaryColor: asPublicString(source.primaryColor, 16),
+    secondaryColor: asPublicString(source.secondaryColor, 16),
+    accentColor: asPublicString(source.accentColor, 16),
+    surfaceColor: asPublicString(source.surfaceColor, 16),
+    surfaceMuted: asPublicString(source.surfaceMuted, 16),
+    textColor: asPublicString(source.textColor, 16),
+    textMuted: asPublicString(source.textMuted, 16),
+    menuBackground: asPublicString(source.menuBackground, 16),
+    menuSurface: asPublicString(source.menuSurface, 16),
+    heroImage: asPublicString(source.heroImage, 8192),
+    heroSlides: sanitizePublicStringArray(source.heroSlides, 3, 8192),
+    logoImage: asPublicString(source.logoImage, 8192)
+  };
+}
+
+function sanitizePublicSuperCategory(item) {
+  const source = item && typeof item === "object" ? item : {};
+  return {
+    id: asPublicString(source.id, 120),
+    name: asPublicString(source.name, 160),
+    desc: asPublicString(source.desc, 240),
+    emoji: asPublicString(source.emoji, 16),
+    time: asPublicString(source.time, 64),
+    cats: sanitizePublicStringArray(source.cats, 40, 120),
+    translations: sanitizePublicTranslations(source.translations)
+  };
+}
+
+function sanitizePublicHoursRow(item) {
+  const source = item && typeof item === "object" ? item : {};
+  return {
+    day: asPublicString(source.day, 64),
+    open: asPublicString(source.open, 64),
+    close: asPublicString(source.close, 64),
+    i18n: asPublicString(source.i18n, 120),
+    highlight: Boolean(source.highlight)
+  };
+}
+
+function buildPublicSitePayload(data) {
+  const source = data && typeof data === "object" ? data : {};
+  return {
+    menu: Array.isArray(source.menu) ? source.menu.map(sanitizePublicMenuItem) : [],
+    catEmojis: source.catEmojis && typeof source.catEmojis === "object" ? source.catEmojis : {},
+    wifi: {
+      ssid: asPublicString(source.wifi?.ssid || source.wifi?.name, 120),
+      pass: asPublicString(source.wifi?.pass || source.wifi?.code, 120)
+    },
+    social: source.social && typeof source.social === "object" ? source.social : {},
+    branding: sanitizePublicBranding(source.branding),
+    contentTranslations: source.contentTranslations && typeof source.contentTranslations === "object"
+      ? source.contentTranslations
+      : {},
+    promoId: typeof source.promoId === "string" || Number.isFinite(source.promoId) ? source.promoId : null,
+    promoIds: Array.isArray(source.promoIds) ? source.promoIds : [],
+    superCategories: Array.isArray(source.superCategories) ? source.superCategories.map(sanitizePublicSuperCategory) : [],
+    hours: Array.isArray(source.hours) ? source.hours.map(sanitizePublicHoursRow) : [],
+    hoursNote: asPublicString(source.hoursNote, 240),
+    gallery: sanitizePublicStringArray(source.gallery, 24, 8192),
+    guestExperience: source.guestExperience && typeof source.guestExperience === "object"
+      ? {
+        paymentMethods: sanitizePublicStringArray(source.guestExperience.paymentMethods, 8, 40),
+        facilities: sanitizePublicStringArray(source.guestExperience.facilities, 12, 40)
+      }
+      : { paymentMethods: [], facilities: [] },
+    sectionVisibility: source.sectionVisibility && typeof source.sectionVisibility === "object"
+      ? source.sectionVisibility
+      : {},
+    sectionOrder: sanitizePublicStringArray(source.sectionOrder, 12, 40),
+    landing: source.landing && typeof source.landing === "object"
+      ? {
+        location: source.landing.location && typeof source.landing.location === "object"
+          ? {
+            address: asPublicString(source.landing.location.address, 240),
+            url: asPublicString(source.landing.location.url, 2048)
+          }
+          : null,
+        phone: asPublicString(source.landing.phone, 120)
+      }
+      : { location: null, phone: "" },
+    categoryTranslations: source.categoryTranslations && typeof source.categoryTranslations === "object"
+      ? source.categoryTranslations
+      : {}
+  };
+}
+
+let cachedPublicPayload = {
+  version: "",
+  json: ""
+};
+
+function getCachedPublicPayload(version) {
+  if (cachedPublicPayload.version === version && cachedPublicPayload.json) {
+    return cachedPublicPayload;
+  }
+
+  const payload = buildPublicSitePayload(readData());
+  cachedPublicPayload = {
+    version,
+    json: JSON.stringify(payload)
+  };
+  return cachedPublicPayload;
+}
+
 const DENY_PUBLIC_FILES = new Set([
   "/admin.html",
   "/admin.js",
@@ -57,7 +223,7 @@ app.get("/build.json", (_req, res) => {
 });
 
 app.get("/api/data", (req, res) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Cache-Control", "private, max-age=0, must-revalidate");
   const version = getDataVersion();
   const etag = `W/"${version}"`;
   res.setHeader("ETag", etag);
@@ -66,7 +232,8 @@ app.get("/api/data", (req, res) => {
     res.status(304).end();
     return;
   }
-  res.json(readData());
+  const payload = getCachedPublicPayload(version);
+  res.type("application/json").send(payload.json);
 });
 
 app.get("/uploads/.thumbs/:file", createThumbnailRequestHandler());

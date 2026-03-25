@@ -59,10 +59,18 @@ function persistCurrentMenuSnapshot(version = '') {
             restaurantData: {
                 superCategories: Array.isArray(window.restaurantConfig?.superCategories) ? window.restaurantConfig.superCategories : [],
                 categoryTranslations: window.restaurantConfig?.categoryTranslations || {},
-                wifi: window.restaurantConfig?.wifi || {},
-                socials: window.restaurantConfig?.socials || {},
-                location: window.restaurantConfig?.location || {},
-                phone: window.restaurantConfig?.phone || '',
+                wifi: {
+                    ssid: window.restaurantConfig?.wifi?.ssid || window.restaurantConfig?.wifi?.name || '',
+                    pass: window.restaurantConfig?.wifi?.pass || window.restaurantConfig?.wifi?.code || ''
+                },
+                social: window.restaurantConfig?.socials || {},
+                guestExperience: window.restaurantConfig?.guestExperience || {},
+                sectionVisibility: window.restaurantConfig?.sectionVisibility || {},
+                sectionOrder: Array.isArray(window.restaurantConfig?.sectionOrder) ? window.restaurantConfig.sectionOrder : [],
+                landing: {
+                    location: window.restaurantConfig?.location || {},
+                    phone: window.restaurantConfig?.phone || ''
+                },
                 gallery: Array.isArray(window.restaurantConfig?.gallery) ? window.restaurantConfig.gallery : [],
                 hours: Array.isArray(window.restaurantConfig?._hours) ? window.restaurantConfig._hours : [],
                 hoursNote: typeof window.restaurantConfig?._hoursNote === 'string' ? window.restaurantConfig._hoursNote : '',
@@ -95,13 +103,23 @@ function applyMenuDataSnapshot(snapshot) {
     }
 
     if (typeof window.mergeRestaurantConfig === 'function') {
+        const snapshotWifi = source.wifi && typeof source.wifi === 'object'
+            ? {
+                name: source.wifi.name || source.wifi.ssid || '',
+                code: source.wifi.code || source.wifi.pass || ''
+            }
+            : window.restaurantConfig.wifi;
+        const snapshotLanding = source.landing && typeof source.landing === 'object' ? source.landing : {};
         window.mergeRestaurantConfig({
             superCategories: Array.isArray(source.superCategories) ? source.superCategories : window.restaurantConfig.superCategories,
             categoryTranslations: source.categoryTranslations || window.restaurantConfig.categoryTranslations,
-            wifi: source.wifi || window.restaurantConfig.wifi,
-            socials: source.socials || window.restaurantConfig.socials,
-            location: source.location || window.restaurantConfig.location,
-            phone: typeof source.phone === 'string' ? source.phone : window.restaurantConfig.phone,
+            wifi: snapshotWifi,
+            socials: source.social || source.socials || window.restaurantConfig.socials,
+            guestExperience: source.guestExperience || window.restaurantConfig.guestExperience,
+            sectionVisibility: source.sectionVisibility || window.restaurantConfig.sectionVisibility,
+            sectionOrder: source.sectionOrder || window.restaurantConfig.sectionOrder,
+            location: snapshotLanding.location || source.location || window.restaurantConfig.location,
+            phone: typeof snapshotLanding.phone === 'string' ? snapshotLanding.phone : (typeof source.phone === 'string' ? source.phone : window.restaurantConfig.phone),
             gallery: Array.isArray(source.gallery) ? source.gallery : window.restaurantConfig.gallery,
             _hours: Array.isArray(source.hours) ? source.hours : window.restaurantConfig._hours,
             _hoursNote: typeof source.hoursNote === 'string' ? source.hoursNote : window.restaurantConfig._hoursNote,
@@ -126,7 +144,6 @@ async function fetchPublicDataWithTimeout() {
 
     try {
         return await fetch('/api/data', {
-            cache: 'no-store',
             headers: lastDataVersion ? { 'If-None-Match': lastDataVersion } : undefined,
             signal: controller ? controller.signal : undefined
         });

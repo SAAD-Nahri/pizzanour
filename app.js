@@ -48,6 +48,23 @@ let serviceType = 'onsite';
 let currentSlide = 0;
 const PUBLIC_DATA_TIMEOUT_MS = 8000;
 const MENU_SNAPSHOT_STORAGE_KEY = 'foody_public_menu_snapshot_v1';
+let homepageSyncInFlight = null;
+let homepageInitialized = false;
+let homepageSliderStarted = false;
+let homepageScrollSetupDone = false;
+let lastPublicDataVersion = '';
+
+function readStoredMenuSnapshot() {
+    try {
+        if (!window.localStorage) return null;
+        const raw = window.localStorage.getItem(MENU_SNAPSHOT_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (_error) {
+        return null;
+    }
+}
 
 function t(key, fallback, vars) {
     if (typeof window.formatTranslation === 'function') {
@@ -110,6 +127,50 @@ function applySiteData(data) {
     }
 }
 
+function applySiteDataSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object') return false;
+
+    const source = snapshot.restaurantData || {};
+    const snapshotWifi = source.wifi && typeof source.wifi === 'object'
+        ? {
+            ssid: source.wifi.ssid || source.wifi.name || '',
+            pass: source.wifi.pass || source.wifi.code || ''
+        }
+        : {};
+    const snapshotLanding = source.landing && typeof source.landing === 'object'
+        ? source.landing
+        : {
+            location: source.location || {},
+            phone: source.phone || ''
+        };
+
+    applySiteData({
+        menu: Array.isArray(snapshot.menu) ? snapshot.menu : defaultMenu,
+        catEmojis: snapshot.catEmojis || defaultCatEmojis,
+        wifi: snapshotWifi,
+        social: source.social || source.socials || defaultSocialLinks,
+        guestExperience: source.guestExperience || defaultGuestExperience,
+        sectionVisibility: source.sectionVisibility || defaultSectionVisibility,
+        sectionOrder: source.sectionOrder || defaultSectionOrder,
+        promoIds: Array.isArray(snapshot.promoIds) ? snapshot.promoIds : [],
+        promoId: Array.isArray(snapshot.promoIds) && snapshot.promoIds.length === 1 ? snapshot.promoIds[0] : null,
+        gallery: Array.isArray(source.gallery) ? source.gallery : [],
+        hours: Array.isArray(source.hours) ? source.hours : [],
+        hoursNote: typeof source.hoursNote === 'string' ? source.hoursNote : '',
+        superCategories: Array.isArray(source.superCategories) ? source.superCategories : [],
+        categoryTranslations: source.categoryTranslations || {},
+        branding: source.branding || {},
+        contentTranslations: source.contentTranslations || {},
+        landing: snapshotLanding
+    });
+
+    if (typeof snapshot.version === 'string' && snapshot.version) {
+        lastPublicDataVersion = snapshot.version;
+    }
+
+    return true;
+}
+
 function persistMenuSnapshotFromSiteData(data, version = '') {
     try {
         if (!window.localStorage) return;
@@ -121,10 +182,18 @@ function persistMenuSnapshotFromSiteData(data, version = '') {
             restaurantData: {
                 superCategories: Array.isArray(window.restaurantConfig?.superCategories) ? window.restaurantConfig.superCategories : [],
                 categoryTranslations: window.restaurantConfig?.categoryTranslations || {},
-                wifi: window.restaurantConfig?.wifi || {},
-                socials: window.restaurantConfig?.socials || {},
-                location: window.restaurantConfig?.location || {},
-                phone: window.restaurantConfig?.phone || '',
+                wifi: {
+                    ssid: window.restaurantConfig?.wifi?.ssid || window.restaurantConfig?.wifi?.name || '',
+                    pass: window.restaurantConfig?.wifi?.pass || window.restaurantConfig?.wifi?.code || ''
+                },
+                social: window.restaurantConfig?.socials || {},
+                guestExperience: guestExperience,
+                sectionVisibility: sectionVisibility,
+                sectionOrder: sectionOrder,
+                landing: {
+                    location: window.restaurantConfig?.location || {},
+                    phone: window.restaurantConfig?.phone || ''
+                },
                 gallery: Array.isArray(window.restaurantConfig?.gallery) ? window.restaurantConfig.gallery : [],
                 hours: Array.isArray(window.restaurantConfig?._hours) ? window.restaurantConfig._hours : [],
                 hoursNote: typeof window.restaurantConfig?._hoursNote === 'string' ? window.restaurantConfig._hoursNote : '',
@@ -138,6 +207,9 @@ function persistMenuSnapshotFromSiteData(data, version = '') {
 }
 
 async function loadSiteData() {
+    if (homepageSyncInFlight) return homepageSyncInFlight;
+
+    homepageSyncInFlight = (async () => {
     try {
         const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
         const timeoutId = controller
@@ -146,39 +218,57 @@ async function loadSiteData() {
         let res;
         try {
             res = await fetch('/api/data', {
-                cache: 'no-store',
+                headers: lastPublicDataVersion ? { 'If-None-Match': lastPublicDataVersion } : undefined,
                 signal: controller ? controller.signal : undefined
             });
         } finally {
             if (timeoutId) clearTimeout(timeoutId);
         }
+        if (res.status === 304) return;
         if (!res.ok) throw new Error('Server returned ' + res.status);
         const data = await res.json();
         const version = res.headers.get('etag') || res.headers.get('x-data-version') || '';
         applySiteData(data);
         persistMenuSnapshotFromSiteData(data, version);
+        lastPublicDataVersion = version || lastPublicDataVersion;
+        if (homepageInitialized) {
+            refreshHomepageUI();
+        }
     } catch (error) {
         console.error('Failed to load site data:', error);
-        applySiteData({
-            menu: defaultMenu,
-            catEmojis: defaultCatEmojis,
-            wifi: defaultWifiData,
-            social: defaultSocialLinks,
-            guestExperience: defaultGuestExperience,
-            sectionVisibility: defaultSectionVisibility,
-            sectionOrder: defaultSectionOrder,
-            promoId: null
-        });
+        if (!homepageInitialized) {
+            applySiteData({
+                menu: defaultMenu,
+                catEmojis: defaultCatEmojis,
+                wifi: defaultWifiData,
+                social: defaultSocialLinks,
+                guestExperience: defaultGuestExperience,
+                sectionVisibility: defaultSectionVisibility,
+                sectionOrder: defaultSectionOrder,
+                promoId: null
+            });
+        }
+    } finally {
+        homepageSyncInFlight = null;
     }
+    })();
+
+    return homepageSyncInFlight;
 }
 
 // INIT
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadSiteData();
+document.addEventListener('DOMContentLoaded', () => {
+    const snapshot = readStoredMenuSnapshot();
+    if (snapshot) {
+        applySiteDataSnapshot(snapshot);
+    }
     initApp();
+    requestAnimationFrame(() => {
+        loadSiteData();
+    });
 });
 
-function initApp() {
+function refreshHomepageUI() {
     categories = [...new Set(menu.map(m => m.cat))];
     if (document.getElementById('catScroll')) renderCatNav();
     if (document.getElementById('dropdownMenu')) renderDropdown();
@@ -189,11 +279,24 @@ function initApp() {
     renderGallery();
     renderPaymentFacilities();
     renderSectionLayout();
-    if (document.getElementById('menuWrap')) setupScroll();
-    startSlider();
     updateWifiUI();
     updateWhatsAppLinks();
     renderLocation();
+    if (typeof window.applyBranding === 'function') {
+        window.applyBranding();
+    }
+}
+
+function initApp() {
+    refreshHomepageUI();
+    if (document.getElementById('menuWrap') && !homepageScrollSetupDone) {
+        setupScroll();
+        homepageScrollSetupDone = true;
+    }
+    if (!homepageSliderStarted) {
+        startSlider();
+        homepageSliderStarted = true;
+    }
 
     document.querySelectorAll('.slide-cta').forEach((cta) => {
         const goToMenu = (event) => {
@@ -225,6 +328,8 @@ function initApp() {
             }
         });
     });
+
+    homepageInitialized = true;
 }
 
 // ═══════════════════════ DYNAMIC HOURS ═══════════════════════
