@@ -6725,6 +6725,8 @@ body:not(.menu-page) {
 }
 
 body:not(.menu-page) .top-bar {
+  position: relative;
+  z-index: 360;
   background: rgba(16, 18, 24, 0.88);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px);
@@ -7865,6 +7867,7 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .top-bar {
+    z-index: 360;
     background: linear-gradient(180deg, rgba(22, 24, 30, 0.97) 0%, rgba(22, 24, 30, 0.91) 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 12px 28px rgba(12, 16, 24, 0.18);
