@@ -273,6 +273,7 @@ body.menu-page {
   position: relative;
   display: inline-block;
   flex-shrink: 0;
+  z-index: 4001;
 }
 
 .lang-drop-btn {
@@ -320,7 +321,7 @@ body.menu-page {
   visibility: hidden;
   transform: translateY(10px);
   transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  z-index: 1100;
+  z-index: 4100;
 }
 
 .lang-options.open {
@@ -6745,6 +6746,7 @@ body:not(.menu-page) .header {
   position: sticky;
   top: 0;
   z-index: 330;
+  margin-bottom: -86px;
   background: transparent;
   border-bottom: none;
 }
@@ -7961,6 +7963,7 @@ body:not(.menu-page) .footer-copy {
   body:not(.menu-page) .header {
     top: 0;
     z-index: 330;
+    margin-bottom: -78px;
     background: transparent;
     border-bottom: 0;
   }
