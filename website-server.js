@@ -241,6 +241,13 @@ function buildPublicHomePayload(data) {
   };
 }
 
+function sendBuiltOrSourceHtml(res, fileName) {
+  const builtPath = path.join(publicBuildDir, fileName);
+  const sourcePath = path.join(__dirname, fileName);
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.sendFile(fs.existsSync(builtPath) ? builtPath : sourcePath);
+}
+
 let cachedPublicPayload = {
   version: "",
   json: ""
@@ -350,8 +357,11 @@ app.get(Array.from(PUBLIC_BUILD_FILES), (req, res, next) => {
 });
 
 app.get("/", (_req, res) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-  res.sendFile(path.join(__dirname, "index.html"));
+  sendBuiltOrSourceHtml(res, "index.html");
+});
+
+app.get("/menu.html", (_req, res) => {
+  sendBuiltOrSourceHtml(res, "menu.html");
 });
 
 app.use((req, res, next) => {
