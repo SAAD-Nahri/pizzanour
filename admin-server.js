@@ -15,6 +15,7 @@ const {
   setStaticAssetHeaders,
   setSessionCookie
 } = require("./server-common");
+const { createThumbnailRequestHandler, ensureThumbnailFile } = require("./image-thumbnails");
 const { ensureStorage, readData, resetToBundledData, uploadsDir, writeData } = require("./site-store");
 const {
   buildProductRecipeKeyFromMenuItem,
@@ -2914,9 +2915,15 @@ app.post("/api/upload", requireAuth, (req, res, next) => {
       return;
     }
 
+    ensureThumbnailFile(req.file.filename, `${req.file.filename}.webp`).catch((thumbnailError) => {
+      console.warn("Thumbnail generation failed:", thumbnailError);
+    });
+
     res.json({ ok: true, url: `/uploads/${req.file.filename}` });
   });
 });
+
+app.get("/uploads/.thumbs/:file", createThumbnailRequestHandler());
 
 app.use("/uploads", express.static(uploadsDir, {
   immutable: true,

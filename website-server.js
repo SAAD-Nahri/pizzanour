@@ -6,6 +6,7 @@ const {
   parsePort,
   setStaticAssetHeaders
 } = require("./server-common");
+const { createThumbnailRequestHandler } = require("./image-thumbnails");
 const { ensureStorage, getDataVersion, readData, uploadsDir } = require("./site-store");
 
 const app = express();
@@ -62,6 +63,8 @@ app.get("/api/data", (req, res) => {
   }
   res.json(readData());
 });
+
+app.get("/uploads/.thumbs/:file", createThumbnailRequestHandler());
 
 app.use("/uploads", express.static(uploadsDir, {
   immutable: true,

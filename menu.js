@@ -289,6 +289,15 @@ function escapeHtmlAttr(value) {
         .replace(/>/g, '&gt;');
 }
 
+function getMenuCardImageSrc(src) {
+    const raw = String(src ?? '').trim();
+    if (!raw.startsWith('/uploads/')) return raw;
+    if (!/\.(jpe?g|png|webp|avif)$/i.test(raw)) return raw;
+    const filename = raw.split('/').pop();
+    if (!filename) return raw;
+    return `/uploads/.thumbs/${filename}.webp`;
+}
+
 
 let navigationStack = []; // stack: 'landing', 'supercats', 'subcats:NAME', 'items:CAT'
 let currentSuperCat = null;
@@ -332,6 +341,12 @@ function loadDeferredMenuImage(img) {
 
     img.dataset.loaded = '1';
     img.onerror = () => {
+        const originalSrc = img.dataset.originalSrc;
+        if (originalSrc) {
+            img.dataset.originalSrc = '';
+            img.src = originalSrc;
+            return;
+        }
         img.onerror = null;
         const fallback = document.createElement('span');
         fallback.className = 'emoji-placeholder';
@@ -1120,11 +1135,15 @@ function renderMenu(categoryFilter = null) {
 function imgTag(item, options = {}) {
     const { defer = false } = options;
     const src = (item.images && item.images.length > 0) ? item.images[0] : item.img;
+    const optimizedSrc = getMenuCardImageSrc(src);
     const safeFallbackEmoji = catEmojis[item.cat] || MENU_UI_ICONS.plate;
-    if (src && defer) {
-        return `<img class="menu-deferred-img" data-menu-src="${escapeHtmlAttr(src)}" data-fallback-emoji="${escapeHtmlAttr(safeFallbackEmoji)}" alt="${escapeHtmlAttr(window.getLocalizedMenuName(item))}" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low">`;
+    const originalSrcAttr = optimizedSrc && src && optimizedSrc !== src
+        ? ` data-original-src="${escapeHtmlAttr(src)}"`
+        : '';
+    if (optimizedSrc && defer) {
+        return `<img class="menu-deferred-img" data-menu-src="${escapeHtmlAttr(optimizedSrc)}"${originalSrcAttr} data-fallback-emoji="${escapeHtmlAttr(safeFallbackEmoji)}" alt="${escapeHtmlAttr(window.getLocalizedMenuName(item))}" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low">`;
     }
-    if (src) return `<img src="${escapeHtmlAttr(src)}" alt="${escapeHtmlAttr(window.getLocalizedMenuName(item))}" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'), { className: 'emoji-placeholder', textContent: ${JSON.stringify(safeFallbackEmoji)} }))">`;
+    if (optimizedSrc) return `<img src="${escapeHtmlAttr(optimizedSrc)}"${originalSrcAttr} alt="${escapeHtmlAttr(window.getLocalizedMenuName(item))}" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low" onerror="if(this.dataset.originalSrc){const next=this.dataset.originalSrc; this.dataset.originalSrc=''; this.src=next; return;} this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'), { className: 'emoji-placeholder', textContent: ${JSON.stringify(safeFallbackEmoji)} }))">`;
     return `<span class="emoji-placeholder">${safeFallbackEmoji}</span>`;
 }
 
