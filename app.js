@@ -51,7 +51,7 @@ let homepageSliderStarted = false;
 let lastPublicDataVersion = '';
 let homepageDeferredRenderHandle = null;
 let homepageDeferredSectionsReady = false;
-let eventModalStylesheetPromise = null;
+let eventBookingScriptPromise = null;
 
 function scheduleLowPriorityTask(callback, timeout = 1200) {
     if (typeof window.requestIdleCallback === 'function') {
@@ -248,25 +248,32 @@ function scheduleDeferredHomepageSections() {
     });
 }
 
-function ensureEventModalStylesheet() {
-    if (document.getElementById('eventModalStylesheet')) {
+function ensureEventBookingScript() {
+    if (window.__eventBookingReady) {
         return Promise.resolve();
     }
-    if (eventModalStylesheetPromise) {
-        return eventModalStylesheetPromise;
+    if (eventBookingScriptPromise) {
+        return eventBookingScriptPromise;
     }
 
-    eventModalStylesheetPromise = new Promise((resolve, reject) => {
-        const link = document.createElement('link');
-        link.id = 'eventModalStylesheet';
-        link.rel = 'stylesheet';
-        link.href = 'event-modal.css';
-        link.onload = () => resolve();
-        link.onerror = () => reject(new Error('event_modal_css_failed'));
-        document.head.appendChild(link);
+    eventBookingScriptPromise = new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-event-booking-script="true"]');
+        if (existing) {
+            existing.addEventListener('load', () => resolve(), { once: true });
+            existing.addEventListener('error', () => reject(new Error('event_booking_js_failed')), { once: true });
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'event-booking.js';
+        script.defer = true;
+        script.setAttribute('data-event-booking-script', 'true');
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('event_booking_js_failed'));
+        document.head.appendChild(script);
     });
 
-    return eventModalStylesheetPromise;
+    return eventBookingScriptPromise;
 }
 
 async function loadSiteData() {
@@ -894,83 +901,31 @@ function copyWifi() {
     });
 }
 
-// ═══════════════════════ EVENT BOOKING ═══════════════════════
-let currentEventType = '';
-
-async function openEventModal(type) {
-    currentEventType = type;
-    const overlay = document.getElementById('eventBookingOverlay');
-    const modal = document.getElementById('eventBookingModal');
-    const title = document.getElementById('eventBookingTitle');
-    const icon = document.getElementById('eventBookingIcon');
-
-    if (!modal || !overlay) return;
-
+// Event booking is lazy-loaded to keep homepage boot lighter.
+window.openEventModal = async function openEventModal(type) {
     try {
-        await ensureEventModalStylesheet();
+        await ensureEventBookingScript();
+        if (typeof window.__eventBookingOpen === 'function') {
+            window.__eventBookingOpen(type);
+        }
     } catch (error) {
-        console.error('Failed to load event modal stylesheet:', error);
+        console.error('Failed to load event booking flow:', error);
     }
+};
 
-    // Reset inputs for each new opening
-    const nameInput = document.getElementById('eventCustName');
-    const phoneInput = document.getElementById('eventCustPhone');
-    if (nameInput) nameInput.value = '';
-    if (phoneInput) phoneInput.value = '';
-
-    title.textContent = t('event_booking_title_prefix', `Réserver : ${type}`, { type });
-
-    // Set dynamic icons based on type
-    const icons = {
-        'Anniversaire': '🎂',
-        'Réunion Familiale': '👨‍👩‍👧‍👦',
-        'Événement Corporate': '🏢',
-        'Fête Privée': '🎉'
-    };
-    icon.textContent = icons[type] || '📅';
-
-    overlay.classList.add('open');
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeEventModal() {
-    document.getElementById('eventBookingOverlay').classList.remove('open');
-    document.getElementById('eventBookingModal').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-function sendEventWA() {
-    const name = document.getElementById('eventCustName').value.trim();
-    const phone = document.getElementById('eventCustPhone').value.trim();
-
-    if (!name) {
-        alert(t('event_booking_name_required', 'Veuillez entrer votre nom.'));
-        document.getElementById('eventCustName').focus();
-        return;
+window.closeEventModal = function closeEventModal() {
+    if (typeof window.__eventBookingClose === 'function') {
+        window.__eventBookingClose();
     }
-    if (!phone) {
-        alert(t('event_booking_phone_required', 'Veuillez entrer votre numéro de téléphone.'));
-        document.getElementById('eventCustPhone').focus();
-        return;
-    }
+};
 
-    const waNum = typeof window.getWhatsAppNumber === 'function'
-        ? window.getWhatsAppNumber()
-        : String(socialLinks.whatsapp || '').replace(/\D/g, '');
-    if (!waNum) {
-        alert(window.getTranslation('social_empty', 'Aucun lien configuré.'));
-        return;
+window.sendEventWA = async function sendEventWA() {
+    try {
+        await ensureEventBookingScript();
+        if (typeof window.__eventBookingSend === 'function') {
+            window.__eventBookingSend();
+        }
+    } catch (error) {
+        console.error('Failed to load event booking flow:', error);
     }
-    const restaurantName = typeof window.getRestaurantShortName === 'function'
-        ? window.getRestaurantShortName()
-        : 'Restaurant';
-    let msg = `✨ *${t('wa_event_title', 'RÉSERVATION ÉVÉNEMENT – {restaurant}', { restaurant: restaurantName.toUpperCase() })}*\n━━━━━━━━━━━━━━━━\n`;
-    msg += `🏢 *${t('ticket_type_label', 'Type')}:* ${currentEventType}\n`;
-    msg += `👤 *${t('wa_client_label', 'Client')}:* ${name}\n`;
-    msg += `📱 *${t('wa_phone_label', 'Tél')}:* ${phone}\n`;
-    msg += `━━━━━━━━━━━━━━━━\n\n🙏 ${t('wa_contact_confirm', 'Merci de me contacter pour confirmer les détails !')}`;
-
-    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
-    closeEventModal();
-}
+};
