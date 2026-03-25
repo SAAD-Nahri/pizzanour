@@ -7,8 +7,8 @@
 
 // Persistence Layer
 const defaultWifiData = {
-    ssid: window.defaultConfig?.wifi?.name || 'Restaurant WiFi',
-    pass: window.defaultConfig?.wifi?.code || 'Ask the team'
+    ssid: window.defaultConfig?.wifi?.name || '',
+    pass: window.defaultConfig?.wifi?.code || ''
 };
 const defaultSocialLinks = { ...(window.defaultConfig?.socials || {}), whatsapp: window.defaultConfig?.socials?.whatsapp || '' };
 const defaultGuestExperience = {
@@ -211,9 +211,15 @@ function updateWifiUI() {
     const ssidEl = document.getElementById('wifiSSIDDisplay');
     const passEl = document.getElementById('wifiPass');
     const qrEl = document.getElementById('wifiQR');
-    if (ssidEl) ssidEl.innerHTML = `<strong>${t('wifi_ssid_label', 'SSID')}:</strong> ${wifiData.ssid}`;
-    if (passEl) passEl.textContent = wifiData.pass;
-    if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WIFI:S:${encodeURIComponent(wifiData.ssid)};T:WPA;P:${encodeURIComponent(wifiData.pass)};;`;
+    const wifiSsid = (typeof wifiData?.ssid === 'string' && wifiData.ssid.trim())
+        ? wifiData.ssid.trim()
+        : t('wifi_default_name', 'Restaurant WiFi');
+    const wifiPass = (typeof wifiData?.pass === 'string' && wifiData.pass.trim())
+        ? wifiData.pass.trim()
+        : t('wifi_default_code_help', 'Ask the team');
+    if (ssidEl) ssidEl.innerHTML = `<strong>${t('wifi_ssid_label', 'SSID')}:</strong> ${wifiSsid}`;
+    if (passEl) passEl.textContent = wifiPass;
+    if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WIFI:S:${encodeURIComponent(wifiSsid)};T:WPA;P:${encodeURIComponent(wifiPass)};;`;
 }
 
 function updateWhatsAppLinks() {

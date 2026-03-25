@@ -1699,8 +1699,14 @@ window.applyBranding = function () {
     }
 
     const aboutTagline = document.getElementById('aboutTaglineText');
-    if (aboutTagline && branding.tagline) {
-        aboutTagline.textContent = branding.tagline;
+    if (aboutTagline) {
+        const rawTagline = typeof branding.tagline === 'string' ? branding.tagline.trim() : '';
+        const defaultTagline = typeof window.defaultBranding?.tagline === 'string'
+            ? window.defaultBranding.tagline.trim()
+            : '';
+        aboutTagline.textContent = rawTagline && rawTagline !== defaultTagline
+            ? rawTagline
+            : window.getTranslation('about_tagline', rawTagline || defaultTagline || '');
     }
 
     const aboutTitle = document.getElementById('aboutTitleHeading');
@@ -1989,6 +1995,8 @@ window.translations = {
         landing_social_placeholder: 'Réseaux bientôt disponibles',
         landing_wifi_placeholder: 'Code WiFi disponible sur place',
         wifi_title: 'WiFi Gratuit', wifi_scan: 'Scannez pour vous connecter',
+        wifi_default_name: 'WiFi du restaurant',
+        wifi_default_code_help: 'Demandez le mot de passe',
         wifi_connect_title: 'Connexion WiFi',
         wifi_network_label: 'Réseau',
         modal_close: 'FERMER',
@@ -2004,7 +2012,7 @@ window.translations = {
         landing_address_placeholder: 'Adresse du restaurant',
         landing_hours_title: "Horaires d'Ouverture",
         menu_search_placeholder: 'Rechercher un plat...',
-        admin_panel_link: 'Admin Panel',
+        admin_panel_link: 'Espace admin',
         site_title_suffix: 'Commandez en ligne',
         promo_badge: 'PROMO DU JOUR', promo_add: 'AJOUTER AU PANIER',
         ingredients_label: 'Ingrédients', add_to_cart: 'AJOUTER AU PANIER',
@@ -2070,6 +2078,8 @@ window.translations = {
         landing_social_placeholder: 'Social links coming soon',
         landing_wifi_placeholder: 'WiFi code available on site',
         wifi_title: 'Free WiFi', wifi_scan: 'Scan to connect',
+        wifi_default_name: 'Restaurant WiFi',
+        wifi_default_code_help: 'Ask the team',
         wifi_connect_title: 'Connect to WiFi',
         wifi_network_label: 'Network',
         modal_close: 'CLOSE',
@@ -2151,6 +2161,8 @@ window.translations = {
         landing_social_placeholder: 'روابط التواصل ستتوفر قريباً',
         landing_wifi_placeholder: 'رمز الواي فاي متوفر داخل المطعم',
         wifi_title: 'واي فاي مجاني', wifi_scan: 'امسح الرمز للاتصال',
+        wifi_default_name: 'واي فاي المطعم',
+        wifi_default_code_help: 'اطلب كلمة المرور',
         wifi_connect_title: 'الاتصال بالواي فاي',
         wifi_network_label: 'الشبكة',
         modal_close: 'إغلاق',
