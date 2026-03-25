@@ -8,8 +8,34 @@ let totalBoxes = 24;
 let trapIndex = -1;
 let revealedCount = 0;
 let gameActive = false;
+let gameStylesheetPromise = null;
 
-function openGameModal() {
+function ensureGameStylesheet() {
+    if (document.getElementById('gameStylesheet')) {
+        return Promise.resolve();
+    }
+    if (gameStylesheetPromise) {
+        return gameStylesheetPromise;
+    }
+
+    gameStylesheetPromise = new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.id = 'gameStylesheet';
+        link.rel = 'stylesheet';
+        link.href = 'game.css';
+        link.onload = () => resolve();
+        link.onerror = () => {
+            gameStylesheetPromise = null;
+            reject(new Error('game_stylesheet_load_failed'));
+        };
+        document.head.appendChild(link);
+    });
+
+    return gameStylesheetPromise;
+}
+
+async function openGameModal() {
+    await ensureGameStylesheet();
     showGameStart();
     document.getElementById('gameOverlay').classList.add('open');
     document.getElementById('gameModal').classList.add('open');
