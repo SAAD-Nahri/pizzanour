@@ -6787,6 +6787,7 @@ body:not(.menu-page) .hero-slider {
   border-radius: 0 0 42px 42px;
   isolation: isolate;
   background: #16181e;
+  pointer-events: none;
 }
 
 body:not(.menu-page) .hero-slider::before {
@@ -6826,6 +6827,9 @@ body:not(.menu-page) .slide-content {
   background: none;
   box-shadow: none;
   backdrop-filter: none;
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
 }
 
 body:not(.menu-page) .slide-sub {
@@ -6873,6 +6877,10 @@ body:not(.menu-page) .slide-cta {
   padding: 14px 24px;
   letter-spacing: 0.12em;
   box-shadow: 0 18px 38px rgba(226, 27, 27, 0.28);
+  position: relative;
+  z-index: 7;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 body:not(.menu-page) .slide-cta:hover {
@@ -6885,6 +6893,7 @@ body:not(.menu-page) .slide-img {
   width: clamp(260px, 34vw, 500px);
   height: clamp(260px, 34vw, 500px);
   filter: drop-shadow(0 28px 50px rgba(0, 0, 0, 0.24));
+  pointer-events: none;
 }
 
 body:not(.menu-page) .slide-dots {
@@ -6893,6 +6902,7 @@ body:not(.menu-page) .slide-dots {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+  pointer-events: auto;
 }
 
 body:not(.menu-page) .dot {
@@ -7916,9 +7926,9 @@ body:not(.menu-page) .footer-copy {
     top: calc(100% + 8px);
     right: 0;
     left: auto;
-    width: 104px;
-    min-width: 98px;
-    max-width: 104px;
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
     border-radius: 16px;
   }
 
@@ -7928,7 +7938,7 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .lang-opt .flag {
-    display: none;
+    display: none !important;
   }
 
   body:not(.menu-page) .header {
