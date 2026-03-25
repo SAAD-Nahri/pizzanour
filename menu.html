@@ -2079,10 +2079,10 @@
                 </div>
                 <div class="top-nav-right">
                     <button id="cartNavBtnLanding" class="nav-icon-btn nav-cart-btn" onclick="openDrawer()" style="display:none;"
-                        data-i18n-title="confirm_cart_label" title="Cart">
+                        data-i18n-title="confirm_cart_label" data-i18n-aria-label="confirm_cart_label" title="Cart" aria-label="Cart">
                         🛒 <span id="cartBadgeLanding" class="cart-badge">0</span>
                     </button>
-                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" title="History">
+                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" data-i18n-aria-label="history_button_title" title="History" aria-label="History">
                         🕒 <span id="histBadgeLanding" class="history-badge">0</span>
                     </button>
                     <a href="index.html" class="nav-icon-btn close-btn">✕</a>
@@ -2163,15 +2163,9 @@
                     </div>
                 </div>
 
-                <!-- Working Hours -->
-                <div class="hours-section menu-reveal-observe">
-                    <h3 class="hours-title" data-i18n="landing_hours_title">Horaires d'Ouverture</h3>
-                    <div class="hours-grid" id="landingHoursGrid"></div>
-                </div>
-
                 <!-- Social Links -->
                 <div class="social-links social-links-minimal menu-reveal-observe" id="menuLandingSocialLinks">
-                    <a href="index.html" class="social-icon-link" aria-label="Website home">&#127968;</a>
+                    <a href="index.html" class="social-icon-link" data-i18n-aria-label="landing_home_title" aria-label="Home">&#127968;</a>
                 </div>
             </div>
         </div>
@@ -2188,10 +2182,10 @@
                 </div>
                 <div class="top-nav-right">
                     <button id="cartNavBtnMenu" class="nav-icon-btn nav-cart-btn" onclick="openDrawer()" style="display:none;"
-                        data-i18n-title="confirm_cart_label" title="Cart">
+                        data-i18n-title="confirm_cart_label" data-i18n-aria-label="confirm_cart_label" title="Cart" aria-label="Cart">
                         🛒 <span id="cartBadgeMenu" class="cart-badge">0</span>
                     </button>
-                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" title="History">
+                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" data-i18n-aria-label="history_button_title" title="History" aria-label="History">
                         🕒 <span id="histBadgeMenu" class="history-badge">0</span>
                     </button>
                     <button class="nav-icon-btn" onclick="showLanding()">✕</button>
@@ -2244,7 +2238,7 @@
     <!-- SUPER CATEGORY BOTTOM SHEET -->
     <div id="superCatOverlay" class="overlay" onclick="closeSuperCatSheet()"></div>
     <div id="superCatSheet" class="super-cat-sheet">
-        <button class="super-sheet-close" onclick="closeSuperCatSheet()" aria-label="Close menu selector">&times;</button>
+        <button class="super-sheet-close" onclick="closeSuperCatSheet()" data-i18n-aria-label="modal_close" aria-label="Close">&times;</button>
         <h2 class="super-sheet-title" data-i18n="menu_select_title">Sélectionner un Menu</h2>
         <div id="superCatList">
             <!-- Injected by JS -->
@@ -2253,7 +2247,7 @@
 
     <!-- Dish Detail Page (Slide Up Overlay) -->
     <div id="dishPage" class="dish-page">
-        <button class="dish-page-close" onclick="closeDishPage()" aria-label="Close dish details">&times;</button>
+        <button class="dish-page-close" onclick="closeDishPage()" data-i18n-aria-label="modal_close" aria-label="Close">&times;</button>
         <div class="dish-page-header">
             <img id="dishPageImg" src="" alt="" class="dish-page-img" width="1200" height="900" decoding="async">
         </div>
@@ -2273,7 +2267,7 @@
         <div class="history-modal" onclick="event.stopPropagation()">
             <div class="history-header">
                 <h2 data-i18n="history_title">Historique</h2>
-                <button onclick="closeHistory()" class="history-close-btn" aria-label="Close history">&times;</button>
+                <button onclick="closeHistory()" class="history-close-btn" data-i18n-aria-label="modal_close" aria-label="Close">&times;</button>
             </div>
             <div id="historyContent">
                 <p class="history-empty" data-i18n="history_empty">Aucune commande récente.</p>

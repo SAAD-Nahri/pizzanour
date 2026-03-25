@@ -381,35 +381,15 @@ function renderLandingInfo() {
         }
     }
 
-    renderLandingHours();
     renderLandingSocialLinks();
     scheduleMenuMotionRefresh();
-}
-
-function renderLandingHours() {
-    const grid = document.getElementById('landingHoursGrid');
-    if (!grid) return;
-
-    const hours = Array.isArray(window.restaurantConfig?._hours) && window.restaurantConfig._hours.length > 0
-        ? window.restaurantConfig._hours
-        : window.defaultHours;
-
-    grid.innerHTML = hours.map((hour) => {
-        const translatedDay = window.translations?.[window.currentLang]?.[hour.i18n] || hour.day;
-        return `
-            <div class="hour-row">
-                <span data-i18n="${hour.i18n}">${translatedDay}</span>
-                <span>${hour.open} &ndash; ${hour.close}</span>
-            </div>
-        `;
-    }).join('');
 }
 
 function renderLandingSocialLinks() {
     const container = document.getElementById('menuLandingSocialLinks');
     if (!container) return;
 
-    const links = ['<a href="index.html" class="social-icon-link" aria-label="Website home">&#127968;</a>'];
+    const links = [`<a href="index.html" class="social-icon-link" aria-label="${t('landing_home_title', 'Home')}">&#127968;</a>`];
     const socials = { ...(window.restaurantConfig?.socials || {}) };
     socials.facebook = window.getSafeExternalUrl(socials.facebook);
     socials.instagram = window.getSafeExternalUrl(socials.instagram);
@@ -950,7 +930,7 @@ function openDishPage(id) {
 
     if (nameEl) nameEl.textContent = window.getLocalizedMenuName(item) + (window.isItemInPromo(item.id) ? t('dish_promo_suffix', ' (PROMO)') : '');
     updateSizePrice();
-    if (descEl) descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'Une prÃ©paration soignÃ©e avec les meilleurs ingrÃ©dients.'));
+    if (descEl) descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.'));
 
     if (addBtn) {
         addBtn.onclick = () => { addToCart(item.id, selectedSize); closeDishPage(); };
@@ -1302,14 +1282,14 @@ function generateTicket() {
 
     const serviceLabels = {
         onsite: t('service_onsite', 'Sur place'),
-        takeaway: t('service_takeaway', 'Ã€ emporter'),
+        takeaway: t('service_takeaway', 'Takeaway'),
         delivery: t('service_delivery', 'Livraison')
     };
     const serviceLabel = serviceLabels[serviceType];
 
     ticketContent.innerHTML = `
         <div class="ticket-content">
-            <button onclick="closeAllModals()" class="ticket-close-btn">âœ•</button>
+            <button onclick="closeAllModals()" class="ticket-close-btn">×</button>
             <div class="ticket-brand">
                 <div class="ticket-brand-name">${restaurantName}</div>
                 <div class="ticket-brand-address">${restaurantAddress}</div>
@@ -1395,15 +1375,15 @@ function finalizeOrderSilent(orderNo, total, serviceLabel, btn) {
     parent.innerHTML = `
         <button onclick="closeAllModals(); showLanding();"
                 class="ticket-action-btn is-success">
-            ${t('ticket_saved', 'COMMANDE ENREGISTRÃ‰E âœ”')}
+            ${t('ticket_saved', 'ORDER SAVED ✓')}
         </button>
-        <div class="ticket-helper is-success">${t('ticket_saved_help', 'Ticket validÃ© ! Cliquez pour fermer.')}</div>
+        <div class="ticket-helper is-success">${t('ticket_saved_help', 'Order saved. Tap to close.')}</div>
     `;
 }
 
 function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
     // WhatsApp formatting
-    let waText = `*${t('wa_new_order_title', 'NOUVELLE COMMANDE â€“ {restaurant}', { restaurant: `#${orderNo}` })}*\n`;
+    let waText = `*${t('wa_new_order_title', 'NEW ORDER - {restaurant}', { restaurant: `#${orderNo}` })}*\n`;
     waText += `${t('ticket_type_label', 'Type')}: ${serviceLabel}\n`;
     if (serviceType === 'delivery') {
         waText += `ðŸ“ ${t('ticket_addr', 'Adresse')}: ${window.currentDeliveryAddress.trim()}\n`;
@@ -1417,7 +1397,7 @@ function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
 
     const phone = window.getWhatsAppNumber();
     if (!phone) {
-        window.showToast(t('social_empty', 'Aucun lien configurÃ©.'));
+        window.showToast(t('social_empty', 'No links configured yet.'));
         return;
     }
 
