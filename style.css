@@ -7367,6 +7367,17 @@ body:not(.menu-page) .utility-btn-label {
   letter-spacing: 0.04em;
 }
 
+body:not(.menu-page) .about-section,
+body:not(.menu-page) .payment-facilities-section,
+body:not(.menu-page) .events-section,
+body:not(.menu-page) .gallery-section,
+body:not(.menu-page) .hours-section,
+body:not(.menu-page) .contact-section,
+body:not(.menu-page) .footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
+}
+
 body:not(.menu-page) .about-grid {
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
 }

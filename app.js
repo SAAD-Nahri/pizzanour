@@ -53,6 +53,25 @@ let homepageInitialized = false;
 let homepageSliderStarted = false;
 let homepageScrollSetupDone = false;
 let lastPublicDataVersion = '';
+let homepageDeferredRenderHandle = null;
+let homepageDeferredSectionsReady = false;
+let eventModalStylesheetPromise = null;
+
+function scheduleLowPriorityTask(callback, timeout = 1200) {
+    if (typeof window.requestIdleCallback === 'function') {
+        return window.requestIdleCallback(callback, { timeout });
+    }
+    return window.setTimeout(callback, 120);
+}
+
+function cancelLowPriorityTask(handle) {
+    if (!handle) return;
+    if (typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(handle);
+        return;
+    }
+    clearTimeout(handle);
+}
 
 function readStoredMenuSnapshot() {
     try {
@@ -206,6 +225,47 @@ function persistMenuSnapshotFromSiteData(data, version = '') {
     }
 }
 
+function renderDeferredHomepageSections() {
+    renderSocialLinks();
+    renderHours();
+    renderGallery();
+    renderPaymentFacilities();
+    renderSectionLayout();
+    updateWifiUI();
+    updateWhatsAppLinks();
+    homepageDeferredSectionsReady = true;
+}
+
+function scheduleDeferredHomepageSections() {
+    if (homepageDeferredSectionsReady) return;
+    cancelLowPriorityTask(homepageDeferredRenderHandle);
+    homepageDeferredRenderHandle = scheduleLowPriorityTask(() => {
+        homepageDeferredRenderHandle = null;
+        renderDeferredHomepageSections();
+    });
+}
+
+function ensureEventModalStylesheet() {
+    if (document.getElementById('eventModalStylesheet')) {
+        return Promise.resolve();
+    }
+    if (eventModalStylesheetPromise) {
+        return eventModalStylesheetPromise;
+    }
+
+    eventModalStylesheetPromise = new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.id = 'eventModalStylesheet';
+        link.rel = 'stylesheet';
+        link.href = 'event-modal.css';
+        link.onload = () => resolve();
+        link.onerror = () => reject(new Error('event_modal_css_failed'));
+        document.head.appendChild(link);
+    });
+
+    return eventModalStylesheetPromise;
+}
+
 async function loadSiteData() {
     if (homepageSyncInFlight) return homepageSyncInFlight;
 
@@ -233,6 +293,11 @@ async function loadSiteData() {
         lastPublicDataVersion = version || lastPublicDataVersion;
         if (homepageInitialized) {
             refreshHomepageUI();
+            if (homepageDeferredSectionsReady) {
+                renderDeferredHomepageSections();
+            } else {
+                scheduleDeferredHomepageSections();
+            }
         }
     } catch (error) {
         console.error('Failed to load site data:', error);
@@ -274,13 +339,6 @@ function refreshHomepageUI() {
     if (document.getElementById('dropdownMenu')) renderDropdown();
     if (document.getElementById('menuWrap')) renderMenu();
     renderPromo();
-    renderSocialLinks();
-    renderHours();
-    renderGallery();
-    renderPaymentFacilities();
-    renderSectionLayout();
-    updateWifiUI();
-    updateWhatsAppLinks();
     renderLocation();
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
@@ -330,6 +388,7 @@ function initApp() {
     });
 
     homepageInitialized = true;
+    scheduleDeferredHomepageSections();
 }
 
 // ═══════════════════════ DYNAMIC HOURS ═══════════════════════
@@ -1085,7 +1144,7 @@ function closeProductModal() {
 // ═══════════════════════ EVENT BOOKING ═══════════════════════
 let currentEventType = '';
 
-function openEventModal(type) {
+async function openEventModal(type) {
     currentEventType = type;
     const overlay = document.getElementById('eventBookingOverlay');
     const modal = document.getElementById('eventBookingModal');
@@ -1093,6 +1152,12 @@ function openEventModal(type) {
     const icon = document.getElementById('eventBookingIcon');
 
     if (!modal || !overlay) return;
+
+    try {
+        await ensureEventModalStylesheet();
+    } catch (error) {
+        console.error('Failed to load event modal stylesheet:', error);
+    }
 
     // Reset inputs for each new opening
     const nameInput = document.getElementById('eventCustName');
