@@ -309,6 +309,7 @@ let promoRenderQueued = false;
 let menuImageObserver = null;
 let activeCategoryRenderState = null;
 let activeCategoryRenderToken = 0;
+let featuredRenderToken = 0;
 const MENU_INITIAL_CHUNK_SIZE = 8;
 const MENU_CHUNK_SIZE = 12;
 
@@ -831,6 +832,7 @@ function startPromoAutoSlide(container) {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANDING & VIEWS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function showLanding() {
+    featuredRenderToken += 1;
     // Close ALL overlays and modals first to prevent blank screen
     ['superCatOverlay', 'superCatSheet', 'sharedOverlay', 'cartDrawer',
         'ticketModal', 'dishPage', 'historyOverlay'].forEach(id => {
@@ -897,6 +899,30 @@ function renderFeaturedSlider(items, containerId) {
     }
     observeDeferredMenuImages(container);
     scheduleMenuMotionRefresh();
+}
+
+function scheduleDeferredFeaturedRender(items, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    featuredRenderToken += 1;
+    const token = featuredRenderToken;
+    container.style.display = 'none';
+    container.innerHTML = '';
+
+    const run = () => {
+        if (token !== featuredRenderToken) return;
+        renderFeaturedSlider(items, containerId);
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(() => run(), { timeout: 600 });
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        setTimeout(run, 40);
+    });
 }
 
 function updateBackBtn() {
@@ -1001,7 +1027,7 @@ function showSubCategoryGrid(sc, addToStack = true) {
 
     // Render global featured items for ALL categories in this super-category
     const featuredItems = menu.filter(m => sc.cats.includes(m.cat) && m.featured);
-    renderFeaturedSlider(featuredItems, 'featuredGlobal');
+    scheduleDeferredFeaturedRender(featuredItems, 'featuredGlobal');
 
     updateBackBtn();
     scheduleMenuMotionRefresh();
@@ -1025,7 +1051,7 @@ function showCategoryItems(cat, addToStack = true) {
 
     // Update global featured slider for specific category
     const featuredItems = menu.filter(m => m.cat === cat && m.featured && m.available !== false);
-    renderFeaturedSlider(featuredItems, 'featuredGlobal');
+    scheduleDeferredFeaturedRender(featuredItems, 'featuredGlobal');
 
     updateBackBtn();
     scheduleMenuMotionRefresh();
