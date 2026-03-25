@@ -101,7 +101,7 @@ async function syncDataFromServer() {
         // Refresh UI
         const currentState = navigationStack[navigationStack.length - 1] || '';
         if (menuMarkupReady && typeof renderMenu === 'function' && !currentState.startsWith('items:')) renderMenu();
-        if (typeof renderPromoCarousel === 'function') renderPromoCarousel();
+        if (typeof renderPromoCarousel === 'function') scheduleDeferredPromoRender();
         if (typeof renderLandingInfo === 'function') renderLandingInfo();
         if (superCatSheetReady && typeof renderSuperCatSheet === 'function') renderSuperCatSheet();
         if (typeof renderSuperCatPills === 'function') renderSuperCatPills();
@@ -202,6 +202,7 @@ let menuMotionObserver = null;
 let menuMotionRefreshFrame = null;
 let menuMarkupReady = false;
 let superCatSheetReady = false;
+let promoRenderQueued = false;
 
 function prefersReducedMenuMotion() {
     return Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -279,13 +280,32 @@ function initMenuApp() {
         : 'fr';
     window.setLang(savedLang);
     renderSuperCatPills();
-    renderPromoCarousel();
     renderLandingInfo();
     updateCartUI();
     updateHistoryBadge();
     window.updateStatus();
     window.applyBranding();
     scheduleMenuMotionRefresh();
+    scheduleDeferredPromoRender();
+}
+
+function scheduleDeferredPromoRender() {
+    if (promoRenderQueued) return;
+    promoRenderQueued = true;
+
+    const run = () => {
+        promoRenderQueued = false;
+        renderPromoCarousel();
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(() => run(), { timeout: 1200 });
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        setTimeout(run, 120);
+    });
 }
 
 function renderLandingInfo() {
