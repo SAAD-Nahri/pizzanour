@@ -439,6 +439,50 @@ function buildCategoryNavigationCardMarkup(cat) {
     `;
 }
 
+function getSuperCategoryForCategory(cat) {
+    if (currentSuperCat && Array.isArray(currentSuperCat.cats) && currentSuperCat.cats.includes(cat)) {
+        return currentSuperCat;
+    }
+    const matched = getSuperCategories().find((entry) => Array.isArray(entry.cats) && entry.cats.includes(cat));
+    if (matched) currentSuperCat = matched;
+    return matched || null;
+}
+
+function buildCategorySubnavButtonMarkup(cat, isActive = false) {
+    const localizedName = window.getLocalizedCategoryName(cat, cat);
+    const preview = getCategoryPreviewSource(cat);
+    const originalSrcAttr = preview.originalSrc && preview.originalSrc !== preview.src
+        ? ` data-original-src="${escapeHtmlAttr(preview.originalSrc)}"`
+        : '';
+
+    return `
+        <button class="menu-cat-btn menu-subnav-btn ${isActive ? 'active' : ''} menu-reveal-observe" data-cat="${escapeHtmlAttr(cat)}" onclick="showCategoryItems(${serializeInlineId(cat)})">
+            <span class="menu-subnav-thumb">
+                <img class="menu-deferred-img" data-menu-src="${escapeHtmlAttr(preview.src)}"${originalSrcAttr} data-fallback-emoji="${escapeHtmlAttr(localizedName.charAt(0).toUpperCase() || MENU_UI_ICONS.plate)}" alt="${escapeHtmlAttr(localizedName)}" width="160" height="160" loading="lazy" decoding="async" fetchpriority="low">
+            </span>
+            <span class="menu-subnav-name">${localizedName}</span>
+        </button>
+    `;
+}
+
+function renderSuperCategoryChildNav(sc, activeCat = '') {
+    const navWrapper = document.getElementById('catNavWrapper');
+    const subCatTitle = document.getElementById('subCatTitle');
+    const catNav = document.getElementById('catNavScroll');
+    if (!navWrapper || !subCatTitle || !catNav || !sc) return;
+
+    const currentCategories = [...new Set(menu.map((m) => m.cat))];
+    const filteredCats = (Array.isArray(sc.cats) ? sc.cats : []).filter((c) => currentCategories.includes(c));
+
+    navWrapper.style.display = filteredCats.length ? 'block' : 'none';
+    subCatTitle.textContent = window.getLocalizedSuperCategoryName(sc, sc.name);
+    catNav.classList.remove('is-visual-list');
+    catNav.innerHTML = filteredCats
+        .map((c) => buildCategorySubnavButtonMarkup(c, c === activeCat))
+        .join('');
+    observeDeferredMenuImages(catNav);
+}
+
 
 let navigationStack = []; // stack: 'landing', 'supercats', 'subcats:NAME', 'items:CAT'
 let currentSuperCat = null;
@@ -1292,6 +1336,7 @@ function showSubCategoryGrid(sc, addToStack = true) {
     const subCatTitle = document.getElementById('subCatTitle');
     const menuContent = document.getElementById('menuContent');
     const searchBox = document.getElementById('menuSearchBox');
+    const catNav = document.getElementById('catNavScroll');
 
     if (subCatTitle) subCatTitle.textContent = window.getLocalizedSuperCategoryName(sc, sc.name);
     document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'categories');
@@ -1301,7 +1346,6 @@ function showSubCategoryGrid(sc, addToStack = true) {
     if (searchBox) searchBox.style.display = 'none';
 
     // Render category grid for this super-category
-    const catNav = document.getElementById('catNavScroll');
     const currentCategories = [...new Set(menu.map(m => m.cat))];
     const filteredCats = sc.cats.filter(c => currentCategories.includes(c));
     catNav.classList.add('is-visual-list');
@@ -1326,13 +1370,12 @@ function showCategoryItems(cat, addToStack = true) {
     const navWrapper = document.getElementById('catNavWrapper');
     const menuContent = document.getElementById('menuContent');
     const searchBox = document.getElementById('menuSearchBox');
-    const catNav = document.getElementById('catNavScroll');
+    const sc = getSuperCategoryForCategory(cat);
 
     document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'items');
-    navWrapper.style.display = 'none';
+    renderSuperCategoryChildNav(sc, cat);
     menuContent.style.display = 'block';
     if (searchBox) searchBox.style.display = 'block';
-    catNav?.classList.remove('is-visual-list');
 
     // Update global featured slider for specific category
     const featuredItems = menu.filter(m => m.cat === cat && m.featured && m.available !== false);
