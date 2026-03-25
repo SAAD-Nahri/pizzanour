@@ -21,6 +21,7 @@ const PUBLIC_BUILD_FILES = new Set([
   "/shared-public.js",
   "/app.js",
   "/menu.js",
+  "/menu-interactions.js",
   "/homepage-extras.js",
   "/game.js"
 ]);
@@ -32,6 +33,7 @@ const build = createBuildFingerprint([
   path.join(__dirname, "game.css"),
   path.join(__dirname, "app.js"),
   path.join(__dirname, "menu.js"),
+  path.join(__dirname, "menu-interactions.js"),
   path.join(__dirname, "shared.js"),
   path.join(__dirname, "shared-public.js"),
   path.join(__dirname, "style.css")

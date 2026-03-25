@@ -383,6 +383,51 @@ let activeCategoryRenderState = null;
 let activeCategoryRenderToken = 0;
 let featuredRenderToken = 0;
 let menuCategoryMarkupCache = new Map();
+let menuInteractionsScriptPromise = null;
+
+function ensureMenuInteractionsScriptLoaded() {
+    if (window.__foodyMenuInteractionsLoaded) return Promise.resolve();
+    if (menuInteractionsScriptPromise) return menuInteractionsScriptPromise;
+
+    menuInteractionsScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = getVersionedPublicAsset('menu-interactions.js');
+        script.async = true;
+        script.onload = () => {
+            window.__foodyMenuInteractionsLoaded = true;
+            resolve();
+        };
+        script.onerror = () => {
+            menuInteractionsScriptPromise = null;
+            reject(new Error('menu_interactions_load_failed'));
+        };
+        document.body.appendChild(script);
+    });
+
+    return menuInteractionsScriptPromise;
+}
+
+window.__foodyGetMenuRuntime = function __foodyGetMenuRuntime() {
+    return {
+        t,
+        sameMenuItemId,
+        serializeInlineId,
+        MENU_UI_ICONS,
+        getMenu: () => menu,
+        getCart: () => cart,
+        setCart: (nextCart) => {
+            cart = Array.isArray(nextCart) ? nextCart : [];
+        },
+        getServiceType: () => serviceType,
+        setServiceType: (nextType) => {
+            serviceType = typeof nextType === 'string' && nextType ? nextType : 'onsite';
+        },
+        saveCart,
+        updateCartUI,
+        updateHistoryBadge,
+        showLanding
+    };
+};
 
 function isCompactMenuViewport() {
     return Boolean(
@@ -1353,166 +1398,32 @@ function imgTag(item, options = {}) {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DISH PAGE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function openDishPage(id) {
-    const item = menu.find(m => sameMenuItemId(m.id, id));
-    if (!item) return;
-
-    const page = document.getElementById('dishPage');
-    const imgEl = document.getElementById('dishPageImg');
-    const nameEl = document.getElementById('dishPageName');
-    const priceEl = document.getElementById('dishPagePrice');
-    const descEl = document.getElementById('dishPageDesc');
-    const addBtn = document.getElementById('dishPageAddBtn');
-    page.dataset.itemId = String(item.id);
-
-    // Size Selector Logic
-    let selectedSize = item.hasSizes ? 'small' : null;
-    const updateSizePrice = () => {
-        if (priceEl) {
-            const currentPrice = window.getItemPrice(item, selectedSize);
-            const originalPrice = selectedSize ? (item.sizes[selectedSize] || item.price) : item.price;
-            if (window.isItemInPromo(item.id)) {
-                priceEl.innerHTML = `<span style="color:#ffd700; font-weight:800;">${currentPrice.toFixed(0)} MAD</span> <span style="text-decoration:line-through; font-size:0.8em; opacity:0.6;">${originalPrice.toFixed(0)} MAD</span>`;
-            } else {
-                priceEl.textContent = `${currentPrice.toFixed(0)} MAD`;
-            }
-        }
-    };
-
-    const sizeSelectorHtml = item.hasSizes ? `
-        <div class="size-selector-wrap" style="margin: 20px 0; display: flex; gap: 10px; justify-content: center;">
-            ${['small', 'medium', 'large'].map(s => {
-        const p = item.sizes[s];
-        if (!p) return '';
-        const labels = { small: 'S', medium: 'M', large: 'L' };
-        return `
-                    <button class="size-btn ${selectedSize === s ? 'active' : ''}" 
-                            onclick="window.selectDishSize('${s}')"
-                            style="padding: 10px 20px; border-radius: 50px; border: 2px solid ${selectedSize === s ? 'var(--primary)' : '#eee'}; background: ${selectedSize === s ? 'var(--primary)' : '#fff'}; color: ${selectedSize === s ? '#fff' : '#333'}; cursor: pointer; font-weight: 700; transition: all 0.2s;">
-                        ${labels[s]} - ${p} MAD
-                    </button>
-                `;
-    }).join('')}
-        </div>
-    ` : '';
-
-    // Add global helper for size selection if not exists
-    window.selectDishSize = (size) => {
-        selectedSize = size;
-        document.querySelectorAll('.size-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.innerText.startsWith(size.charAt(0).toUpperCase()));
-            // Simpler way: update the background/border inline or via another render
-            btn.style.background = btn.innerText.startsWith(size.charAt(0).toUpperCase()) ? 'var(--primary)' : '#fff';
-            btn.style.color = btn.innerText.startsWith(size.charAt(0).toUpperCase()) ? '#fff' : '#333';
-            btn.style.borderColor = btn.innerText.startsWith(size.charAt(0).toUpperCase()) ? 'var(--primary)' : '#eee';
-        });
-        updateSizePrice();
-    };
-
-    const descContainer = descEl.parentElement;
-    // Check if selector already exists and remove
-    const oldSelector = descContainer.querySelector('.size-selector-wrap');
-    if (oldSelector) oldSelector.remove();
-    if (sizeSelectorHtml) {
-        descEl.insertAdjacentHTML('afterend', sizeSelectorHtml);
-    }
-
-    const imgSrc = (item.images && item.images.length > 0) ? item.images[0] : item.img;
-
-    if (imgSrc) {
-        window.setSafeImageSource(imgEl, imgSrc, {
-            onMissing: () => {
-                imgEl.removeAttribute('src');
-                imgEl.style.display = 'none';
-            },
-            displayValue: 'block'
-        });
-        imgEl.onclick = () => openGallery([item], 0);
-        imgEl.style.cursor = 'zoom-in';
-    } else {
-        imgEl.removeAttribute('src');
-        imgEl.style.display = 'none';
-        imgEl.onclick = null;
-    }
-
-    if (nameEl) nameEl.textContent = window.getLocalizedMenuName(item) + (window.isItemInPromo(item.id) ? t('dish_promo_suffix', ' (PROMO)') : '');
-    updateSizePrice();
-    if (descEl) descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.'));
-
-    if (addBtn) {
-        addBtn.onclick = () => { addToCart(item.id, selectedSize); closeDishPage(); };
-    }
-
-    // Love button in page
-    const loveContainer = document.getElementById('dishPageLoveContainer');
-    if (loveContainer) {
-        loveContainer.innerHTML = `
-            <button class="love-btn ${window.getLikeCount(item.id) > 0 ? 'loved' : ''}" 
-                    style="position:static; width:40px; height:40px; font-size:1.2rem;"
-                    onclick="window.handleToggleLike(${serializeInlineId(item.id)}, this)">
-                ${MENU_UI_ICONS.heart}<span class="love-count" style="font-size:0.8rem;">${window.getLikeCount(item.id)}</span>
-            </button>
-        `;
-    }
-
-    page.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.openDishPage(id));
 }
 
 function closeDishPage() {
-    document.getElementById('dishPage').classList.remove('open');
-    document.body.style.overflow = '';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.closeDishPage());
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• IMAGE GALLERY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-let galleryItems = [];
-let currentGalleryIdx = 0;
-
 function openGallery(items, startIndex = 0) {
-    galleryItems = items.filter(it => (it.images && it.images.length > 0) || it.img); // Items with images
-    if (galleryItems.length === 0) return;
-
-    currentGalleryIdx = startIndex;
-    const overlay = document.getElementById('galleryOverlay');
-    overlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    updateGalleryView();
+    return ensureMenuInteractionsScriptLoaded().then(() => window.openGallery(items, startIndex));
 }
 
 function closeGallery() {
-    document.getElementById('galleryOverlay').style.display = 'none';
-    document.body.style.overflow = '';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.closeGallery());
 }
 
 function updateGalleryView() {
-    const item = galleryItems[currentGalleryIdx];
-    const img = document.getElementById('galleryImg');
-    const title = document.getElementById('galleryTitle');
-    const count = document.getElementById('galleryCount');
-
-    // Animation reset
-    img.classList.remove('gallery-flip');
-    void img.offsetWidth; // trigger reflow
-    img.classList.add('gallery-flip');
-
-    const galleryImgSrc = (item.images && item.images.length > 0) ? item.images[0] : item.img;
-    window.setSafeImageSource(img, galleryImgSrc, {
-        onMissing: () => {
-            closeGallery();
-        },
-        displayValue: 'block'
-    });
-    title.textContent = window.getLocalizedMenuName(item);
-    count.textContent = `${currentGalleryIdx + 1} / ${galleryItems.length}`;
+    return ensureMenuInteractionsScriptLoaded().then(() => window.updateGalleryView());
 }
 
 function nextGalleryImage() {
-    currentGalleryIdx = (currentGalleryIdx + 1) % galleryItems.length;
-    updateGalleryView();
+    return ensureMenuInteractionsScriptLoaded().then(() => window.nextGalleryImage());
 }
 
 function prevGalleryImage() {
-    currentGalleryIdx = (currentGalleryIdx - 1 + galleryItems.length) % galleryItems.length;
-    updateGalleryView();
+    return ensureMenuInteractionsScriptLoaded().then(() => window.prevGalleryImage());
 }
 
 // Keyboard support
@@ -1619,141 +1530,37 @@ function updateCartUI() {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function openDrawer() {
-    document.getElementById('sharedOverlay').classList.add('open');
-    document.getElementById('cartDrawer').classList.add('open');
-    renderDrawer();
-    document.body.style.overflow = 'hidden';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.openDrawer());
 }
 
 function closeAllModals() {
-    ['sharedOverlay', 'cartDrawer', 'ticketModal', 'dishPage', 'historyOverlay', 'superCatSheet', 'superCatOverlay'].forEach(id => {
-        document.getElementById(id)?.classList.remove('open');
-    });
-    document.body.style.overflow = '';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.closeAllModals());
 }
 
 function renderDrawer() {
-    const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
-    const content = document.getElementById('drawerContent');
-    if (!content) return;
-    const restaurantName = typeof window.getRestaurantDisplayName === 'function'
-        ? window.getRestaurantDisplayName()
-        : 'Restaurant';
-    const serviceOptions = [
-        { key: 'onsite', icon: MENU_UI_ICONS.plate, label: t('service_onsite', 'Sur place') },
-        { key: 'takeaway', icon: MENU_UI_ICONS.takeaway, label: t('service_takeaway', 'À Emporter') },
-        { key: 'delivery', icon: MENU_UI_ICONS.delivery, label: t('service_delivery', 'Livraison') }
-    ];
-
-    content.innerHTML = `
-        <div class="cart-drawer-body">
-            <div class="cart-drawer-header">
-                <div class="cart-drawer-title">
-                    ${restaurantName}
-                </div>
-                <div class="cart-drawer-meta">
-                    <button onclick="if(confirm('${t('cart_clear_confirm', 'Vider le panier ?')}')) { cart=[]; saveCart(); updateCartUI(); closeAllModals(); }" class="cart-drawer-clear">${t('cart_clear', 'Vider')}</button>
-                    <div class="cart-drawer-count">${t('cart_items_count', '{count} item(s)', { count: cart.length })}</div>
-                </div>
-            </div>
-            <div class="cart-items-list">
-                ${cart.map(item => `
-                    <div class="cart-item-card">
-                        <div class="cart-item-main">
-                            <div class="cart-item-name">
-                                ${window.getLocalizedMenuName(item)} ${item.selectedSize ? `<span class="cart-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}
-                            </div>
-                            <div class="cart-item-price">${(item.price * item.qty).toFixed(2)} MAD</div>
-                        </div>
-                        <div class="cart-item-controls">
-                            <button onclick="removeFromCart('${item.cartId}')" class="cart-qty-btn is-minus">-</button>
-                            <span class="cart-item-qty">${item.qty}</span>
-                            <button onclick="addToCart(${serializeInlineId(item.id)}, '${item.selectedSize || ''}');renderDrawer();" class="cart-qty-btn is-plus">+</button>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="cart-service-grid">
-                ${serviceOptions.map((option) => `
-                    <button class="cart-service-btn${serviceType === option.key ? ' is-active' : ''}" onclick="serviceType='${option.key}'; renderDrawer()">
-                        <span class="cart-service-icon">${option.icon}</span>
-                        <span class="cart-service-label">${option.label}</span>
-                    </button>
-                `).join('')}
-            </div>
-            ${serviceType === 'delivery' ? `
-            <div class="cart-delivery-block">
-                <label class="cart-delivery-label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
-                <textarea id="deliveryAddress" rows="2" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, résidence, quartier...')}" oninput="window.currentDeliveryAddress = this.value" class="cart-delivery-input">${window.currentDeliveryAddress || ''}</textarea>
-            </div>
-            ` : ''}
-            <div class="cart-total-card">
-                <div class="cart-total-row">
-                    <span>${t('cart_total_label', 'Total')}</span><span>${total.toFixed(2)} MAD</span>
-                </div>
-            </div>
-            <button onclick="generateTicket()" class="cart-confirm-btn">
-                ${t('cart_confirm_order', 'CONFIRMER MA COMMANDE')}
-            </button>
-        </div>
-    `;
-
-    if (typeof window.applyBranding === 'function') {
-        window.applyBranding();
-    }
+    return ensureMenuInteractionsScriptLoaded().then(() => window.renderDrawer());
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HISTORY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function openHistory() {
-    renderHistory();
-    document.getElementById('historyOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.openHistory());
 }
 
 function closeHistory() {
-    document.getElementById('historyOverlay')?.classList.remove('open');
-    document.body.style.overflow = '';
+    return ensureMenuInteractionsScriptLoaded().then(() => window.closeHistory());
 }
 
 function renderHistory() {
-    const history = typeof window.getStoredHistory === 'function'
-        ? window.getStoredHistory()
-        : [];
-    const container = document.getElementById('historyContent');
-    if (!container) return;
-    container.innerHTML = history.length === 0
-        ? `<p class="history-empty">${t('history_empty', 'Aucune commande récente.')}</p>`
-        : history.map((ticketHtml, i) => `
-            <div class="history-ticket history-ticket-wrap">
-                ${ticketHtml}
-                <button onclick="deleteHistoryItem(${i})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}">${MENU_UI_ICONS.trash}</button>
-            </div>
-        `).join('');
+    return ensureMenuInteractionsScriptLoaded().then(() => window.renderHistory());
 }
 
 function deleteHistoryItem(index) {
-    if (!confirm(t('history_delete_confirm', 'Supprimer ce ticket de l\'historique ?'))) return;
-    let h = typeof window.getStoredHistory === 'function'
-        ? window.getStoredHistory()
-        : [];
-    h.splice(index, 1);
-    if (typeof window.setStoredHistory === 'function') {
-        window.setStoredHistory(h);
-    }
-    renderHistory();
-    updateHistoryBadge();
+    return ensureMenuInteractionsScriptLoaded().then(() => window.deleteHistoryItem(index));
 }
 
 function saveToHistory(text) {
-    let h = typeof window.getStoredHistory === 'function'
-        ? window.getStoredHistory()
-        : [];
-    h.unshift(text); if (h.length > 3) h = h.slice(0, 3);
-    if (typeof window.setStoredHistory === 'function') {
-        window.setStoredHistory(h);
-    }
-    updateHistoryBadge();
+    return ensureMenuInteractionsScriptLoaded().then(() => window.saveToHistory(text));
 }
 
 function updateHistoryBadge() {
@@ -1773,148 +1580,7 @@ function updateHistoryBadge() {
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TICKET â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function generateTicket() {
-    if (serviceType === 'delivery' && (!window.currentDeliveryAddress || window.currentDeliveryAddress.trim() === '')) {
-        alert(t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.'));
-        return;
-    }
-    const total = cart.reduce((s, c) => s + (c.price * c.qty), 0);
-    const now = new Date();
-    const orderNo = Math.floor(1000 + Math.random() * 9000);
-    const ticketModal = document.getElementById('ticketModal');
-    const ticketContent = document.getElementById('ticketContent');
-    const restaurantName = typeof window.getRestaurantDisplayName === 'function'
-        ? window.getRestaurantDisplayName()
-        : 'Restaurant';
-    const restaurantAddress = typeof window.getRestaurantAddress === 'function'
-        ? window.getRestaurantAddress()
-        : '';
-
-    const serviceLabels = {
-        onsite: t('service_onsite', 'Sur place'),
-        takeaway: t('service_takeaway', 'Takeaway'),
-        delivery: t('service_delivery', 'Livraison')
-    };
-    const serviceLabel = serviceLabels[serviceType];
-
-    ticketContent.innerHTML = `
-        <div class="ticket-content">
-            <button onclick="closeAllModals()" class="ticket-close-btn">×</button>
-            <div class="ticket-brand">
-                <div class="ticket-brand-name">${restaurantName}</div>
-                <div class="ticket-brand-address">${restaurantAddress}</div>
-            </div>
-            <div class="ticket-summary">
-                <div class="ticket-number">${t('ticket_number_prefix', 'TICKET')} #${orderNo}</div>
-                <div class="ticket-datetime">${now.toLocaleDateString()} â€” ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                <div class="ticket-service">${t('ticket_type_label', 'Type')}: ${serviceLabel}</div>
-                ${serviceType === 'delivery' ? `<div class="ticket-delivery-address">ðŸ“ ${window.currentDeliveryAddress}</div>` : ''}
-            </div>
-            <div class="ticket-items">
-                ${cart.map(item => `
-                    <div class="ticket-item-row">
-                        <div class="ticket-item-name"><strong class="ticket-item-qty">${item.qty} Ã—</strong> ${window.getLocalizedMenuName(item)}</div>
-                        <div class="ticket-item-price">${(item.price * item.qty).toFixed(0)} <span class="ticket-item-currency">dhs</span></div>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="ticket-total-wrap">
-                <div class="ticket-total-box">
-                    ${t('ticket_total_prefix', 'TOTAL :')} ${total.toFixed(0)} dhs
-                </div>
-            </div>
-            
-            ${serviceType === 'delivery' ? `
-                <div class="ticket-actions-grid">
-                    <button onclick="document.getElementById('ticketModal').classList.remove('open'); document.getElementById('cartDrawer').classList.add('open');"
-                            class="ticket-action-btn is-outline">
-                        ${t('ticket_edit', 'MODIFIER')}
-                    </button>
-                    <button onclick="sendOrderViaWhatsApp('${orderNo}', ${total.toFixed(2)}, '${serviceLabel}')"
-                            class="ticket-action-btn is-primary">
-                        ${t('ticket_order', 'COMMANDER')}
-                    </button>
-                </div>
-            ` : `
-                <div id="ticketActions_${orderNo}" class="ticket-actions-single">
-                    <button onclick="finalizeOrderSilent('${orderNo}', ${total.toFixed(2)}, '${serviceLabel}', this)"
-                            class="ticket-action-btn is-dark">
-                        ${t('ticket_validate', 'VALIDER LA COMMANDE')}
-                    </button>
-                    <div class="ticket-helper">${t('ticket_helper', 'Cliquez pour enregistrer et montrer au serveur')}</div>
-                </div>
-            `}
-        </div>
-    `;
-
-    document.getElementById('cartDrawer').classList.remove('open');
-    ticketModal.classList.add('open');
-}
-
-function finalizeOrder(orderNo, total, serviceLabel) {
-    const now = new Date();
-    const historyText = `${t('ticket_number_prefix', 'TICKET')} #${orderNo}\n${now.toLocaleDateString()} ${now.toLocaleTimeString()}\n${t('ticket_type_label', 'Type')}: ${serviceLabel}\n${serviceType === 'delivery' ? `${t('ticket_addr', 'Adresse')}: ${window.currentDeliveryAddress.trim()}\n` : ''}${t('ticket_total', 'TOTAL')}: ${total.toFixed(0)} MAD\n---\n${cart.map(i => i.qty + 'x ' + window.getLocalizedMenuName(i)).join('\n')}`;
-    saveToHistory(historyText);
-
-    // Clear and return home
-    cart = [];
-    window.currentDeliveryAddress = '';
-    saveCart();
-    updateCartUI();
-    closeAllModals();
-    showLanding();
-}
-
-/** 
- * Finalize but keep receipt on screen for server to see.
- * Changes the button to a 'Close/Finish' button once clicked.
- */
-function finalizeOrderSilent(orderNo, total, serviceLabel, btn) {
-    const now = new Date();
-    const historyText = `${t('ticket_number_prefix', 'TICKET')} #${orderNo}\n${now.toLocaleDateString()} ${now.toLocaleTimeString()}\n${t('ticket_type_label', 'Type')}: ${serviceLabel}\n${t('ticket_total', 'TOTAL')}: ${total.toFixed(0)} MAD\n---\n${cart.map(i => i.qty + 'x ' + window.getLocalizedMenuName(i)).join('\n')}`;
-    saveToHistory(historyText);
-
-    // Clear background data
-    cart = [];
-    window.currentDeliveryAddress = '';
-    saveCart();
-    updateCartUI();
-
-    // Update the button UI to allow exit
-    const parent = btn.parentElement;
-    parent.innerHTML = `
-        <button onclick="closeAllModals(); showLanding();"
-                class="ticket-action-btn is-success">
-            ${t('ticket_saved', 'ORDER SAVED ✓')}
-        </button>
-        <div class="ticket-helper is-success">${t('ticket_saved_help', 'Order saved. Tap to close.')}</div>
-    `;
-}
-
-function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
-    // WhatsApp formatting
-    let waText = `*${t('wa_new_order_title', 'NEW ORDER - {restaurant}', { restaurant: `#${orderNo}` })}*\n`;
-    waText += `${t('ticket_type_label', 'Type')}: ${serviceLabel}\n`;
-    if (serviceType === 'delivery') {
-        waText += `ðŸ“ ${t('ticket_addr', 'Adresse')}: ${window.currentDeliveryAddress.trim()}\n`;
-    }
-    waText += `---------------------------\n`;
-    cart.forEach(item => {
-        waText += `${item.qty}x ${window.getLocalizedMenuName(item)} - ${(item.price * item.qty).toFixed(0)} dhs\n`;
-    });
-    waText += `---------------------------\n`;
-    waText += `*${t('wa_total_label', 'TOTAL')}: ${total.toFixed(0)} dhs*\n`;
-
-    const phone = window.getWhatsAppNumber();
-    if (!phone) {
-        window.showToast(t('social_empty', 'No links configured yet.'));
-        return;
-    }
-
-    // Save history then clear and send
-    finalizeOrder(orderNo, total, serviceLabel);
-
-    // Open WhatsApp
-    window.openSafeExternalUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
+    return ensureMenuInteractionsScriptLoaded().then(() => window.generateTicket());
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LIKES HANDLER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

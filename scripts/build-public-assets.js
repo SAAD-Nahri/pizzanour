@@ -14,6 +14,7 @@ const ASSETS = [
   { input: "shared-public.js", loader: "js" },
   { input: "app.js", loader: "js" },
   { input: "menu.js", loader: "js" },
+  { input: "menu-interactions.js", loader: "js" },
   { input: "homepage-extras.js", loader: "js" },
   { input: "game.js", loader: "js" }
 ];
