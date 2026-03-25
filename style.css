@@ -6724,11 +6724,6 @@ body:not(.menu-page) {
 }
 
 body:not(.menu-page) .top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 340;
   background: rgba(16, 18, 24, 0.88);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px);
@@ -6738,7 +6733,7 @@ body:not(.menu-page) .top-bar {
 body:not(.menu-page) .top-bar-inner {
   max-width: 1180px;
   min-height: 52px;
-  padding: calc(env(safe-area-inset-top, 0px) + 8px) 24px 8px;
+  padding: 10px 24px;
 }
 
 body:not(.menu-page) .status-badge {
@@ -6747,10 +6742,8 @@ body:not(.menu-page) .status-badge {
 }
 
 body:not(.menu-page) .header {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 52px + 8px);
-  left: 0;
-  right: 0;
+  position: sticky;
+  top: 0;
   z-index: 330;
   background: transparent;
   border-bottom: none;
@@ -6781,8 +6774,8 @@ body:not(.menu-page) .header-nav .nav-link::after {
 }
 
 body:not(.menu-page) .hero-slider {
-  margin-top: calc(env(safe-area-inset-top, 0px) + 52px + 86px);
-  height: min(calc(100svh - 130px), 760px);
+  margin-top: 0;
+  height: min(calc(100svh - 86px), 760px);
   min-height: 560px;
   border-radius: 0 0 42px 42px;
   isolation: isolate;
@@ -7861,7 +7854,6 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .top-bar {
-    z-index: 340;
     background: linear-gradient(180deg, rgba(22, 24, 30, 0.97) 0%, rgba(22, 24, 30, 0.91) 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 12px 28px rgba(12, 16, 24, 0.18);
@@ -7906,9 +7898,7 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .header {
-    top: calc(env(safe-area-inset-top, 0px) + var(--home-mobile-topbar-h) + 4px);
-    left: 10px;
-    right: 10px;
+    top: 0;
     z-index: 330;
     background: transparent;
     border-bottom: 0;
@@ -7999,7 +7989,7 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .hero-slider {
-    margin-top: calc(env(safe-area-inset-top, 0px) + var(--home-mobile-topbar-h) + var(--home-mobile-header-h) + 14px);
+    margin-top: 0;
     height: 58svh;
     min-height: 392px;
     border-radius: 0 0 28px 28px;
