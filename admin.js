@@ -1144,6 +1144,7 @@ function renderMenuBuilder() {
                     <td data-label="Items"><span class="menu-builder-count-pill">${entry.itemCount} items</span></td>
                     <td data-label="Actions">
                         <div class="menu-builder-item-actions">
+                            <button type="button" class="action-btn" title="Category image" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.image}</button>
                             <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.edit}</button>
                             <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>${ADMIN_ICON.trash}</button>
                         </div>
@@ -3557,7 +3558,7 @@ function renderCatTable() {
         const media = image
             ? `<span class="menu-builder-entry-thumb"><img src="${escapeHtml(image)}" alt="${escapeHtml(cat)}" loading="lazy" decoding="async"></span>`
             : `${catEmojis[cat]}`;
-        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
+        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" title="Category image" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.image}</button><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
     }).join('');
 }
 function editCat(cat) {
