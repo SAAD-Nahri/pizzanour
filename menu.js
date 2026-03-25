@@ -44,6 +44,7 @@ async function fetchPublicDataWithTimeout() {
     try {
         return await fetch('/api/data', {
             cache: 'no-store',
+            headers: lastDataVersion ? { 'If-None-Match': lastDataVersion } : undefined,
             signal: controller ? controller.signal : undefined
         });
     } finally {
@@ -59,11 +60,13 @@ async function syncDataFromServer() {
     syncInFlight = (async () => {
     try {
         const res = await fetchPublicDataWithTimeout();
+        if (res.status === 304) return;
         if (!res.ok) return;
+        const nextVersion = res.headers.get('etag') || res.headers.get('x-data-version') || '';
         const data = await res.json();
-        const nextDataVersion = JSON.stringify(data);
+        const nextDataVersion = nextVersion || JSON.stringify(data);
 
-        if (nextDataVersion === lastDataVersion) return; // No change
+        if (nextDataVersion === lastDataVersion) return;
 
         // Update local variables
         menu = Array.isArray(data.menu) ? data.menu : menu;

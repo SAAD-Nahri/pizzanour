@@ -6,7 +6,7 @@ const {
   parsePort,
   setStaticAssetHeaders
 } = require("./server-common");
-const { ensureStorage, readData, uploadsDir } = require("./site-store");
+const { ensureStorage, getDataVersion, readData, uploadsDir } = require("./site-store");
 
 const app = express();
 const port = parsePort(process.env.PORT, 3002);
@@ -50,8 +50,16 @@ app.get("/build.json", (_req, res) => {
   res.json({ status: "ok", service: "website", build });
 });
 
-app.get("/api/data", (_req, res) => {
+app.get("/api/data", (req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  const version = getDataVersion();
+  const etag = `W/"${version}"`;
+  res.setHeader("ETag", etag);
+  res.setHeader("X-Data-Version", version);
+  if (req.headers["if-none-match"] === etag) {
+    res.status(304).end();
+    return;
+  }
   res.json(readData());
 });
 

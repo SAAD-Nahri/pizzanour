@@ -457,6 +457,17 @@ function readData() {
   }
 }
 
+function getDataVersion() {
+  ensureStorage();
+
+  try {
+    const stats = fs.statSync(dataFile);
+    return `${stats.size}-${Math.floor(stats.mtimeMs)}`;
+  } catch (_error) {
+    return "0-0";
+  }
+}
+
 function writeData(data) {
   ensureStorage();
   const normalized = normalizeData(data);
@@ -475,6 +486,7 @@ module.exports = {
   dataFile,
   uploadsDir,
   ensureStorage,
+  getDataVersion,
   readData,
   writeData,
   normalizeData,
