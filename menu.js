@@ -450,16 +450,9 @@ function getSuperCategoryForCategory(cat) {
 
 function buildCategorySubnavButtonMarkup(cat, isActive = false) {
     const localizedName = window.getLocalizedCategoryName(cat, cat);
-    const preview = getCategoryPreviewSource(cat);
-    const originalSrcAttr = preview.originalSrc && preview.originalSrc !== preview.src
-        ? ` data-original-src="${escapeHtmlAttr(preview.originalSrc)}"`
-        : '';
 
     return `
         <button class="menu-cat-btn menu-subnav-btn ${isActive ? 'active' : ''} menu-reveal-observe" data-cat="${escapeHtmlAttr(cat)}" onclick="showCategoryItems(${serializeInlineId(cat)})">
-            <span class="menu-subnav-thumb">
-                <img class="menu-deferred-img" data-menu-src="${escapeHtmlAttr(preview.src)}"${originalSrcAttr} data-fallback-emoji="${escapeHtmlAttr(localizedName.charAt(0).toUpperCase() || MENU_UI_ICONS.plate)}" alt="${escapeHtmlAttr(localizedName)}" width="160" height="160" loading="lazy" decoding="async" fetchpriority="low">
-            </span>
             <span class="menu-subnav-name">${localizedName}</span>
         </button>
     `;
@@ -480,7 +473,6 @@ function renderSuperCategoryChildNav(sc, activeCat = '') {
     catNav.innerHTML = filteredCats
         .map((c) => buildCategorySubnavButtonMarkup(c, c === activeCat))
         .join('');
-    observeDeferredMenuImages(catNav);
 }
 
 
