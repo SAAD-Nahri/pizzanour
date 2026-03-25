@@ -373,6 +373,7 @@ let navigationStack = []; // stack: 'landing', 'supercats', 'subcats:NAME', 'ite
 let currentSuperCat = null;
 let menuMotionObserver = null;
 let menuMotionRefreshFrame = null;
+let categoryChunkObserver = null;
 let menuMarkupReady = false;
 let superCatSheetReady = false;
 let promoRenderQueued = false;
@@ -409,6 +410,28 @@ function prefersReducedMenuMotion() {
             window.matchMedia('(pointer: coarse)').matches
         ))
     );
+}
+
+function disconnectCategoryChunkObserver() {
+    if (!categoryChunkObserver) return;
+    categoryChunkObserver.disconnect();
+    categoryChunkObserver = null;
+}
+
+function ensureCategoryChunkObserver() {
+    if (categoryChunkObserver || !('IntersectionObserver' in window)) return categoryChunkObserver;
+
+    categoryChunkObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const currentState = activeCategoryRenderState;
+            if (!currentState || entry.target !== currentState.sentinel) return;
+            categoryChunkObserver.unobserve(entry.target);
+            scheduleNextCategoryChunk(activeCategoryRenderToken);
+        });
+    }, { rootMargin: '320px 0px' });
+
+    return categoryChunkObserver;
 }
 
 function ensureMenuMotionObserver() {
@@ -527,6 +550,20 @@ function cacheRenderedCategoryMarkup(cat, gridMarkup) {
     menuCategoryMarkupCache.set(getMenuCategoryCacheKey(cat), buildCategorySectionMarkup(cat, gridMarkup));
 }
 
+function ensureCategoryChunkSentinel(state) {
+    if (!state?.grid) return;
+    if (!state.sentinel || !state.sentinel.isConnected) {
+        const sentinel = document.createElement('div');
+        sentinel.className = 'menu-grid-sentinel';
+        sentinel.setAttribute('aria-hidden', 'true');
+        state.grid.appendChild(sentinel);
+        state.sentinel = sentinel;
+    }
+
+    const observer = ensureCategoryChunkObserver();
+    if (observer) observer.observe(state.sentinel);
+}
+
 function flushActiveCategoryRenderState() {
     if (!activeCategoryRenderState) return;
 
@@ -543,10 +580,13 @@ function flushActiveCategoryRenderState() {
             .slice(state.nextIndex, endIndex)
             .map((item, index) => buildMenuItemCardMarkup(item, state.category, state.nextIndex + index))
             .join('');
-        state.grid.insertAdjacentHTML('beforeend', chunkMarkup);
+        if (state.sentinel && state.sentinel.isConnected) state.sentinel.insertAdjacentHTML('beforebegin', chunkMarkup);
+        else state.grid.insertAdjacentHTML('beforeend', chunkMarkup);
         state.nextIndex = endIndex;
     }
 
+    if (state.sentinel?.isConnected) state.sentinel.remove();
+    disconnectCategoryChunkObserver();
     observeDeferredMenuImages(state.grid);
     scheduleMenuMotionRefresh();
     cacheRenderedCategoryMarkup(state.category, state.grid.innerHTML);
@@ -570,14 +610,22 @@ function scheduleNextCategoryChunk(token) {
             .slice(currentState.nextIndex, endIndex)
             .map((item, index) => buildMenuItemCardMarkup(item, currentState.category, currentState.nextIndex + index))
             .join('');
-        currentState.grid.insertAdjacentHTML('beforeend', chunkMarkup);
+        if (currentState.sentinel && currentState.sentinel.isConnected) currentState.sentinel.insertAdjacentHTML('beforebegin', chunkMarkup);
+        else currentState.grid.insertAdjacentHTML('beforeend', chunkMarkup);
         currentState.nextIndex = endIndex;
         observeDeferredMenuImages(currentState.grid);
         scheduleMenuMotionRefresh();
 
         if (currentState.nextIndex >= currentState.items.length) {
+            if (currentState.sentinel?.isConnected) currentState.sentinel.remove();
+            disconnectCategoryChunkObserver();
             cacheRenderedCategoryMarkup(currentState.category, currentState.grid.innerHTML);
             activeCategoryRenderState = null;
+            return;
+        }
+
+        if (isCompactMenuViewport()) {
+            ensureCategoryChunkSentinel(currentState);
             return;
         }
 
@@ -620,6 +668,7 @@ function refreshMenuMotionTargets() {
 }
 
 function scheduleMenuMotionRefresh() {
+    if (prefersReducedMenuMotion()) return;
     if (menuMotionRefreshFrame) {
         cancelAnimationFrame(menuMotionRefreshFrame);
     }
@@ -1223,6 +1272,7 @@ function renderMenu(categoryFilter = null) {
     menuMarkupReady = true;
     activeCategoryRenderToken += 1;
     activeCategoryRenderState = null;
+    disconnectCategoryChunkObserver();
 
     let categories = categoryFilter
         ? [categoryFilter]
@@ -1260,7 +1310,8 @@ function renderMenu(categoryFilter = null) {
                 nextIndex: initialCount,
                 grid
             };
-            scheduleNextCategoryChunk(activeCategoryRenderToken);
+            if (isCompactMenuViewport()) ensureCategoryChunkSentinel(activeCategoryRenderState);
+            else scheduleNextCategoryChunk(activeCategoryRenderToken);
         } else {
             cacheRenderedCategoryMarkup(cat, grid.innerHTML);
         }

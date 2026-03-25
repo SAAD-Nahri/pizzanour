@@ -310,6 +310,11 @@
             gap: 18px;
         }
 
+        .menu-grid-sentinel {
+            width: 100%;
+            height: 1px;
+        }
+
         .menu-item-card {
             background: linear-gradient(180deg, rgba(34, 38, 46, 0.985) 0%, rgba(21, 24, 30, 0.985) 100%);
             border-radius: 22px;
