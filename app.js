@@ -389,6 +389,7 @@ function renderLocation() {
     const topPhoneText = document.getElementById('topPhoneDisplay');
     const contactPhoneLink = document.getElementById('contactPhoneLink');
     const directionsLink = document.getElementById('directionsLink');
+    const reviewsLink = document.getElementById('reviewsLink');
 
     if (restaurantConfig.location) {
         if (addressText) addressText.textContent = restaurantConfig.location.address;
@@ -411,6 +412,13 @@ function renderLocation() {
             directionsLink.removeAttribute('href');
             directionsLink.classList.add('is-disabled');
         }
+        if (reviewsLink && mapUrl) {
+            reviewsLink.href = mapUrl;
+            reviewsLink.classList.remove('is-disabled');
+        } else if (reviewsLink) {
+            reviewsLink.removeAttribute('href');
+            reviewsLink.classList.add('is-disabled');
+        }
     } else if (addressCard) {
         addressCard.onclick = null;
         addressCard.classList.remove('is-actionable');
@@ -421,6 +429,10 @@ function renderLocation() {
         }
         if (footerAddressText) footerAddressText.textContent = '';
         if (topAddressText) topAddressText.textContent = '';
+        if (reviewsLink) {
+            reviewsLink.removeAttribute('href');
+            reviewsLink.classList.add('is-disabled');
+        }
     }
 
     if (restaurantConfig.phone) {
