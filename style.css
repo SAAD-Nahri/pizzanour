@@ -7900,9 +7900,9 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .lang-drop-btn {
-    min-width: 58px;
+    min-width: 54px;
     height: 38px;
-    padding: 0 10px;
+    padding: 0 9px;
     border-radius: 14px;
     background: rgba(255, 248, 238, 0.14);
     border: 1px solid rgba(255, 248, 238, 0.2);
@@ -7913,14 +7913,14 @@ body:not(.menu-page) .footer-copy {
     top: calc(100% + 8px);
     right: 0;
     left: auto;
-    min-width: 108px;
-    max-width: min(118px, calc(100vw - 20px));
+    min-width: 98px;
+    max-width: min(108px, calc(100vw - 20px));
     border-radius: 16px;
   }
 
   body:not(.menu-page) .lang-opt {
-    padding: 8px 9px;
-    font-size: 0.76rem;
+    padding: 7px 8px;
+    font-size: 0.74rem;
   }
 
   body:not(.menu-page) .header {
