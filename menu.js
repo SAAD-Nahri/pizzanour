@@ -1328,7 +1328,6 @@ function showSubCategoryGrid(sc, addToStack = true) {
 
     const navWrapper = document.getElementById('catNavWrapper');
     const menuContent = document.getElementById('menuContent');
-    const searchBox = document.getElementById('menuSearchBox');
     document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'items');
 
     const currentCategories = [...new Set(menu.map(m => m.cat))];
@@ -1337,7 +1336,6 @@ function showSubCategoryGrid(sc, addToStack = true) {
 
     navWrapper.style.display = filteredCats.length ? 'block' : 'none';
     menuContent.style.display = '';
-    if (searchBox) searchBox.style.display = '';
     currentSuperCat = sc;
 
     renderSuperCategoryChildNav(sc, defaultCategory);
@@ -1363,13 +1361,11 @@ function showCategoryItems(cat, addToStack = true) {
 
     const navWrapper = document.getElementById('catNavWrapper');
     const menuContent = document.getElementById('menuContent');
-    const searchBox = document.getElementById('menuSearchBox');
     const sc = getSuperCategoryForCategory(cat);
 
     document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'items');
     renderSuperCategoryChildNav(sc, cat);
     menuContent.style.display = 'block';
-    if (searchBox) searchBox.style.display = 'block';
 
     // Update global featured slider for specific category
     const featuredItems = menu.filter(m => m.cat === cat && m.featured && m.available !== false);

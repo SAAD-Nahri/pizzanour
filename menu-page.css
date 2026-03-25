@@ -214,13 +214,13 @@
         }
 
         #menuNavigationView[data-mode='items'] {
-            --menu-subnav-top: calc(env(safe-area-inset-top, 0px) + 78px);
+            --menu-subnav-top: calc(env(safe-area-inset-top, 0px) + 62px);
             --menu-subnav-width: min(calc(100vw - 36px), 860px);
-            --menu-subnav-height: 60px;
+            --menu-subnav-height: 54px;
         }
 
         #menuNavigationView[data-mode='items'] .menu-content-area {
-            padding-top: calc(var(--menu-subnav-height) + 22px);
+            padding-top: calc(var(--menu-subnav-height) + 8px);
         }
 
         #menuNavigationView[data-mode='categories'] .cat-nav-wrapper {
@@ -238,12 +238,12 @@
             transform: translateX(-50%);
             width: var(--menu-subnav-width);
             margin: 0;
-            padding: 10px 0 12px;
+            padding: 6px 0 8px;
             background: linear-gradient(180deg, rgba(251, 247, 240, 0.98) 0%, rgba(251, 247, 240, 0.92) 72%, rgba(251, 247, 240, 0.82) 100%);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 190, 92, 0.12);
             box-shadow: 0 16px 28px rgba(75, 47, 24, 0.06);
-            border-radius: 20px;
+            border-radius: 18px;
             z-index: 180;
         }
 
@@ -1224,10 +1224,10 @@
             }
 
             #menuNavigationView[data-mode='items'] .cat-nav-wrapper {
-                top: calc(env(safe-area-inset-top, 0px) + 68px);
+                top: calc(env(safe-area-inset-top, 0px) + 56px);
                 width: calc(100vw - 20px);
-                padding: 8px 0 10px;
-                border-radius: 18px;
+                padding: 5px 0 7px;
+                border-radius: 16px;
             }
 
             #menuNavigationView[data-mode='items'] .cat-nav-scroll,
@@ -1236,7 +1236,7 @@
             }
 
             #menuNavigationView[data-mode='items'] .menu-content-area {
-                padding-top: 86px;
+                padding-top: 62px;
             }
 
             .menu-subnav-track {
