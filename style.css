@@ -649,8 +649,8 @@ body.menu-page {
 .landing-body {
   background: linear-gradient(180deg, #fff 0%, #fffdf9 100%);
   border-radius: 32px 32px 0 0;
-  margin-top: -26px;
-  padding: 24px 20px 56px;
+  margin-top: -34px;
+  padding: 28px 20px 42px;
   position: relative;
   z-index: 5;
   box-shadow: 0 -18px 46px rgba(15, 23, 42, 0.06);
@@ -668,7 +668,7 @@ body.menu-page {
 
 .landing-status {
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* Super Category Pills on Landing */
@@ -721,9 +721,11 @@ body.menu-page {
 
 /* View Menu Button */
 .view-menu-btn {
-  display: block;
-  width: 100%;
-  padding: 19px 22px;
+  display: flex;
+  width: min(100%, 340px);
+  align-items: center;
+  justify-content: center;
+  padding: 18px 22px;
   background: linear-gradient(135deg, var(--red) 0%, var(--orange) 100%);
   color: #fff;
   border: none;
@@ -731,11 +733,11 @@ body.menu-page {
   font-size: 1.02rem;
   font-weight: 800;
   cursor: pointer;
-  margin: 18px 0 18px;
+  margin: 18px auto 18px;
   transition: transform 0.24s ease, box-shadow 0.24s ease, filter 0.24s ease;
   box-shadow: 0 18px 34px rgba(226, 27, 27, 0.24);
   font-family: 'Poppins', sans-serif;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
 .view-menu-btn:hover {
@@ -746,23 +748,27 @@ body.menu-page {
 
 /* Info Section */
 .info-section {
-  margin: 4px 0 20px;
-  border: 1px solid rgba(255, 141, 8, 0.08);
-  border-radius: 24px;
-  overflow: hidden;
-  background: linear-gradient(180deg, #ffffff 0%, #fffdf9 100%);
-  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.06);
+  margin: 8px 0 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .info-row {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 18px 18px;
-  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
-  font-size: 0.92rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 94px;
+  padding: 16px 16px 14px;
+  border: 1px solid rgba(255, 141, 8, 0.08);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fffaf3 100%);
+  font-size: 0.9rem;
   color: #333;
-  transition: background 0.24s ease, transform 0.24s ease;
+  transition: background 0.24s ease, transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.05);
 }
 
 .info-row.is-actionable {
@@ -770,8 +776,10 @@ body.menu-page {
 }
 
 .info-row.is-actionable:hover {
-  background: rgba(255, 247, 236, 0.9);
-  transform: translateX(2px);
+  background: linear-gradient(180deg, #fff7ed 0%, #fff0dd 100%);
+  border-color: rgba(255, 141, 8, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 32px rgba(15, 23, 42, 0.08);
 }
 
 .info-row.is-empty {
@@ -783,13 +791,26 @@ body.menu-page {
 }
 
 .info-icon {
-  font-size: 1.14rem;
-  min-width: 28px;
-  text-align: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(255, 244, 231, 0.96) 0%, rgba(255, 234, 208, 0.98) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 141, 8, 0.08);
 }
 
 .info-text {
   flex: 1;
+  width: 100%;
+  font-weight: 600;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .info-text.is-empty {
@@ -835,15 +856,15 @@ body.menu-page {
 .social-links {
   display: flex;
   justify-content: center;
-  gap: 14px;
-  margin: 28px 0 0;
+  gap: 12px;
+  margin: 14px 0 0;
   flex-wrap: wrap;
 }
 
 .social-icon-link {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
+  width: 50px;
+  height: 50px;
+  border-radius: 17px;
   background: linear-gradient(180deg, #fff 0%, #fff8ef 100%);
   display: flex;
   align-items: center;
@@ -4993,7 +5014,7 @@ body[data-theme-preset='traditional'] .about-section {
 
 .dish-page-body {
   flex: 1;
-  padding: 30px 20px 20px;
+  padding: 28px 20px 18px;
   background: linear-gradient(180deg, #fff 0%, #fbf7f0 100%);
   border-top-left-radius: 34px;
   border-top-right-radius: 34px;
@@ -5017,27 +5038,27 @@ body[data-theme-preset='traditional'] .about-section {
 
 .dish-page-name {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.8rem, 5vw, 2.18rem);
+  font-size: clamp(1.72rem, 4.8vw, 2.08rem);
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: #161616;
   letter-spacing: -1px;
   text-wrap: balance;
 }
 
 .dish-page-price {
-  font-size: 1.36rem;
+  font-size: 1.24rem;
   font-weight: 800;
   color: #d94841;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   letter-spacing: -0.4px;
 }
 
 .dish-page-desc {
   color: var(--text2);
-  line-height: 1.65;
-  font-size: 0.95rem;
-  margin-bottom: 22px;
+  line-height: 1.58;
+  font-size: 0.92rem;
+  margin-bottom: 18px;
   max-width: 40ch;
 }
 
@@ -6463,7 +6484,7 @@ body[data-theme-preset='traditional'] .about-section {
 
   .landing-body {
     margin-top: -18px;
-    padding: 18px 14px 28px;
+    padding: 18px 14px 22px;
     border-radius: 28px 28px 0 0;
   }
 
@@ -6510,27 +6531,30 @@ body[data-theme-preset='traditional'] .about-section {
   }
 
   .view-menu-btn {
-    margin: 12px 0 14px;
+    width: 100%;
+    margin: 12px 0 12px;
     padding: 16px 18px;
     border-radius: 22px;
     font-size: 0.95rem;
   }
 
   .info-section {
-    margin-bottom: 12px;
-    border-radius: 20px;
-    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.05);
+    margin-bottom: 10px;
+    gap: 10px;
   }
 
   .info-row {
-    padding: 14px 12px;
-    gap: 12px;
-    font-size: 0.88rem;
+    min-height: 84px;
+    padding: 14px 12px 12px;
+    gap: 8px;
+    border-radius: 18px;
+    font-size: 0.82rem;
   }
 
   .info-icon {
-    min-width: 24px;
-    font-size: 1rem;
+    width: 38px;
+    height: 38px;
+    font-size: 0.98rem;
   }
 
   .hours-section {
@@ -6552,7 +6576,7 @@ body[data-theme-preset='traditional'] .about-section {
   }
 
   .social-links {
-    margin-top: 14px;
+    margin-top: 10px;
     gap: 10px;
   }
 
@@ -6648,7 +6672,7 @@ body[data-theme-preset='traditional'] .about-section {
   }
 
   .menu-item-info {
-    padding-right: 42px;
+    padding-right: 38px;
   }
 
   .menu-item-name {
@@ -6696,11 +6720,11 @@ body[data-theme-preset='traditional'] .about-section {
   }
 
   .dish-page-body {
-    padding: 24px 16px 16px;
+    padding: 24px 16px 14px;
   }
 
   .dish-page-name {
-    font-size: clamp(1.4rem, 7vw, 1.82rem);
+    font-size: clamp(1.42rem, 7vw, 1.74rem);
   }
 
   .dish-page-desc {
