@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const compression = require("compression");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -72,6 +73,10 @@ const dataRoot = process.env.DATA_FILE
   : __dirname;
 const authFile = process.env.AUTH_FILE || path.join(dataRoot, "auth.json");
 const loginAttempts = new Map();
+
+app.use(compression({
+  threshold: 1024
+}));
 
 const IMPORTER_SYSTEM_PROMPT = [
   "You generate seller-side draft JSON for a white-label restaurant website.",

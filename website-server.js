@@ -1,4 +1,5 @@
 const express = require("express");
+const compression = require("compression");
 const path = require("path");
 
 const {
@@ -22,6 +23,10 @@ const build = createBuildFingerprint([
 ]);
 
 ensureStorage();
+
+app.use(compression({
+  threshold: 1024
+}));
 
 const DENY_PUBLIC_FILES = new Set([
   "/admin.html",
