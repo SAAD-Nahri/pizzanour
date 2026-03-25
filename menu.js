@@ -99,7 +99,8 @@ async function syncDataFromServer() {
         }
 
         // Refresh UI
-        if (menuMarkupReady && typeof renderMenu === 'function') renderMenu();
+        const currentState = navigationStack[navigationStack.length - 1] || '';
+        if (menuMarkupReady && typeof renderMenu === 'function' && !currentState.startsWith('items:')) renderMenu();
         if (typeof renderPromoCarousel === 'function') renderPromoCarousel();
         if (typeof renderLandingInfo === 'function') renderLandingInfo();
         if (superCatSheetReady && typeof renderSuperCatSheet === 'function') renderSuperCatSheet();
@@ -387,12 +388,6 @@ function renderLandingInfo() {
 
     renderLandingSocialLinks();
     scheduleMenuMotionRefresh();
-}
-
-function ensureMenuMarkupReady() {
-    if (menuMarkupReady) return;
-    renderMenu();
-    menuMarkupReady = true;
 }
 
 function ensureSuperCatSheetReady() {
@@ -715,7 +710,6 @@ function selectSuperCategory(scId) {
 
 function showSubCategoryGrid(sc, addToStack = true) {
     if (addToStack) navigationStack.push(`subcats:${sc.id}`);
-    ensureMenuMarkupReady();
 
     showMenuNavigationView(window.getLocalizedSuperCategoryName(sc, sc.name));
 
@@ -753,7 +747,7 @@ function showSubCategoryGrid(sc, addToStack = true) {
 
 function showCategoryItems(cat, addToStack = true) {
     if (addToStack) navigationStack.push(`items:${cat}`);
-    ensureMenuMarkupReady();
+    renderMenu(cat);
 
     showMenuNavigationView(window.getLocalizedCategoryName(cat, cat));
 
@@ -764,12 +758,6 @@ function showCategoryItems(cat, addToStack = true) {
     navWrapper.style.display = 'none';
     menuContent.style.display = 'block';
     if (searchBox) searchBox.style.display = 'block';
-
-    // Show only the selected category's sections
-    document.querySelectorAll('.menu-section').forEach(s => {
-        const sId = s.id.replace('cat-', '').replace(/-/g, ' ');
-        s.style.display = sId === cat ? 'block' : 'none';
-    });
 
     // Update global featured slider for specific category
     const featuredItems = menu.filter(m => m.cat === cat && m.featured && m.available !== false);
@@ -821,12 +809,14 @@ if (baseMenuSetLang) {
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RENDERING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-function renderMenu() {
+function renderMenu(categoryFilter = null) {
     const wrap = document.getElementById('menuContent');
     if (!wrap) return;
     menuMarkupReady = true;
 
-    let categories = [...new Set(menu.map(m => m.cat))];
+    let categories = categoryFilter
+        ? [categoryFilter]
+        : [...new Set(menu.map(m => m.cat))];
 
     wrap.innerHTML = categories.map(cat => {
         const items = menu.filter(m => m.cat === cat && m.available !== false);
