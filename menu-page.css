@@ -182,9 +182,11 @@
 
         .cat-nav-scroll {
             display: flex;
-            gap: 14px;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 10px;
             overflow-x: auto;
-            padding: 8px 16px;
+            padding: 6px 14px;
             scrollbar-width: none;
         }
 
@@ -264,9 +266,10 @@
             align-items: center;
             justify-content: center;
             gap: 0;
-            padding: 8px 16px;
-            min-height: 46px;
-            border-radius: 18px;
+            padding: 6px 14px;
+            min-height: 38px;
+            border-radius: 999px;
+            flex: 0 0 auto;
         }
 
         .menu-subnav-name {
@@ -1178,12 +1181,12 @@
             }
 
             .menu-subnav-btn {
-                min-height: 42px;
-                padding: 7px 14px;
+                min-height: 34px;
+                padding: 5px 12px;
             }
 
             .menu-subnav-name {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
             }
 
             .menu-category-card {

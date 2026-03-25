@@ -1325,26 +1325,26 @@ function showSubCategoryGrid(sc, addToStack = true) {
     showMenuNavigationView(window.getLocalizedSuperCategoryName(sc, sc.name));
 
     const navWrapper = document.getElementById('catNavWrapper');
-    const subCatTitle = document.getElementById('subCatTitle');
     const menuContent = document.getElementById('menuContent');
     const searchBox = document.getElementById('menuSearchBox');
-    const catNav = document.getElementById('catNavScroll');
+    document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'items');
 
-    if (subCatTitle) subCatTitle.textContent = window.getLocalizedSuperCategoryName(sc, sc.name);
-    document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'categories');
-
-    navWrapper.style.display = 'block';
-    menuContent.style.display = 'none';
-    if (searchBox) searchBox.style.display = 'none';
-
-    // Render category grid for this super-category
     const currentCategories = [...new Set(menu.map(m => m.cat))];
     const filteredCats = sc.cats.filter(c => currentCategories.includes(c));
-    catNav.classList.add('is-visual-list');
-    catNav.innerHTML = filteredCats.map((c) => buildCategoryNavigationCardMarkup(c)).join('');
-    observeDeferredMenuImages(catNav);
+    const defaultCategory = filteredCats[0] || '';
 
-    // Keep this step focused on picking a category.
+    navWrapper.style.display = filteredCats.length ? 'block' : 'none';
+    menuContent.style.display = '';
+    if (searchBox) searchBox.style.display = '';
+    currentSuperCat = sc;
+
+    renderSuperCategoryChildNav(sc, defaultCategory);
+    if (defaultCategory) {
+        renderMenu(defaultCategory);
+    } else {
+        menuContent.innerHTML = '';
+    }
+
     scheduleDeferredFeaturedRender([], 'featuredGlobal');
 
     updateBackBtn();
