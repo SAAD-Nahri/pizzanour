@@ -4055,6 +4055,17 @@ body[data-theme-preset='traditional'] .about-section {
   pointer-events: all;
 }
 
+/* Keep event booking modal hidden until lazy event-modal.css loads */
+.event-booking-overlay,
+.event-booking-modal {
+  display: none;
+}
+
+.event-booking-overlay.open,
+.event-booking-modal.open {
+  display: block;
+}
+
 .social-modal-close {
   position: absolute;
   top: 15px;
