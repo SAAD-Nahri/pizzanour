@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
+const crypto = require("crypto");
 const esbuild = require("esbuild");
 const { minify: minifyHtml } = require("html-minifier-terser");
 
@@ -41,14 +42,37 @@ async function minifyAsset({ input, loader }) {
   return {
     input,
     before: Buffer.byteLength(source),
-    after: Buffer.byteLength(result.code)
+    after: Buffer.byteLength(result.code),
+    code: result.code
   };
 }
 
-async function minifyHtmlFile(input) {
+function versionedAssetPath(fileName, version) {
+  return `${fileName}?v=${encodeURIComponent(version)}`;
+}
+
+async function minifyHtmlFile(input, version) {
   const inputPath = path.join(ROOT, input);
   const source = await fs.readFile(inputPath, "utf8");
-  const code = await minifyHtml(source, {
+  const versionedSource = source
+    .replace(/href="style\.css"/g, `href="${versionedAssetPath("style.css", version)}"`)
+    .replace(/href="menu-page\.css"/g, `href="${versionedAssetPath("menu-page.css", version)}"`)
+    .replace(/href="shared-public\.js"/g, `href="${versionedAssetPath("shared-public.js", version)}"`)
+    .replace(/href="app\.js"/g, `href="${versionedAssetPath("app.js", version)}"`)
+    .replace(/href="menu\.js"/g, `href="${versionedAssetPath("menu.js", version)}"`)
+    .replace(/href="homepage-extras\.js"/g, `href="${versionedAssetPath("homepage-extras.js", version)}"`)
+    .replace(/href="game\.js"/g, `href="${versionedAssetPath("game.js", version)}"`)
+    .replace(/src="shared-public\.js"/g, `src="${versionedAssetPath("shared-public.js", version)}"`)
+    .replace(/src="app\.js"/g, `src="${versionedAssetPath("app.js", version)}"`)
+    .replace(/src="menu\.js"/g, `src="${versionedAssetPath("menu.js", version)}"`)
+    .replace(/href="game\.css"/g, `href="${versionedAssetPath("game.css", version)}"`)
+    .replace(/href="homepage-extras\.js"/g, `href="${versionedAssetPath("homepage-extras.js", version)}"`)
+    .replace(
+      /(<script src="shared-public[^"]*" defer><\/script>)/,
+      `<script>window.__PUBLIC_BUILD_VERSION=${JSON.stringify(version)};</script>$1`
+    );
+
+  const code = await minifyHtml(versionedSource, {
     collapseWhitespace: true,
     removeComments: true,
     minifyCSS: true,
@@ -72,13 +96,22 @@ async function minifyHtmlFile(input) {
 async function main() {
   await ensureDir(OUT_DIR);
   const results = [];
+  const assetResults = [];
 
   for (const asset of ASSETS) {
-    results.push(await minifyAsset(asset));
+    const result = await minifyAsset(asset);
+    results.push(result);
+    assetResults.push(result);
   }
 
+  const versionHash = crypto
+    .createHash("sha1")
+    .update(assetResults.map((item) => `${item.input}:${item.code}`).join("\n"))
+    .digest("hex")
+    .slice(0, 10);
+
   for (const input of HTML_FILES) {
-    results.push(await minifyHtmlFile(input));
+    results.push(await minifyHtmlFile(input, versionHash));
   }
 
   const totalBefore = results.reduce((sum, item) => sum + item.before, 0);

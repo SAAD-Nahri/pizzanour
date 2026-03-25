@@ -56,6 +56,12 @@ let homepageDeferredFallbackTimer = null;
 let eventBookingScriptPromise = null;
 let homepageExtrasScriptPromise = null;
 
+function getVersionedPublicAsset(pathname) {
+    const version = typeof window.__PUBLIC_BUILD_VERSION === 'string' ? window.__PUBLIC_BUILD_VERSION.trim() : '';
+    if (!version) return pathname;
+    return `${pathname}?v=${encodeURIComponent(version)}`;
+}
+
 function scheduleLowPriorityTask(callback, timeout = 1200) {
     if (typeof window.requestIdleCallback === 'function') {
         return window.requestIdleCallback(callback, { timeout });
@@ -298,7 +304,7 @@ function ensureEventBookingScript() {
         }
 
         const script = document.createElement('script');
-        script.src = 'event-booking.js';
+        script.src = getVersionedPublicAsset('event-booking.js');
         script.defer = true;
         script.setAttribute('data-event-booking-script', 'true');
         script.onload = () => resolve();
@@ -476,7 +482,7 @@ function ensureHomepageExtrasScript() {
         }
 
         const script = document.createElement('script');
-        script.src = 'homepage-extras.js';
+        script.src = getVersionedPublicAsset('homepage-extras.js');
         script.defer = true;
         script.setAttribute('data-homepage-extras-script', 'true');
         script.onload = () => resolve();

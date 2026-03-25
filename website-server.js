@@ -352,7 +352,11 @@ app.get(Array.from(PUBLIC_BUILD_FILES), (req, res, next) => {
     next();
     return;
   }
-  setStaticAssetHeaders(res, builtPath);
+  if (typeof req.query?.v === "string" && req.query.v) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  } else {
+    setStaticAssetHeaders(res, builtPath);
+  }
   res.sendFile(builtPath);
 });
 

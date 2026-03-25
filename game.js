@@ -10,6 +10,12 @@ let revealedCount = 0;
 let gameActive = false;
 let gameStylesheetPromise = null;
 
+function getVersionedPublicAsset(pathname) {
+    const version = typeof window.__PUBLIC_BUILD_VERSION === 'string' ? window.__PUBLIC_BUILD_VERSION.trim() : '';
+    if (!version) return pathname;
+    return `${pathname}?v=${encodeURIComponent(version)}`;
+}
+
 function gameText(key, fallback, vars = {}) {
     if (typeof window.formatTranslation === 'function') {
         return window.formatTranslation(key, fallback, vars);
@@ -32,7 +38,7 @@ function ensureGameStylesheet() {
         const link = document.createElement('link');
         link.id = 'gameStylesheet';
         link.rel = 'stylesheet';
-        link.href = 'game.css';
+        link.href = getVersionedPublicAsset('game.css');
         link.onload = () => resolve();
         link.onerror = () => {
             gameStylesheetPromise = null;

@@ -9,9 +9,14 @@ window.catEmojis = catEmojis;
 let cart = typeof window.getStoredCart === 'function'
     ? window.getStoredCart()
     : [];
-const GAME_SCRIPT_SRC = 'game.js';
 let gameScriptPromise = null;
 const gameLoaderPlaceholders = {};
+
+function getVersionedPublicAsset(pathname) {
+    const version = typeof window.__PUBLIC_BUILD_VERSION === 'string' ? window.__PUBLIC_BUILD_VERSION.trim() : '';
+    if (!version) return pathname;
+    return `${pathname}?v=${encodeURIComponent(version)}`;
+}
 
 function ensureGameScriptLoaded() {
     if (window.__foodyGameLoaded) return Promise.resolve();
@@ -19,7 +24,7 @@ function ensureGameScriptLoaded() {
 
     gameScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = GAME_SCRIPT_SRC;
+        script.src = getVersionedPublicAsset('game.js');
         script.async = true;
         script.onload = () => {
             window.__foodyGameLoaded = true;
