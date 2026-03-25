@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function refreshHomepageUI() {
     renderPromo();
-    renderLocation();
+    renderLocationCritical();
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
     }
@@ -472,6 +472,46 @@ function renderDeferredHomepageSections() {
         .catch((error) => {
             console.error('Failed to load homepage extras:', error);
         });
+}
+
+function renderLocationCritical() {
+    const topAddressText = document.getElementById('topAddressDisplay');
+    const topPhoneText = document.getElementById('topPhoneDisplay');
+    const directionsLink = document.getElementById('directionsLink');
+    const reviewsLink = document.getElementById('reviewsLink');
+    const mapUrl = window.getSafeExternalUrl(window.restaurantConfig?.location?.url);
+
+    if (topAddressText) {
+        topAddressText.textContent = window.restaurantConfig?.location?.address
+            ? `📍 ${window.restaurantConfig.location.address}`
+            : '';
+    }
+
+    if (topPhoneText) {
+        topPhoneText.textContent = window.restaurantConfig?.phone
+            ? `📞 ${window.restaurantConfig.phone}`
+            : '';
+    }
+
+    if (directionsLink) {
+        if (mapUrl) {
+            directionsLink.href = mapUrl;
+            directionsLink.classList.remove('is-disabled');
+        } else {
+            directionsLink.removeAttribute('href');
+            directionsLink.classList.add('is-disabled');
+        }
+    }
+
+    if (reviewsLink) {
+        if (mapUrl) {
+            reviewsLink.href = mapUrl;
+            reviewsLink.classList.remove('is-disabled');
+        } else {
+            reviewsLink.removeAttribute('href');
+            reviewsLink.classList.add('is-disabled');
+        }
+    }
 }
 
 function renderLocation() {
