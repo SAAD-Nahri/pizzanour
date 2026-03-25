@@ -4153,22 +4153,6 @@
                         <label data-i18n="admin.menu.default_description">Default Description</label>
                         <input type="text" id="itemDesc" placeholder="Used as the fallback when a translation is missing" data-i18n-placeholder="admin.menu.default_description_placeholder" required />
                     </div>
-                    <div class="category-image-field">
-                        <div id="catImagePreview" class="category-image-preview">
-                            <img id="catImagePreviewImg" src="" alt="Category preview" style="display:none;">
-                            <span id="catImagePreviewFallback">Image</span>
-                        </div>
-                        <div class="category-image-controls">
-                            <div class="form-group">
-                                <label>Category Image URL / Path</label>
-                                <input type="text" id="catImage" placeholder="/uploads/category-drinks.webp" />
-                            </div>
-                            <div class="category-image-upload">
-                                <label for="catImageUpload">Upload category image</label>
-                                <input type="file" id="catImageUpload" accept="image/*" />
-                            </div>
-                        </div>
-                    </div>
                     <details class="admin-disclosure">
                         <summary>
                             <span>
@@ -4426,6 +4410,22 @@
                         <div class="form-group">
                             <label data-i18n="admin.categories.emoji">Emoji</label>
                             <input type="text" id="catEmoji" placeholder="☕" required />
+                        </div>
+                    </div>
+                    <div class="category-image-field">
+                        <div id="catImagePreview" class="category-image-preview">
+                            <img id="catImagePreviewImg" src="" alt="Category preview" style="display:none;">
+                            <span id="catImagePreviewFallback">Image</span>
+                        </div>
+                        <div class="category-image-controls">
+                            <div class="form-group">
+                                <label>Category Image URL / Path</label>
+                                <input type="text" id="catImage" placeholder="/uploads/category-drinks.webp" />
+                            </div>
+                            <div class="category-image-upload">
+                                <label for="catImageUpload">Upload category image</label>
+                                <input type="file" id="catImageUpload" accept="image/*" />
+                            </div>
                         </div>
                     </div>
                     <details class="admin-disclosure">
