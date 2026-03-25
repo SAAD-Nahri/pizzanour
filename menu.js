@@ -221,6 +221,7 @@ async function syncDataFromServer() {
         }
 
         lastDataVersion = nextDataVersion;
+        menuCategoryMarkupCache = new Map();
     } catch (e) {
         console.warn('[SYNC] Failed to fetch data:', e);
     } finally {
@@ -310,6 +311,7 @@ let menuImageObserver = null;
 let activeCategoryRenderState = null;
 let activeCategoryRenderToken = 0;
 let featuredRenderToken = 0;
+let menuCategoryMarkupCache = new Map();
 const MENU_INITIAL_CHUNK_SIZE = 8;
 const MENU_CHUNK_SIZE = 12;
 
@@ -413,6 +415,26 @@ function buildMenuItemCardMarkup(item, cat, itemIndex) {
     `;
 }
 
+function getMenuCategoryCacheKey(cat) {
+    const currentLang = typeof window.getStoredLanguage === 'function'
+        ? window.getStoredLanguage()
+        : 'fr';
+    return `${lastDataVersion || 'runtime'}::${currentLang}::${cat}`;
+}
+
+function buildCategorySectionMarkup(cat, gridMarkup) {
+    return `
+        <section class="menu-section menu-reveal-observe" id="cat-${cat.replace(/\s/g, '-')}">
+            <h2 class="menu-section-title">${catEmojis[cat] || MENU_UI_ICONS.plate} ${window.getLocalizedCategoryName(cat, cat)}</h2>
+            <div class="menu-grid">${gridMarkup}</div>
+        </section>
+    `;
+}
+
+function cacheRenderedCategoryMarkup(cat, gridMarkup) {
+    menuCategoryMarkupCache.set(getMenuCategoryCacheKey(cat), buildCategorySectionMarkup(cat, gridMarkup));
+}
+
 function flushActiveCategoryRenderState() {
     if (!activeCategoryRenderState) return;
 
@@ -434,6 +456,7 @@ function flushActiveCategoryRenderState() {
 
     observeDeferredMenuImages(state.grid);
     scheduleMenuMotionRefresh();
+    cacheRenderedCategoryMarkup(state.category, state.grid.innerHTML);
     activeCategoryRenderState = null;
 }
 
@@ -459,6 +482,7 @@ function scheduleNextCategoryChunk(token) {
         scheduleMenuMotionRefresh();
 
         if (currentState.nextIndex >= currentState.items.length) {
+            cacheRenderedCategoryMarkup(currentState.category, currentState.grid.innerHTML);
             activeCategoryRenderState = null;
             return;
         }
@@ -1092,6 +1116,7 @@ const baseMenuSetLang = typeof window.setLang === 'function' ? window.setLang.bi
 if (baseMenuSetLang) {
     window.setLang = function (lang, btn) {
         baseMenuSetLang(lang, btn);
+        menuCategoryMarkupCache = new Map();
         rerenderCurrentMenuLanguageView();
     };
 }
@@ -1112,12 +1137,15 @@ function renderMenu(categoryFilter = null) {
     if (categories.length === 1) {
         const cat = categories[0];
         const items = menu.filter(m => m.cat === cat && m.available !== false);
-        wrap.innerHTML = `
-            <section class="menu-section menu-reveal-observe" id="cat-${cat.replace(/\s/g, '-')}">
-                <h2 class="menu-section-title">${catEmojis[cat] || MENU_UI_ICONS.plate} ${window.getLocalizedCategoryName(cat, cat)}</h2>
-                <div class="menu-grid"></div>
-            </section>
-        `;
+        const cachedMarkup = menuCategoryMarkupCache.get(getMenuCategoryCacheKey(cat));
+        if (cachedMarkup) {
+            wrap.innerHTML = cachedMarkup;
+            observeDeferredMenuImages(wrap);
+            scheduleMenuMotionRefresh();
+            return;
+        }
+
+        wrap.innerHTML = buildCategorySectionMarkup(cat, '');
 
         const grid = wrap.querySelector('.menu-grid');
         if (!grid) return;
@@ -1139,6 +1167,8 @@ function renderMenu(categoryFilter = null) {
                 grid
             };
             scheduleNextCategoryChunk(activeCategoryRenderToken);
+        } else {
+            cacheRenderedCategoryMarkup(cat, grid.innerHTML);
         }
         return;
     }
