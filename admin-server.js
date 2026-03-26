@@ -86,7 +86,10 @@ const IMPORTER_SYSTEM_PROMPT = [
   "Do not invent contact details, maps, hours, WiFi, or social links.",
   "Do not invent branding, hero media, gallery media, website copy, or restaurant story content.",
   "If information is missing, leave the field empty and record a warning.",
-  "Prefer clean restaurant website categories and group them into super-categories only when the grouping is clear.",
+  "Map extracted menu categories into canonical super-categories whenever the source menu does not explicitly provide them.",
+  "Use these canonical super-categories as the default top-level groups: Starters, Main Courses, Sides, Desserts, Beverages, Breakfast.",
+  "Do not mirror category names as super-category names unless they clearly match one of those canonical groups.",
+  "If a category is ambiguous, choose the closest canonical group and record the uncertainty in review.warnings instead of inventing a new top-level group.",
   "Flag uncertainty in review.warnings or review.blockers instead of pretending confidence.",
   "Use category keys consistently: restaurantData.categories[].key must match menu[].cat and superCategories[].cats[].",
   "Follow the JSON schema exactly."
@@ -96,6 +99,7 @@ const IMPORTER_SOURCE_EXTRACTION_SYSTEM_PROMPT = [
   "You extract raw restaurant menu source text from uploaded menu images or PDFs.",
   "Return page-by-page text only.",
   "Preserve headings, item names, prices, and short descriptions with meaningful line breaks.",
+  "Preserve visible section headings and subsection headings even when they do not explicitly say category or super-category.",
   "If names, descriptions, and prices are visually separated, keep the closest related lines together in reading order.",
   "For PDFs, return one page entry per PDF page in order. For single menu images, return one page entry for the visible menu content in that image.",
   "Keep the original language and wording. Do not translate, summarize, group, or normalize the menu.",
@@ -108,11 +112,121 @@ const IMPORTER_SOURCE_TEXT_FALLBACK_SYSTEM_PROMPT = [
   "You extract raw restaurant menu text from one uploaded menu image or PDF.",
   "Return plain text only.",
   "Preserve the visible menu reading order as faithfully as possible.",
+  "Preserve visible section headings and subsection headings as separate lines when they appear.",
   "Keep item names, prices, and short descriptions together when they clearly belong together.",
   "Do not translate, summarize, explain, or output JSON.",
   "Skip obvious decorative marketing copy when it is clearly not part of the menu.",
   "If some text is unreadable, omit it instead of inventing content."
 ].join("\n");
+
+const IMPORTER_CANONICAL_SUPER_CATEGORY_DEFS = [
+  {
+    id: "starters",
+    name: "Starters",
+    desc: "Appetizers, salads, soups, and light first plates.",
+    emoji: "🥗",
+    translations: {
+      fr: { name: "Entrees", desc: "Entrees, salades, soupes et petites assiettes." },
+      en: { name: "Starters", desc: "Appetizers, salads, soups, and light first plates." },
+      ar: { name: "المقبلات", desc: "مقبلات وسلطات وشوربات وأطباق خفيفة." }
+    },
+    keywords: [
+      "starter", "starters", "entree", "entrees", "appetizer", "appetizers", "appetiser", "appetisers",
+      "salad", "salads", "salade", "salades", "soup", "soups", "soupe", "soupes",
+      "mezze", "meze", "mezza", "tapas", "hors doeuvre", "hors d oeuvre",
+      "مقبلات", "سلطة", "سلطات", "شوربة", "حساء", "مزة"
+    ]
+  },
+  {
+    id: "main-courses",
+    name: "Main Courses",
+    desc: "Core savory dishes and full plates.",
+    emoji: "🍽️",
+    translations: {
+      fr: { name: "Plats Principaux", desc: "Plats principaux et assiettes completes." },
+      en: { name: "Main Courses", desc: "Core savory dishes and full plates." },
+      ar: { name: "الاطباق الرئيسية", desc: "الاطباق الرئيسية والوجبات الكاملة." }
+    },
+    keywords: [
+      "main course", "main courses", "main dish", "main dishes", "plat", "plats", "plat principal", "plats principaux",
+      "grill", "grills", "pizza", "pizzas", "burger", "burgers", "sandwich", "sandwiches", "wrap", "wraps",
+      "taco", "tacos", "shawarma", "pasta", "pastas", "spaghetti", "tagine", "tajine", "couscous",
+      "combo", "combos", "formule", "formules", "menu enfant", "kids menu", "kids",
+      "meat", "viande", "beef", "steak", "chicken", "poulet", "fish", "poisson", "seafood", "brochette",
+      "الأطباق الرئيسية", "طبق رئيسي", "رئيسية", "مشاوي", "بيتزا", "برغر", "برجر", "ساندويتش", "شطائر",
+      "باستا", "معكرونة", "طاجين", "كسكس", "سمك", "مأكولات بحرية"
+    ]
+  },
+  {
+    id: "sides",
+    name: "Sides",
+    desc: "Accompaniments, extras, and side dishes.",
+    emoji: "🍟",
+    translations: {
+      fr: { name: "Accompagnements", desc: "Accompagnements, extras et petites portions." },
+      en: { name: "Sides", desc: "Accompaniments, extras, and side dishes." },
+      ar: { name: "الاطباق الجانبية", desc: "أطباق جانبية وإضافات ومقبلات صغيرة." }
+    },
+    keywords: [
+      "side", "sides", "side dish", "side dishes", "accompaniment", "accompaniments", "accompagnement", "accompagnements",
+      "garniture", "garnitures", "extra", "extras", "supplement", "supplements", "frites", "fries", "rice", "riz",
+      "potato", "potatoes", "puree", "bread", "pain", "sauce", "sauces", "dip", "dips",
+      "جانبية", "اطباق جانبية", "أطباق جانبية", "إضافات", "بطاطس", "أرز", "خبز", "صلصات", "صوص"
+    ]
+  },
+  {
+    id: "desserts",
+    name: "Desserts",
+    desc: "Sweet dishes, pastries, and chilled treats.",
+    emoji: "🍰",
+    translations: {
+      fr: { name: "Desserts", desc: "Desserts, patisseries et douceurs." },
+      en: { name: "Desserts", desc: "Sweet dishes, pastries, and chilled treats." },
+      ar: { name: "الحلويات", desc: "حلويات ومعجنات وأصناف حلوة." }
+    },
+    keywords: [
+      "dessert", "desserts", "sweet", "sweets", "cake", "cakes", "gateau", "gateaux", "tarte", "tartes",
+      "fondant", "cookie", "cookies", "brownie", "mousse", "cheesecake", "glace", "ice cream",
+      "crepe", "crepes", "waffle", "waffles", "patisserie", "patisseries", "pastry", "pastries",
+      "حلويات", "تحلية", "تحليات", "كيك", "آيس كريم", "ايس كريم", "كريب", "وافل"
+    ]
+  },
+  {
+    id: "beverages",
+    name: "Beverages",
+    desc: "Cold drinks, hot drinks, juices, and cocktails.",
+    emoji: "🥤",
+    translations: {
+      fr: { name: "Boissons", desc: "Boissons froides, chaudes, jus et cocktails." },
+      en: { name: "Beverages", desc: "Cold drinks, hot drinks, juices, and cocktails." },
+      ar: { name: "المشروبات", desc: "مشروبات ساخنة وباردة وعصائر وكوكتيلات." }
+    },
+    keywords: [
+      "beverage", "beverages", "drink", "drinks", "boisson", "boissons", "jus", "juice", "juices",
+      "smoothie", "smoothies", "cocktail", "cocktails", "mocktail", "mocktails", "mojito", "coffee", "cafe", "cafes",
+      "tea", "the", "infusion", "espresso", "latte", "cappuccino", "soda", "soft", "soft drinks",
+      "milkshake", "shake", "shakes", "water", "eau", "beer", "biere", "wine", "vin",
+      "مشروبات", "مشروب", "عصير", "عصائر", "قهوة", "شاي", "كوكتيل", "كوكتيلات", "موهيتو", "ماء", "سموذي"
+    ]
+  },
+  {
+    id: "breakfast",
+    name: "Breakfast",
+    desc: "Morning dishes, eggs, pastries, and brunch items.",
+    emoji: "🍳",
+    translations: {
+      fr: { name: "Petit Dejeuner", desc: "Petit dejeuner, brunch et gourmandises du matin." },
+      en: { name: "Breakfast", desc: "Morning dishes, eggs, pastries, and brunch items." },
+      ar: { name: "الفطور", desc: "فطور وبرنش وأطباق الصباح." }
+    },
+    keywords: [
+      "breakfast", "petit dejeuner", "petit-dejeuner", "brunch", "morning", "omelette", "omelet", "egg", "eggs",
+      "pancake", "pancakes", "croissant", "viennoiserie", "viennoiseries", "toast", "toasts", "bagel", "granola",
+      "porridge", "club matin", "morning pastries",
+      "فطور", "افطار", "إفطار", "برنش", "بيض", "أومليت", "اومليت", "بان كيك", "كرواسون", "توست"
+    ]
+  }
+];
 
 const IMPORTER_REPAIR_SYSTEM_PROMPT = [
   "You repair malformed seller-side restaurant draft output into valid JSON.",
@@ -742,6 +856,174 @@ function buildFallbackSuperCategories(categoryTranslations, catEmojis) {
   });
 }
 
+function buildImporterKeywordHaystack(value) {
+  return ` ${canonicalImporterLookup(value)
+    .replace(/[^a-z0-9\u0600-\u06FF]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()} `;
+}
+
+function scoreImporterKeywords(value, keywords, weight = 1) {
+  const haystack = buildImporterKeywordHaystack(value);
+  if (!haystack.trim()) return 0;
+
+  return keywords.reduce((total, keyword) => {
+    const needle = buildImporterKeywordHaystack(keyword).trim();
+    if (!needle) return total;
+    return haystack.includes(` ${needle} `) ? total + weight : total;
+  }, 0);
+}
+
+function collectImporterCategoryInferenceSignals(categoryKey, categoryTranslations, menuItems) {
+  const translations = categoryTranslations?.[categoryKey] || {};
+  const relevantItems = (Array.isArray(menuItems) ? menuItems : [])
+    .filter((item) => item?.cat === categoryKey)
+    .slice(0, 10);
+
+  return {
+    strongTexts: [
+      categoryKey,
+      translations?.fr?.name,
+      translations?.en?.name,
+      translations?.ar?.name
+    ].filter(Boolean),
+    supportTexts: [
+      translations?.fr?.desc,
+      translations?.en?.desc,
+      translations?.ar?.desc,
+      ...relevantItems.flatMap((item) => [
+        item?.name,
+        item?.desc,
+        item?.translations?.fr?.name,
+        item?.translations?.en?.name,
+        item?.translations?.ar?.name
+      ])
+    ].filter(Boolean)
+  };
+}
+
+function scoreImporterCanonicalSuperCategory(signals, definition) {
+  const strongScore = (Array.isArray(signals?.strongTexts) ? signals.strongTexts : [])
+    .reduce((total, value) => total + scoreImporterKeywords(value, definition.keywords, 6), 0);
+  const supportScore = (Array.isArray(signals?.supportTexts) ? signals.supportTexts : [])
+    .reduce((total, value) => total + scoreImporterKeywords(value, definition.keywords, 1), 0);
+
+  return strongScore + supportScore;
+}
+
+function inferImporterCanonicalSuperCategoryForCategory(categoryKey, categoryTranslations, menuItems) {
+  const signals = collectImporterCategoryInferenceSignals(categoryKey, categoryTranslations, menuItems);
+  const scored = IMPORTER_CANONICAL_SUPER_CATEGORY_DEFS
+    .map((definition) => ({
+      id: definition.id,
+      score: scoreImporterCanonicalSuperCategory(signals, definition)
+    }))
+    .sort((left, right) => right.score - left.score);
+
+  const best = scored[0];
+  const second = scored[1];
+  if (!best || best.score <= 0) {
+    return {
+      id: "main-courses",
+      confidence: "fallback"
+    };
+  }
+
+  return {
+    id: best.id,
+    confidence: best.score >= ((second?.score || 0) + 3) ? "high" : "medium"
+  };
+}
+
+function inferImporterCanonicalSuperCategoryFromEntry(entry) {
+  const signals = {
+    strongTexts: [
+      entry?.id,
+      entry?.name,
+      entry?.translations?.fr?.name,
+      entry?.translations?.en?.name,
+      entry?.translations?.ar?.name
+    ].filter(Boolean),
+    supportTexts: [
+      entry?.desc,
+      entry?.translations?.fr?.desc,
+      entry?.translations?.en?.desc,
+      entry?.translations?.ar?.desc
+    ].filter(Boolean)
+  };
+
+  const scored = IMPORTER_CANONICAL_SUPER_CATEGORY_DEFS
+    .map((definition) => ({
+      id: definition.id,
+      score: scoreImporterCanonicalSuperCategory(signals, definition)
+    }))
+    .sort((left, right) => right.score - left.score);
+
+  const best = scored[0];
+  const second = scored[1];
+  if (!best || best.score <= 0 || best.score < ((second?.score || 0) + 3)) {
+    return "";
+  }
+  return best.id;
+}
+
+function buildCanonicalImporterSuperCategories(categoryTranslations, menuItems, normalizedSuperCategories) {
+  const categoryKeys = Object.keys(categoryTranslations || {});
+  const assignedByCategory = new Map();
+  const extractedBucketEntries = new Map();
+  let fallbackAssignmentCount = 0;
+
+  (Array.isArray(normalizedSuperCategories) ? normalizedSuperCategories : []).forEach((entry) => {
+    const bucketId = inferImporterCanonicalSuperCategoryFromEntry(entry);
+    if (!bucketId) return;
+
+    const existing = extractedBucketEntries.get(bucketId);
+    if (!existing || (Array.isArray(entry.cats) ? entry.cats.length : 0) > (Array.isArray(existing.cats) ? existing.cats.length : 0)) {
+      extractedBucketEntries.set(bucketId, entry);
+    }
+
+    (Array.isArray(entry.cats) ? entry.cats : []).forEach((categoryKey) => {
+      if (categoryTranslations?.[categoryKey]) {
+        assignedByCategory.set(categoryKey, bucketId);
+      }
+    });
+  });
+
+  categoryKeys.forEach((categoryKey) => {
+    if (assignedByCategory.has(categoryKey)) return;
+    const inferred = inferImporterCanonicalSuperCategoryForCategory(categoryKey, categoryTranslations, menuItems);
+    assignedByCategory.set(categoryKey, inferred.id);
+    if (inferred.confidence === "fallback") {
+      fallbackAssignmentCount += 1;
+    }
+  });
+
+  const superCategories = IMPORTER_CANONICAL_SUPER_CATEGORY_DEFS.map((definition) => {
+    const cats = categoryKeys.filter((categoryKey) => assignedByCategory.get(categoryKey) === definition.id);
+    if (!cats.length) return null;
+
+    const extractedEntry = extractedBucketEntries.get(definition.id);
+    const fallbackName = normalizeImporterText(extractedEntry?.name) || definition.name;
+    const fallbackDesc = normalizeImporterText(extractedEntry?.desc) || definition.desc;
+    const translationSeed = deepMerge(definition.translations, extractedEntry?.translations || {});
+
+    return {
+      id: normalizeImporterText(extractedEntry?.id) || definition.id,
+      name: fallbackName,
+      desc: fallbackDesc,
+      emoji: asImporterString(extractedEntry?.emoji) || definition.emoji,
+      time: normalizeImporterText(extractedEntry?.time),
+      cats,
+      translations: fillTranslationSet(translationSeed, fallbackName, fallbackDesc)
+    };
+  }).filter(Boolean);
+
+  return {
+    superCategories,
+    fallbackAssignmentCount
+  };
+}
+
 function buildImporterDraftSkeleton(input) {
   const menuImageUrls = Array.isArray(input.menuImageUrls) ? input.menuImageUrls : [];
   const menuPdfUrls = Array.isArray(input.menuPdfUrls) ? input.menuPdfUrls : [];
@@ -1244,14 +1526,12 @@ function normalizeStructuredImporterDraft(parsed) {
     };
   });
 
-  const coveredSuperCategoryCats = new Set();
   const normalizedSuperCategories = (Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : []).map((entry, index) => {
     const cats = Array.isArray(entry?.cats)
       ? [...new Set(entry.cats
         .map((value) => aliasMap.get(canonicalImporterLookup(value)) || normalizeImporterText(value))
         .filter((value) => Boolean(value) && categoryTranslations[value]))]
       : [];
-    cats.forEach((value) => coveredSuperCategoryCats.add(value));
     const fallbackName = normalizeImporterText(entry?.name)
       || (cats.length === 1 ? asImporterString(categoryTranslations[cats[0]]?.fr?.name) || cats[0] : `Super Category ${index + 1}`);
     const fallbackDesc = normalizeImporterText(entry?.desc)
@@ -1269,12 +1549,13 @@ function normalizeStructuredImporterDraft(parsed) {
     };
   }).filter((entry) => entry.name && entry.cats.length);
 
-  const fallbackSuperCategories = buildFallbackSuperCategories(categoryTranslations, catEmojis)
-    .filter((entry) => !coveredSuperCategoryCats.has(entry.cats[0]));
-  derivedSuperCategoryCount = fallbackSuperCategories.length;
-  restaurantData.superCategories = normalizedSuperCategories.length
-    ? [...normalizedSuperCategories, ...fallbackSuperCategories]
-    : fallbackSuperCategories;
+  const canonicalSuperCategoryResult = buildCanonicalImporterSuperCategories(
+    categoryTranslations,
+    restaurantData.menu,
+    normalizedSuperCategories
+  );
+  derivedSuperCategoryCount = canonicalSuperCategoryResult.superCategories.length;
+  restaurantData.superCategories = canonicalSuperCategoryResult.superCategories;
 
   if (restaurantData.branding && typeof restaurantData.branding === "object") {
     const heroSlides = Array.isArray(restaurantData.branding.heroSlides)
@@ -1303,7 +1584,10 @@ function normalizeStructuredImporterDraft(parsed) {
     reviewWarnings.push(`Derived ${derivedCategoryCount} category record(s) from extracted menu items.`);
   }
   if (derivedSuperCategoryCount > 0) {
-    reviewWarnings.push(`Generated ${derivedSuperCategoryCount} fallback super-category record(s) to keep the public menu navigable.`);
+    reviewWarnings.push(`Grouped categories into ${derivedSuperCategoryCount} canonical super-category bucket(s) for cleaner navigation.`);
+  }
+  if (canonicalSuperCategoryResult.fallbackAssignmentCount > 0) {
+    reviewWarnings.push(`Mapped ${canonicalSuperCategoryResult.fallbackAssignmentCount} ambiguous category(ies) into the default canonical buckets because the source menu did not label a clear top-level group.`);
   }
   if (duplicateIdCount > 0) {
     reviewWarnings.push(`Rebuilt ${duplicateIdCount} duplicate menu item id(s) during import normalization.`);
