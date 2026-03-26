@@ -1089,6 +1089,7 @@ function showLanding() {
     document.getElementById('menuNavigationView').style.display = 'none';
     document.getElementById('menuNavigationView')?.removeAttribute('data-mode');
     document.querySelector('.mobile-wrapper')?.classList.add('is-landing');
+    scheduleDeferredFeaturedRender(menu.filter(m => m.featured && m.available !== false), 'featuredLanding');
     navigationStack = [];
     updateBackBtn();
     scheduleMenuMotionRefresh();
