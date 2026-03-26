@@ -1588,7 +1588,7 @@ body.menu-page {
 
 .dish-page-header {
   position: relative;
-  height: 44vh;
+  height: min(56vh, 460px);
   background: #000;
   overflow: hidden;
 }
@@ -1605,7 +1605,19 @@ body.menu-page {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.01);
+  transform: scale(1.14);
+  transform-origin: center center;
+  animation: dishHeroZoomOut 9s ease-out forwards;
+  will-change: transform;
+}
+
+@keyframes dishHeroZoomOut {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1.03);
+  }
 }
 
 .dish-page-close {

@@ -1979,8 +1979,8 @@
             }
 
             .dish-page-header {
-                height: 34vh;
-                min-height: 220px;
+                height: min(44vh, 380px);
+                min-height: 280px;
             }
 
             .dish-page-body {

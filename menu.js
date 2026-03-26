@@ -686,7 +686,7 @@ function buildMenuItemCardMarkup(item, cat, itemIndex) {
                     onclick="event.stopPropagation(); window.handleToggleLike(${serializeInlineId(item.id)}, this)">
                 <span class="love-icon">${MENU_UI_ICONS.heart}</span><span class="love-count">${window.getLikeCount(item.id)}</span>
             </button>
-            <div class="menu-item-img" onclick="event.stopPropagation(); openGallery(menu.filter(m => m.cat === ${serializeInlineId(cat)}), ${itemIndex})">
+            <div class="menu-item-img" onclick="event.stopPropagation(); openDishPage(${serializeInlineId(item.id)})">
                 ${imgTag(item, { defer: true, variant: 'list' })}
             </div>
             <div class="menu-item-info">

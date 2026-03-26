@@ -184,8 +184,8 @@
                 },
                 displayValue: 'block'
             });
-            imgEl.onclick = () => openGallery([item], 0);
-            imgEl.style.cursor = 'zoom-in';
+            imgEl.onclick = null;
+            imgEl.style.cursor = 'default';
         } else {
             imgEl.removeAttribute('src');
             imgEl.style.display = 'none';
