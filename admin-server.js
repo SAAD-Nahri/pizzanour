@@ -44,7 +44,10 @@ const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
 const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
 const OPENAI_IMPORT_PDF_MODEL = process.env.OPENAI_IMPORT_PDF_MODEL || "gpt-4o";
-const OPENAI_ITEM_MEDIA_MODEL = process.env.OPENAI_ITEM_MEDIA_MODEL || "dall-e-3";
+const OPENAI_ITEM_MEDIA_MODEL = process.env.OPENAI_ITEM_MEDIA_MODEL || "gpt-image-1-mini";
+const OPENAI_ITEM_MEDIA_QUALITY = typeof process.env.OPENAI_ITEM_MEDIA_QUALITY === "string"
+  ? process.env.OPENAI_ITEM_MEDIA_QUALITY.trim().toLowerCase()
+  : "";
 const SELLER_TOOLS_ENABLED = booleanFromEnv(
   process.env.SELLER_TOOLS_ENABLED,
   process.env.NODE_ENV !== "production"
@@ -576,6 +579,27 @@ function saveGeneratedImage(base64Data, prefix = "generated") {
   fs.mkdirSync(uploadsDir, { recursive: true });
   fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
   return `/uploads/${filename}`;
+}
+
+function resolveOpenAiItemMediaQuality(model) {
+  const normalizedModel = asImporterString(model).toLowerCase();
+  const requestedQuality = asImporterString(OPENAI_ITEM_MEDIA_QUALITY).toLowerCase();
+
+  if (normalizedModel === "dall-e-3") {
+    return requestedQuality === "hd" ? "hd" : "standard";
+  }
+
+  if (normalizedModel.startsWith("gpt-image-1")) {
+    if (["low", "medium", "high"].includes(requestedQuality)) {
+      return requestedQuality;
+    }
+    return normalizedModel === "gpt-image-1-mini" ? "low" : "medium";
+  }
+
+  if (["low", "medium", "high"].includes(requestedQuality)) {
+    return requestedQuality;
+  }
+  return "medium";
 }
 
 function asImporterString(value) {
@@ -2070,6 +2094,7 @@ async function generateMenuItemMediaImage(input) {
   const prompt = buildMenuItemImagePrompt(input);
 
   async function requestMenuItemImage(model) {
+    const quality = resolveOpenAiItemMediaQuality(model);
     const response = await fetch(OPENAI_IMAGES_URL, {
       method: "POST",
       headers: {
@@ -2080,12 +2105,12 @@ async function generateMenuItemMediaImage(input) {
         model,
         prompt,
         size: "1024x1024",
-        quality: model === "dall-e-3" ? "standard" : "medium",
+        quality,
         response_format: "b64_json"
       })
     });
     const payload = await response.json().catch(() => ({}));
-    return { response, payload, model };
+    return { response, payload, model, quality };
   }
 
   let generationResult = await requestMenuItemImage(OPENAI_ITEM_MEDIA_MODEL);
@@ -2128,6 +2153,7 @@ async function generateMenuItemMediaImage(input) {
         tags: [itemLike.cat, "menu-item", itemName].filter(Boolean),
         approved: true,
         model: generationResult.model,
+        quality: generationResult.quality,
         prompt,
         promptVersion: "menu-item-image-v2",
         notes: "Generated from the item image modal.",
@@ -2143,7 +2169,8 @@ async function generateMenuItemMediaImage(input) {
     url,
     prompt,
     libraryAssetId,
-    model: generationResult.model
+    model: generationResult.model,
+    quality: generationResult.quality
   };
 }
 

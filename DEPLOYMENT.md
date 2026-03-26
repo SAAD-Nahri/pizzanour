@@ -47,7 +47,8 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `OPENAI_API_KEY=<server-side-key>` if you want seller-side menu import or per-item AI image generation
 - `OPENAI_IMPORT_MODEL=gpt-4o` optional override for image-based menu imports; recommended for reliability
 - `OPENAI_IMPORT_PDF_MODEL=gpt-4o` optional override for PDF menu imports; use a stronger model here
-- `OPENAI_ITEM_MEDIA_MODEL=dall-e-3` recommended default for per-item AI dish/drink images; this avoids depending on `gpt-4.1` image-tool access for the owner flow
+- `OPENAI_ITEM_MEDIA_MODEL=gpt-image-1-mini` recommended default for per-item AI dish/drink images when you want lower cost
+- `OPENAI_ITEM_MEDIA_QUALITY=low` recommended default for the cheapest owner-facing image path
 - `SELLER_TOOLS_ENABLED=false` for clean client handoff admin; enable only on seller setup instances
 - `AI_MEDIA_TOOLS_ENABLED=false` unless you explicitly want the per-item AI image button available inside the item image modal
 - `COOKIE_SECURE=true`
@@ -102,7 +103,11 @@ Importer note:
 AI item-image note:
 
 - the owner admin can expose per-item AI image generation from the item image modal when `AI_MEDIA_TOOLS_ENABLED=true`
-- the owner-facing item-image flow uses `OPENAI_ITEM_MEDIA_MODEL`, which is recommended to stay on `dall-e-3` unless your OpenAI org is verified for a more advanced image path
+- the owner-facing item-image flow uses `OPENAI_ITEM_MEDIA_MODEL` and `OPENAI_ITEM_MEDIA_QUALITY`
+- recommended low-cost path:
+  - `OPENAI_ITEM_MEDIA_MODEL=gpt-image-1-mini`
+  - `OPENAI_ITEM_MEDIA_QUALITY=low`
+- if your OpenAI org cannot use that model, the server automatically falls back to `dall-e-3`
 - this does not require `SELLER_TOOLS_ENABLED=true`
 - importer routes, backup import/export, and reset remain seller-only when `SELLER_TOOLS_ENABLED=false`
 

@@ -146,7 +146,7 @@ What they do:
 - The admin security panel should not show the default-credentials warning at handoff time.
 - Keep AI keys and future automation credentials out of the live restaurant admin.
 - If you want to use `Seller Tools -> AI Import Studio`, set `OPENAI_API_KEY` server-side and optionally `OPENAI_IMPORT_MODEL`; for PDF-heavy workflows, also set `OPENAI_IMPORT_PDF_MODEL`.
-- If you want to use per-item AI dish image generation inside the item image modal, set `OPENAI_API_KEY` server-side and optionally `OPENAI_ITEM_MEDIA_MODEL`.
+- If you want to use per-item AI dish image generation inside the item image modal, set `OPENAI_API_KEY` server-side and optionally configure `OPENAI_ITEM_MEDIA_MODEL` and `OPENAI_ITEM_MEDIA_QUALITY`.
 
 ## Data And Product Model
 
@@ -183,6 +183,9 @@ Current importer status:
 Current seller-side media status:
 
 - per-item AI image generation can create dish/drink visuals directly from the item image modal
+- low-cost default:
+  - `OPENAI_ITEM_MEDIA_MODEL=gpt-image-1-mini`
+  - `OPENAI_ITEM_MEDIA_QUALITY=low`
 - generated images are saved locally under `/uploads`
 - the recommended product-image path is still client photos first, local library second, AI later
 
