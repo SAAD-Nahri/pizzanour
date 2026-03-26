@@ -1093,7 +1093,7 @@ function renderMenuBuilder() {
             ? window.getLocalizedCategoryName(menuBuilderSelectedCategoryKey, menuBuilderSelectedCategoryKey)
             : 'Items';
         rows = getMenuBuilderCurrentItems();
-        columns = ['Item', 'Price', 'Likes', 'Promo', 'Featured', 'Actions'];
+        columns = ['Item', 'Price', 'Likes', 'Featured', 'Actions'];
         addLabel = 'Add Item';
         emptyText = 'No items in this category yet.';
         title.textContent = `${categoryLabel} / Items`;

@@ -688,7 +688,7 @@ function renderHomepageFeatured() {
 
     mount.style.display = 'block';
     mount.innerHTML = `
-      <section class="promo-section home-featured-spotlight">
+      <section class="featured-section home-featured-spotlight">
         <div class="promo-inner home-featured-inner">
           <div class="home-featured-head">
             <div>
@@ -697,10 +697,10 @@ function renderHomepageFeatured() {
             </div>
             <a href="menu.html" class="slide-cta home-featured-cta">${escapeHtml(cta)}</a>
           </div>
-          <div class="home-featured-rail">
+          <div class="featured-slider home-featured-slider">
             ${items.map((item) => `
-              <a class="home-featured-card" href="menu.html" aria-label="${escapeHtml(window.getLocalizedMenuName(item) || '')}">
-                <div class="home-featured-image-wrap">
+              <a class="featured-card home-featured-card" href="menu.html" aria-label="${escapeHtml(window.getLocalizedMenuName(item) || '')}">
+                <div class="featured-img-wrap home-featured-image-wrap">
                   <img
                     id="homeFeaturedImg${escapeHtml(String(item.id))}"
                     alt="${escapeHtml(window.getLocalizedMenuName(item) || '')}"
@@ -710,10 +710,10 @@ function renderHomepageFeatured() {
                     decoding="async"
                   />
                 </div>
-                <div class="home-featured-copy">
-                  <h3>${escapeHtml(window.getLocalizedMenuName(item) || '')}</h3>
-                  <p>${escapeHtml(window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.')) || '')}</p>
-                  <strong>MAD ${Number(window.getItemPrice(item) || 0).toFixed(0)}</strong>
+                <div class="featured-info home-featured-copy">
+                  <div class="featured-name">${escapeHtml(window.getLocalizedMenuName(item) || '')}</div>
+                  <div class="home-featured-desc">${escapeHtml(window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.')) || '')}</div>
+                  <div class="featured-price">MAD ${Number(window.getItemPrice(item) || 0).toFixed(0)}</div>
                 </div>
               </a>
             `).join('')}
