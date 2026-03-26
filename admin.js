@@ -3653,6 +3653,15 @@ function updateStats() {
 // IMAGE MODAL LOGIC
 let currentEditingId = null;
 
+function setImageModalProgress(active, text = 'Processing image...') {
+    const progressEl = document.getElementById('modalImageProgress');
+    const progressTextEl = document.getElementById('modalImageProgressText');
+    const dropzoneEl = document.querySelector('.image-modal-dropzone');
+    if (progressEl) progressEl.hidden = !active;
+    if (progressTextEl) progressTextEl.textContent = text;
+    if (dropzoneEl) dropzoneEl.classList.toggle('is-busy', active);
+}
+
 function syncImageModalAiControls() {
     const toolsEl = document.getElementById('modalAiImageTools');
     const buttonEl = document.getElementById('modalGenerateImageBtn');
@@ -3663,6 +3672,7 @@ function syncImageModalAiControls() {
         buttonEl.disabled = false;
         buttonEl.textContent = 'Generate with AI';
     }
+    setImageModalProgress(false);
 }
 
 function openImageModal(id) {
@@ -3683,6 +3693,10 @@ function openImageModal(id) {
 
 function closeImageModal() {
     document.getElementById('imageModal').style.display = 'none';
+    const uploadInput = document.getElementById('modalImgUpload');
+    const captureInput = document.getElementById('modalImgCapture');
+    if (uploadInput) uploadInput.value = '';
+    if (captureInput) captureInput.value = '';
     currentEditingId = null;
     syncImageModalAiControls();
 }
@@ -3708,23 +3722,32 @@ async function handleModalImageUpload(input) {
 
     if (!item.images) item.images = item.img ? [item.img] : [];
 
-    for (let file of input.files) {
-        try {
+    try {
+        for (let index = 0; index < input.files.length; index += 1) {
+            const file = input.files[index];
+            const isCapture = input.id === 'modalImgCapture';
+            const progressLabel = isCapture
+                ? 'Uploading captured photo...'
+                : `Uploading image ${index + 1} of ${input.files.length}...`;
+            setImageModalProgress(true, progressLabel);
             const url = await uploadImageToServer(file);
             item.images.push(url);
-        } catch (err) {
-            console.error('Modal upload failed:', err);
-            showToast('Upload failed.');
         }
+
+        // SYNC: Ensure main img is set to the first image for the main page cards
+        if (item.images.length > 0) item.img = item.images[0];
+
+        input.value = '';
+        await saveAndRefresh();
+        renderModalImages();
+        showToast(input.id === 'modalImgCapture' ? 'Photo added.' : 'Images added.');
+    } catch (err) {
+        console.error('Modal upload failed:', err);
+        showToast('Upload failed.');
+    } finally {
+        input.value = '';
+        setImageModalProgress(false);
     }
-
-    // SYNC: Ensure main img is set to the first image for the main page cards
-    if (item.images.length > 0) item.img = item.images[0];
-
-    input.value = '';
-    saveAndRefresh();
-    renderModalImages();
-    showToast('Images added.');
 }
 
 function addModalImageUrl() {
@@ -3776,6 +3799,7 @@ window.generateModalImageWithAI = async function () {
     const originalLabel = buttonEl.textContent;
     buttonEl.disabled = true;
     buttonEl.textContent = 'Generating...';
+    setImageModalProgress(true, 'Generating dish image with AI...');
 
     try {
         const response = await fetch('/api/media/generate-menu-item', {
@@ -3817,6 +3841,7 @@ window.generateModalImageWithAI = async function () {
     } finally {
         buttonEl.disabled = false;
         buttonEl.textContent = originalLabel;
+        setImageModalProgress(false);
     }
 }
 

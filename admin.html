@@ -888,6 +888,10 @@
             gap: 12px;
         }
 
+        .image-modal-dropzone.is-busy {
+            opacity: 0.82;
+        }
+
         .image-modal-label {
             display: block;
             font-size: 0.78rem;
@@ -909,6 +913,93 @@
             grid-template-columns: minmax(0, 1fr) auto;
             gap: 10px;
             align-items: center;
+        }
+
+        .image-modal-input-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .image-modal-file-trigger {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.96);
+            color: var(--text);
+            font-size: 0.94rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .image-modal-file-trigger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
+            border-color: rgba(255, 145, 0, 0.34);
+        }
+
+        .image-modal-file-trigger input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .image-modal-progress {
+            display: grid;
+            gap: 8px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .image-modal-progress[hidden] {
+            display: none;
+        }
+
+        .image-modal-progress-bar {
+            position: relative;
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 225, 191, 0.74);
+        }
+
+        .image-modal-progress-bar span {
+            position: absolute;
+            inset: 0;
+            width: 44%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), #ff7b00);
+            animation: image-modal-progress-slide 1.1s ease-in-out infinite;
+            box-shadow: 0 0 16px rgba(255, 141, 8, 0.28);
+        }
+
+        .image-modal-progress-text {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text2);
+            line-height: 1.45;
+        }
+
+        @keyframes image-modal-progress-slide {
+            0% {
+                transform: translateX(-115%);
+            }
+
+            100% {
+                transform: translateX(240%);
+            }
         }
 
         .image-modal-ai-tools {
@@ -3789,6 +3880,10 @@
                 gap: 10px;
             }
 
+            .image-modal-input-actions {
+                grid-template-columns: 1fr;
+            }
+
             .image-modal-url-row {
                 grid-template-columns: 1fr;
             }
@@ -4372,7 +4467,16 @@
 
                 <div class="image-modal-dropzone">
                     <label class="image-modal-label">Add Images</label>
-                    <input type="file" id="modalImgUpload" accept="image/*" onchange="handleModalImageUpload(this)" multiple class="file-input-spaced" />
+                    <div class="image-modal-input-actions">
+                        <label class="image-modal-file-trigger">
+                            Upload Images
+                            <input type="file" id="modalImgUpload" accept="image/*" onchange="handleModalImageUpload(this)" multiple />
+                        </label>
+                        <label class="image-modal-file-trigger">
+                            Take Photo
+                            <input type="file" id="modalImgCapture" accept="image/*" capture="environment" onchange="handleModalImageUpload(this)" />
+                        </label>
+                    </div>
                     <p class="image-modal-helper">Upload one or more images, or paste an existing image URL below.</p>
                     <div class="image-modal-url-row">
                         <input type="text" id="modalImgUrl" placeholder="https://..." />
@@ -4381,6 +4485,10 @@
                     <div id="modalAiImageTools" class="image-modal-ai-tools" style="display:none;">
                         <p class="image-modal-helper">Generate a realistic dish image from the item name and description.</p>
                         <button type="button" id="modalGenerateImageBtn" class="secondary-btn" onclick="generateModalImageWithAI()">Generate with AI</button>
+                    </div>
+                    <div id="modalImageProgress" class="image-modal-progress" hidden aria-live="polite">
+                        <div class="image-modal-progress-bar"><span></span></div>
+                        <p id="modalImageProgressText" class="image-modal-progress-text">Processing image...</p>
                     </div>
                 </div>
 
