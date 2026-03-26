@@ -89,6 +89,7 @@
                     <img id="dishPageImg" src="" alt="" class="dish-page-img" width="1200" height="900" decoding="async">
                 </div>
                 <div class="dish-page-body">
+                    <div id="dishPageThumbs" class="dish-page-thumbs"></div>
                     <h2 id="dishPageName" class="dish-page-name"></h2>
                     <div id="dishPagePrice" class="dish-page-price"></div>
                     <p id="dishPageDesc" class="dish-page-desc"></p>
@@ -157,11 +158,12 @@
 
         const page = document.getElementById('dishPage');
         const imgEl = document.getElementById('dishPageImg');
+        const thumbsEl = document.getElementById('dishPageThumbs');
         const nameEl = document.getElementById('dishPageName');
         const priceEl = document.getElementById('dishPagePrice');
         const descEl = document.getElementById('dishPageDesc');
         const addBtn = document.getElementById('dishPageAddBtn');
-        if (!page || !imgEl || !nameEl || !priceEl || !descEl || !addBtn) return;
+        if (!page || !imgEl || !thumbsEl || !nameEl || !priceEl || !descEl || !addBtn) return;
 
         page.dataset.itemId = String(item.id);
 
@@ -206,9 +208,15 @@
             descEl.insertAdjacentHTML('afterend', sizeSelectorHtml);
         }
 
-        const imgSrc = (item.images && item.images.length > 0) ? item.images[0] : item.img;
-        if (imgSrc) {
-            window.setSafeImageSource(imgEl, imgSrc, {
+        const itemImages = Array.isArray(item.images)
+            ? item.images.filter((value) => typeof value === 'string' && value.trim())
+            : [];
+        const fallbackImg = typeof item.img === 'string' && item.img.trim() ? item.img.trim() : '';
+        const detailImages = itemImages.length ? itemImages : (fallbackImg ? [fallbackImg] : []);
+        const primaryImage = detailImages[0] || '';
+
+        if (primaryImage) {
+            window.setSafeImageSource(imgEl, primaryImage, {
                 onMissing: () => {
                     imgEl.removeAttribute('src');
                     imgEl.style.display = 'none';
@@ -217,11 +225,23 @@
             });
             imgEl.onclick = () => openGallery([item], 0);
             imgEl.style.cursor = 'zoom-in';
+            imgEl.classList.remove('dish-page-img-animate');
+            void imgEl.offsetWidth;
+            imgEl.classList.add('dish-page-img-animate');
         } else {
             imgEl.removeAttribute('src');
             imgEl.style.display = 'none';
             imgEl.onclick = null;
         }
+
+        thumbsEl.innerHTML = detailImages.length > 1
+            ? detailImages.map((imageSrc, index) => `
+                <button class="dish-thumb ${index === 0 ? 'is-active' : ''}" type="button" onclick="openDishGallery(${serializeInlineId(item.id)}, ${index})" aria-label="${t('lightbox_view', 'Open image')} ${index + 1}">
+                    <img src="${imageSrc.replace(/"/g, '&quot;')}" alt="${(typeof window.getLocalizedMenuName === 'function' ? window.getLocalizedMenuName(item) : (item.name || '')).replace(/"/g, '&quot;')}" width="96" height="96" loading="lazy" decoding="async">
+                </button>
+            `).join('')
+            : '';
+        thumbsEl.style.display = detailImages.length > 1 ? 'flex' : 'none';
 
         nameEl.textContent = window.getLocalizedMenuName(item);
         updateSizePrice();
@@ -248,6 +268,12 @@
         ensureMenuInteractionDom();
         document.getElementById('dishPage')?.classList.remove('open');
         document.body.style.overflow = '';
+    }
+
+    function openDishGallery(id, startIndex = 0) {
+        const item = getMenu().find((entry) => sameMenuItemId(entry.id, id));
+        if (!item) return;
+        openGallery([item], startIndex);
     }
 
     function openGallery(items, startIndex = 0) {
@@ -722,6 +748,7 @@
 
     window.openDishPage = openDishPage;
     window.closeDishPage = closeDishPage;
+    window.openDishGallery = openDishGallery;
     window.openGallery = openGallery;
     window.closeGallery = closeGallery;
     window.updateGalleryView = updateGalleryView;
