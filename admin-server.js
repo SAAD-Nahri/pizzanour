@@ -2095,19 +2095,23 @@ async function generateMenuItemMediaImage(input) {
 
   async function requestMenuItemImage(model) {
     const quality = resolveOpenAiItemMediaQuality(model);
+    const normalizedModel = asImporterString(model).toLowerCase();
+    const body = {
+      model,
+      prompt,
+      size: "1024x1024",
+      quality
+    };
+    if (normalizedModel === "dall-e-3" || normalizedModel === "dall-e-2") {
+      body.response_format = "b64_json";
+    }
     const response = await fetch(OPENAI_IMAGES_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
-      body: JSON.stringify({
-        model,
-        prompt,
-        size: "1024x1024",
-        quality,
-        response_format: "b64_json"
-      })
+      body: JSON.stringify(body)
     });
     const payload = await response.json().catch(() => ({}));
     return { response, payload, model, quality };
