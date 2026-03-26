@@ -44,6 +44,37 @@
     let currentGalleryIdx = 0;
     let interactionDomReady = false;
 
+    function buildGalleryEntries(items) {
+        return (Array.isArray(items) ? items : []).flatMap((entry) => {
+            if (!entry) return [];
+
+            if (typeof entry.imageSrc === 'string' && entry.imageSrc.trim()) {
+                return [{
+                    imageSrc: entry.imageSrc.trim(),
+                    title: typeof entry.title === 'string' && entry.title.trim()
+                        ? entry.title.trim()
+                        : ''
+                }];
+            }
+
+            const itemImages = Array.isArray(entry.images)
+                ? entry.images.filter((value) => typeof value === 'string' && value.trim())
+                : [];
+            const fallbackImg = typeof entry.img === 'string' && entry.img.trim() ? entry.img.trim() : '';
+            const images = itemImages.length ? itemImages : (fallbackImg ? [fallbackImg] : []);
+            if (!images.length) return [];
+
+            const localizedTitle = typeof window.getLocalizedMenuName === 'function'
+                ? window.getLocalizedMenuName(entry)
+                : (entry.name || '');
+
+            return images.map((imageSrc) => ({
+                imageSrc,
+                title: localizedTitle
+            }));
+        });
+    }
+
     function ensureMenuInteractionDom() {
         if (interactionDomReady || document.getElementById('dishPage')) {
             interactionDomReady = true;
@@ -184,8 +215,8 @@
                 },
                 displayValue: 'block'
             });
-            imgEl.onclick = null;
-            imgEl.style.cursor = 'default';
+            imgEl.onclick = () => openGallery([item], 0);
+            imgEl.style.cursor = 'zoom-in';
         } else {
             imgEl.removeAttribute('src');
             imgEl.style.display = 'none';
@@ -221,10 +252,10 @@
 
     function openGallery(items, startIndex = 0) {
         ensureMenuInteractionDom();
-        galleryItems = items.filter((entry) => (entry.images && entry.images.length > 0) || entry.img);
+        galleryItems = buildGalleryEntries(items);
         if (!galleryItems.length) return;
 
-        currentGalleryIdx = startIndex;
+        currentGalleryIdx = Math.max(0, Math.min(startIndex, galleryItems.length - 1));
         const overlay = document.getElementById('galleryOverlay');
         if (!overlay) return;
         overlay.style.display = 'flex';
@@ -241,8 +272,8 @@
 
     function updateGalleryView() {
         ensureMenuInteractionDom();
-        const item = galleryItems[currentGalleryIdx];
-        if (!item) return;
+        const entry = galleryItems[currentGalleryIdx];
+        if (!entry) return;
         const img = document.getElementById('galleryImg');
         const title = document.getElementById('galleryTitle');
         const count = document.getElementById('galleryCount');
@@ -252,14 +283,13 @@
         void img.offsetWidth;
         img.classList.add('gallery-flip');
 
-        const galleryImgSrc = (item.images && item.images.length > 0) ? item.images[0] : item.img;
-        window.setSafeImageSource(img, galleryImgSrc, {
+        window.setSafeImageSource(img, entry.imageSrc, {
             onMissing: () => {
                 closeGallery();
             },
             displayValue: 'block'
         });
-        title.textContent = window.getLocalizedMenuName(item);
+        title.textContent = entry.title || '';
         count.textContent = `${currentGalleryIdx + 1} / ${galleryItems.length}`;
     }
 
