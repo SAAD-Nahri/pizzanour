@@ -16,7 +16,7 @@ const {
   setStaticAssetHeaders,
   setSessionCookie
 } = require("./server-common");
-const { createThumbnailRequestHandler, ensureThumbnailFile } = require("./image-thumbnails");
+const { createThumbnailRequestHandler, ensureThumbnailFile, getThumbnailTargetFileName } = require("./image-thumbnails");
 const { ensureStorage, readData, resetToBundledData, uploadsDir, writeData } = require("./site-store");
 const {
   buildProductRecipeKeyFromMenuItem,
@@ -2921,9 +2921,9 @@ app.post("/api/upload", requireAuth, (req, res, next) => {
     }
 
     Promise.all([
-      ensureThumbnailFile(req.file.filename, `${req.file.filename}.webp`, "default"),
-      ensureThumbnailFile(req.file.filename, `${req.file.filename}.menu.webp`, "menu"),
-      ensureThumbnailFile(req.file.filename, `${req.file.filename}.list.webp`, "list")
+      ensureThumbnailFile(req.file.filename, getThumbnailTargetFileName(req.file.filename, "default"), "default"),
+      ensureThumbnailFile(req.file.filename, getThumbnailTargetFileName(req.file.filename, "menu"), "menu"),
+      ensureThumbnailFile(req.file.filename, getThumbnailTargetFileName(req.file.filename, "list"), "list")
     ]).catch((thumbnailError) => {
       console.warn("Thumbnail generation failed:", thumbnailError);
     });
