@@ -15,6 +15,7 @@ const app = express();
 const port = parsePort(process.env.PORT, 3002);
 const publicBuildDir = path.join(__dirname, "public-build");
 const PUBLIC_BUILD_FILES = new Set([
+  "/home-shell.css",
   "/style.css",
   "/menu-shell.css",
   "/menu-page.css",
@@ -30,6 +31,7 @@ const build = createBuildFingerprint([
   path.join(__dirname, "website-server.js"),
   path.join(__dirname, "index.html"),
   path.join(__dirname, "menu.html"),
+  path.join(__dirname, "home-shell.css"),
   path.join(__dirname, "menu-shell.css"),
   path.join(__dirname, "menu-page.css"),
   path.join(__dirname, "game.css"),
