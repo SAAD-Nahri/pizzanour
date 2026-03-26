@@ -1662,17 +1662,6 @@
             border: 1.5px dashed var(--border);
         }
 
-        /* Promo Toggle */
-        .promo-star {
-            cursor: pointer;
-            font-size: 1.5rem;
-            transition: transform 0.2s;
-        }
-
-        .promo-star:hover {
-            transform: scale(1.2);
-        }
-
         #menuBuilderTable[data-step="items"] .menu-builder-toggle {
             color: #b6aa9a;
             transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
@@ -1683,18 +1672,6 @@
             background: #fff0dc;
             border-color: rgba(255, 141, 8, 0.24);
             color: #9f7442;
-        }
-
-        #menuBuilderTable[data-step="items"] .menu-builder-toggle.promo-active {
-            background: linear-gradient(180deg, #fff8e3 0%, #fff1c4 100%);
-            border-color: rgba(255, 193, 7, 0.28);
-            box-shadow: 0 10px 18px rgba(255, 193, 7, 0.18);
-        }
-
-        .promo-active {
-            color: #ffca28;
-            filter: grayscale(0) !important;
-            text-shadow: 0 0 10px rgba(255, 202, 40, 0.5);
         }
 
         /* Toast */
@@ -4513,10 +4490,6 @@
                 <div class="stat-card">
                     <div class="stat-label" data-i18n="admin.stats.categories">Categories</div>
                     <div class="stat-val" id="stat-cats">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label" data-i18n="admin.stats.promo_status">Promo Status</div>
-                    <div class="stat-val" id="stat-promo">OFF</div>
                 </div>
             </div>
         </div>

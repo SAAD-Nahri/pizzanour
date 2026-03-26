@@ -38,8 +38,6 @@ let catEmojis = { ...defaultCatEmojis };
 let categoryImages = { ...(window.defaultCategoryImages || {}) };
 window.categoryImages = categoryImages;
 let wifiData = { ...defaultWifiData };
-let promoId = null;
-let homePromoItem = null;
 let socialLinks = { ...defaultSocialLinks };
 let guestExperience = { ...defaultGuestExperience };
 let sectionVisibility = { ...defaultSectionVisibility };
@@ -134,16 +132,6 @@ function applySiteData(data) {
     };
     sectionVisibility = { ...defaultSectionVisibility, ...(data?.sectionVisibility && typeof data.sectionVisibility === 'object' ? data.sectionVisibility : {}) };
     sectionOrder = Array.isArray(data?.sectionOrder) ? data.sectionOrder.filter(Boolean) : [...defaultSectionOrder];
-    promoId = typeof data?.promoId === 'undefined' ? null : data.promoId;
-    if (Object.prototype.hasOwnProperty.call(data || {}, 'promoItem')) {
-        homePromoItem = data?.promoItem ? normalizeMenuItem(data.promoItem) : null;
-    }
-    window.promoIds = Array.isArray(data?.promoIds)
-        ? data.promoIds
-        : promoId !== null
-            ? [promoId]
-            : [];
-
     if (typeof window.mergeRestaurantConfig === 'function') {
         window.mergeRestaurantConfig({
             wifi: { name: wifiData.ssid, code: wifiData.pass },
@@ -190,8 +178,6 @@ function applySiteDataSnapshot(snapshot) {
         guestExperience: source.guestExperience || defaultGuestExperience,
         sectionVisibility: source.sectionVisibility || defaultSectionVisibility,
         sectionOrder: source.sectionOrder || defaultSectionOrder,
-        promoIds: Array.isArray(snapshot.promoIds) ? snapshot.promoIds : [],
-        promoId: Array.isArray(snapshot.promoIds) && snapshot.promoIds.length === 1 ? snapshot.promoIds[0] : null,
         gallery: Array.isArray(source.gallery) ? source.gallery : [],
         hours: Array.isArray(source.hours) ? source.hours : [],
         hoursNote: typeof source.hoursNote === 'string' ? source.hoursNote : '',
@@ -217,7 +203,6 @@ function persistMenuSnapshotFromSiteData(data, version = '') {
             menu,
             catEmojis,
             categoryImages,
-            promoIds: Array.isArray(window.promoIds) ? window.promoIds : [],
             restaurantData: {
                 superCategories: Array.isArray(window.restaurantConfig?.superCategories) ? window.restaurantConfig.superCategories : [],
                 categoryImages,
@@ -365,8 +350,7 @@ async function loadSiteData() {
                 social: defaultSocialLinks,
                 guestExperience: defaultGuestExperience,
                 sectionVisibility: defaultSectionVisibility,
-                sectionOrder: defaultSectionOrder,
-                promoId: null
+                sectionOrder: defaultSectionOrder
             });
         }
     } finally {
@@ -411,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function refreshHomepageUI() {
-    renderPromo();
     renderLocationCritical();
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
@@ -511,8 +494,6 @@ window.__homepageGetState = function __homepageGetState() {
         sectionOrder,
         defaultSectionVisibility,
         defaultSectionOrder,
-        promoId,
-        homePromoItem,
         menu
     };
 };
@@ -642,34 +623,6 @@ window.copyWifi = function copyWifi() {
             console.error('Failed to load homepage extras:', error);
         });
 };
-
-function renderPromo() {
-    const promoSection = document.getElementById('promo-section');
-    const item = homePromoItem || menu.find(m => m.id == promoId);
-    if (!item) {
-        if (promoSection) promoSection.style.display = 'none';
-        return;
-    }
-
-    if (promoSection) {
-        promoSection.style.display = 'block';
-        document.getElementById('promo-item-name').textContent = window.getLocalizedMenuName(item);
-        document.getElementById('promo-item-price').textContent = `MAD ${item.price.toFixed(2)}`;
-        const promoImg = document.getElementById('promo-item-img');
-        if (promoImg) {
-            window.setSafeImageSource(promoImg, item.img || '', {
-                fallbackSrc: window.defaultBranding?.heroImage || 'images/hero-default.svg',
-                onMissing: () => {
-                    promoImg.style.display = 'none';
-                }
-            });
-        }
-        document.getElementById('promo-item-cta').onclick = () => {
-            window.location.href = 'menu.html';
-        };
-    }
-}
-
 
 // STATUS LOGIC
 // Status is now managed by shared.js

@@ -182,8 +182,6 @@ function buildPublicSitePayload(data) {
     contentTranslations: source.contentTranslations && typeof source.contentTranslations === "object"
       ? source.contentTranslations
       : {},
-    promoId: typeof source.promoId === "string" || Number.isFinite(source.promoId) ? source.promoId : null,
-    promoIds: Array.isArray(source.promoIds) ? source.promoIds : [],
     superCategories: Array.isArray(source.superCategories) ? source.superCategories.map(sanitizePublicSuperCategory) : [],
     hours: Array.isArray(source.hours) ? source.hours.map(sanitizePublicHoursRow) : [],
     hoursNote: asPublicString(source.hoursNote, 240),
@@ -217,13 +215,6 @@ function buildPublicSitePayload(data) {
 
 function buildPublicHomePayload(data) {
   const source = data && typeof data === "object" ? data : {};
-  const promoIds = Array.isArray(source.promoIds)
-    ? source.promoIds
-    : (typeof source.promoId === "string" || Number.isFinite(source.promoId) ? [source.promoId] : []);
-  const promoId = promoIds.length ? promoIds[0] : null;
-  const promoItem = Array.isArray(source.menu)
-    ? source.menu.find((item) => String(item?.id) === String(promoId))
-    : null;
 
   return {
     wifi: {
@@ -235,9 +226,6 @@ function buildPublicHomePayload(data) {
     contentTranslations: source.contentTranslations && typeof source.contentTranslations === "object"
       ? source.contentTranslations
       : {},
-    promoId,
-    promoIds,
-    promoItem: promoItem ? sanitizePublicMenuItem(promoItem) : null,
     categoryImages: source.categoryImages && typeof source.categoryImages === "object" ? source.categoryImages : {},
     hours: Array.isArray(source.hours) ? source.hours.map(sanitizePublicHoursRow) : [],
     hoursNote: asPublicString(source.hoursNote, 240),
@@ -281,8 +269,6 @@ function buildPublicMenuPayload(data) {
     contentTranslations: source.contentTranslations && typeof source.contentTranslations === "object"
       ? source.contentTranslations
       : {},
-    promoId: typeof source.promoId === "string" || Number.isFinite(source.promoId) ? source.promoId : null,
-    promoIds: Array.isArray(source.promoIds) ? source.promoIds : [],
     superCategories: Array.isArray(source.superCategories) ? source.superCategories.map(sanitizePublicSuperCategory) : [],
     landing: source.landing && typeof source.landing === "object"
       ? {
