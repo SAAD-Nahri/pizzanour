@@ -663,12 +663,14 @@ function getHomepageFeaturedItems() {
         ? homeFeaturedItems
         : menu.filter((item) => item?.featured && item?.available !== false);
     const seen = new Set();
-    return sourceItems.filter((item) => {
+    const uniqueFeatured = sourceItems.filter((item) => {
         const key = String(item?.id ?? '');
         if (!key || seen.has(key)) return false;
         seen.add(key);
         return true;
     }).slice(0, 6);
+    if (uniqueFeatured.length) return uniqueFeatured;
+    return menu.filter((item) => item?.available !== false).slice(0, 6);
 }
 
 function renderHomepageFeatured() {
@@ -688,7 +690,7 @@ function renderHomepageFeatured() {
 
     mount.style.display = 'block';
     mount.innerHTML = `
-      <section class="featured-section home-featured-spotlight">
+      <section class="promo-section home-featured-spotlight">
         <div class="promo-inner home-featured-inner">
           <div class="home-featured-head">
             <div>
@@ -697,10 +699,11 @@ function renderHomepageFeatured() {
             </div>
             <a href="menu.html" class="slide-cta home-featured-cta">${escapeHtml(cta)}</a>
           </div>
-          <div class="featured-slider home-featured-slider">
+          <div class="promo-carousel-container home-featured-slider">
             ${items.map((item) => `
-              <a class="featured-card home-featured-card" href="menu.html" aria-label="${escapeHtml(window.getLocalizedMenuName(item) || '')}">
-                <div class="featured-img-wrap home-featured-image-wrap">
+              <a class="promo-card-vibrant home-featured-card" href="menu.html" aria-label="${escapeHtml(window.getLocalizedMenuName(item) || '')}">
+                <span class="promo-tag-glow">${escapeHtml(label)}</span>
+                <div class="promo-visual-vibrant home-featured-image-wrap">
                   <img
                     id="homeFeaturedImg${escapeHtml(String(item.id))}"
                     alt="${escapeHtml(window.getLocalizedMenuName(item) || '')}"
@@ -710,10 +713,10 @@ function renderHomepageFeatured() {
                     decoding="async"
                   />
                 </div>
-                <div class="featured-info home-featured-copy">
-                  <div class="featured-name">${escapeHtml(window.getLocalizedMenuName(item) || '')}</div>
+                <div class="promo-info-vibrant home-featured-copy">
+                  <div class="promo-name-vibrant">${escapeHtml(window.getLocalizedMenuName(item) || '')}</div>
                   <div class="home-featured-desc">${escapeHtml(window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.')) || '')}</div>
-                  <div class="featured-price">MAD ${Number(window.getItemPrice(item) || 0).toFixed(0)}</div>
+                  <div class="promo-price-vibrant"><span class="price-new">MAD ${Number(window.getItemPrice(item) || 0).toFixed(0)}</span></div>
                 </div>
               </a>
             `).join('')}
