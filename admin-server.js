@@ -3,6 +3,7 @@ const compression = require("compression");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const sharp = require("sharp");
 
 const {
   MAX_JSON_BYTES,
@@ -48,6 +49,7 @@ const OPENAI_ITEM_MEDIA_MODEL = process.env.OPENAI_ITEM_MEDIA_MODEL || "gpt-imag
 const OPENAI_ITEM_MEDIA_QUALITY = typeof process.env.OPENAI_ITEM_MEDIA_QUALITY === "string"
   ? process.env.OPENAI_ITEM_MEDIA_QUALITY.trim().toLowerCase()
   : "";
+const GENERATED_IMAGE_QUALITY = Number.parseInt(process.env.GENERATED_IMAGE_QUALITY || "82", 10) || 82;
 const SELLER_TOOLS_ENABLED = booleanFromEnv(
   process.env.SELLER_TOOLS_ENABLED,
   process.env.NODE_ENV !== "production"
@@ -572,12 +574,28 @@ function materializeLibraryAssetToUpload(asset) {
   return `/uploads/${filename}`;
 }
 
-function saveGeneratedImage(base64Data, prefix = "generated") {
+async function saveGeneratedImage(base64Data, prefix = "generated") {
   const safePrefix = typeof prefix === "string" && prefix.trim() ? prefix.trim().replace(/[^a-z0-9_-]+/gi, "-") : "generated";
-  const filename = `${safePrefix}_${Date.now()}_${crypto.randomBytes(8).toString("hex")}.png`;
+  const filename = `${safePrefix}_${Date.now()}_${crypto.randomBytes(8).toString("hex")}.webp`;
   const filePath = path.join(uploadsDir, filename);
   fs.mkdirSync(uploadsDir, { recursive: true });
-  fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+  const sourceBuffer = Buffer.from(base64Data, "base64");
+  await sharp(sourceBuffer)
+    .rotate()
+    .webp({
+      quality: GENERATED_IMAGE_QUALITY,
+      effort: 4
+    })
+    .toFile(filePath);
+
+  Promise.all([
+    ensureThumbnailFile(filename, getThumbnailTargetFileName(filename, "default"), "default"),
+    ensureThumbnailFile(filename, getThumbnailTargetFileName(filename, "menu"), "menu"),
+    ensureThumbnailFile(filename, getThumbnailTargetFileName(filename, "list"), "list")
+  ]).catch((thumbnailError) => {
+    console.warn("Generated image thumbnail generation failed:", thumbnailError);
+  });
+
   return `/uploads/${filename}`;
 }
 
@@ -2139,7 +2157,7 @@ async function generateMenuItemMediaImage(input) {
     throw error;
   }
 
-  const url = saveGeneratedImage(base64Image, "product-generated");
+  const url = await saveGeneratedImage(base64Image, "product-generated");
   let libraryAssetId = "";
 
   try {
