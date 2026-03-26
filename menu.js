@@ -1466,26 +1466,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SEARCH â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-function searchMenu(q) {
-    const query = q.toLowerCase().trim();
-    if (query && activeCategoryRenderState) {
-        flushActiveCategoryRenderState();
-    }
-
-    document.querySelectorAll('.menu-item-card').forEach(card => {
-        const name = card.querySelector('.menu-item-name').textContent.toLowerCase();
-        const desc = card.querySelector('.menu-item-desc').textContent.toLowerCase();
-        card.style.display = (!query || name.includes(query) || desc.includes(query)) ? 'flex' : 'none';
-    });
-
-    document.querySelectorAll('.menu-section').forEach(s => {
-        const visible = Array.from(s.querySelectorAll('.menu-item-card')).some(c => c.style.display !== 'none');
-        s.style.display = visible ? 'block' : 'none';
-    });
-}
-
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANG DROPDOWN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function toggleLangDropdown() {
@@ -1637,7 +1617,6 @@ window.showSubCategoryGrid = showSubCategoryGrid;
 window.showCategoryItems = showCategoryItems;
 window.menuGoBack = menuGoBack;
 window.toggleLangDropdown = toggleLangDropdown;
-window.searchMenu = searchMenu;
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.openDrawer = openDrawer;
