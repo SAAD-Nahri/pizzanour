@@ -38,6 +38,9 @@ let catEmojis = { ...defaultCatEmojis };
 let categoryImages = { ...(window.defaultCategoryImages || {}) };
 window.categoryImages = categoryImages;
 let wifiData = { ...defaultWifiData };
+let promoId = null;
+let homePromoItem = null;
+let homeFeaturedItems = [];
 let socialLinks = { ...defaultSocialLinks };
 let guestExperience = { ...defaultGuestExperience };
 let sectionVisibility = { ...defaultSectionVisibility };
@@ -100,6 +103,15 @@ function t(key, fallback, vars) {
     return fallback;
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function normalizeMenuItem(item) {
     const images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
     return {
@@ -132,6 +144,21 @@ function applySiteData(data) {
     };
     sectionVisibility = { ...defaultSectionVisibility, ...(data?.sectionVisibility && typeof data.sectionVisibility === 'object' ? data.sectionVisibility : {}) };
     sectionOrder = Array.isArray(data?.sectionOrder) ? data.sectionOrder.filter(Boolean) : [...defaultSectionOrder];
+    promoId = typeof data?.promoId === 'undefined' ? null : data.promoId;
+    if (Object.prototype.hasOwnProperty.call(data || {}, 'promoItem')) {
+        homePromoItem = data?.promoItem ? normalizeMenuItem(data.promoItem) : null;
+    }
+    if (Array.isArray(data?.featuredItems)) {
+        homeFeaturedItems = data.featuredItems.map(normalizeMenuItem);
+    } else if (Array.isArray(data?.menu)) {
+        homeFeaturedItems = [];
+    }
+    window.promoIds = Array.isArray(data?.promoIds)
+        ? data.promoIds
+        : promoId !== null
+            ? [promoId]
+            : [];
+
     if (typeof window.mergeRestaurantConfig === 'function') {
         window.mergeRestaurantConfig({
             wifi: { name: wifiData.ssid, code: wifiData.pass },
@@ -178,6 +205,8 @@ function applySiteDataSnapshot(snapshot) {
         guestExperience: source.guestExperience || defaultGuestExperience,
         sectionVisibility: source.sectionVisibility || defaultSectionVisibility,
         sectionOrder: source.sectionOrder || defaultSectionOrder,
+        promoIds: Array.isArray(snapshot.promoIds) ? snapshot.promoIds : [],
+        promoId: Array.isArray(snapshot.promoIds) && snapshot.promoIds.length === 1 ? snapshot.promoIds[0] : null,
         gallery: Array.isArray(source.gallery) ? source.gallery : [],
         hours: Array.isArray(source.hours) ? source.hours : [],
         hoursNote: typeof source.hoursNote === 'string' ? source.hoursNote : '',
@@ -203,6 +232,7 @@ function persistMenuSnapshotFromSiteData(data, version = '') {
             menu,
             catEmojis,
             categoryImages,
+            promoIds: Array.isArray(window.promoIds) ? window.promoIds : [],
             restaurantData: {
                 superCategories: Array.isArray(window.restaurantConfig?.superCategories) ? window.restaurantConfig.superCategories : [],
                 categoryImages,
@@ -350,7 +380,8 @@ async function loadSiteData() {
                 social: defaultSocialLinks,
                 guestExperience: defaultGuestExperience,
                 sectionVisibility: defaultSectionVisibility,
-                sectionOrder: defaultSectionOrder
+                sectionOrder: defaultSectionOrder,
+                promoId: null
             });
         }
     } finally {
@@ -395,6 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function refreshHomepageUI() {
+    renderHomepageFeatured();
     renderLocationCritical();
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
@@ -494,6 +526,8 @@ window.__homepageGetState = function __homepageGetState() {
         sectionOrder,
         defaultSectionVisibility,
         defaultSectionOrder,
+        promoId,
+        homePromoItem,
         menu
     };
 };
@@ -623,6 +657,80 @@ window.copyWifi = function copyWifi() {
             console.error('Failed to load homepage extras:', error);
         });
 };
+
+function getHomepageFeaturedItems() {
+    const sourceItems = Array.isArray(homeFeaturedItems) && homeFeaturedItems.length
+        ? homeFeaturedItems
+        : menu.filter((item) => item?.featured && item?.available !== false);
+    const seen = new Set();
+    return sourceItems.filter((item) => {
+        const key = String(item?.id ?? '');
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    }).slice(0, 6);
+}
+
+function renderHomepageFeatured() {
+    const mount = document.getElementById('menu-area');
+    if (!mount) return;
+
+    const items = getHomepageFeaturedItems();
+    if (!items.length) {
+        mount.innerHTML = '';
+        mount.style.display = 'none';
+        return;
+    }
+
+    const label = t('featured_label', 'Featured Selection');
+    const title = t('featured_best', 'Our Favorites');
+    const cta = t('view_menu', 'View Menu');
+
+    mount.style.display = 'block';
+    mount.innerHTML = `
+      <section class="promo-section home-featured-spotlight">
+        <div class="promo-inner home-featured-inner">
+          <div class="home-featured-head">
+            <div>
+              <p class="section-tag home-featured-tag">${escapeHtml(label)}</p>
+              <h2 class="section-title home-featured-title">${escapeHtml(title)}</h2>
+            </div>
+            <a href="menu.html" class="slide-cta home-featured-cta">${escapeHtml(cta)}</a>
+          </div>
+          <div class="home-featured-rail">
+            ${items.map((item) => `
+              <a class="home-featured-card" href="menu.html" aria-label="${escapeHtml(window.getLocalizedMenuName(item) || '')}">
+                <div class="home-featured-image-wrap">
+                  <img
+                    id="homeFeaturedImg${escapeHtml(String(item.id))}"
+                    alt="${escapeHtml(window.getLocalizedMenuName(item) || '')}"
+                    width="320"
+                    height="240"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div class="home-featured-copy">
+                  <h3>${escapeHtml(window.getLocalizedMenuName(item) || '')}</h3>
+                  <p>${escapeHtml(window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.')) || '')}</p>
+                  <strong>MAD ${Number(window.getItemPrice(item) || 0).toFixed(0)}</strong>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+    `;
+
+    items.forEach((item) => {
+        const image = document.getElementById(`homeFeaturedImg${String(item.id)}`);
+        if (!image) return;
+        window.setSafeImageSource(image, item.img || '', {
+            fallbackSrc: window.defaultBranding?.heroImage || 'images/hero-default.svg'
+        });
+    });
+}
+
 
 // STATUS LOGIC
 // Status is now managed by shared.js

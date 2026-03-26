@@ -4,6 +4,7 @@ let categoryImages = window.defaultCategoryImages || {};
 window.categoryImages = categoryImages;
 let categoryTranslations = window.defaultCategoryTranslations || {};
 let restaurantConfig = window.restaurantConfig || window.defaultConfig || {};
+let promoIds = [];
 let lastImporterDraft = null;
 let lastImporterDraftMeta = null;
 let lastImporterReviewReport = null;
@@ -750,6 +751,14 @@ async function loadDataFromServer() {
             restaurantConfig = window.restaurantConfig;
             categoryTranslations = restaurantConfig.categoryTranslations || categoryTranslations;
         }
+        if (data.promoId !== undefined) {
+            promoIds = data.promoId ? [data.promoId] : [];
+        }
+        if (Array.isArray(data.promoIds)) {
+            promoIds = data.promoIds;
+        }
+        window.promoIds = promoIds; // Sync for shared.js
+
         console.log('[ADMIN] Loaded', menu.length, 'items from server');
         return true;
     } catch (e) {
@@ -2991,6 +3000,8 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
             en: { ...(restaurantConfig.contentTranslations?.en || {}) },
             ar: { ...(restaurantConfig.contentTranslations?.ar || {}) }
         },
+        promoId: promoIds.length > 0 ? promoIds[0] : null,
+        promoIds: promoIds,
         superCategories: applyStructure
             ? (Array.isArray(imported.superCategories) && imported.superCategories.length ? imported.superCategories : [])
             : (restaurantConfig.superCategories || []),
@@ -3139,7 +3150,19 @@ window.copyImporterDraftJson = async function () {
 // Image handling helper
 const toImageUrl = (img) => img;
 
-function deleteItem(id) { if (confirm('Supprimer cet article ?')) { menu = menu.filter(m => m.id != id); saveAndRefresh(); } }
+function deleteItem(id) { if (confirm('Supprimer cet article ?')) { menu = menu.filter(m => m.id != id); promoIds = promoIds.filter(pid => pid != id); saveAndRefresh(); } }
+function hasPromoId(id) {
+    return promoIds.some((pid) => String(pid) === String(id));
+}
+function togglePromo(id) {
+    if (hasPromoId(id)) {
+        promoIds = promoIds.filter(pid => String(pid) !== String(id));
+    } else {
+        promoIds.push(id);
+    }
+    window.promoIds = promoIds; // Sync for shared.js
+    saveAndRefresh();
+}
 function toggleFeatured(id) {
     const item = menu.find(m => m.id == id);
     if (item) {
@@ -3148,6 +3171,7 @@ function toggleFeatured(id) {
     }
 }
 
+window.togglePromo = togglePromo;
 window.toggleFeatured = toggleFeatured;
 // Legacy save handlers kept only as a fallback reference while the newer save flow remains below.
 async function forceSaveChangesLegacy() {
@@ -3203,6 +3227,8 @@ async function saveAndRefreshLegacy() {
         sectionOrder: restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
         branding: restaurantConfig.branding || window.defaultBranding || {},
         contentTranslations: restaurantConfig.contentTranslations || { fr: {}, en: {}, ar: {} },
+        promoId: promoIds.length > 0 ? promoIds[0] : null,
+        promoIds: promoIds,
         superCategories: restaurantConfig.superCategories || [],
         hours: restaurantConfig._hours || null,
         hoursNote: restaurantConfig._hoursNote || '',
@@ -3454,6 +3480,8 @@ async function saveAndRefresh() {
         sectionOrder: restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
         branding: restaurantConfig.branding || window.defaultBranding || {},
         contentTranslations: restaurantConfig.contentTranslations || { fr: {}, en: {}, ar: {} },
+        promoId: promoIds.length > 0 ? promoIds[0] : null,
+        promoIds: promoIds,
         superCategories: restaurantConfig.superCategories || [],
         hours: restaurantConfig._hours || null,
         hoursNote: restaurantConfig._hoursNote || '',
@@ -3616,8 +3644,10 @@ function initWifiForm() {
 function updateStats() {
     const p = document.getElementById('stat-products');
     const c = document.getElementById('stat-cats');
+    const pr = document.getElementById('stat-promo');
     if (p) p.textContent = menu.length;
     if (c) c.textContent = Object.keys(catEmojis).length;
+    if (pr) pr.textContent = promoIds.length;
 }
 
 // IMAGE MODAL LOGIC

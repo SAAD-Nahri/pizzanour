@@ -1433,6 +1433,19 @@ window.translations = {
     }
 };
 
+// --- PROMO & DISCOUNT HELPERS ---
+window.getPromoIds = function () {
+    // Priority 1: Use window.promoIds if set (usually by menu.js or admin.js sync)
+    if (window.promoIds && Array.isArray(window.promoIds) && window.promoIds.length > 0) {
+        return window.promoIds;
+    }
+    return [];
+};
+
+window.isItemInPromo = function (id) {
+    return window.getPromoIds().includes(Number(id));
+};
+
 window.getItemPrice = function (item, sizeKey) {
     let basePrice = item.price;
 
@@ -1445,6 +1458,9 @@ window.getItemPrice = function (item, sizeKey) {
         }
     }
 
+    if (window.isItemInPromo(item.id)) {
+        return basePrice * 0.8; // 20% Discount
+    }
     return basePrice;
 };
 

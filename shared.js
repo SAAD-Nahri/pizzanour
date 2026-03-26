@@ -2465,7 +2465,7 @@ Object.assign(window.translations.fr, {
     'admin.menu.gallery_placeholder': 'Ou collez des URLs ici (séparées par des virgules)...',
     'admin.menu.save_product': 'Enregistrer le produit',
     'admin.menu.reset_all_data': 'Réinitialiser toutes les données',
-    'admin.menu.existing_items': 'Articles existants',
+    'admin.menu.existing_items': 'Articles existants (sélectionnez une étoile pour la promo du jour)',
     'admin.table.image': 'Image',
     'admin.table.name': 'Nom',
     'admin.table.category': 'Catégorie',
@@ -2495,6 +2495,7 @@ Object.assign(window.translations.fr, {
     'admin.stats.title': 'Vue d’ensemble',
     'admin.stats.total_products': 'Produits au total',
     'admin.stats.categories': 'Catégories',
+    'admin.stats.promo_status': 'Statut promo'
 });
 
 Object.assign(window.translations.fr, {
@@ -2831,7 +2832,7 @@ Object.assign(window.translations.en, {
     'admin.menu.gallery_placeholder': 'Or paste URLs here (comma separated)...',
     'admin.menu.save_product': 'Save Product',
     'admin.menu.reset_all_data': 'Reset All Data',
-    'admin.menu.existing_items': 'Existing Items',
+    'admin.menu.existing_items': 'Existing Items (Select star for Promo of the Day)',
     'admin.table.image': 'Image',
     'admin.table.name': 'Name',
     'admin.table.category': 'Category',
@@ -2863,6 +2864,7 @@ Object.assign(window.translations.en, {
     'admin.stats.title': 'Business Overview',
     'admin.stats.total_products': 'Total Products',
     'admin.stats.categories': 'Categories',
+    'admin.stats.promo_status': 'Promo Status',
     'admin.branding.title': 'Brand & Theme System',
     'admin.branding.subtitle': 'Configure the reusable identity that should follow this restaurant across the public website and menu.',
     'admin.branding.preset': 'Preset',
@@ -3030,7 +3032,7 @@ Object.assign(window.translations.ar, {
     'admin.menu.gallery_placeholder': 'أو ألصق الروابط هنا (مفصولة بفواصل)...',
     'admin.menu.save_product': 'حفظ المنتج',
     'admin.menu.reset_all_data': 'إعادة ضبط كل البيانات',
-    'admin.menu.existing_items': 'العناصر الحالية',
+    'admin.menu.existing_items': 'العناصر الحالية (اختر نجمة لعرض اليوم)',
     'admin.table.image': 'الصورة',
     'admin.table.name': 'الاسم',
     'admin.table.category': 'الفئة',
@@ -3060,6 +3062,7 @@ Object.assign(window.translations.ar, {
     'admin.stats.title': 'نظرة عامة على النشاط',
     'admin.stats.total_products': 'إجمالي المنتجات',
     'admin.stats.categories': 'الفئات',
+    'admin.stats.promo_status': 'حالة العرض',
     'admin.branding.title': 'نظام الهوية والثيم',
     'admin.branding.subtitle': 'اضبط الهوية القابلة لإعادة الاستخدام التي يجب أن ترافق هذا المطعم عبر الموقع العام والقائمة.',
     'admin.branding.preset': 'الإعداد',
@@ -3293,6 +3296,19 @@ Object.assign(window.translations.ar, {
     'admin.floating_save_title': 'نشر التعديلات'
 });
 
+// --- PROMO & DISCOUNT HELPERS ---
+window.getPromoIds = function () {
+    // Priority 1: Use window.promoIds if set (usually by menu.js or admin.js sync)
+    if (window.promoIds && Array.isArray(window.promoIds) && window.promoIds.length > 0) {
+        return window.promoIds;
+    }
+    return [];
+};
+
+window.isItemInPromo = function (id) {
+    return window.getPromoIds().includes(Number(id));
+};
+
 window.getItemPrice = function (item, sizeKey) {
     let basePrice = item.price;
 
@@ -3305,6 +3321,9 @@ window.getItemPrice = function (item, sizeKey) {
         }
     }
 
+    if (window.isItemInPromo(item.id)) {
+        return basePrice * 0.8; // 20% Discount
+    }
     return basePrice;
 };
 
