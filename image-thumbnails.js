@@ -40,6 +40,48 @@ const THUMBNAIL_VARIANTS = Object.freeze({
   }
 });
 
+function escapeSvgText(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildFallbackThumbnailSvg(label, width, height) {
+  const safeLabel = escapeSvgText(label || "Image unavailable");
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <defs>
+        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#fff8ef"/>
+          <stop offset="100%" stop-color="#f3e6d3"/>
+        </linearGradient>
+      </defs>
+      <rect width="${width}" height="${height}" rx="28" fill="url(#bg)"/>
+      <rect x="${Math.round(width * 0.12)}" y="${Math.round(height * 0.12)}" width="${Math.round(width * 0.76)}" height="${Math.round(height * 0.76)}" rx="22" fill="rgba(255,255,255,0.85)" stroke="#e7d5bc" stroke-width="3"/>
+      <circle cx="${Math.round(width * 0.38)}" cy="${Math.round(height * 0.42)}" r="${Math.round(Math.min(width, height) * 0.09)}" fill="#ffd7a8"/>
+      <path d="M${Math.round(width * 0.27)} ${Math.round(height * 0.68)} L${Math.round(width * 0.45)} ${Math.round(height * 0.5)} L${Math.round(width * 0.57)} ${Math.round(height * 0.62)} L${Math.round(width * 0.7)} ${Math.round(height * 0.44)} L${Math.round(width * 0.82)} ${Math.round(height * 0.68)} Z" fill="#f7b86d"/>
+      <text x="50%" y="${Math.round(height * 0.83)}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${Math.max(14, Math.round(width * 0.065))}" font-weight="700" fill="#7a5a3d">${safeLabel}</text>
+    </svg>
+  `.trim();
+}
+
+async function writeFallbackThumbnail(targetPath, variantConfig) {
+  const svg = buildFallbackThumbnailSvg(
+    variantConfig === THUMBNAIL_VARIANTS.list ? "Preview" : "Image unavailable",
+    variantConfig.width,
+    variantConfig.height
+  );
+  await sharp(Buffer.from(svg))
+    .webp({
+      quality: Math.max(variantConfig.quality, 58),
+      effort: 2
+    })
+    .toFile(targetPath);
+}
+
 function getThumbnailDir() {
   return path.join(uploadsDir, THUMBNAIL_DIRNAME);
 }
@@ -100,17 +142,21 @@ async function ensureThumbnailFile(originalFileName, targetFileName, variant = "
     );
 
     try {
-      await sharp(originalPath)
-        .rotate()
-        .resize(variantConfig.width, variantConfig.height, {
-          fit: "cover",
-          position: "attention"
-        })
-        .webp({
-          quality: variantConfig.quality,
-          effort: variantConfig.effort
-        })
-        .toFile(tempPath);
+      try {
+        await sharp(originalPath, { failOn: "none" })
+          .rotate()
+          .resize(variantConfig.width, variantConfig.height, {
+            fit: "cover",
+            position: "attention"
+          })
+          .webp({
+            quality: variantConfig.quality,
+            effort: variantConfig.effort
+          })
+          .toFile(tempPath);
+      } catch (error) {
+        await writeFallbackThumbnail(tempPath, variantConfig);
+      }
 
       if (!fs.existsSync(thumbnailPath)) {
         fs.renameSync(tempPath, thumbnailPath);
