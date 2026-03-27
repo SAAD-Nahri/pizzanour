@@ -7514,6 +7514,13 @@ body:not(.menu-page) .footer-copy {
 
   body:not(.menu-page) .top-bar {
     z-index: 360;
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  body.home-header-scrolled:not(.menu-page) .top-bar {
     background: linear-gradient(180deg, rgba(22, 24, 30, 0.97) 0%, rgba(22, 24, 30, 0.91) 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 12px 28px rgba(12, 16, 24, 0.18);
@@ -7775,6 +7782,7 @@ body:not(.menu-page) .footer-copy {
     margin-right: 0;
     max-width: min(100%, 272px);
     text-align: right;
+    transform: translateX(14px);
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-title,
@@ -8069,6 +8077,21 @@ body:not(.menu-page) .footer-inner {
 
   body:not(.menu-page) .utility-btn-label {
     font-size: 0.74rem;
+  }
+
+  html[dir="rtl"] body:not(.menu-page) .slide-content {
+    margin-left: auto;
+    margin-right: 0;
+    max-width: min(100%, 214px);
+    transform: translateX(18px);
+    text-align: right;
+  }
+
+  html[dir="rtl"] body:not(.menu-page) .slide-title,
+  html[dir="rtl"] body:not(.menu-page) .slide-sub,
+  html[dir="rtl"] body:not(.menu-page) .slide-desc,
+  html[dir="rtl"] body:not(.menu-page) .slide-cta {
+    text-align: right;
   }
 
   body:not(.menu-page) .about-section {

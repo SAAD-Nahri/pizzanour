@@ -527,9 +527,19 @@ function initApp() {
         });
     });
 
+    syncHomepageHeaderState();
+    window.addEventListener('scroll', syncHomepageHeaderState, { passive: true });
+    window.addEventListener('resize', syncHomepageHeaderState);
+
     homepageInitialized = true;
     armDeferredHomepageSections();
     armHomepageMenuWarmIntent();
+}
+
+function syncHomepageHeaderState() {
+    if (document.body.classList.contains('menu-page')) return;
+    const scrolled = (window.scrollY || window.pageYOffset || 0) > 28;
+    document.body.classList.toggle('home-header-scrolled', scrolled);
 }
 
 // ═══════════════════════ DYNAMIC HOURS ═══════════════════════
