@@ -910,8 +910,8 @@ body:not(.menu-page) .utility-btn {
   html[dir="rtl"] body:not(.menu-page) .slide-content {
     width: 100%;
     max-width: min(100%, 214px);
-    margin-left: 0;
-    margin-right: auto;
+    margin-left: auto;
+    margin-right: 0;
     text-align: right;
   }
 
@@ -924,8 +924,8 @@ body:not(.menu-page) .utility-btn {
   html[dir="rtl"] body:not(.menu-page) .slide-sub,
   html[dir="rtl"] body:not(.menu-page) .slide-cta,
   html[dir="rtl"] body:not(.menu-page) .slide-desc {
-    margin-left: auto;
-    margin-right: 0;
+    margin-left: 0;
+    margin-right: auto;
     text-align: right;
   }
 
