@@ -7884,21 +7884,26 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
 
 @media (min-width: 769px) {
   html[dir="rtl"] body:not(.menu-page) .slide {
-    justify-content: flex-end;
-    padding-right: clamp(56px, 8vw, 112px);
+    justify-content: flex-start;
+    padding-right: clamp(48px, 6vw, 88px);
     padding-left: clamp(32px, 4vw, 56px);
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-content {
-    max-width: min(100%, 430px);
-    margin-right: 0;
-    margin-left: auto;
+    position: absolute;
+    top: 50%;
+    right: clamp(64px, 9vw, 128px);
+    left: auto;
+    width: min(100%, 390px);
+    max-width: 390px;
+    margin: 0;
     text-align: right;
-    transform: none;
+    transform: translateY(-22%);
+    z-index: 5;
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-title {
-    max-width: 5.2ch;
+    max-width: 4.9ch;
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-sub {
@@ -7917,7 +7922,7 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-img {
-    left: clamp(18px, 4vw, 54px);
+    left: clamp(12px, 3vw, 42px);
     top: 56%;
   }
 }
