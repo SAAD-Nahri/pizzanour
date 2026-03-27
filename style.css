@@ -7885,17 +7885,17 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
 @media (min-width: 769px) {
   html[dir="rtl"] body:not(.menu-page) .slide {
     justify-content: flex-start;
-    padding-right: clamp(48px, 6vw, 88px);
+    padding-right: clamp(72px, 8vw, 132px);
     padding-left: clamp(32px, 4vw, 56px);
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-content {
     position: absolute;
     top: 50%;
-    right: clamp(64px, 9vw, 128px);
+    right: clamp(92px, 11vw, 168px);
     left: auto;
-    width: min(100%, 390px);
-    max-width: 390px;
+    width: min(100%, 332px);
+    max-width: 332px;
     margin: 0;
     text-align: right;
     transform: translateY(-22%);
@@ -7903,7 +7903,7 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-title {
-    max-width: 4.9ch;
+    max-width: 4.2ch;
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-sub {
@@ -7912,7 +7912,7 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-desc {
-    max-width: 22ch;
+    max-width: 18ch;
     margin-left: auto;
     margin-right: 0;
   }
@@ -7922,7 +7922,7 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-img {
-    left: clamp(12px, 3vw, 42px);
+    left: clamp(4px, 2vw, 24px);
     top: 56%;
   }
 }
