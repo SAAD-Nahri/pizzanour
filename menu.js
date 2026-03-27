@@ -1285,8 +1285,6 @@ function showSubCategoryGrid(sc, addToStack = true) {
         menuContent.innerHTML = '';
     }
 
-    scheduleDeferredFeaturedRender([], 'featuredGlobal');
-
     updateBackBtn();
     scheduleMenuFixedLayout();
     scheduleMenuMotionRefresh();
@@ -1307,10 +1305,6 @@ function showCategoryItems(cat, addToStack = true) {
     document.getElementById('menuNavigationView')?.setAttribute('data-mode', 'items');
     renderSuperCategoryChildNav(sc, cat);
     menuContent.style.display = 'block';
-
-    // Update global featured slider for specific category
-    const featuredItems = menu.filter(m => m.cat === cat && m.featured && m.available !== false);
-    scheduleDeferredFeaturedRender(featuredItems, 'featuredGlobal');
 
     updateBackBtn();
     scheduleMenuFixedLayout();
