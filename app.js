@@ -582,6 +582,9 @@ function renderDeferredHomepageSections() {
             if (typeof window.__homepageRenderDeferredSections === 'function') {
                 window.__homepageRenderDeferredSections();
             }
+            if (typeof window.setLang === 'function') {
+                window.setLang(window.currentLang || document.documentElement.lang || 'fr');
+            }
             homepageDeferredSectionsReady = true;
             cleanupDeferredHomepageSectionIntent();
         })
