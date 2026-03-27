@@ -7767,6 +7767,21 @@ body:not(.menu-page) .footer-copy {
     opacity: 0.95;
   }
 
+  html[lang="fr"] body:not(.menu-page) .hero-slider {
+    height: 68svh;
+    min-height: 486px;
+  }
+
+  html[lang="fr"] body:not(.menu-page) .slide {
+    padding-top: 176px;
+    padding-bottom: 94px;
+  }
+
+  html[lang="fr"] body:not(.menu-page) .slide-content {
+    margin-top: 40px;
+    max-width: min(100%, 258px);
+  }
+
   body:not(.menu-page) .utility-nav {
     width: calc(100% - 28px);
     margin-top: -28px;
