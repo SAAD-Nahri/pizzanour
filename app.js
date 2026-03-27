@@ -56,6 +56,8 @@ let homepageDeferredRenderHandle = null;
 let homepageDeferredSectionsReady = false;
 let homepageDeferredIntentArmed = false;
 let homepageDeferredFallbackTimer = null;
+let homepageMenuWarmArmed = false;
+let homepageMenuWarmStarted = false;
 let eventBookingScriptPromise = null;
 let homepageExtrasScriptPromise = null;
 
@@ -393,6 +395,8 @@ async function loadSiteData() {
 }
 
 async function warmMenuSnapshotFromHomepage() {
+    if (homepageMenuWarmStarted) return;
+    homepageMenuWarmStarted = true;
     const snapshot = readStoredMenuSnapshot();
     if (snapshot?.version && snapshot.version === lastPublicDataVersion && Array.isArray(snapshot.menu) && snapshot.menu.length) {
         return;
@@ -411,6 +415,48 @@ async function warmMenuSnapshotFromHomepage() {
     } catch (error) {
         console.warn('Failed to warm menu snapshot from homepage:', error);
     }
+}
+
+function armHomepageMenuWarmIntent() {
+    if (homepageMenuWarmArmed) return;
+    homepageMenuWarmArmed = true;
+
+    const triggerWarm = () => {
+        if (homepageMenuWarmStarted) return;
+        warmMenuSnapshotFromHomepage();
+        cleanup();
+    };
+
+    const menuIntentNodes = Array.from(document.querySelectorAll('a[href="menu.html"], .slide-cta'));
+    const cleanupFns = [];
+
+    const bindOnce = (target, eventName, handler, options) => {
+        if (!target) return;
+        target.addEventListener(eventName, handler, options);
+        cleanupFns.push(() => target.removeEventListener(eventName, handler, options));
+    };
+
+    menuIntentNodes.forEach((node) => {
+        bindOnce(node, 'pointerenter', triggerWarm, { passive: true });
+        bindOnce(node, 'touchstart', triggerWarm, { passive: true });
+        bindOnce(node, 'focus', triggerWarm, { passive: true });
+    });
+
+    const fallbackTimer = window.setTimeout(() => {
+        triggerWarm();
+    }, 6000);
+    cleanupFns.push(() => window.clearTimeout(fallbackTimer));
+
+    const cleanup = () => {
+        while (cleanupFns.length) {
+            const fn = cleanupFns.pop();
+            try {
+                fn();
+            } catch (_error) {
+                // no-op
+            }
+        }
+    };
 }
 
 // INIT
@@ -483,9 +529,7 @@ function initApp() {
 
     homepageInitialized = true;
     armDeferredHomepageSections();
-    scheduleLowPriorityTask(() => {
-        warmMenuSnapshotFromHomepage();
-    }, 1800);
+    armHomepageMenuWarmIntent();
 }
 
 // ═══════════════════════ DYNAMIC HOURS ═══════════════════════
