@@ -8,7 +8,7 @@ const {
   parsePort,
   setStaticAssetHeaders
 } = require("./server-common");
-const { createThumbnailRequestHandler, warmUploadThumbnailCache } = require("./image-thumbnails");
+const { createThumbnailRequestHandler, getUploadThumbnailPublicUrl, warmUploadThumbnailCache } = require("./image-thumbnails");
 const { ensureStorage, getDataVersion, readData, uploadsDir } = require("./site-store");
 
 const app = express();
@@ -145,6 +145,17 @@ function sanitizePublicBranding(input) {
   };
 }
 
+function optimizeHomeBrandingImages(branding) {
+  if (!branding || typeof branding !== "object") return branding;
+  return {
+    ...branding,
+    heroImage: getUploadThumbnailPublicUrl(branding.heroImage, "hero"),
+    heroSlides: Array.isArray(branding.heroSlides)
+      ? branding.heroSlides.map((value) => getUploadThumbnailPublicUrl(value, "hero"))
+      : []
+  };
+}
+
 function sanitizePublicSuperCategory(item) {
   const source = item && typeof item === "object" ? item : {};
   return {
@@ -180,7 +191,7 @@ function buildPublicSitePayload(data) {
       pass: asPublicString(source.wifi?.pass || source.wifi?.code, 120)
     },
     social: source.social && typeof source.social === "object" ? source.social : {},
-    branding: sanitizePublicBranding(source.branding),
+    branding: optimizeHomeBrandingImages(sanitizePublicBranding(source.branding)),
     contentTranslations: source.contentTranslations && typeof source.contentTranslations === "object"
       ? source.contentTranslations
       : {},

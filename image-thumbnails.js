@@ -15,6 +15,9 @@ const MENU_CARD_THUMB_QUALITY = Number.parseInt(process.env.IMAGE_MENU_THUMB_QUA
 const MENU_LIST_THUMB_WIDTH = Number.parseInt(process.env.IMAGE_MENU_LIST_THUMB_WIDTH || "112", 10) || 112;
 const MENU_LIST_THUMB_HEIGHT = Number.parseInt(process.env.IMAGE_MENU_LIST_THUMB_HEIGHT || "112", 10) || 112;
 const MENU_LIST_THUMB_QUALITY = Number.parseInt(process.env.IMAGE_MENU_LIST_THUMB_QUALITY || "46", 10) || 46;
+const HERO_THUMB_WIDTH = Number.parseInt(process.env.IMAGE_HERO_THUMB_WIDTH || "1280", 10) || 1280;
+const HERO_THUMB_HEIGHT = Number.parseInt(process.env.IMAGE_HERO_THUMB_HEIGHT || "720", 10) || 720;
+const HERO_THUMB_QUALITY = Number.parseInt(process.env.IMAGE_HERO_THUMB_QUALITY || "58", 10) || 58;
 const THUMBNAIL_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif"]);
 const THUMBNAIL_VARIANTS = Object.freeze({
   default: {
@@ -37,6 +40,13 @@ const THUMBNAIL_VARIANTS = Object.freeze({
     height: MENU_LIST_THUMB_HEIGHT,
     quality: MENU_LIST_THUMB_QUALITY,
     effort: 3
+  },
+  hero: {
+    suffix: `.hero${THUMB_VARIANT_VERSION}`,
+    width: HERO_THUMB_WIDTH,
+    height: HERO_THUMB_HEIGHT,
+    quality: HERO_THUMB_QUALITY,
+    effort: 4
   }
 });
 
@@ -193,7 +203,7 @@ function parseRequestedThumbnailFile(requestedFile) {
     }
   }
 
-  for (const legacyVariant of ["menu", "list"]) {
+  for (const legacyVariant of ["menu", "list", "hero"]) {
     const legacySuffix = `.${legacyVariant}`;
     if (withoutWebp.endsWith(legacySuffix)) {
       return {
@@ -270,6 +280,9 @@ function warmUploadThumbnailCache(options = {}) {
         }),
         ensureThumbnailFile(fileName, getThumbnailTargetFileName(fileName, "list"), "list").catch((error) => {
           console.warn(`[${logPrefix}] List thumbnail warmup failed for ${fileName}:`, error?.message || error);
+        }),
+        ensureThumbnailFile(fileName, getThumbnailTargetFileName(fileName, "hero"), "hero").catch((error) => {
+          console.warn(`[${logPrefix}] Hero thumbnail warmup failed for ${fileName}:`, error?.message || error);
         })
       ])));
       await new Promise((resolve) => setTimeout(resolve, 15));
