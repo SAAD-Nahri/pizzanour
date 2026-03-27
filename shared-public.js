@@ -284,6 +284,19 @@ function normalizeBranding(input) {
     };
 }
 
+function getPublicUploadThumbnailUrl(value, variant = 'default') {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    if (!trimmed.startsWith('/uploads/')) return value;
+
+    const filename = trimmed.split('/').pop();
+    if (!filename || !/\.(jpg|jpeg|png|webp|avif)$/i.test(filename)) return value;
+    if (variant === 'default') {
+        return `/uploads/.thumbs/${filename}.webp`;
+    }
+    return `/uploads/.thumbs/${filename}.${variant}.webp`;
+}
+
 const PAYMENT_METHOD_IDS = ['cash', 'tpe'];
 const FACILITY_IDS = ['wifi', 'accessible', 'parking', 'terrace', 'family'];
 const SECTION_VISIBILITY_KEYS = ['about', 'payments', 'events', 'gallery', 'hours', 'contact'];
@@ -842,6 +855,12 @@ window.applyBranding = function () {
     if (!window.restaurantConfig) return;
 
     const branding = normalizeBranding(window.restaurantConfig.branding);
+    const displayHeroImage = getPublicUploadThumbnailUrl(branding.heroImage, 'hero');
+    const displayHeroSlides = normalizeHeroSlideList(
+        branding.heroSlides,
+        [],
+        branding.heroImage
+    ).map((value) => getPublicUploadThumbnailUrl(value, 'hero'));
     const lang = document.documentElement.lang || 'fr';
     const root = document.documentElement;
     const surface3 = mixHexColors(branding.surfaceMuted, '#ffffff', 0.35, branding.surfaceMuted);
@@ -869,7 +888,7 @@ window.applyBranding = function () {
     root.style.setProperty('--menu-bg', branding.menuBackground);
     root.style.setProperty('--menu-surface', branding.menuSurface);
     root.style.setProperty('--menu-surface-2', menuSurfaceAlt);
-    root.style.setProperty('--brand-hero-image', `url("${branding.heroImage}")`);
+    root.style.setProperty('--brand-hero-image', `url("${displayHeroImage}")`);
     root.style.setProperty('--brand-logo-image', `url("${branding.logoImage}")`);
 
     const titleBase = branding.shortName || branding.restaurantName;
@@ -977,7 +996,7 @@ window.applyBranding = function () {
     heroImageIds.forEach((id) => {
         const image = document.getElementById(id);
         if (image && branding.heroImage) {
-            window.setSafeImageSource(image, branding.heroImage, {
+            window.setSafeImageSource(image, displayHeroImage, {
                 fallbackSrc: window.defaultBranding.heroImage,
                 onMissing: () => {
                     image.style.display = '';
@@ -993,9 +1012,9 @@ window.applyBranding = function () {
 
     const presetConfig = window.getBrandPresetConfig(branding.presetId);
     const homepageHeroImages = normalizeHeroSlideList(
-        branding.heroSlides,
+        displayHeroSlides,
         presetConfig.heroSlides,
-        branding.heroImage
+        displayHeroImage
     );
 
     homepageHeroImages.forEach((src, index) => {
