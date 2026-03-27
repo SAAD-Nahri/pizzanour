@@ -799,6 +799,18 @@ html[dir="rtl"] body:not(.menu-page) .slide-img {
   right: auto;
 }
 
+html[dir="rtl"] body:not(.menu-page) .utility-nav {
+  direction: rtl;
+}
+
+html[dir="rtl"] body:not(.menu-page) .utility-btn {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] body:not(.menu-page) .utility-btn-label {
+  text-align: right;
+}
+
 /* ===== Impeccable App Pass: Homepage Shell ===== */
 body:not(.menu-page) .header-inner {
   min-height: 60px;
@@ -849,5 +861,10 @@ body:not(.menu-page) .utility-btn {
   body:not(.menu-page) .utility-nav {
     width: calc(100% - 24px);
     margin-top: -24px;
+  }
+
+  html[dir="rtl"] body:not(.menu-page) .slide-img {
+    left: -12px;
+    right: auto;
   }
 }
