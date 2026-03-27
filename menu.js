@@ -373,14 +373,43 @@ function getMenuCardImageSrc(src, variant = 'menu') {
     if (!/\.(jpe?g|png|webp|avif)$/i.test(raw)) return raw;
     const filename = raw.split('/').pop();
     if (!filename) return raw;
-    const safeVariant = variant === 'list' ? 'list' : 'menu';
+    const safeVariant = variant === 'list'
+        ? 'list'
+        : (variant === 'hero' ? 'hero' : 'menu');
     return `/uploads/.thumbs/${filename}.${safeVariant}.webp`;
 }
 
-function getCategoryPreviewSource(cat) {
-    const explicitCategoryImage = typeof categoryImages?.[cat] === 'string'
+function getExplicitCategoryImage(cat) {
+    return typeof categoryImages?.[cat] === 'string'
         ? categoryImages[cat].trim()
         : '';
+}
+
+function toCssImageValue(src) {
+    const safe = String(src ?? '').replace(/["\\]/g, '\\$&');
+    return `url("${safe}")`;
+}
+
+function applyActiveCategoryBackdrop(cat = '') {
+    const contentArea = document.querySelector('#menuNavigationView .menu-content-area');
+    if (!contentArea) return;
+
+    const explicitCategoryImage = getExplicitCategoryImage(cat);
+    if (!explicitCategoryImage) {
+        contentArea.classList.remove('is-category-backed');
+        contentArea.style.removeProperty('--menu-category-backdrop-image');
+        return;
+    }
+
+    contentArea.classList.add('is-category-backed');
+    contentArea.style.setProperty(
+        '--menu-category-backdrop-image',
+        toCssImageValue(getMenuCardImageSrc(explicitCategoryImage, 'hero'))
+    );
+}
+
+function getCategoryPreviewSource(cat) {
+    const explicitCategoryImage = getExplicitCategoryImage(cat);
     if (explicitCategoryImage) {
         return {
             src: getMenuCardImageSrc(explicitCategoryImage, 'menu'),
@@ -1353,6 +1382,7 @@ if (baseMenuSetLang) {
 function renderMenu(categoryFilter = null) {
     const wrap = document.getElementById('menuContent');
     if (!wrap) return;
+    applyActiveCategoryBackdrop(categoryFilter);
     menuMarkupReady = true;
     activeCategoryRenderToken += 1;
     activeCategoryRenderState = null;
