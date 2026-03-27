@@ -16,6 +16,7 @@ const port = parsePort(process.env.PORT, 3002);
 const publicBuildDir = path.join(__dirname, "public-build");
 const PUBLIC_BUILD_FILES = new Set([
   "/home-shell.css",
+  "/home-polish.css",
   "/style.css",
   "/menu-shell.css",
   "/menu-page.css",
@@ -32,6 +33,7 @@ const build = createBuildFingerprint([
   path.join(__dirname, "index.html"),
   path.join(__dirname, "menu.html"),
   path.join(__dirname, "home-shell.css"),
+  path.join(__dirname, "home-polish.css"),
   path.join(__dirname, "menu-shell.css"),
   path.join(__dirname, "menu-page.css"),
   path.join(__dirname, "game.css"),
@@ -48,6 +50,10 @@ ensureStorage();
 app.use(compression({
   threshold: 1024
 }));
+
+app.get("/favicon.ico", (req, res) => {
+  res.sendFile(path.join(__dirname, "images", "hero-default.svg"));
+});
 
 function asPublicString(value, maxLength = 8192) {
   return typeof value === "string" ? value.slice(0, maxLength) : "";

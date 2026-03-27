@@ -1723,6 +1723,17 @@ window.applyBranding = function () {
     }
 
     const footerCopy = document.getElementById('footerCopyText');
+    if (aboutTitle) {
+        aboutTitle.innerHTML = window.getTranslation(
+            'about_title',
+            lang === 'en'
+                ? 'About <span>Our Place</span>'
+                : lang === 'ar'
+                    ? 'عن <span>مطعمنا</span>'
+                    : 'À Propos de <span>Notre Table</span>'
+        );
+    }
+
     if (footerCopy) {
         const rights = window.getTranslation(
             'footer_rights',
