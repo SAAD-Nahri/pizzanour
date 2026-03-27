@@ -847,6 +847,10 @@ body:not(.menu-page) .utility-btn {
 
 @media (max-width: 768px) {
   body:not(.menu-page) .header-inner {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
     border-radius: 20px;
   }
 
@@ -904,10 +908,17 @@ body:not(.menu-page) .utility-btn {
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-content {
+    width: 100%;
+    max-width: min(100%, 214px);
     margin-left: 0;
     margin-right: auto;
     text-align: right;
-    align-items: flex-end;
+  }
+
+  html[dir="rtl"] body:not(.menu-page) .slide-title {
+    max-width: none;
+    width: 100%;
+    text-align: right;
   }
 
   html[dir="rtl"] body:not(.menu-page) .slide-sub,
