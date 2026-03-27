@@ -1131,9 +1131,6 @@ function renderFeaturedSlider(items, containerId) {
     container.innerHTML = `
         <div class="featured-header-sexy menu-reveal-observe">
             <span class="featured-header-label">${t('featured_label', 'Sélection Signature')}</span>
-            <h2 class="featured-header-title">
-                <span>${t('featured_best', 'Nos Coups de Coeur')}</span>
-            </h2>
         </div>
         <div class="featured-slider">
             ${items.map(item => `

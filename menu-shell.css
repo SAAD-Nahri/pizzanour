@@ -277,27 +277,28 @@ body.menu-page {
 }
 
 .lang-drop-btn {
-  min-width: 72px;
-  height: 42px;
-  padding: 0 12px;
-  justify-content: space-between;
-  background: rgba(255, 248, 238, 0.16);
-  border: 1px solid rgba(255, 240, 220, 0.24);
+  min-width: 58px;
+  height: 44px;
+  padding: 0 10px;
+  justify-content: center;
+  background: rgba(10, 12, 18, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   color: var(--text-inverse);
   border-radius: 14px;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: 0.3s;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px);
 }
 
 .lang-drop-btn:hover {
-  background: rgba(255, 248, 238, 0.24);
+  background: rgba(10, 12, 18, 0.66);
+  border-color: rgba(255, 227, 187, 0.26);
 }
 
 .lang-drop-btn .chevron {
@@ -308,13 +309,13 @@ body.menu-page {
 .lang-options {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  right: 0;
   background: var(--menu-surface);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  min-width: 84px;
+  min-width: 74px;
   width: max-content;
-  max-width: min(140px, calc(100vw - 28px));
+  max-width: min(120px, calc(100vw - 28px));
   padding: 6px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   opacity: 0;
@@ -336,7 +337,7 @@ body.menu-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-inverse);
@@ -1213,14 +1214,14 @@ body.menu-page {
   }
 
   .lang-drop-btn {
-    min-width: 66px;
-    height: 40px;
-    padding: 0 10px;
-    font-size: 0.78rem;
+    min-width: 54px;
+    height: 44px;
+    padding: 0 9px;
+    font-size: 0.82rem;
   }
 
   .lang-options {
-    min-width: 76px;
+    min-width: 70px;
     max-width: calc(100vw - 32px);
     padding: 5px;
   }
@@ -2607,21 +2608,25 @@ body.menu-page {
 
 /* Sexy Featured Header */
 .featured-header-sexy {
-  margin-top: 40px;
-  margin-bottom: 20px;
-  padding: 0 15px;
+  margin-top: 22px;
+  margin-bottom: 12px;
+  padding: 0 10px;
   text-align: left;
 }
 
 .featured-header-label {
-  display: block;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 0.18em;
   color: #ff6b35;
   font-weight: 800;
-  margin-bottom: 4px;
-  text-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 249, 241, 0.98) 0%, rgba(255, 239, 219, 0.96) 100%);
+  border: 1px solid rgba(255, 170, 93, 0.2);
+  box-shadow: 0 12px 24px rgba(255, 141, 8, 0.12);
   animation: slideInLeft 0.8s ease-out;
 }
 
