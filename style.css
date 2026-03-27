@@ -7513,18 +7513,7 @@ body:not(.menu-page) .footer-copy {
   }
 
   body:not(.menu-page) .top-bar {
-    z-index: 360;
-    background: transparent;
-    border-bottom: none;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-
-  body.home-header-scrolled:not(.menu-page) .top-bar {
-    background: linear-gradient(180deg, rgba(22, 24, 30, 0.97) 0%, rgba(22, 24, 30, 0.91) 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 12px 28px rgba(12, 16, 24, 0.18);
-    backdrop-filter: blur(16px);
+    display: none;
   }
 
   body:not(.menu-page) .top-bar-inner {
@@ -7610,8 +7599,23 @@ body:not(.menu-page) .footer-copy {
     backdrop-filter: none;
   }
 
+  body.home-header-scrolled:not(.menu-page) .header-inner,
+  body:not(.menu-page) .header-nav.mobile-open ~ .header-inner,
+  body:not(.menu-page) .header-inner:has(.header-nav.mobile-open) {
+    background: linear-gradient(180deg, rgba(20, 23, 31, 0.92) 0%, rgba(20, 23, 31, 0.76) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 34px rgba(12, 16, 24, 0.18);
+    backdrop-filter: blur(18px);
+  }
+
   body:not(.menu-page) .logo {
     max-width: calc(100% - 58px);
+    padding: 11px 14px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(20, 23, 31, 0.72) 0%, rgba(20, 23, 31, 0.56) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 14px 24px rgba(12, 16, 24, 0.16);
+    backdrop-filter: blur(16px);
     font-size: 0.95rem;
     gap: 8px;
     color: #fff4ea;
@@ -7619,6 +7623,39 @@ body:not(.menu-page) .footer-copy {
 
   body:not(.menu-page) .logo span {
     color: inherit;
+  }
+
+  body:not(.menu-page) .mobile-nav-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  html[dir="rtl"] body:not(.menu-page) .mobile-nav-meta {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  body:not(.menu-page) .mobile-nav-meta .status-badge {
+    padding: 4px 10px;
+    gap: 6px;
+    background: linear-gradient(180deg, rgba(20, 23, 31, 0.72) 0%, rgba(20, 23, 31, 0.56) 100%);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 22px rgba(12, 16, 24, 0.12);
+    backdrop-filter: blur(16px);
+  }
+
+  body:not(.menu-page) .mobile-nav-meta .status-text {
+    font-size: 0.64rem;
+  }
+
+  body:not(.menu-page) .mobile-nav-meta .lang-selector {
+    justify-self: auto;
+  }
+
+  body:not(.menu-page) .mobile-nav-meta .lang-drop-btn {
+    min-width: 54px;
   }
 
   body:not(.menu-page) .mobile-menu-btn {
