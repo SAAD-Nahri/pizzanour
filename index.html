@@ -25,29 +25,6 @@
   <!-- TOP BAR -->
   <div class="top-bar">
     <div class="top-bar-inner">
-      <div class="lang-selector">
-        <div class="lang-dropdown" id="langDropdown">
-          <button class="lang-drop-btn" onclick="toggleLangDropdown()">
-            <span id="currentLangDisplay">FR</span>
-            <span class="chevron">▼</span>
-          </button>
-          <div class="lang-options" id="langOptions">
-            <div class="lang-opt" onclick="window.setLang('fr', this)">
-              <span class="flag">🇫🇷</span> Français
-            </div>
-            <div class="lang-opt" onclick="window.setLang('en', this)">
-              <span class="flag">🇬🇧</span> English
-            </div>
-            <div class="lang-opt" onclick="window.setLang('ar', this)">
-              <span class="flag">🇲🇦</span> العربية
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="status-badge" id="statusBadge">
-        <span class="status-dot"></span>
-        <span class="status-text" id="statusText" data-i18n="status_loading">Chargement...</span>
-      </div>
       <div class="top-contact">
         <span id="topPhoneDisplay">📞 05393-007 07</span>
         <span id="topAddressDisplay"></span>
@@ -74,6 +51,25 @@
         <a href="#hours" class="nav-link" data-i18n="nav_hours" data-section-link="hours">Horaires</a>
       </nav>
       <div class="header-actions">
+        <div class="lang-selector">
+          <div class="lang-dropdown" id="langDropdown">
+            <button class="lang-drop-btn" onclick="toggleLangDropdown()">
+              <span id="currentLangDisplay">FR</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="lang-options" id="langOptions">
+              <div class="lang-opt" onclick="window.setLang('fr', this)">
+                <span class="flag">🇫🇷</span> Français
+              </div>
+              <div class="lang-opt" onclick="window.setLang('en', this)">
+                <span class="flag">🇬🇧</span> English
+              </div>
+              <div class="lang-opt" onclick="window.setLang('ar', this)">
+                <span class="flag">🇲🇦</span> العربية
+              </div>
+            </div>
+          </div>
+        </div>
         <a href="https://maps.google.com" target="_blank" class="dir-btn" data-i18n="nav_directions" id="directionsLink">ITINÉRAIRE</a>
       </div>
     </div>
@@ -81,11 +77,16 @@
 
   <!-- HERO SLIDER -->
   <section class="hero-slider" id="heroSlider">
+    <div class="hero-status-slot">
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span class="status-text" id="statusText" data-i18n="status_loading">Chargement...</span>
+      </div>
+    </div>
     <div class="slide slide-active" id="slide1">
       <div class="slide-content">
         <p class="slide-sub" data-i18n="hero_sub1">Une table pour</p>
         <h1 class="slide-title" data-i18n="hero_title1">SAVEURS <span>AUTHENTIQUES</span></h1>
-        <a href="menu.html" class="slide-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
       </div>
       <div class="slide-img"><img id="heroSlideImage1" src="images/hero-default.svg" alt="Restaurant hero preview" width="960" height="960" decoding="async" fetchpriority="high" /></div>
     </div>
@@ -94,7 +95,6 @@
         <p class="slide-sub"><span data-i18n="hero_sub2">Découvrez nos</span></p>
         <h1 class="slide-title" data-i18n="hero_title2">PLATS <span>SIGNATURE</span></h1>
         <p class="slide-desc" data-i18n="hero_desc2">Des recettes maison pensées pour tous les appétits</p>
-        <a href="menu.html" class="slide-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
       </div>
       <div class="slide-img"><img id="heroSlideImage2" src="images/hero-cafe.svg"
           alt="Restaurant atmosphere preview" width="960" height="960" loading="lazy" decoding="async" fetchpriority="low" /></div>
@@ -104,8 +104,6 @@
         <p class="slide-sub">🔥 <span data-i18n="hero_sub3">Cuisine préparée</span></p>
         <h1 class="slide-title" data-i18n="hero_title3">FRAIS <span>CHAQUE JOUR</span></h1>
         <p class="slide-desc" data-i18n="hero_desc3">Sur place, à emporter ou en livraison</p>
-        <a href="menu.html" class="slide-cta"
-          data-i18n="hero_cta">VOIR LA CARTE</a>
       </div>
       <div class="slide-img"><img id="heroSlideImage3" src="images/hero-traditional.svg"
           alt="Restaurant service preview" width="960" height="960" loading="lazy" decoding="async" fetchpriority="low" /></div>
@@ -126,6 +124,9 @@
       <span class="utility-btn-icon" aria-hidden="true">&#128246;</span>
       <span class="utility-btn-label" data-i18n="landing_wifi_title">Code WiFi</span>
     </button>
+  </div>
+  <div class="hero-menu-cta-wrap">
+    <a href="menu.html" class="hero-menu-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
   </div>
 
   <div id="menu-area"></div>
@@ -390,3 +391,4 @@
 </body>
 
 </html>
+

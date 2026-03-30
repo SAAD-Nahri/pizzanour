@@ -7767,37 +7767,6 @@ body:not(.menu-page) .footer-copy {
     opacity: 0.95;
   }
 
-  html[lang="fr"] body:not(.menu-page) .hero-slider {
-    height: 70svh;
-    min-height: 516px;
-  }
-
-  html[lang="fr"] body:not(.menu-page) .slide {
-    padding-top: 194px;
-    padding-bottom: 102px;
-  }
-
-  html[lang="fr"] body:not(.menu-page) .slide-content {
-    margin-top: 56px;
-    max-width: min(100%, 272px);
-  }
-
-  html[lang="fr"] body:not(.menu-page) .slide-title {
-    max-width: 6.6ch;
-    font-size: clamp(1.62rem, 9.4vw, 2.56rem);
-    line-height: 0.94;
-  }
-
-  html[lang="fr"] body:not(.menu-page) .slide-sub {
-    margin-bottom: 10px;
-    font-size: 0.68rem;
-  }
-
-  html[lang="fr"] body:not(.menu-page) .slide-desc {
-    max-width: 24ch;
-    font-size: 0.78rem;
-  }
-
   body:not(.menu-page) .utility-nav {
     width: calc(100% - 28px);
     margin-top: -28px;

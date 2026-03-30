@@ -441,6 +441,10 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function escapeHtmlAttr(value) {
+    return escapeHtml(value);
+}
+
 function toInlineJsString(value) {
     return JSON.stringify(String(value ?? ''));
 }
@@ -1626,6 +1630,7 @@ function renderMenuTable() {
             const firstImg = images.length > 0 ? images[0] : '';
             const safePrice = Number(item.price) || 0;
             const likeCount = (typeof window.getLikeCount === 'function') ? window.getLikeCount(item.id) : 0;
+            const extrasCount = Array.isArray(item.extras) ? item.extras.length : 0;
             const itemName = escapeHtml(getAdminItemDisplayName(item));
             const itemDesc = escapeHtml(getAdminItemDisplayDescription(item));
             const itemCat = escapeHtml(item.cat || 'Uncategorized');
@@ -1639,7 +1644,7 @@ function renderMenuTable() {
                     </div>
                     ${images.length > 0 ? `<small style="display:block;text-align:center;font-size:10px;color:var(--primary);cursor:pointer;margin-top:2px" onclick='openImageModal(${inlineItemId})'>${images.length} image(s)</small>` : ''}
                 </td>
-                <td><strong>${itemName}</strong><div class="item-copy-meta"><div class="translation-badges">${translationBadges}</div></div><small style="color:#888">${itemDesc}</small></td>
+                <td><strong>${itemName}</strong><div class="item-copy-meta"><div class="translation-badges">${translationBadges}</div>${extrasCount ? `<span class="translation-chip">${extrasCount} extra${extrasCount > 1 ? 's' : ''}</span>` : ''}</div></div><small style="color:#888">${itemDesc}</small></td>
                 <td>${itemCat}</td>
                 <td>MAD ${safePrice.toFixed(2)}</td>
                 <td><span style="color:#e01e2f">${ADMIN_ICON.heart}</span> ${likeCount}</td>
@@ -1665,6 +1670,77 @@ function toggleSizesUI() {
     const hasSizes = document.getElementById('itemHasSizes').checked;
     document.getElementById('singlePriceGroup').style.display = hasSizes ? 'none' : 'block';
     document.getElementById('multiPriceGroup').style.display = hasSizes ? 'grid' : 'none';
+}
+
+function buildItemExtraId(name, index = 0) {
+    const base = String(name || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\u0600-\u06ff]+/gi, '-')
+        .replace(/^-+|-+$/g, '');
+    return base || `extra-${index + 1}`;
+}
+
+function createItemExtraRowMarkup(extra = {}, index = 0) {
+    const name = String(extra?.name || '').trim();
+    const price = Number.isFinite(Number(extra?.price)) ? Number(extra.price) : '';
+    const extraId = String(extra?.id || buildItemExtraId(name, index));
+    return `
+        <div class="dish-extra-row" data-extra-id="${escapeHtmlAttr(extraId)}">
+            <div class="form-group">
+                <label>Extra name</label>
+                <input type="text" class="dish-extra-name" value="${escapeHtmlAttr(name)}" placeholder="e.g. Extra cheese" />
+            </div>
+            <div class="form-group">
+                <label>Price (MAD)</label>
+                <input type="number" class="dish-extra-price" value="${price === '' ? '' : escapeHtmlAttr(price)}" placeholder="0.00" step="0.01" min="0" />
+            </div>
+            <button type="button" class="action-btn dish-extra-remove" onclick="removeItemExtraRow(this)" aria-label="Remove extra">${ADMIN_ICON.trash}</button>
+        </div>
+    `;
+}
+
+function renderItemExtrasEditor(extras = []) {
+    const list = document.getElementById('itemExtrasList');
+    if (!list) return;
+    const safeExtras = Array.isArray(extras) ? extras.filter((entry) => entry && typeof entry === 'object') : [];
+    if (!safeExtras.length) {
+        list.innerHTML = '<div class="dish-extra-empty">No paid extras yet. Add options like extra sauce, extra cheese, or toppings here.</div>';
+        return;
+    }
+    list.innerHTML = safeExtras.map((extra, index) => createItemExtraRowMarkup(extra, index)).join('');
+}
+
+window.addItemExtraRow = function (extra = {}) {
+    const list = document.getElementById('itemExtrasList');
+    if (!list) return;
+    const empty = list.querySelector('.dish-extra-empty');
+    if (empty) empty.remove();
+    list.insertAdjacentHTML('beforeend', createItemExtraRowMarkup(extra, list.querySelectorAll('.dish-extra-row').length));
+};
+
+window.removeItemExtraRow = function (button) {
+    const row = button?.closest('.dish-extra-row');
+    row?.remove();
+    const list = document.getElementById('itemExtrasList');
+    if (list && !list.querySelector('.dish-extra-row')) {
+        renderItemExtrasEditor([]);
+    }
+};
+
+function collectItemExtrasFromEditor() {
+    return Array.from(document.querySelectorAll('#itemExtrasList .dish-extra-row'))
+        .map((row, index) => {
+            const name = row.querySelector('.dish-extra-name')?.value?.trim() || '';
+            const price = parseFloat(row.querySelector('.dish-extra-price')?.value || '') || 0;
+            if (!name) return null;
+            return {
+                id: row.dataset.extraId || buildItemExtraId(name, index),
+                name,
+                price
+            };
+        })
+        .filter(Boolean);
 }
 
 function editItem(id) {
@@ -1701,6 +1777,7 @@ function editItem(id) {
     document.getElementById('itemFeatured').checked = item.featured || false;
     const availableCb = document.getElementById('itemAvailable');
     if (availableCb) availableCb.checked = item.available !== false;
+    renderItemExtrasEditor(item.extras || []);
 
     // Store ALL existing images (including base64) for preservation during save
     const existingImages = item.images && item.images.length > 0 ? item.images : (item.img ? [item.img] : []);
@@ -1726,6 +1803,7 @@ function resetFoodForm() {
     const availableCb = document.getElementById('itemAvailable');
     if (availableCb) availableCb.checked = true;
     toggleSizesUI();
+    renderItemExtrasEditor([]);
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = 'Add Item';
     document.querySelector('#foodForm .primary-btn').textContent = 'Save';
@@ -1787,6 +1865,7 @@ function initForms() {
         const translations = buildMenuItemTranslations();
         const featured = document.getElementById('itemFeatured').checked;
         const available = document.getElementById('itemAvailable').checked;
+        const extras = collectItemExtrasFromEditor();
 
         const hasSizes = document.getElementById('itemHasSizes').checked;
         let price = 0;
@@ -1812,6 +1891,7 @@ function initForms() {
                     ...menu[index],
                     name, cat, desc, translations, ingredients, price,
                     hasSizes, sizes,
+                    extras,
                     images: finalImages,
                     img: finalImages[0] || menu[index].img || '',
                     featured,
@@ -1824,6 +1904,7 @@ function initForms() {
                 id: Date.now(),
                 name, cat, desc, translations, ingredients, price,
                 hasSizes, sizes,
+                extras,
                 images: finalImages,
                 img: finalImages[0] || '',
                 featured,
@@ -3891,7 +3972,11 @@ window.generateCategoryImageWithAI = async function () {
             body: JSON.stringify({
                 categoryName,
                 superCategoryName: selectedSuperCategory?.name || '',
-                translations: buildCategoryTranslations(categoryName)
+                translations: buildCategoryTranslations(categoryName),
+                sampleItems: menu
+                    .filter((item) => item.cat === categoryName)
+                    .slice(0, 4)
+                    .map((item) => getAdminItemDisplayName(item))
             })
         });
         const data = await response.json().catch(() => ({}));

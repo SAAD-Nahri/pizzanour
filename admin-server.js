@@ -2092,6 +2092,12 @@ function buildMenuItemImagePrompt(input) {
 function buildCategoryImagePrompt(input) {
   const categoryName = asImporterString(input?.categoryName);
   const superCategoryName = asImporterString(input?.superCategoryName);
+  const sampleItems = Array.isArray(input?.sampleItems)
+    ? input.sampleItems
+      .map((value) => asImporterString(value))
+      .filter(Boolean)
+      .slice(0, 4)
+    : [];
   const translations = input?.translations && typeof input.translations === "object" ? input.translations : {};
   const translatedNames = ["fr", "en", "ar"]
     .map((lang) => asImporterString(translations?.[lang]?.name))
@@ -2104,8 +2110,9 @@ function buildCategoryImagePrompt(input) {
     categoryName ? `Primary category: ${categoryName}.` : "",
     superCategoryName ? `Top-level menu group: ${superCategoryName}.` : "",
     translatedNames ? `Category names across languages: ${translatedNames}.` : "",
-    "Show a representative plated dish or beverage style for this category only.",
-    "The result should feel premium and appetizing, with believable tableware, natural restaurant lighting, and a composition that works behind category cards.",
+    sampleItems.length ? `Representative items in this category: ${sampleItems.join(", ")}.` : "",
+    "Show one representative plated dish or beverage style for this category only.",
+    "The result should feel premium and appetizing, with believable tableware, natural restaurant lighting, and a composition that works as a soft visual background behind a category product list.",
     "Avoid text, labels, logos, watermark, collage, packaging, hands, and visible people."
   ].filter(Boolean).join(" ");
 }

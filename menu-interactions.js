@@ -39,6 +39,67 @@
         return runtime()?.serializeInlineId?.(value) || JSON.stringify(String(value ?? ''));
     }
 
+    function getAvailableItemExtras(item) {
+        return typeof window.getAvailableItemExtras === 'function'
+            ? window.getAvailableItemExtras(item)
+            : [];
+    }
+
+    function getSelectedItemExtras(item, selectedExtras) {
+        return typeof window.getSelectedItemExtras === 'function'
+            ? window.getSelectedItemExtras(item, selectedExtras)
+            : [];
+    }
+
+    function getConfiguredItemPrice(item, sizeKey, selectedExtras) {
+        return typeof window.getConfiguredItemPrice === 'function'
+            ? window.getConfiguredItemPrice(item, sizeKey, selectedExtras)
+            : window.getItemPrice(item, sizeKey);
+    }
+
+    function formatMoney(value) {
+        const amount = Number.isFinite(Number(value)) ? Number(value) : 0;
+        return `${amount.toFixed(0)} MAD`;
+    }
+
+    function getUiLang() {
+        if (typeof window.getStoredLanguage === 'function') {
+            return window.getStoredLanguage();
+        }
+        const htmlLang = document.documentElement?.getAttribute('lang') || '';
+        return htmlLang.slice(0, 2) || 'fr';
+    }
+
+    function getDishUiCopy(key) {
+        const lang = getUiLang();
+        const copy = {
+            size_title: { fr: 'Choisissez une taille', en: 'Choose a size', ar: 'اختر الحجم' },
+            extras_title: { fr: 'Ajoutez des extras', en: 'Add extras', ar: 'أضف إضافات' },
+            included_label: { fr: 'Inclus', en: 'Included', ar: 'مشمول' }
+        };
+        return copy[key]?.[lang] || copy[key]?.fr || '';
+    }
+
+    function formatSelectedExtrasSummary(extras) {
+        const safeExtras = Array.isArray(extras) ? extras.filter(Boolean) : [];
+        if (!safeExtras.length) return '';
+        return safeExtras.map((extra) => {
+            const name = typeof extra.name === 'string' ? extra.name.trim() : '';
+            if (!name) return '';
+            return `${name}${extra.price ? ` (+${formatMoney(extra.price)})` : ''}`;
+        }).filter(Boolean).join(' • ');
+    }
+
+    function repeatCartItem(cartId) {
+        const item = getCart().find((entry) => String(entry.cartId) === String(cartId));
+        if (!item) return;
+        window.addToCart(item.id, {
+            size: item.selectedSize || null,
+            extras: Array.isArray(item.selectedExtras) ? item.selectedExtras.map((extra) => extra.id || extra.name) : []
+        });
+        renderDrawer();
+    }
+
     const MENU_UI_ICONS = runtime()?.MENU_UI_ICONS || {};
     let galleryItems = [];
     let currentGalleryIdx = 0;
@@ -96,7 +157,9 @@
                 <div class="dish-page-body">
                     <h2 id="dishPageName" class="dish-page-name"></h2>
                     <div id="dishPagePrice" class="dish-page-price"></div>
+                    <div id="dishPagePriceNote" class="dish-page-price-note"></div>
                     <p id="dishPageDesc" class="dish-page-desc"></p>
+                    <div id="dishPageConfig" class="dish-page-config"></div>
                     <div id="dishPageLoveContainer" class="dish-page-love-row"></div>
                     <div class="dish-page-footer">
                         <button id="dishPageAddBtn" class="dish-add-btn">${t('add_to_cart', 'AJOUTER AU PANIER')}</button>
@@ -167,52 +230,93 @@
         const countEl = document.getElementById('dishPageCount');
         const nameEl = document.getElementById('dishPageName');
         const priceEl = document.getElementById('dishPagePrice');
+        const priceNoteEl = document.getElementById('dishPagePriceNote');
         const descEl = document.getElementById('dishPageDesc');
+        const configEl = document.getElementById('dishPageConfig');
         const addBtn = document.getElementById('dishPageAddBtn');
-        if (!page || !imgEl || !prevBtn || !nextBtn || !countEl || !nameEl || !priceEl || !descEl || !addBtn) return;
+        if (!page || !imgEl || !prevBtn || !nextBtn || !countEl || !nameEl || !priceEl || !priceNoteEl || !descEl || !configEl || !addBtn) return;
 
         page.dataset.itemId = String(item.id);
 
-        let selectedSize = item.hasSizes ? 'small' : null;
-        const updateSizePrice = () => {
-            const currentPrice = window.getItemPrice(item, selectedSize);
-            priceEl.textContent = `${currentPrice.toFixed(0)} MAD`;
-        };
+        const availableExtras = getAvailableItemExtras(item);
+        const availableSizeKeys = item.hasSizes && item.sizes
+            ? ['small', 'medium', 'large'].filter((sizeKey) => Number(item.sizes?.[sizeKey]) > 0)
+            : [];
+        let selectedSize = availableSizeKeys[0] || null;
+        let selectedExtraIds = [];
 
-        const sizeSelectorHtml = item.hasSizes ? `
-            <div class="size-selector-wrap" style="margin: 20px 0; display: flex; gap: 10px; justify-content: center;">
-                ${['small', 'medium', 'large'].map((sizeKey) => {
-                    const sizePrice = item.sizes?.[sizeKey];
-                    if (!sizePrice) return '';
-                    const labels = { small: 'S', medium: 'M', large: 'L' };
-                    return `
-                        <button class="size-btn ${selectedSize === sizeKey ? 'active' : ''}" 
-                                onclick="window.selectDishSize('${sizeKey}')"
-                                style="padding: 10px 20px; border-radius: 50px; border: 2px solid ${selectedSize === sizeKey ? 'var(--primary)' : '#eee'}; background: ${selectedSize === sizeKey ? 'var(--primary)' : '#fff'}; color: ${selectedSize === sizeKey ? '#fff' : '#333'}; cursor: pointer; font-weight: 700; transition: all 0.2s;">
-                            ${labels[sizeKey]} - ${sizePrice} MAD
-                        </button>
-                    `;
-                }).join('')}
-            </div>
-        ` : '';
+        const renderDishConfigurator = () => {
+            const sizeLabels = {
+                small: 'S',
+                medium: 'M',
+                large: 'L'
+            };
 
-        window.selectDishSize = (sizeKey) => {
-            selectedSize = sizeKey;
-            document.querySelectorAll('.size-btn').forEach((btn) => {
-                const isActive = btn.innerText.startsWith(sizeKey.charAt(0).toUpperCase());
-                btn.classList.toggle('active', isActive);
-                btn.style.background = isActive ? 'var(--primary)' : '#fff';
-                btn.style.color = isActive ? '#fff' : '#333';
-                btn.style.borderColor = isActive ? 'var(--primary)' : '#eee';
+            configEl.innerHTML = `
+                ${availableSizeKeys.length ? `
+                    <div class="dish-config-block">
+                        <div class="dish-config-label">${getDishUiCopy('size_title')}</div>
+                        <div class="dish-config-options dish-size-options">
+                            ${availableSizeKeys.map((sizeKey) => `
+                                <button
+                                    type="button"
+                                    class="dish-config-chip${selectedSize === sizeKey ? ' is-active' : ''}"
+                                    data-size-key="${sizeKey}">
+                                    ${sizeLabels[sizeKey] || sizeKey} · ${formatMoney(item.sizes?.[sizeKey])}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                ${availableExtras.length ? `
+                    <div class="dish-config-block">
+                        <div class="dish-config-label">${getDishUiCopy('extras_title')}</div>
+                        <div class="dish-extra-options">
+                            ${availableExtras.map((extra) => `
+                                <label class="dish-extra-option">
+                                    <input
+                                        type="checkbox"
+                                        class="dish-extra-check"
+                                        value="${extra.id}"
+                                        ${selectedExtraIds.includes(extra.id) ? 'checked' : ''}>
+                                    <span class="dish-extra-copy">
+                                        <span class="dish-extra-name">${extra.name}</span>
+                                        <span class="dish-extra-price">${extra.price ? `+${formatMoney(extra.price)}` : getDishUiCopy('included_label')}</span>
+                                    </span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            configEl.querySelectorAll('[data-size-key]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    selectedSize = button.dataset.sizeKey || null;
+                    syncDishPricing();
+                    renderDishConfigurator();
+                });
             });
-            updateSizePrice();
+
+            configEl.querySelectorAll('.dish-extra-check').forEach((checkbox) => {
+                checkbox.addEventListener('change', () => {
+                    selectedExtraIds = Array.from(configEl.querySelectorAll('.dish-extra-check:checked'))
+                        .map((entry) => entry.value)
+                        .filter(Boolean);
+                    syncDishPricing();
+                });
+            });
         };
 
-        const oldSelector = descEl.parentElement?.querySelector('.size-selector-wrap');
-        if (oldSelector) oldSelector.remove();
-        if (sizeSelectorHtml) {
-            descEl.insertAdjacentHTML('afterend', sizeSelectorHtml);
-        }
+        const syncDishPricing = () => {
+            const selectedExtras = getSelectedItemExtras(item, selectedExtraIds);
+            const totalPrice = getConfiguredItemPrice(item, selectedSize, selectedExtras);
+            priceEl.textContent = formatMoney(totalPrice);
+            priceNoteEl.textContent = selectedExtras.length
+                ? formatSelectedExtrasSummary(selectedExtras)
+                : '';
+            priceNoteEl.style.display = priceNoteEl.textContent ? 'block' : 'none';
+        };
 
         const itemImages = Array.isArray(item.images)
             ? item.images.filter((value) => typeof value === 'string' && value.trim())
@@ -256,10 +360,14 @@
         syncDishImage();
 
         nameEl.textContent = window.getLocalizedMenuName(item);
-        updateSizePrice();
+        renderDishConfigurator();
+        syncDishPricing();
         descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.'));
         addBtn.onclick = () => {
-            window.addToCart(item.id, selectedSize);
+            window.addToCart(item.id, {
+                size: selectedSize,
+                extras: selectedExtraIds
+            });
             closeDishPage();
         };
 
@@ -399,12 +507,13 @@
                                 <div class="cart-item-name">
                                     ${window.getLocalizedMenuName(item)} ${item.selectedSize ? `<span class="cart-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}
                                 </div>
+                                ${item.selectedExtras?.length ? `<div class="cart-item-extras">${formatSelectedExtrasSummary(item.selectedExtras)}</div>` : ''}
                                 <div class="cart-item-price">${(item.price * item.qty).toFixed(2)} MAD</div>
                             </div>
                             <div class="cart-item-controls">
                                 <button onclick="removeFromCart('${item.cartId}')" class="cart-qty-btn is-minus">-</button>
                                 <span class="cart-item-qty">${item.qty}</span>
-                                <button onclick="addToCart(${serializeInlineId(item.id)}, '${item.selectedSize || ''}');renderDrawer();" class="cart-qty-btn is-plus">+</button>
+                                <button onclick="window.repeatCartItem('${item.cartId}')" class="cart-qty-btn is-plus">+</button>
                             </div>
                         </div>
                     `).join('')}
@@ -533,7 +642,13 @@
                 qty: Number.isFinite(Number(item?.qty)) ? Number(item.qty) : 1,
                 name: typeof item?.name === 'string' ? item.name.trim() : '',
                 total: Number.isFinite(Number(item?.total)) ? Number(item.total) : null,
-                label: typeof item?.label === 'string' ? item.label.trim() : ''
+                label: typeof item?.label === 'string' ? item.label.trim() : '',
+                extras: Array.isArray(item?.extras)
+                    ? item.extras
+                        .map((extra) => typeof extra === 'string' ? extra.trim() : '')
+                        .filter(Boolean)
+                    : [],
+                sizeLabel: typeof item?.sizeLabel === 'string' ? item.sizeLabel.trim() : ''
             })).filter((item) => item.name || item.label)
             : [];
 
@@ -576,8 +691,12 @@
             return `
                 <div class="history-line-item">
                     <div class="history-line-item-main">
-                        <span class="history-line-item-qty">${item.qty}&times;</span>
-                        <span class="history-line-item-name">${escapeHistoryHtml(item.name)}</span>
+                        <div class="history-line-item-head">
+                            <span class="history-line-item-qty">${item.qty}&times;</span>
+                            <span class="history-line-item-name">${escapeHistoryHtml(item.name)}</span>
+                            ${item.sizeLabel ? `<span class="history-line-item-size">${escapeHistoryHtml(item.sizeLabel)}</span>` : ''}
+                        </div>
+                        ${item.extras?.length ? `<div class="history-line-item-extras">${escapeHistoryHtml(item.extras.join(' • '))}</div>` : ''}
                     </div>
                     ${Number.isFinite(item.total) ? `<span class="history-line-item-total">${item.total.toFixed(0)} ${escapeHistoryHtml(normalized.currency)}</span>` : ''}
                 </div>
@@ -663,7 +782,10 @@
                 <div class="ticket-items">
                     ${cart.map((item) => `
                         <div class="ticket-item-row">
-                            <div class="ticket-item-name"><strong class="ticket-item-qty">${item.qty} &times;</strong> ${window.getLocalizedMenuName(item)}</div>
+                            <div class="ticket-item-name">
+                                <div><strong class="ticket-item-qty">${item.qty} &times;</strong> ${window.getLocalizedMenuName(item)}${item.selectedSize ? ` <span class="ticket-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}</div>
+                                ${item.selectedExtras?.length ? `<div class="ticket-item-extras">${item.selectedExtras.map((extra) => extra.name).join(' • ')}</div>` : ''}
+                            </div>
                             <div class="ticket-item-price">${(item.price * item.qty).toFixed(0)} <span class="ticket-item-currency">dhs</span></div>
                         </div>
                     `).join('')}
@@ -703,6 +825,8 @@
             items: cart.map((item) => ({
                 qty: item.qty,
                 name: window.getLocalizedMenuName(item),
+                sizeLabel: item.selectedSize ? item.selectedSize.charAt(0).toUpperCase() : '',
+                extras: Array.isArray(item.selectedExtras) ? item.selectedExtras.map((extra) => extra.name) : [],
                 total: item.price * item.qty
             }))
         });
@@ -726,6 +850,8 @@
             items: cart.map((item) => ({
                 qty: item.qty,
                 name: window.getLocalizedMenuName(item),
+                sizeLabel: item.selectedSize ? item.selectedSize.charAt(0).toUpperCase() : '',
+                extras: Array.isArray(item.selectedExtras) ? item.selectedExtras.map((extra) => extra.name) : [],
                 total: item.price * item.qty
             }))
         });
@@ -752,7 +878,11 @@
         }
         waText += `---------------------------\n`;
         cart.forEach((item) => {
-            waText += `${item.qty}x ${window.getLocalizedMenuName(item)} - ${(item.price * item.qty).toFixed(0)} dhs\n`;
+            const sizeLabel = item.selectedSize ? ` (${item.selectedSize.charAt(0).toUpperCase()})` : '';
+            const extrasLabel = item.selectedExtras?.length
+                ? ` + ${item.selectedExtras.map((extra) => extra.name).join(', ')}`
+                : '';
+            waText += `${item.qty}x ${window.getLocalizedMenuName(item)}${sizeLabel}${extrasLabel} - ${(item.price * item.qty).toFixed(0)} dhs\n`;
         });
         waText += `---------------------------\n`;
         waText += `*${t('wa_total_label', 'TOTAL')}: ${total.toFixed(0)} dhs*\n`;
@@ -779,6 +909,7 @@
     window.openDishPage = openDishPage;
     window.closeDishPage = closeDishPage;
     window.openDishGallery = openDishGallery;
+    window.repeatCartItem = repeatCartItem;
     window.nextDishImage = nextDishImage;
     window.prevDishImage = prevDishImage;
     window.openGallery = openGallery;

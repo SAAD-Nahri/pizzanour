@@ -1739,12 +1739,120 @@ body.menu-page {
   letter-spacing: -0.4px;
 }
 
+.dish-page-price-note {
+  display: none;
+  margin: -4px 0 14px;
+  color: #8a5d43;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .dish-page-desc {
   color: var(--text2);
   line-height: 1.58;
   font-size: 0.92rem;
   margin-bottom: 18px;
   max-width: 40ch;
+}
+
+.dish-page-config {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.dish-config-block {
+  display: grid;
+  gap: 10px;
+}
+
+.dish-config-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8c644a;
+}
+
+.dish-config-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dish-config-chip {
+  border: 1px solid rgba(215, 193, 162, 0.48);
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.98) 0%, rgba(249, 242, 232, 0.92) 100%);
+  color: #2c221d;
+  border-radius: 999px;
+  padding: 10px 15px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.dish-config-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(27, 31, 38, 0.08);
+}
+
+.dish-config-chip.is-active {
+  border-color: rgba(255, 156, 86, 0.8);
+  background: linear-gradient(135deg, rgba(255, 162, 72, 0.22) 0%, rgba(227, 57, 70, 0.12) 100%);
+  color: #b53e32;
+  box-shadow: 0 12px 24px rgba(227, 57, 70, 0.12);
+}
+
+.dish-extra-options {
+  display: grid;
+  gap: 10px;
+}
+
+.dish-extra-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(215, 193, 162, 0.34);
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.98) 0%, rgba(249, 242, 232, 0.9) 100%);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dish-extra-option:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 156, 86, 0.52);
+  box-shadow: 0 12px 20px rgba(27, 31, 38, 0.06);
+}
+
+.dish-extra-check {
+  width: 18px;
+  height: 18px;
+  accent-color: #e1523d;
+  margin-top: 2px;
+}
+
+.dish-extra-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dish-extra-name {
+  font-size: 0.93rem;
+  font-weight: 700;
+  color: #231b18;
+}
+
+.dish-extra-price {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #d65a42;
+  white-space: nowrap;
 }
 
 .dish-page-love-row {
@@ -2033,6 +2141,13 @@ body.menu-page {
   margin-top: 2px;
 }
 
+.cart-item-extras {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #8a5d43;
+}
+
 .cart-item-controls {
   display: flex;
   align-items: center;
@@ -2278,11 +2393,35 @@ body.menu-page {
 
 .history-line-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   font-size: 0.92rem;
   color: #2b2b2b;
+}
+
+.history-line-item-main {
+  display: grid;
+  gap: 4px;
+}
+
+.history-line-item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-line-item-size {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #c05842;
+}
+
+.history-line-item-extras {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #8a5d43;
 }
 
 .history-line-item-main {
@@ -2460,6 +2599,19 @@ body.menu-page {
 
 .ticket-item-name {
   font-weight: 500;
+}
+
+.ticket-item-size {
+  color: #d75d44;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ticket-item-extras {
+  margin-top: 4px;
+  color: #8d6150;
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 .ticket-item-qty {

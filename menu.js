@@ -90,8 +90,17 @@ const PUBLIC_RESUME_SYNC_MIN_GAP_MS = 60000;
 const MENU_SNAPSHOT_STORAGE_KEY = 'foody_public_menu_snapshot_v1';
 let lastPublicSyncStartedAt = 0;
 
+function shouldUseStoredMenuSnapshot() {
+    const host = String(window.location?.hostname || '').trim().toLowerCase();
+    return host !== '127.0.0.1' && host !== 'localhost';
+}
+
 function readStoredMenuSnapshot() {
     try {
+        if (!shouldUseStoredMenuSnapshot()) {
+            window.localStorage?.removeItem?.(MENU_SNAPSHOT_STORAGE_KEY);
+            return null;
+        }
         if (!window.localStorage) return null;
         const raw = window.localStorage.getItem(MENU_SNAPSHOT_STORAGE_KEY);
         if (!raw) return null;
@@ -104,6 +113,7 @@ function readStoredMenuSnapshot() {
 
 function persistCurrentMenuSnapshot(version = '') {
     try {
+        if (!shouldUseStoredMenuSnapshot()) return;
         if (!window.localStorage) return;
         window.localStorage.setItem(MENU_SNAPSHOT_STORAGE_KEY, JSON.stringify({
             version,
@@ -406,6 +416,63 @@ function applyActiveCategoryBackdrop(cat = '') {
         '--menu-category-backdrop-image',
         toCssImageValue(getMenuCardImageSrc(explicitCategoryImage, 'hero'))
     );
+}
+
+function getAvailableItemExtras(item) {
+    return Array.isArray(item?.extras)
+        ? item.extras
+            .filter((extra) => extra && typeof extra === 'object' && String(extra.name || '').trim())
+            .map((extra, index) => ({
+                id: String(extra.id || `extra-${index + 1}`),
+                name: String(extra.name || '').trim(),
+                price: Number.isFinite(Number(extra.price)) ? Number(extra.price) : 0
+            }))
+        : [];
+}
+
+function getSelectedItemExtras(item, selectedExtras) {
+    const availableExtras = getAvailableItemExtras(item);
+    if (!availableExtras.length) return [];
+
+    const selectedIds = (Array.isArray(selectedExtras) ? selectedExtras : [])
+        .map((entry) => {
+            if (entry && typeof entry === 'object') return String(entry.id || entry.name || '').trim();
+            return String(entry || '').trim();
+        })
+        .filter(Boolean);
+
+    if (!selectedIds.length) return [];
+
+    return availableExtras.filter((extra) => selectedIds.includes(extra.id) || selectedIds.includes(extra.name));
+}
+
+function getConfiguredItemPrice(item, sizeKey, selectedExtras) {
+    const basePrice = window.getItemPrice(item, sizeKey);
+    const extrasTotal = getSelectedItemExtras(item, selectedExtras)
+        .reduce((sum, extra) => sum + extra.price, 0);
+    return basePrice + extrasTotal;
+}
+
+function buildCartItemId(id, sizeKey, selectedExtras) {
+    const extrasKey = getSelectedItemExtras(menu.find((entry) => sameMenuItemId(entry.id, id)), selectedExtras)
+        .map((extra) => extra.id)
+        .sort()
+        .join('+');
+    return [String(id), String(sizeKey || ''), extrasKey].join('__');
+}
+
+function itemNeedsConfiguration(item) {
+    return Boolean(item?.hasSizes || getAvailableItemExtras(item).length);
+}
+
+function handleMenuItemAdd(id) {
+    const item = menu.find((entry) => sameMenuItemId(entry.id, id));
+    if (!item) return;
+    if (itemNeedsConfiguration(item)) {
+        openDishPage(item.id);
+        return;
+    }
+    addToCart(item.id);
 }
 
 function getCategoryPreviewSource(cat) {
@@ -728,7 +795,7 @@ function buildMenuItemCardMarkup(item, cat, itemIndex) {
                 </div>
             </div>
             <div class="menu-item-side">
-                <button class="menu-item-add" onclick="event.stopPropagation();addToCart(${serializeInlineId(item.id)})">+</button>
+                <button class="menu-item-add" onclick="event.stopPropagation();handleMenuItemAdd(${serializeInlineId(item.id)})">+</button>
             </div>
         </div>
     `;
@@ -1172,12 +1239,12 @@ function renderFeaturedSlider(items, containerId) {
                     <div class="featured-info">
                         <div class="featured-name">${window.getLocalizedMenuName(item)}</div>
                         <div class="featured-desc">${window.getLocalizedMenuDescription(item, t('dish_default_desc', 'Une préparation soignée avec les meilleurs ingrédients.'))}</div>
-                        <div class="featured-price-row">
-                            <div class="featured-price">${window.getItemPrice(item).toFixed(0)} MAD</div>
-                            <div class="featured-hint">${t('view_menu', 'Voir le Menu')}</div>
-                        </div>
+                    <div class="featured-price-row">
+                        <div class="featured-price">${window.getItemPrice(item).toFixed(0)} MAD</div>
+                        <div class="featured-hint">${t('view_menu', 'Voir le Menu')}</div>
                     </div>
-                    <button class="featured-add-btn" onclick="event.stopPropagation();addToCart(${serializeInlineId(item.id)})">+</button>
+                </div>
+                    <button class="featured-add-btn" onclick="event.stopPropagation();handleMenuItemAdd(${serializeInlineId(item.id)})">+</button>
                 </div>
             `).join('')}
         </div>
@@ -1537,13 +1604,20 @@ document.addEventListener('click', (e) => {
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CART â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-window.addToCart = function (id, size) {
+window.addToCart = function (id, sizeOrConfig, extrasArg) {
     const item = menu.find(m => sameMenuItemId(m.id, id));
     if (!item) return;
 
-    const cartId = size ? `${id}_${size}` : `${id}`;
+    const selectedSize = typeof sizeOrConfig === 'string'
+        ? sizeOrConfig
+        : (sizeOrConfig && typeof sizeOrConfig === 'object' ? sizeOrConfig.size || null : null);
+    const selectedExtrasInput = Array.isArray(extrasArg)
+        ? extrasArg
+        : (sizeOrConfig && typeof sizeOrConfig === 'object' ? sizeOrConfig.extras : []);
+    const selectedExtras = getSelectedItemExtras(item, selectedExtrasInput);
+    const cartId = buildCartItemId(id, selectedSize, selectedExtras);
     const existing = cart.find(c => c.cartId === cartId);
-    const correctPrice = window.getItemPrice(item, size);
+    const correctPrice = getConfiguredItemPrice(item, selectedSize, selectedExtras);
 
     if (existing) {
         existing.qty++;
@@ -1551,16 +1625,21 @@ window.addToCart = function (id, size) {
         cart.push({
             ...item,
             cartId: cartId,
-            selectedSize: size,
+            selectedSize: selectedSize,
+            selectedExtras,
+            basePrice: window.getItemPrice(item, selectedSize),
             price: correctPrice,
             qty: 1
         });
     }
     saveCart();
     updateCartUI();
-    const sizeLabel = size ? ` (${size.charAt(0).toUpperCase()})` : '';
+    const sizeLabel = selectedSize ? ` (${selectedSize.charAt(0).toUpperCase()})` : '';
+    const extrasLabel = selectedExtras.length
+        ? ` + ${selectedExtras.map((extra) => extra.name).join(', ')}`
+        : '';
     window.showToast?.(t('toast_item_added', `${MENU_UI_ICONS.sparkle} {item} ajouté !`, {
-        item: `${window.getLocalizedMenuName(item)}${sizeLabel}`
+        item: `${window.getLocalizedMenuName(item)}${sizeLabel}${extrasLabel}`
     }));
 };
 
@@ -1688,6 +1767,10 @@ window.renderDrawer = renderDrawer;
 window.saveCart = saveCart;
 window.updateCartUI = updateCartUI;
 window.openPublicMediaPreview = openGallery;
+window.getAvailableItemExtras = getAvailableItemExtras;
+window.getSelectedItemExtras = getSelectedItemExtras;
+window.getConfiguredItemPrice = getConfiguredItemPrice;
+window.handleMenuItemAdd = handleMenuItemAdd;
 
 window.addEventListener('resize', scheduleMenuFixedLayout);
 window.addEventListener('orientationchange', scheduleMenuFixedLayout);

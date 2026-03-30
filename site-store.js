@@ -113,6 +113,27 @@ function sanitizeMenuTranslations(input) {
   };
 }
 
+function sanitizeMenuItemExtra(input, index = 0) {
+  const source = input && typeof input === "object" ? input : {};
+  const name = asString(source.name, 120).trim();
+  const price = Number.parseFloat(source.price);
+  if (!name) return null;
+
+  return {
+    id: asString(source.id, 120).trim() || `extra-${index + 1}`,
+    name,
+    price: Number.isFinite(price) ? price : 0
+  };
+}
+
+function sanitizeMenuItemExtras(input) {
+  const source = Array.isArray(input) ? input : [];
+  return source
+    .map((entry, index) => sanitizeMenuItemExtra(entry, index))
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
 function sanitizeEntityTranslationBucket(input) {
   const source = input && typeof input === "object" ? input : {};
   return {
@@ -155,6 +176,7 @@ function sanitizeMenuItem(item, index) {
   result.images = images;
   result.img = images[0] || "";
   result.translations = sanitizeMenuTranslations(source.translations);
+  result.extras = sanitizeMenuItemExtras(source.extras);
 
   return result;
 }

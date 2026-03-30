@@ -61,6 +61,11 @@ let homepageMenuWarmStarted = false;
 let eventBookingScriptPromise = null;
 let homepageExtrasScriptPromise = null;
 
+function shouldUseStoredMenuSnapshot() {
+    const host = String(window.location?.hostname || '').trim().toLowerCase();
+    return host !== '127.0.0.1' && host !== 'localhost';
+}
+
 function getVersionedPublicAsset(pathname) {
     const version = typeof window.__PUBLIC_BUILD_VERSION === 'string' ? window.__PUBLIC_BUILD_VERSION.trim() : '';
     if (!version) return pathname;
@@ -85,6 +90,10 @@ function cancelLowPriorityTask(handle) {
 
 function readStoredMenuSnapshot() {
     try {
+        if (!shouldUseStoredMenuSnapshot()) {
+            window.localStorage?.removeItem?.(MENU_SNAPSHOT_STORAGE_KEY);
+            return null;
+        }
         if (!window.localStorage) return null;
         const raw = window.localStorage.getItem(MENU_SNAPSHOT_STORAGE_KEY);
         if (!raw) return null;
@@ -228,6 +237,7 @@ function applySiteDataSnapshot(snapshot) {
 
 function persistMenuSnapshotFromSiteData(data, version = '') {
     try {
+        if (!shouldUseStoredMenuSnapshot()) return;
         if (!window.localStorage) return;
         window.localStorage.setItem(MENU_SNAPSHOT_STORAGE_KEY, JSON.stringify({
             version,
@@ -527,11 +537,9 @@ function initApp() {
         });
     });
 
-    syncHomepageMobileChrome();
     syncHomepageHeaderState();
     window.addEventListener('scroll', syncHomepageHeaderState, { passive: true });
     window.addEventListener('resize', syncHomepageHeaderState);
-    window.addEventListener('resize', syncHomepageMobileChrome);
 
     homepageInitialized = true;
     armDeferredHomepageSections();
@@ -539,34 +547,7 @@ function initApp() {
 }
 
 function syncHomepageMobileChrome() {
-    if (document.body.classList.contains('menu-page')) return;
-    const topBarInner = document.querySelector('.top-bar-inner');
-    const headerInner = document.querySelector('.header-inner');
-    const menuBtn = document.querySelector('.mobile-menu-btn');
-    const langSelector = document.querySelector('.lang-selector');
-    const statusBadge = document.getElementById('statusBadge');
-    if (!topBarInner || !headerInner || !langSelector || !statusBadge) return;
-
-    let mobileMeta = headerInner.querySelector('.mobile-nav-meta');
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
-    if (isMobile) {
-        if (!mobileMeta) {
-            mobileMeta = document.createElement('div');
-            mobileMeta.className = 'mobile-nav-meta';
-        }
-        mobileMeta.appendChild(statusBadge);
-        mobileMeta.appendChild(langSelector);
-        if (menuBtn) headerInner.insertBefore(mobileMeta, menuBtn);
-        else headerInner.appendChild(mobileMeta);
-        return;
-    }
-
-    if (mobileMeta) {
-        topBarInner.insertBefore(langSelector, topBarInner.firstChild);
-        topBarInner.insertBefore(statusBadge, topBarInner.children[1] || null);
-        mobileMeta.remove();
-    }
+    // Homepage mobile chrome now lives in its final HTML positions.
 }
 
 function syncHomepageHeaderState() {
@@ -776,6 +757,10 @@ function renderHomepageFeatured() {
 
 // SLIDER
 function startSlider() {
+    if (window.matchMedia('(max-width: 768px)').matches) {
+        goSlide(0);
+        return;
+    }
     setInterval(() => { goSlide((currentSlide + 1) % 3); }, 5000);
 }
 function goSlide(n) {

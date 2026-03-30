@@ -334,6 +334,44 @@ function sendBuiltOrSourceHtml(res, fileName) {
   res.sendFile(fs.existsSync(builtPath) ? builtPath : sourcePath);
 }
 
+function isLocalDevRequest(req) {
+  const host = String(req.hostname || "").trim().toLowerCase();
+  return host === "127.0.0.1" || host === "localhost";
+}
+
+function sendPreferredPublicAsset(req, res, next) {
+  const builtPath = path.join(publicBuildDir, req.path.replace(/^\//, ""));
+  const sourcePath = path.join(__dirname, req.path.replace(/^\//, ""));
+  const shouldPreferSource = isLocalDevRequest(req);
+
+  if (shouldPreferSource && fs.existsSync(sourcePath)) {
+    setStaticAssetHeaders(res, sourcePath);
+    res.sendFile(sourcePath);
+    return;
+  }
+
+  if (!fs.existsSync(builtPath)) {
+    next();
+    return;
+  }
+
+  if (typeof req.query?.v === "string" && req.query.v) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  } else {
+    setStaticAssetHeaders(res, builtPath);
+  }
+  res.sendFile(builtPath);
+}
+
+function sendPreferredHtml(req, res, fileName) {
+  if (isLocalDevRequest(req)) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.sendFile(path.join(__dirname, fileName));
+    return;
+  }
+  sendBuiltOrSourceHtml(res, fileName);
+}
+
 let cachedPublicPayload = {
   version: "",
   json: ""
@@ -464,25 +502,15 @@ app.use("/uploads", express.static(uploadsDir, {
 }));
 
 app.get(Array.from(PUBLIC_BUILD_FILES), (req, res, next) => {
-  const builtPath = path.join(publicBuildDir, req.path.replace(/^\//, ""));
-  if (!fs.existsSync(builtPath)) {
-    next();
-    return;
-  }
-  if (typeof req.query?.v === "string" && req.query.v) {
-    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-  } else {
-    setStaticAssetHeaders(res, builtPath);
-  }
-  res.sendFile(builtPath);
+  sendPreferredPublicAsset(req, res, next);
 });
 
-app.get("/", (_req, res) => {
-  sendBuiltOrSourceHtml(res, "index.html");
+app.get("/", (req, res) => {
+  sendPreferredHtml(req, res, "index.html");
 });
 
-app.get("/menu.html", (_req, res) => {
-  sendBuiltOrSourceHtml(res, "menu.html");
+app.get("/menu.html", (req, res) => {
+  sendPreferredHtml(req, res, "menu.html");
 });
 
 app.use((req, res, next) => {
