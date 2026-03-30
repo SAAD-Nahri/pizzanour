@@ -86,6 +86,18 @@ function sanitizePublicTranslations(input) {
   };
 }
 
+function sanitizePublicMenuExtras(input) {
+  const source = Array.isArray(input) ? input : [];
+  return source
+    .filter((entry) => entry && typeof entry === "object")
+    .map((entry, index) => ({
+      id: asPublicString(entry.id, 120) || `extra-${index + 1}`,
+      name: asPublicString(entry.name, 160),
+      price: Number.isFinite(Number(entry.price)) ? Number(entry.price) : 0
+    }))
+    .filter((entry) => entry.name);
+}
+
 function sanitizePublicMenuItem(item) {
   const source = item && typeof item === "object" ? item : {};
   const images = sanitizePublicStringArray(source.images, 8);
@@ -105,6 +117,7 @@ function sanitizePublicMenuItem(item) {
     available: source.available !== false,
     hasSizes: Boolean(source.hasSizes),
     sizes: source.sizes && typeof source.sizes === "object" ? source.sizes : (Array.isArray(source.sizes) ? source.sizes : []),
+    extras: sanitizePublicMenuExtras(source.extras),
     discount: Number.isFinite(Number(source.discount)) ? Number(source.discount) : 0
   };
 }
@@ -124,7 +137,8 @@ function sanitizePublicMenuPageItem(item) {
     featured: Boolean(source.featured),
     available: source.available !== false,
     hasSizes: Boolean(source.hasSizes),
-    sizes: source.sizes && typeof source.sizes === "object" ? source.sizes : (Array.isArray(source.sizes) ? source.sizes : [])
+    sizes: source.sizes && typeof source.sizes === "object" ? source.sizes : (Array.isArray(source.sizes) ? source.sizes : []),
+    extras: sanitizePublicMenuExtras(source.extras)
   };
 }
 
