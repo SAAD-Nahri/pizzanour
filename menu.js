@@ -400,6 +400,16 @@ function toCssImageValue(src) {
     return `url("${safe}")`;
 }
 
+function buildCategoryBackdropImageValue(src) {
+    const original = String(src ?? '').trim();
+    if (!original) return '';
+    const heroThumb = getMenuCardImageSrc(original, 'hero');
+    if (heroThumb && heroThumb !== original) {
+        return `${toCssImageValue(heroThumb)}, ${toCssImageValue(original)}`;
+    }
+    return toCssImageValue(original);
+}
+
 function applyActiveCategoryBackdrop(cat = '') {
     const contentArea = document.querySelector('#menuNavigationView .menu-content-area');
     if (!contentArea) return;
@@ -414,7 +424,7 @@ function applyActiveCategoryBackdrop(cat = '') {
     contentArea.classList.add('is-category-backed');
     contentArea.style.setProperty(
         '--menu-category-backdrop-image',
-        toCssImageValue(getMenuCardImageSrc(explicitCategoryImage, 'hero'))
+        buildCategoryBackdropImageValue(explicitCategoryImage)
     );
 }
 
