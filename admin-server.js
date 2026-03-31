@@ -3171,10 +3171,37 @@ app.get("/manifest.webmanifest", (_req, res) => {
     start_url: "/admin.html?source=pwa",
     scope: "/",
     display: "standalone",
+    display_override: ["window-controls-overlay", "standalone"],
     orientation: "portrait-primary",
     background_color: meta.menuBackground,
     theme_color: meta.menuBackground,
     categories: ["business", "food", "productivity"],
+    shortcuts: [
+      {
+        name: "Menu",
+        short_name: "Menu",
+        description: `Open ${meta.restaurantName} menu management`,
+        url: "/admin.html?source=pwa&section=menu"
+      },
+      {
+        name: "Branding",
+        short_name: "Branding",
+        description: `Open ${meta.restaurantName} branding`,
+        url: "/admin.html?source=pwa&section=branding"
+      },
+      {
+        name: "Import",
+        short_name: "Import",
+        description: "Open importer and data tools",
+        url: "/admin.html?source=pwa&section=data-tools"
+      },
+      {
+        name: "Security",
+        short_name: "Security",
+        description: "Open WiFi, hours, and security settings",
+        url: "/admin.html?source=pwa&section=security"
+      }
+    ],
     icons: [
       {
         src: `/images/pwa/admin-app-icon.svg?v=${build}`,

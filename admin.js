@@ -21,6 +21,7 @@ let adminSaveState = {
     updatedAt: null
 };
 let deferredAdminInstallPrompt = null;
+const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
 const ADMIN_PWA_COPY = Object.freeze({
     fr: {
         label: 'Accès rapide',
@@ -98,6 +99,42 @@ function isAdminStandaloneMode() {
         ? window.matchMedia('(display-mode: standalone)').matches
         : false;
     return displayModeStandalone || window.navigator.standalone === true;
+}
+
+function getRequestedAdminSection() {
+    const url = new URL(window.location.href);
+    const sectionParam = (url.searchParams.get('section') || '').trim();
+    const hashSection = (url.hash || '').replace(/^#/, '').trim();
+    const candidate = sectionParam || hashSection;
+    return candidate || '';
+}
+
+function getSavedAdminSection() {
+    try {
+        return window.localStorage.getItem(ADMIN_APP_SECTION_KEY) || '';
+    } catch (_error) {
+        return '';
+    }
+}
+
+function storeAdminSection(sectionId) {
+    if (!sectionId) return;
+    try {
+        window.localStorage.setItem(ADMIN_APP_SECTION_KEY, sectionId);
+    } catch (_error) {
+        // Ignore private mode or storage restrictions.
+    }
+}
+
+function normalizeAdminSectionTarget(sectionId) {
+    if (!sectionId) return 'menu';
+    if (isMenuWorkspaceSection(sectionId) || isInfoSection(sectionId) || isBrandingSection(sectionId)) {
+        return sectionId;
+    }
+    if (sectionId === 'data-tools' || sectionId === 'menu' || sectionId === 'info' || sectionId === 'branding') {
+        return sectionId;
+    }
+    return 'menu';
 }
 
 function getAdminInstallFallbackCopy() {
@@ -1607,6 +1644,12 @@ async function showDashboard() {
     mountOwnerAdminLayout();
     refreshUI();
     initForms();
+    const requestedSection = normalizeAdminSectionTarget(getRequestedAdminSection() || getSavedAdminSection());
+    if (requestedSection && requestedSection !== 'menu') {
+        showSection(requestedSection);
+    } else {
+        storeAdminSection('menu');
+    }
     updateAdminInstallUi();
 }
 
@@ -3840,6 +3883,8 @@ function showSection(id, btn) {
     if (window.innerWidth <= 992 && document.getElementById('adminSidebar')?.classList.contains('mobile-open')) {
         toggleSidebar();
     }
+
+    storeAdminSection(id);
 }
 
 function syncMobileParametersButton(activeSection) {
