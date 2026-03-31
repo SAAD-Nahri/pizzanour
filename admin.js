@@ -102,6 +102,19 @@ function getAdminPwaShellCopy() {
     return ADMIN_PWA_SHELL_COPY[getAdminPwaLanguage()] || ADMIN_PWA_SHELL_COPY.fr;
 }
 
+function getAdminShellSectionLabel(sectionId) {
+    const topLevelSection = resolveTopLevelSection(sectionId || 'menu');
+    const button = topLevelSection === 'branding'
+        ? document.getElementById('brandingNavBtn')
+        : topLevelSection === 'info'
+            ? document.getElementById('infoNavBtn')
+            : topLevelSection === 'data-tools'
+                ? document.getElementById('sellerToolsNavBtn')
+                : document.getElementById('menuNavBtn');
+    if (!button) return '';
+    return (button.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
 function isIosStandaloneCapable() {
     const ua = window.navigator.userAgent || '';
     return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
@@ -195,7 +208,7 @@ function getAdminInstallFallbackCopy() {
     };
 }
 
-function syncAdminAppShell() {
+function syncAdminAppShell(activeSection = '') {
     if (!document.body) return;
     const standalone = isAdminStandaloneMode();
     document.body.classList.toggle('admin-standalone', standalone);
@@ -204,7 +217,9 @@ function syncAdminAppShell() {
     const stateBadge = document.getElementById('adminMobileStateBadge');
     if (stateBadge) {
         const shellCopy = getAdminPwaShellCopy();
-        stateBadge.textContent = standalone ? shellCopy.standalone : shellCopy.browser;
+        const isAuthenticated = document.body.classList.contains('is-authenticated');
+        const sectionLabel = isAuthenticated ? getAdminShellSectionLabel(activeSection || getRequestedAdminSection() || getSavedAdminSection() || 'menu') : '';
+        stateBadge.textContent = sectionLabel || (standalone ? shellCopy.standalone : shellCopy.browser);
     }
 }
 
@@ -992,6 +1007,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const websiteHomeLink = document.querySelector('.back-btn');
     if (websiteHomeLink) websiteHomeLink.setAttribute('href', '/');
     syncAdminAppShell();
+    document.body.classList.remove('is-authenticated');
 
     window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
@@ -1672,6 +1688,7 @@ async function performAdminLogin() {
 }
 
 async function showDashboard() {
+    document.body.classList.add('is-authenticated');
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminSidebar').style.display = 'flex';
     document.getElementById('adminMain').style.display = 'block';
@@ -1684,11 +1701,13 @@ async function showDashboard() {
         showSection(requestedSection);
     } else {
         storeAdminSection('menu');
+        syncAdminAppShell('menu');
     }
     updateAdminInstallUi();
 }
 
 async function adminLogout() {
+    document.body.classList.remove('is-authenticated');
     try { await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' }); } catch (e) { }
     location.reload();
 }
@@ -3920,6 +3939,7 @@ function showSection(id, btn) {
     }
 
     storeAdminSection(id);
+    syncAdminAppShell(id);
 }
 
 function syncMobileParametersButton(activeSection) {

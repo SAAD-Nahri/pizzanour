@@ -1930,6 +1930,27 @@
             box-shadow: 0 30px 60px rgba(15, 23, 42, 0.24);
         }
 
+        .login-brand-mark {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 18px;
+            border-radius: 28px;
+            padding: 14px;
+            background:
+                radial-gradient(circle at top left, rgba(255, 255, 255, 0.58), transparent 48%),
+                linear-gradient(145deg, rgba(255, 141, 8, 0.18), rgba(224, 30, 47, 0.16));
+            border: 1px solid rgba(255, 188, 130, 0.32);
+            box-shadow: 0 22px 38px rgba(15, 23, 42, 0.12);
+            box-sizing: border-box;
+        }
+
+        .login-brand-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
         .login-card h1 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 2.5rem;
@@ -4297,6 +4318,9 @@
     <!-- LOGIN SCREEN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-card">
+            <div class="login-brand-mark" aria-hidden="true">
+                <img src="/images/pwa/admin-app-icon-192.png" alt="" />
+            </div>
             <h1 id="adminLoginTitleText" data-i18n="admin.login.title">Restaurant Admin</h1>
             <p id="adminLoginSubtitleText" data-i18n="admin.login.subtitle">Connectez-vous pour g&eacute;rer votre restaurant</p>
             <input type="text" id="loginUser" placeholder="Nom d'utilisateur" data-i18n-placeholder="admin.login.username_placeholder" />
@@ -5719,6 +5743,13 @@
         }
 
         @media (max-width: 992px) {
+            body:not(.is-authenticated) .mobile-header,
+            body:not(.is-authenticated) .mobile-bottom-nav,
+            body:not(.is-authenticated) .sidebar,
+            body:not(.is-authenticated) .overlay {
+                display: none !important;
+            }
+
             .mobile-header {
                 display: flex !important;
                 align-items: center;
@@ -5781,6 +5812,12 @@
             body.admin-standalone .login-screen {
                 padding-top: calc(26px + env(safe-area-inset-top, 0px));
                 padding-bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-standalone .login-card {
+                max-width: 420px;
+                border-radius: 28px;
+                box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
             }
         }
 
