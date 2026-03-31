@@ -88,11 +88,54 @@ function isIosStandaloneCapable() {
     return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
 }
 
+function isAndroidLike() {
+    const ua = window.navigator.userAgent || '';
+    return /android/i.test(ua);
+}
+
 function isAdminStandaloneMode() {
     const displayModeStandalone = typeof window.matchMedia === 'function'
         ? window.matchMedia('(display-mode: standalone)').matches
         : false;
     return displayModeStandalone || window.navigator.standalone === true;
+}
+
+function getAdminInstallFallbackCopy() {
+    const text = getAdminPwaCopy();
+    if (deferredAdminInstallPrompt) {
+        return {
+            copy: text.copy,
+            button: text.button
+        };
+    }
+    if (isIosStandaloneCapable()) {
+        return {
+            copy: text.iosCopy,
+            button: text.iosButton
+        };
+    }
+    if (isAndroidLike()) {
+        return {
+            copy: getAdminPwaLanguage() === 'fr'
+                ? "Sur Android, ouvrez le menu du navigateur puis choisissez Installer l'application ou Ajouter à l'écran d'accueil."
+                : getAdminPwaLanguage() === 'ar'
+                    ? 'على Android افتح قائمة المتصفح ثم اختر تثبيت التطبيق أو إضافة إلى الشاشة الرئيسية.'
+                    : 'On Android, open the browser menu and choose Install app or Add to Home Screen.',
+            button: getAdminPwaLanguage() === 'fr'
+                ? 'Comment installer'
+                : getAdminPwaLanguage() === 'ar'
+                    ? 'طريقة التثبيت'
+                    : 'How to install'
+        };
+    }
+    return {
+        copy: text.desktopHint,
+        button: getAdminPwaLanguage() === 'fr'
+            ? 'Voir les instructions'
+            : getAdminPwaLanguage() === 'ar'
+                ? 'عرض التعليمات'
+                : 'View instructions'
+    };
 }
 
 function updateAdminInstallUi() {
@@ -107,17 +150,16 @@ function updateAdminInstallUi() {
 
     const text = getAdminPwaCopy();
     const installed = isAdminStandaloneMode();
-    const iosFallback = !installed && isIosStandaloneCapable();
-    const canInstall = Boolean(deferredAdminInstallPrompt) || iosFallback;
+    const fallback = getAdminInstallFallbackCopy();
 
     label.textContent = text.label;
     title.textContent = text.title;
-    copy.textContent = deferredAdminInstallPrompt ? text.copy : (iosFallback ? text.iosCopy : text.desktopHint);
-    button.textContent = deferredAdminInstallPrompt ? text.button : text.iosButton;
+    copy.textContent = fallback.copy;
+    button.textContent = fallback.button;
     sidebarBtn.textContent = text.sidebarButton;
 
-    card.hidden = installed || !canInstall;
-    sidebarBtn.hidden = installed || !canInstall;
+    card.hidden = installed;
+    sidebarBtn.hidden = installed;
 }
 
 async function registerAdminPwa() {
@@ -928,6 +970,11 @@ window.installAdminApp = async function () {
 
     if (isIosStandaloneCapable() && !isAdminStandaloneMode()) {
         showToast(getAdminPwaCopy().iosCopy);
+        return;
+    }
+
+    if (isAndroidLike()) {
+        showToast(getAdminInstallFallbackCopy().copy);
         return;
     }
 
