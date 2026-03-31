@@ -20,8 +20,13 @@ let adminSaveState = {
     message: '',
     updatedAt: null
 };
+let importStudioBusy = false;
+let activeImporterJobId = '';
+let activeImporterPollHandle = 0;
 let deferredAdminInstallPrompt = null;
 const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
+const ADMIN_IMPORTER_ACTIVE_JOB_KEY = 'restaurant_admin_importer_active_job';
+const IMPORTER_JOB_POLL_MAX_FAILURES = 6;
 const ADMIN_PWA_COPY = Object.freeze({
     fr: {
         label: 'Accès rapide',
@@ -81,6 +86,123 @@ const ADMIN_ICON = Object.freeze({
     trash: String.fromCodePoint(0x1F5D1, 0xFE0F),
     camera: String.fromCodePoint(0x1F4F7)
 });
+
+function clearActiveImporterPollHandle() {
+    if (activeImporterPollHandle) {
+        clearTimeout(activeImporterPollHandle);
+        activeImporterPollHandle = 0;
+    }
+}
+
+function persistActiveImporterJob(jobId = '') {
+    try {
+        if (!jobId) {
+            window.sessionStorage.removeItem(ADMIN_IMPORTER_ACTIVE_JOB_KEY);
+            return;
+        }
+        window.sessionStorage.setItem(ADMIN_IMPORTER_ACTIVE_JOB_KEY, String(jobId));
+    } catch (_error) {
+        // Ignore storage errors; importer still works in-memory.
+    }
+}
+
+function getPersistedActiveImporterJob() {
+    try {
+        return window.sessionStorage.getItem(ADMIN_IMPORTER_ACTIVE_JOB_KEY) || '';
+    } catch (_error) {
+        return '';
+    }
+}
+
+function setAdminTaskOverlay(state = null) {
+    const overlayEl = document.getElementById('adminTaskOverlay');
+    const badgeEl = document.getElementById('adminTaskBadge');
+    const titleEl = document.getElementById('adminTaskTitle');
+    const copyEl = document.getElementById('adminTaskCopy');
+    const fillEl = document.getElementById('adminTaskProgressFill');
+    const stageEl = document.getElementById('adminTaskStage');
+    const hintEl = document.getElementById('adminTaskHint');
+    const active = Boolean(state);
+
+    if (overlayEl) {
+        overlayEl.hidden = !active;
+    }
+    document.body.classList.toggle('admin-task-busy', active);
+    document.documentElement.classList.toggle('admin-task-busy', active);
+
+    if (!active) {
+        if (fillEl) fillEl.style.width = '0%';
+        return;
+    }
+
+    const progress = Math.max(0, Math.min(100, Number(state.progress) || 0));
+    if (badgeEl) badgeEl.textContent = state.badge || 'Working';
+    if (titleEl) titleEl.textContent = state.title || 'Please wait';
+    if (copyEl) copyEl.textContent = state.copy || 'The admin is finishing a long-running task. Keep this page open.';
+    if (fillEl) fillEl.style.width = `${progress}%`;
+    if (stageEl) stageEl.textContent = state.stage || `${progress}% complete`;
+    if (hintEl) hintEl.textContent = state.hint || 'This screen is temporarily locked.';
+}
+
+function setImportStudioControlsBusy(active) {
+    importStudioBusy = Boolean(active);
+    const menuFilesEl = document.getElementById('importStudioMenuFiles');
+    const generateBtn = document.querySelector('#data-tools .tool-actions .primary-btn');
+    const copyBtn = document.querySelector('#data-tools .tool-actions .brand-secondary-btn');
+    const applyMenuBtn = document.getElementById('applyImporterMenuOnlyBtn');
+    const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
+
+    if (menuFilesEl) menuFilesEl.disabled = importStudioBusy;
+    if (generateBtn) generateBtn.disabled = importStudioBusy;
+    if (copyBtn) copyBtn.disabled = importStudioBusy || !lastImporterDraft;
+    if (applyMenuBtn && importStudioBusy) applyMenuBtn.disabled = true;
+    if (applyStructureBtn && importStudioBusy) applyStructureBtn.disabled = true;
+    if (!importStudioBusy && typeof renderImporterDraftOutputs === 'function') {
+        renderImporterDraftOutputs(lastImporterDraft);
+    }
+}
+
+function setImportStudioStatus(state = null) {
+    const cardEl = document.getElementById('importStudioStatusCard');
+    const badgeEl = document.getElementById('importStudioStatusBadge');
+    const metaEl = document.getElementById('importStudioStatusMeta');
+    const titleEl = document.getElementById('importStudioStatusTitle');
+    const copyEl = document.getElementById('importStudioStatusCopy');
+    const fillEl = document.getElementById('importStudioStatusFill');
+
+    if (!cardEl) return;
+    if (!state) {
+        cardEl.hidden = true;
+        cardEl.classList.remove('is-complete', 'is-error');
+        if (fillEl) fillEl.style.width = '0%';
+        return;
+    }
+
+    const progress = Math.max(0, Math.min(100, Number(state.progress) || 0));
+    cardEl.hidden = false;
+    cardEl.classList.toggle('is-complete', state.status === 'succeeded');
+    cardEl.classList.toggle('is-error', state.status === 'failed');
+    if (badgeEl) badgeEl.textContent = state.badge || (state.status === 'failed' ? 'Import failed' : state.status === 'succeeded' ? 'Draft ready' : 'Import in progress');
+    if (metaEl) metaEl.textContent = state.meta || `${progress}% complete`;
+    if (titleEl) titleEl.textContent = state.title || 'Preparing your menu import';
+    if (copyEl) copyEl.textContent = state.copy || 'Keep this page open while the importer extracts and structures the menu.';
+    if (fillEl) fillEl.style.width = `${progress}%`;
+}
+
+function applyImportStudioProgress(state = null, options = {}) {
+    setImportStudioStatus(state);
+    setImportStudioControlsBusy(Boolean(state) && state.status !== 'succeeded' && state.status !== 'failed');
+    if (options.overlay !== false) {
+        setAdminTaskOverlay(state ? {
+            badge: state.badge || 'Import in progress',
+            title: state.title,
+            copy: state.copy,
+            progress: state.progress,
+            stage: state.meta,
+            hint: state.hint || 'Keep this page open while extraction and structuring finish.'
+        } : null);
+    }
+}
 
 function t(key, fallback = '', vars = {}) {
     if (typeof window.formatTranslation === 'function') {
@@ -1085,6 +1207,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateAdminInstallUi();
         showToast(getAdminPwaCopy().installedToast);
     });
+    window.addEventListener('beforeunload', (event) => {
+        if (!importStudioBusy && !activeImporterJobId && !document.body.classList.contains('admin-task-busy')) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
 
     if (typeof window.matchMedia === 'function') {
         const standaloneMedia = window.matchMedia('(display-mode: standalone)');
@@ -1772,6 +1899,7 @@ async function showDashboard() {
         syncAdminAppShell('menu');
     }
     updateAdminInstallUi();
+    await resumeActiveImporterJobIfNeeded();
 }
 
 async function adminLogout() {
@@ -3164,6 +3292,7 @@ function renderImporterDraftOutputs(draft) {
     const applyNoteEl = document.getElementById('importStudioApplyNote');
     const applyMenuOnlyBtn = document.getElementById('applyImporterMenuOnlyBtn');
     const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
+    const copyBtn = document.querySelector('#data-tools .tool-actions .brand-secondary-btn');
     if (!summaryEl || !jsonEl) return;
 
     if (!draft) {
@@ -3177,6 +3306,7 @@ function renderImporterDraftOutputs(draft) {
         }
         if (applyMenuOnlyBtn) applyMenuOnlyBtn.disabled = true;
         if (applyStructureBtn) applyStructureBtn.disabled = true;
+        if (copyBtn) copyBtn.disabled = true;
         return;
     }
 
@@ -3228,11 +3358,12 @@ function renderImporterDraftOutputs(draft) {
     }
 
     if (applyMenuOnlyBtn) {
-        applyMenuOnlyBtn.disabled = !reviewReport.canApplyMenuOnly;
+        applyMenuOnlyBtn.disabled = importStudioBusy || !reviewReport.canApplyMenuOnly;
     }
     if (applyStructureBtn) {
-        applyStructureBtn.disabled = !reviewReport.canApplyMenuStructure;
+        applyStructureBtn.disabled = importStudioBusy || !reviewReport.canApplyMenuStructure;
     }
+    if (copyBtn) copyBtn.disabled = importStudioBusy;
 
     if (applyNoteEl) {
         if (reviewReport.blockers.length) {
@@ -3367,17 +3498,209 @@ function isPdfImportFile(file) {
     return type === 'application/pdf' || name.endsWith('.pdf');
 }
 
-async function uploadFilesForImporter(fileList, label) {
+async function uploadFilesForImporter(fileList, label, onProgress) {
     const files = Array.from(fileList || []).filter(Boolean);
     const urls = [];
 
     for (let index = 0; index < files.length; index += 1) {
-        showToast(`Uploading ${label} ${index + 1}/${files.length}...`);
+        if (typeof onProgress === 'function') {
+            onProgress({
+                label,
+                index: index + 1,
+                total: files.length,
+                fileName: files[index]?.name || ''
+            });
+        }
         const url = await uploadImageToServer(files[index]);
         if (url) urls.push(url);
     }
 
     return urls;
+}
+
+function buildImporterJobUiState(job) {
+    const progress = Math.max(0, Math.min(100, Number(job?.progress) || 0));
+    const status = typeof job?.status === 'string' ? job.status : 'running';
+    const stage = typeof job?.stage === 'string' ? job.stage : '';
+    return {
+        status,
+        progress,
+        badge: status === 'failed' ? 'Import failed' : status === 'succeeded' ? 'Draft ready' : 'Import in progress',
+        title: job?.title || 'Processing import',
+        copy: job?.detail || 'The importer is still processing your menu files.',
+        meta: stage ? stage.replace(/_/g, ' ') : `${progress}% complete`,
+        hint: status === 'succeeded'
+            ? 'Review the draft below before applying it live.'
+            : 'Keep this page open while extraction and structuring finish.'
+    };
+}
+
+function buildImporterResumeUiState(jobId) {
+    return {
+        status: 'running',
+        progress: 14,
+        badge: 'Resuming import',
+        title: 'Recovering the active importer job',
+        copy: 'A menu import is already running. The admin is reconnecting to that job instead of starting a second one.',
+        meta: jobId ? `Job ${jobId}` : 'Recovering active job',
+        hint: 'Keep this page open while the running import finishes.'
+    };
+}
+
+function buildImporterReconnectNeededUiState(jobId = '', copyOverride = '') {
+    return {
+        status: 'failed',
+        progress: 100,
+        badge: 'Reconnect needed',
+        title: 'Importer connection lost',
+        copy: copyOverride || 'The importer may still be running on the server, but this page lost track of it. Reopen Import to reconnect.',
+        meta: jobId ? `Job ${jobId}` : 'Reconnect to continue',
+        hint: 'Try opening the Import section again in a moment.'
+    };
+}
+
+function getLongTaskConflictMessage(error) {
+    if (error?.message === 'importer_job_in_progress') {
+        return 'Finish the current import before starting another AI or data task.';
+    }
+    return '';
+}
+
+async function pollImporterDraftJob(jobId) {
+    clearActiveImporterPollHandle();
+    activeImporterJobId = jobId;
+    persistActiveImporterJob(jobId);
+
+    return await new Promise((resolve, reject) => {
+        let failureCount = 0;
+        const poll = async () => {
+            try {
+                const response = await fetch(`/api/importer/jobs/${encodeURIComponent(jobId)}`, {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || !data.ok || !data.job) {
+                    throw new Error(data.error || 'Importer progress is unavailable.');
+                }
+
+                failureCount = 0;
+                const job = data.job;
+                applyImportStudioProgress(buildImporterJobUiState(job));
+
+                if (job.status === 'succeeded') {
+                    clearActiveImporterPollHandle();
+                    activeImporterJobId = '';
+                    persistActiveImporterJob('');
+                    resolve(job.result);
+                    return;
+                }
+
+                if (job.status === 'failed') {
+                    clearActiveImporterPollHandle();
+                    activeImporterJobId = '';
+                    persistActiveImporterJob('');
+                    const error = new Error(job?.error?.message || 'Importer draft failed.');
+                    error.stage = job?.error?.stage || job?.stage || '';
+                    reject(error);
+                    return;
+                }
+
+                activeImporterPollHandle = setTimeout(poll, 1000);
+            } catch (error) {
+                failureCount += 1;
+
+                if (failureCount < IMPORTER_JOB_POLL_MAX_FAILURES) {
+                    applyImportStudioProgress({
+                        status: 'running',
+                        badge: 'Reconnecting',
+                        title: 'Trying to reconnect to the importer',
+                        copy: 'The importer may still be running. The admin is retrying automatically.',
+                        progress: 22,
+                        meta: `Retry ${failureCount}/${IMPORTER_JOB_POLL_MAX_FAILURES - 1}`,
+                        hint: 'Keep this page open while the connection recovers.'
+                    });
+                    activeImporterPollHandle = setTimeout(poll, 1500);
+                    return;
+                }
+
+                clearActiveImporterPollHandle();
+                activeImporterJobId = '';
+                persistActiveImporterJob('');
+                error.code = error.code || 'importer_poll_lost';
+                reject(error);
+            }
+        };
+
+        poll();
+    });
+}
+
+async function resumeActiveImporterJobIfNeeded() {
+    let jobId = activeImporterJobId || getPersistedActiveImporterJob();
+    if (!jobId && !importStudioBusy) {
+        try {
+            const response = await fetch('/api/importer/jobs/active/current', {
+                credentials: 'include',
+                cache: 'no-store'
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.ok && data?.ok && data?.job?.jobId) {
+                jobId = data.job.jobId;
+                persistActiveImporterJob(jobId);
+            }
+        } catch (error) {
+            console.error('Active importer discovery error:', error);
+        }
+    }
+
+    if (!jobId || importStudioBusy) return;
+
+    const dataToolsBtn = document.getElementById('sellerToolsNavBtn');
+    if (dataToolsBtn) {
+        showSection('data-tools', dataToolsBtn);
+    }
+
+    try {
+        const result = await pollImporterDraftJob(jobId);
+        if (result?.draft) {
+            lastImporterDraft = result.draft;
+            lastImporterDraftMeta = {
+                jobId: result?.jobId || jobId,
+                mediaLibraryMatches: Number(result?.mediaLibraryMatches) || 0
+            };
+            renderImporterDraftOutputs(lastImporterDraft);
+            applyImportStudioProgress({
+                status: 'succeeded',
+                badge: 'Draft ready',
+                title: 'Menu draft generated',
+                copy: 'Review blockers and warnings below before applying anything live.',
+                progress: 100,
+                meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
+                hint: 'You can review and apply the draft now.'
+            });
+            setTimeout(() => {
+                setAdminTaskOverlay(null);
+                setImportStudioControlsBusy(false);
+            }, 320);
+            showToast('Importer draft restored.');
+        }
+    } catch (error) {
+        console.error('Importer resume error:', error);
+        if (error?.code === 'importer_poll_lost') {
+            applyImportStudioProgress(buildImporterReconnectNeededUiState(jobId));
+            setTimeout(() => {
+                setAdminTaskOverlay(null);
+                setImportStudioControlsBusy(false);
+            }, 240);
+            showToast('Importer connection lost. Reopen Import to reconnect.');
+            return;
+        }
+        persistActiveImporterJob('');
+        setAdminTaskOverlay(null);
+        setImportStudioControlsBusy(false);
+        setImportStudioStatus(null);
+    }
 }
 
 function buildImporterApplyPayload(draft, scope = 'menu_only') {
@@ -3458,6 +3781,11 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
 }
 
 window.generateImporterDraft = async function () {
+    if (importStudioBusy) {
+        showToast('The importer is already running. Please wait for it to finish.');
+        return;
+    }
+
     const menuFiles = Array.from(document.getElementById('importStudioMenuFiles')?.files || []);
     const branding = restaurantConfig?.branding || {};
     const restaurantName = (branding.restaurantName || window.getRestaurantDisplayName?.() || '').trim();
@@ -3476,11 +3804,45 @@ window.generateImporterDraft = async function () {
     }
 
     try {
-        showToast('Uploading import assets...');
-        const menuImageUrls = await uploadFilesForImporter(menuImageFiles, 'menu image');
-        const menuPdfUrls = await uploadFilesForImporter(menuPdfFiles, 'menu PDF');
+        applyImportStudioProgress({
+            status: 'running',
+            badge: 'Import in progress',
+            title: 'Uploading menu files',
+            copy: 'Your files are being prepared for extraction.',
+            progress: 6,
+            meta: 'Uploading assets'
+        });
 
-        showToast('Generating menu draft...');
+        const totalUploadCount = menuFiles.length;
+        const updateUploadProgress = ({ label, index, total, fileName }) => {
+            const completed = index - 1;
+            const progress = totalUploadCount > 0
+                ? 6 + Math.round(((completed + 0.35) / totalUploadCount) * 16)
+                : 12;
+            applyImportStudioProgress({
+                status: 'running',
+                badge: 'Import in progress',
+                title: 'Uploading menu files',
+                copy: fileName
+                    ? `Uploading ${fileName} so the importer can work from the current files.`
+                    : 'Your files are being prepared for extraction.',
+                progress,
+                meta: `${label} ${index}/${total}`
+            });
+        };
+
+        const menuImageUrls = await uploadFilesForImporter(menuImageFiles, 'menu image', updateUploadProgress);
+        const menuPdfUrls = await uploadFilesForImporter(menuPdfFiles, 'menu PDF', updateUploadProgress);
+
+        applyImportStudioProgress({
+            status: 'running',
+            badge: 'Import in progress',
+            title: 'Starting the AI importer',
+            copy: 'The importer job has started. Extraction and structuring will continue in the background while this screen stays locked.',
+            progress: 18,
+            meta: 'Job queued'
+        });
+
         const response = await fetch('/api/importer/draft', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3497,23 +3859,67 @@ window.generateImporterDraft = async function () {
         });
 
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.ok || !data.draft) {
+        if ((!response.ok || !data.ok || !data.jobId) && data?.error === 'importer_job_in_progress' && data?.jobId) {
+            applyImportStudioProgress(buildImporterResumeUiState(data.jobId));
+            const result = await pollImporterDraftJob(data.jobId);
+            lastImporterDraft = result?.draft || null;
+            lastImporterDraftMeta = {
+                jobId: result?.jobId || data.jobId || '',
+                mediaLibraryMatches: Number(result?.mediaLibraryMatches) || 0
+            };
+            renderImporterDraftOutputs(lastImporterDraft);
+            applyImportStudioProgress({
+                status: 'succeeded',
+                badge: 'Draft ready',
+                title: 'Menu draft generated',
+                copy: 'Review blockers and warnings below before applying anything live.',
+                progress: 100,
+                meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
+                hint: 'You can review and apply the draft now.'
+            });
+            setTimeout(() => {
+                setAdminTaskOverlay(null);
+                setImportStudioControlsBusy(false);
+            }, 320);
+            showToast('Importer draft restored.');
+            return;
+        }
+
+        if (!response.ok || !data.ok || !data.jobId) {
             const error = new Error(data.error || 'Importer draft failed.');
             error.jobId = data.jobId || '';
             error.stage = data.stage || '';
             throw error;
         }
 
-        lastImporterDraft = data.draft;
+        const result = await pollImporterDraftJob(data.jobId);
+        lastImporterDraft = result?.draft || null;
         lastImporterDraftMeta = {
-            jobId: data.jobId || '',
-            mediaLibraryMatches: Number(data.mediaLibraryMatches) || 0
+            jobId: result?.jobId || data.jobId || '',
+            mediaLibraryMatches: Number(result?.mediaLibraryMatches) || 0
         };
         renderImporterDraftOutputs(lastImporterDraft);
+        applyImportStudioProgress({
+            status: 'succeeded',
+            badge: 'Draft ready',
+            title: 'Menu draft generated',
+            copy: 'Review blockers and warnings below before applying anything live.',
+            progress: 100,
+            meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
+            hint: 'You can review and apply the draft now.'
+        });
+        setTimeout(() => {
+            setAdminTaskOverlay(null);
+            setImportStudioControlsBusy(false);
+        }, 320);
         showToast('Menu draft generated.');
     } catch (error) {
+        clearActiveImporterPollHandle();
+        activeImporterJobId = '';
         console.error('Importer draft error:', error);
-        const message = error?.message === 'openai_not_configured'
+        const message = error?.code === 'importer_poll_lost'
+            ? 'The importer connection was lost. The server job may still be running.'
+            : error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY on the admin server before using AI Import Studio.'
             : error?.message === 'invalid_json_from_openai'
                 ? 'The model returned an invalid menu draft. Try fewer or clearer menu files.'
@@ -3522,7 +3928,24 @@ window.generateImporterDraft = async function () {
                     : error.message;
         const stageLabel = error?.stage ? ` [${String(error.stage).replace(/_/g, ' ')}]` : '';
         const jobLabel = error?.jobId ? ` Job: ${error.jobId}.` : '';
-        showToast(`Menu draft failed${stageLabel}: ${message}.${jobLabel}`.replace(/\.\s*\./g, '.'));
+        applyImportStudioProgress(error?.code === 'importer_poll_lost'
+            ? buildImporterReconnectNeededUiState(error?.jobId || activeImporterJobId || '', `${message}${jobLabel}`.trim())
+            : {
+                status: 'failed',
+                badge: 'Import failed',
+                title: 'The menu draft could not be completed',
+                copy: `${message}${jobLabel}`.trim(),
+                progress: 100,
+                meta: stageLabel ? stageLabel.replace(/[\[\]]/g, '') : 'Review the error and try again.',
+                hint: 'You can retry after adjusting the files or server configuration.'
+            });
+        setImportStudioControlsBusy(false);
+        setAdminTaskOverlay(null);
+        showToast(
+            error?.code === 'importer_poll_lost'
+                ? 'Importer connection lost. Reopen Import to reconnect.'
+                : `Menu draft failed${stageLabel}: ${message}.${jobLabel}`.replace(/\.\s*\./g, '.')
+        );
     }
 };
 
@@ -3550,6 +3973,15 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
     }
 
     try {
+        applyImportStudioProgress({
+            status: 'running',
+            badge: 'Applying draft',
+            title: scope === 'menu_structure' ? 'Applying menu and structure' : 'Applying menu items',
+            copy: 'The reviewed draft is being written into the live restaurant data.',
+            progress: 42,
+            meta: scope === 'menu_structure' ? 'Menu + structure' : 'Menu only',
+            hint: 'Please wait while the current restaurant data is updated.'
+        });
         const payload = buildImporterApplyPayload(lastImporterDraft, scope);
         const response = await fetch('/api/data/import', {
             method: 'POST',
@@ -3565,9 +3997,31 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
 
         await loadDataFromServer();
         refreshUI();
+        applyImportStudioProgress({
+            status: 'succeeded',
+            badge: 'Apply complete',
+            title: scope === 'menu_structure' ? 'Menu and structure applied' : 'Menu items applied',
+            copy: 'The public site can now use the reviewed importer data.',
+            progress: 100,
+            meta: 'Saved',
+            hint: 'You can continue editing or generate another draft.'
+        }, { overlay: false });
+        setAdminTaskOverlay(null);
+        setImportStudioControlsBusy(false);
         showToast(scope === 'menu_structure' ? 'Menu and structure applied.' : 'Menu items applied.');
     } catch (error) {
         console.error('Apply importer draft error:', error);
+        applyImportStudioProgress({
+            status: 'failed',
+            badge: 'Apply failed',
+            title: 'The reviewed draft could not be applied',
+            copy: error.message,
+            progress: 100,
+            meta: 'Apply failed',
+            hint: 'Nothing new was published. Fix the issue and try again.'
+        }, { overlay: false });
+        setAdminTaskOverlay(null);
+        setImportStudioControlsBusy(false);
         showToast(`Draft apply failed: ${error.message}`);
     }
 };
@@ -4264,6 +4718,14 @@ window.generateModalImageWithAI = async function () {
     buttonEl.disabled = true;
     buttonEl.textContent = 'Generating...';
     setImageModalProgress(true, 'Generating dish image with AI...');
+    setAdminTaskOverlay({
+        badge: 'AI generation',
+        title: 'Generating dish image',
+        copy: 'The admin is creating a fresh image for this dish. Keep this page open until it finishes.',
+        progress: 58,
+        stage: 'Dish image generation',
+        hint: 'The admin is locked while the image is being generated.'
+    });
 
     try {
         const response = await fetch('/api/media/generate-menu-item', {
@@ -4296,16 +4758,17 @@ window.generateModalImageWithAI = async function () {
         }
     } catch (error) {
         console.error('Menu item AI image generation error:', error);
-        const message = error?.message === 'openai_not_configured'
+        const message = getLongTaskConflictMessage(error) || (error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY before using AI image generation.'
             : /verify organization|verified to use the model/i.test(error?.message || '')
                 ? 'Your OpenAI organization is not verified for the configured image model. Use OPENAI_ITEM_MEDIA_MODEL=dall-e-3 or wait for verification to propagate.'
-            : error.message;
+            : error.message);
         showToast(`AI image generation failed: ${message}`);
     } finally {
         buttonEl.disabled = false;
         buttonEl.textContent = originalLabel;
         setImageModalProgress(false);
+        setAdminTaskOverlay(null);
     }
 }
 
@@ -4325,6 +4788,14 @@ window.generateCategoryImageWithAI = async function () {
     }
 
     setCategoryImageProgress(true, 'Generating category image with AI...');
+    setAdminTaskOverlay({
+        badge: 'AI generation',
+        title: 'Generating category image',
+        copy: 'The admin is creating a category visual to support the menu backdrop and category identity.',
+        progress: 58,
+        stage: 'Category image generation',
+        hint: 'The admin is locked while the image is being generated.'
+    });
     try {
         const response = await fetch('/api/media/generate-category-image', {
             method: 'POST',
@@ -4350,14 +4821,15 @@ window.generateCategoryImageWithAI = async function () {
         showToast('AI image generated for the category.');
     } catch (error) {
         console.error('Category AI image generation error:', error);
-        const message = error?.message === 'openai_not_configured'
+        const message = getLongTaskConflictMessage(error) || (error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY before using AI image generation.'
             : /verify organization|verified to use the model/i.test(error?.message || '')
                 ? 'Your OpenAI organization is not verified for the configured image model. Use OPENAI_ITEM_MEDIA_MODEL=dall-e-3 or wait for verification to propagate.'
-                : error.message;
+                : error.message);
         showToast(`AI image generation failed: ${message}`);
     } finally {
         setCategoryImageProgress(false);
+        setAdminTaskOverlay(null);
     }
 }
 

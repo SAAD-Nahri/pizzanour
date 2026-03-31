@@ -89,6 +89,189 @@ const adminPwaIconFiles = Object.freeze({
   icon512: path.join(adminPwaIconDir, "admin-app-icon-512.png"),
   maskable512: path.join(adminPwaIconDir, "admin-app-icon-maskable-512.png")
 });
+const importerJobs = new Map();
+const IMPORTER_JOB_RETENTION_MS = 1000 * 60 * 60 * 6;
+
+function pruneImporterJobs() {
+  const cutoff = Date.now() - IMPORTER_JOB_RETENTION_MS;
+  for (const [jobId, job] of importerJobs.entries()) {
+    const updatedAt = Date.parse(job?.updatedAt || "");
+    if (Number.isFinite(updatedAt) && updatedAt < cutoff) {
+      importerJobs.delete(jobId);
+    }
+  }
+}
+
+function findActiveImporterJob() {
+  pruneImporterJobs();
+  for (const job of importerJobs.values()) {
+    if (job?.status === "queued" || job?.status === "running") {
+      return job;
+    }
+  }
+  return null;
+}
+
+function describeImporterStage(stage, meta = {}) {
+  const totalChunks = Number(meta.totalChunks) > 0 ? Number(meta.totalChunks) : 0;
+  const chunkNumber = Number(meta.chunkNumber) > 0 ? Number(meta.chunkNumber) : 0;
+
+  if (/^source_structuring_chunk_/i.test(String(stage || ""))) {
+    const total = totalChunks || 1;
+    const current = chunkNumber || 1;
+    const progress = Math.min(82, 42 + Math.round((current / total) * 30));
+    return {
+      title: total > 1 ? `Structuring menu draft chunk ${current}/${total}` : "Structuring menu draft",
+      detail: total > 1
+        ? "The importer is turning extracted menu text into a reviewable menu structure."
+        : "The importer is turning extracted menu text into a reviewable menu structure.",
+      progress
+    };
+  }
+
+  switch (stage) {
+    case "queued":
+      return {
+        title: "Queued for import",
+        detail: "Your import request is being prepared.",
+        progress: 2
+      };
+    case "prepare_input":
+      return {
+        title: "Preparing import inputs",
+        detail: "The importer is validating uploaded files and creating the working job.",
+        progress: 8
+      };
+    case "source_extraction":
+      return {
+        title: "Extracting menu source",
+        detail: "Reading your menu files to recover headings, dishes, prices, and descriptions.",
+        progress: 24
+      };
+    case "source_structuring":
+      return {
+        title: "Structuring menu draft",
+        detail: "Building categories, super-categories, dishes, and translations from the extracted source.",
+        progress: 48
+      };
+    case "direct_structuring":
+      return {
+        title: "Direct multimodal structuring",
+        detail: "Falling back to direct image/PDF understanding because source extraction was incomplete.",
+        progress: 62
+      };
+    case "finalize":
+      return {
+        title: "Finalizing the draft",
+        detail: "Normalizing IDs, category structure, and review warnings before the draft is ready.",
+        progress: 88
+      };
+    case "succeeded":
+      return {
+        title: "Import draft ready",
+        detail: "The menu draft is ready for review and apply.",
+        progress: 100
+      };
+    case "failed":
+      return {
+        title: "Import failed",
+        detail: "The importer could not finish this request.",
+        progress: 100
+      };
+    default:
+      return {
+        title: "Processing import",
+        detail: "The importer is still working on your draft.",
+        progress: 14
+      };
+  }
+}
+
+function upsertImporterJob(jobId, patch = {}) {
+  pruneImporterJobs();
+  const existing = importerJobs.get(jobId) || {
+    jobId,
+    status: "queued",
+    stage: "queued",
+    progress: 2,
+    title: "Queued for import",
+    detail: "Your import request is being prepared.",
+    result: null,
+    error: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  const next = {
+    ...existing,
+    ...patch,
+    updatedAt: new Date().toISOString()
+  };
+  importerJobs.set(jobId, next);
+  try {
+    writeSellerJobJson(jobId, "review/status.json", {
+      jobId: next.jobId,
+      status: next.status,
+      stage: next.stage,
+      title: next.title,
+      detail: next.detail,
+      progress: next.progress,
+      meta: next.meta || {},
+      error: next.error || null,
+      createdAt: next.createdAt,
+      updatedAt: next.updatedAt,
+      completedAt: next.completedAt || null
+    });
+  } catch (_error) {
+    // Status persistence is best-effort; in-memory polling remains the source of truth.
+  }
+  return next;
+}
+
+function markImporterJobStage(jobId, stage, meta = {}) {
+  const descriptor = describeImporterStage(stage, meta);
+  return upsertImporterJob(jobId, {
+    status: "running",
+    stage,
+    title: descriptor.title,
+    detail: descriptor.detail,
+    progress: descriptor.progress,
+    meta: {
+      ...(meta && typeof meta === "object" ? meta : {})
+    },
+    error: null
+  });
+}
+
+function markImporterJobSucceeded(jobId, result) {
+  const descriptor = describeImporterStage("succeeded");
+  return upsertImporterJob(jobId, {
+    status: "succeeded",
+    stage: "succeeded",
+    title: descriptor.title,
+    detail: descriptor.detail,
+    progress: descriptor.progress,
+    result,
+    error: null,
+    completedAt: new Date().toISOString()
+  });
+}
+
+function markImporterJobFailed(jobId, error) {
+  const descriptor = describeImporterStage("failed");
+  return upsertImporterJob(jobId, {
+    status: "failed",
+    stage: error?.importerStage || "failed",
+    title: descriptor.title,
+    detail: error?.message || descriptor.detail,
+    progress: descriptor.progress,
+    error: {
+      message: error?.message || "importer_draft_failed",
+      stage: error?.importerStage || "",
+      statusCode: error?.statusCode || 500
+    },
+    completedAt: new Date().toISOString()
+  });
+}
 
 app.use(compression({
   threshold: 1024
@@ -2772,7 +2955,7 @@ async function finalizeImporterDraft(parsedDraft, input, extraWarnings = []) {
   };
 }
 
-async function generateImporterDraft(input) {
+async function generateImporterDraft(input, options = {}) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error("openai_not_configured");
     error.statusCode = 400;
@@ -2787,11 +2970,16 @@ async function generateImporterDraft(input) {
   const shortName = typeof input.shortName === "string" ? input.shortName.trim() : "";
   const notes = typeof input.notes === "string" ? input.notes.trim() : "";
   const importerModel = getImporterModelForInput({ menuPdfUrls });
-  const job = createSellerJob("import");
+  const job = options.job || createSellerJob("import");
+  const reportProgress = typeof options.onProgress === "function" ? options.onProgress : () => {};
   let importerStage = "request";
+  const setImporterStage = (stage, meta = {}) => {
+    importerStage = stage;
+    reportProgress(stage, meta);
+  };
 
   try {
-    importerStage = "prepare_input";
+    setImporterStage("prepare_input");
     writeSellerJobJson(job.jobId, "input/request.json", {
       restaurantName,
       shortName,
@@ -2827,7 +3015,7 @@ async function generateImporterDraft(input) {
     const importerWarnings = [];
 
     try {
-      importerStage = "source_extraction";
+      setImporterStage("source_extraction");
       sourceExtraction = await extractImporterMenuSource(inputContext);
       writeSellerJobJson(job.jobId, "extraction/menu-source.json", sourceExtraction);
       if (Array.isArray(sourceExtraction.assets)) {
@@ -2862,7 +3050,13 @@ async function generateImporterDraft(input) {
           const chunkKey = String(index + 1).padStart(2, "0");
           writeSellerJobJson(job.jobId, `extraction/source-chunks/${chunkKey}.json`, chunk);
           writeSellerJobText(job.jobId, `extraction/source-chunks/${chunkKey}.txt`, formatImporterSourceForPrompt(chunk));
-          importerStage = sourceChunks.length > 1 ? `source_structuring_chunk_${index + 1}` : "source_structuring";
+          setImporterStage(
+            sourceChunks.length > 1 ? `source_structuring_chunk_${index + 1}` : "source_structuring",
+            {
+              chunkNumber: index + 1,
+              totalChunks: sourceChunks.length
+            }
+          );
           const structuredChunk = await buildImporterDraftFromSource(inputContext, chunk, {
             chunkIndex: index,
             totalChunks: sourceChunks.length
@@ -2882,7 +3076,7 @@ async function generateImporterDraft(input) {
     }
 
     if (!parsedDraft) {
-      importerStage = "direct_structuring";
+      setImporterStage("direct_structuring");
       const directDraft = await buildImporterDraftDirectFromAssets(inputContext);
       writeSellerJobJson(job.jobId, "extraction/openai-response.json", directDraft.payload);
       if (directDraft.rawText) {
@@ -2898,7 +3092,7 @@ async function generateImporterDraft(input) {
       parsedDraft = directDraft.parsed;
     }
 
-    importerStage = "finalize";
+    setImporterStage("finalize");
     const finalized = await finalizeImporterDraft(
       parsedDraft,
       inputContext,
@@ -3121,6 +3315,21 @@ function requireSellerTools(_req, res, next) {
 function requireAiMediaTools(_req, res, next) {
   if (!AI_MEDIA_TOOLS_ENABLED) {
     res.status(403).json({ ok: false, error: "ai_media_disabled" });
+    return;
+  }
+  next();
+}
+
+function requireNoActiveImporterJob(_req, res, next) {
+  const activeJob = findActiveImporterJob();
+  if (activeJob && (activeJob.status === "queued" || activeJob.status === "running")) {
+    res.status(409).json({
+      ok: false,
+      error: "importer_job_in_progress",
+      jobId: activeJob.jobId,
+      stage: activeJob.stage || "",
+      status: activeJob.status
+    });
     return;
   }
   next();
@@ -3457,7 +3666,7 @@ app.get("/api/data/export", requireAuth, requireSellerTools, (_req, res) => {
   res.send(JSON.stringify(data, null, 2));
 });
 
-app.post("/api/data/import", requireAuth, requireSellerTools, (req, res) => {
+app.post("/api/data/import", requireAuth, requireSellerTools, requireNoActiveImporterJob, (req, res) => {
   try {
     const payload = req.body?.data && typeof req.body.data === "object" ? req.body.data : req.body;
     const saved = writeData(payload);
@@ -3469,22 +3678,74 @@ app.post("/api/data/import", requireAuth, requireSellerTools, (req, res) => {
 });
 
 app.post("/api/importer/draft", requireAuth, requireSellerTools, async (req, res) => {
-  try {
-    const payload = req.body && typeof req.body === "object" ? req.body : {};
-    const result = await generateImporterDraft(payload);
-    res.json({ ok: true, ...result });
-  } catch (error) {
-    console.error("IMPORTER DRAFT ERROR:", error);
-    res.status(error.statusCode || 500).json({
+  const payload = req.body && typeof req.body === "object" ? req.body : {};
+  const existingJob = findActiveImporterJob();
+  if (existingJob) {
+    res.setHeader("Cache-Control", "no-store");
+    res.status(409).json({
       ok: false,
-      error: error.message || "importer_draft_failed",
-      jobId: error.jobId || "",
-      stage: error.importerStage || ""
+      error: "importer_job_in_progress",
+      jobId: existingJob.jobId
     });
+    return;
   }
+  const job = createSellerJob("import");
+  res.setHeader("Cache-Control", "no-store");
+  upsertImporterJob(job.jobId, {
+    status: "queued",
+    stage: "queued",
+    title: describeImporterStage("queued").title,
+    detail: describeImporterStage("queued").detail,
+    progress: describeImporterStage("queued").progress
+  });
+
+  setImmediate(async () => {
+    try {
+      const result = await generateImporterDraft(payload, {
+        job,
+        onProgress: (stage, meta) => {
+          markImporterJobStage(job.jobId, stage, meta);
+        }
+      });
+      markImporterJobSucceeded(job.jobId, result);
+    } catch (error) {
+      console.error("IMPORTER DRAFT ERROR:", error);
+      markImporterJobFailed(job.jobId, error);
+    }
+  });
+
+  res.status(202).json({
+    ok: true,
+    accepted: true,
+    jobId: job.jobId
+  });
 });
 
-app.post("/api/media/generate-menu-item", requireAuth, requireAiMediaTools, async (req, res) => {
+app.get("/api/importer/jobs/:jobId", requireAuth, requireSellerTools, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const jobId = typeof req.params?.jobId === "string" ? req.params.jobId.trim() : "";
+  const job = jobId ? importerJobs.get(jobId) : null;
+  if (!job) {
+    res.status(404).json({ ok: false, error: "importer_job_not_found" });
+    return;
+  }
+
+  res.json({
+    ok: true,
+    job
+  });
+});
+
+app.get("/api/importer/jobs/active/current", requireAuth, requireSellerTools, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const job = findActiveImporterJob();
+  res.json({
+    ok: true,
+    job: job || null
+  });
+});
+
+app.post("/api/media/generate-menu-item", requireAuth, requireAiMediaTools, requireNoActiveImporterJob, async (req, res) => {
   try {
     const payload = req.body && typeof req.body === "object" ? req.body : {};
     const result = await generateMenuItemMediaImage(payload);
@@ -3498,7 +3759,7 @@ app.post("/api/media/generate-menu-item", requireAuth, requireAiMediaTools, asyn
   }
 });
 
-app.post("/api/media/generate-category-image", requireAuth, requireAiMediaTools, async (req, res) => {
+app.post("/api/media/generate-category-image", requireAuth, requireAiMediaTools, requireNoActiveImporterJob, async (req, res) => {
   try {
     const payload = req.body && typeof req.body === "object" ? req.body : {};
     const result = await generateCategoryMediaImage(payload);
@@ -3532,7 +3793,7 @@ app.post("/api/media/library/approve", requireAuth, requireSellerTools, requireA
   }
 });
 
-app.post("/api/data/reset", requireAuth, requireSellerTools, (_req, res) => {
+app.post("/api/data/reset", requireAuth, requireSellerTools, requireNoActiveImporterJob, (_req, res) => {
   const reset = resetToBundledData();
   res.json({ ok: true, data: reset });
 });

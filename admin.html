@@ -2929,6 +2929,112 @@
             margin: 14px 0;
         }
 
+        .importer-status-card {
+            display: grid;
+            gap: 10px;
+            margin: 14px 0;
+            padding: 16px 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 191, 128, 0.44);
+            background:
+                linear-gradient(180deg, rgba(255, 252, 247, 0.98) 0%, rgba(255, 246, 236, 0.94) 100%),
+                radial-gradient(circle at top right, rgba(255, 171, 34, 0.15), transparent 48%);
+            box-shadow: 0 18px 38px rgba(255, 145, 0, 0.1);
+        }
+
+        .importer-status-card[hidden] {
+            display: none;
+        }
+
+        .importer-status-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .importer-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #8a4b00;
+            background: rgba(255, 243, 224, 0.98);
+            border: 1px solid rgba(255, 179, 71, 0.28);
+        }
+
+        .importer-status-meta {
+            color: var(--text2);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .importer-status-title {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.25;
+            color: var(--text);
+        }
+
+        .importer-status-copy {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .importer-status-bar {
+            position: relative;
+            height: 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 220, 188, 0.76);
+        }
+
+        .importer-status-bar span {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), #ff7b00);
+            box-shadow: 0 0 20px rgba(255, 141, 8, 0.24);
+            transition: width 0.28s ease;
+        }
+
+        .importer-status-card.is-complete {
+            border-color: rgba(52, 211, 153, 0.24);
+            background:
+                linear-gradient(180deg, rgba(246, 255, 251, 0.98) 0%, rgba(236, 253, 245, 0.94) 100%),
+                radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 46%);
+            box-shadow: 0 18px 38px rgba(16, 185, 129, 0.12);
+        }
+
+        .importer-status-card.is-complete .importer-status-badge {
+            color: #065f46;
+            background: rgba(220, 252, 231, 0.98);
+            border-color: rgba(16, 185, 129, 0.24);
+        }
+
+        .importer-status-card.is-error {
+            border-color: rgba(220, 38, 38, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 247, 247, 0.98) 0%, rgba(254, 242, 242, 0.94) 100%),
+                radial-gradient(circle at top right, rgba(220, 38, 38, 0.12), transparent 46%);
+            box-shadow: 0 18px 38px rgba(220, 38, 38, 0.12);
+        }
+
+        .importer-status-card.is-error .importer-status-badge {
+            color: #991b1b;
+            background: rgba(254, 226, 226, 0.98);
+            border-color: rgba(220, 38, 38, 0.22);
+        }
+
         .importer-review-stat {
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -4164,6 +4270,99 @@
             display: block;
         }
 
+        .admin-task-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 12020;
+            display: grid;
+            place-items: center;
+            padding: 28px;
+            background: rgba(11, 15, 24, 0.56);
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-task-overlay[hidden] {
+            display: none;
+        }
+
+        html.admin-task-busy,
+        body.admin-task-busy {
+            overflow: hidden;
+        }
+
+        .admin-task-card {
+            width: min(480px, 100%);
+            display: grid;
+            gap: 12px;
+            padding: 24px 24px 22px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 210, 164, 0.2);
+            background:
+                linear-gradient(180deg, rgba(27, 24, 31, 0.97) 0%, rgba(17, 19, 27, 0.96) 100%),
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.18), transparent 44%);
+            color: #fff7f0;
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.36);
+        }
+
+        .admin-task-badge {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 240, 223, 0.92);
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .admin-task-title {
+            margin: 0;
+            font-size: clamp(1.35rem, 2vw, 1.75rem);
+            line-height: 1.15;
+            font-weight: 900;
+            color: #fffaf5;
+        }
+
+        .admin-task-copy {
+            margin: 0;
+            color: rgba(255, 240, 223, 0.78);
+            font-size: 0.96rem;
+            line-height: 1.55;
+        }
+
+        .admin-task-progress {
+            position: relative;
+            height: 12px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .admin-task-progress span {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff4d4d 0%, #ff9100 100%);
+            box-shadow: 0 0 24px rgba(255, 145, 0, 0.28);
+            transition: width 0.28s ease;
+        }
+
+        .admin-task-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: rgba(255, 240, 223, 0.68);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
         .login-error {
             color: #e01e2f;
             background: #ffe6e6;
@@ -4416,6 +4615,18 @@
 
     <!-- OVERLAY for mobile sidebar -->
     <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div id="adminTaskOverlay" class="admin-task-overlay" hidden aria-live="assertive" aria-busy="true">
+        <div class="admin-task-card">
+            <span id="adminTaskBadge" class="admin-task-badge">Working</span>
+            <h3 id="adminTaskTitle" class="admin-task-title">Please wait</h3>
+            <p id="adminTaskCopy" class="admin-task-copy">The admin is finishing a long-running task. Keep this page open.</p>
+            <div class="admin-task-progress"><span id="adminTaskProgressFill"></span></div>
+            <div class="admin-task-meta">
+                <span id="adminTaskStage">Preparing</span>
+                <span id="adminTaskHint">This screen is temporarily locked.</span>
+            </div>
+        </div>
+    </div>
 
     <div class="sidebar" id="adminSidebar" style="display:none">
         <h1 id="adminSidebarTitleText" data-i18n="admin.sidebar_title">Restaurant Admin</h1>
@@ -5532,6 +5743,15 @@
                     <div class="tool-actions">
                         <button type="button" class="primary-btn btn-auto" onclick="generateImporterDraft()">Generate Menu Draft</button>
                         <button type="button" class="brand-secondary-btn" onclick="copyImporterDraftJson()">Copy Draft JSON</button>
+                    </div>
+                    <div id="importStudioStatusCard" class="importer-status-card" hidden aria-live="polite">
+                        <div class="importer-status-head">
+                            <span id="importStudioStatusBadge" class="importer-status-badge">Importer busy</span>
+                            <span id="importStudioStatusMeta" class="importer-status-meta">Preparing…</span>
+                        </div>
+                        <h5 id="importStudioStatusTitle" class="importer-status-title">Preparing your menu import</h5>
+                        <p id="importStudioStatusCopy" class="importer-status-copy">Keep this page open while the importer extracts and structures the menu.</p>
+                        <div class="importer-status-bar"><span id="importStudioStatusFill"></span></div>
                     </div>
                     <div id="importStudioReviewGrid" class="importer-review-grid"></div>
                     <div class="importer-apply-panel">
