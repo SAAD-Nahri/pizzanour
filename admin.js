@@ -20,6 +20,42 @@ let adminSaveState = {
     message: '',
     updatedAt: null
 };
+let deferredAdminInstallPrompt = null;
+const ADMIN_PWA_COPY = Object.freeze({
+    fr: {
+        label: 'Accès rapide',
+        title: "Installer l'app admin",
+        copy: "Ajoutez l'admin à l'écran d'accueil pour ouvrir le back-office comme une vraie application.",
+        iosCopy: "Sur iPhone, utilisez Partager puis Ajouter à l'écran d'accueil pour installer l'admin.",
+        button: "Installer l'app",
+        iosButton: "Ajouter à l'écran d'accueil",
+        sidebarButton: '⬇ Installer l’app',
+        installedToast: "L'app admin est installée.",
+        desktopHint: "Utilisez le menu du navigateur pour installer l'app."
+    },
+    en: {
+        label: 'Quick Access',
+        title: 'Install the admin app',
+        copy: 'Add the admin to the home screen so the restaurant owner can open it like a real app.',
+        iosCopy: 'On iPhone, use Share and then Add to Home Screen to install the admin.',
+        button: 'Install App',
+        iosButton: 'Add to Home Screen',
+        sidebarButton: '⬇ Install App',
+        installedToast: 'The admin app is installed.',
+        desktopHint: 'Use the browser install option to add this app.'
+    },
+    ar: {
+        label: 'دخول سريع',
+        title: 'ثبت تطبيق الإدارة',
+        copy: 'أضف لوحة الإدارة إلى الشاشة الرئيسية ليصل صاحب المطعم إليها كتطبيق سريع.',
+        iosCopy: 'على iPhone استخدم مشاركة ثم إضافة إلى الشاشة الرئيسية لتثبيت لوحة الإدارة.',
+        button: 'تثبيت التطبيق',
+        iosButton: 'إضافة إلى الشاشة الرئيسية',
+        sidebarButton: '⬇ تثبيت التطبيق',
+        installedToast: 'تم تثبيت تطبيق الإدارة.',
+        desktopHint: 'استخدم خيار التثبيت من المتصفح لإضافة التطبيق.'
+    }
+});
 const ADMIN_ICON = Object.freeze({
     bullet: String.fromCodePoint(0x2022),
     heart: String.fromCodePoint(0x2764, 0xFE0F),
@@ -36,6 +72,73 @@ function t(key, fallback = '', vars = {}) {
         return window.formatTranslation(key, fallback, vars);
     }
     return fallback;
+}
+
+function getAdminPwaLanguage() {
+    const lang = window.currentLang || window.getStoredLanguage?.() || document.documentElement.lang || 'fr';
+    return ['fr', 'en', 'ar'].includes(lang) ? lang : 'fr';
+}
+
+function getAdminPwaCopy() {
+    return ADMIN_PWA_COPY[getAdminPwaLanguage()] || ADMIN_PWA_COPY.fr;
+}
+
+function isIosStandaloneCapable() {
+    const ua = window.navigator.userAgent || '';
+    return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
+}
+
+function isAdminStandaloneMode() {
+    const displayModeStandalone = typeof window.matchMedia === 'function'
+        ? window.matchMedia('(display-mode: standalone)').matches
+        : false;
+    return displayModeStandalone || window.navigator.standalone === true;
+}
+
+function updateAdminInstallUi() {
+    const card = document.getElementById('adminInstallCard');
+    const sidebarBtn = document.getElementById('adminSidebarInstallBtn');
+    const label = document.getElementById('adminInstallLabel');
+    const title = document.getElementById('adminInstallTitle');
+    const copy = document.getElementById('adminInstallCopy');
+    const button = document.getElementById('adminInstallBtn');
+
+    if (!card || !sidebarBtn || !label || !title || !copy || !button) return;
+
+    const text = getAdminPwaCopy();
+    const installed = isAdminStandaloneMode();
+    const iosFallback = !installed && isIosStandaloneCapable();
+    const canInstall = Boolean(deferredAdminInstallPrompt) || iosFallback;
+
+    label.textContent = text.label;
+    title.textContent = text.title;
+    copy.textContent = deferredAdminInstallPrompt ? text.copy : (iosFallback ? text.iosCopy : text.desktopHint);
+    button.textContent = deferredAdminInstallPrompt ? text.button : text.iosButton;
+    sidebarBtn.textContent = text.sidebarButton;
+
+    card.hidden = installed || !canInstall;
+    sidebarBtn.hidden = installed || !canInstall;
+}
+
+async function registerAdminPwa() {
+    if (!('serviceWorker' in navigator)) {
+        updateAdminInstallUi();
+        return;
+    }
+
+    const isSecure = window.isSecureContext || ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    if (!isSecure) {
+        updateAdminInstallUi();
+        return;
+    }
+
+    try {
+        await navigator.serviceWorker.register('/admin-sw.js', { scope: '/' });
+    } catch (error) {
+        console.warn('[ADMIN PWA] Service worker registration failed:', error);
+    }
+
+    updateAdminInstallUi();
 }
 
 // Admin category filter state
@@ -776,6 +879,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const websiteHomeLink = document.querySelector('.back-btn');
     if (websiteHomeLink) websiteHomeLink.setAttribute('href', '/');
 
+    window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredAdminInstallPrompt = event;
+        updateAdminInstallUi();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredAdminInstallPrompt = null;
+        updateAdminInstallUi();
+        showToast(getAdminPwaCopy().installedToast);
+    });
+
+    if (typeof window.matchMedia === 'function') {
+        const standaloneMedia = window.matchMedia('(display-mode: standalone)');
+        if (typeof standaloneMedia.addEventListener === 'function') {
+            standaloneMedia.addEventListener('change', updateAdminInstallUi);
+        }
+    }
+
     // Check if we already have a valid session
     await checkSession();
 
@@ -788,7 +910,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     bindCategoryImageFormEvents();
     updateCategoryImagePreview();
+    await registerAdminPwa();
 });
+
+window.installAdminApp = async function () {
+    if (deferredAdminInstallPrompt) {
+        deferredAdminInstallPrompt.prompt();
+        try {
+            await deferredAdminInstallPrompt.userChoice;
+        } catch (_error) {
+            // Ignore prompt choice errors; UI will be refreshed below.
+        }
+        deferredAdminInstallPrompt = null;
+        updateAdminInstallUi();
+        return;
+    }
+
+    if (isIosStandaloneCapable() && !isAdminStandaloneMode()) {
+        showToast(getAdminPwaCopy().iosCopy);
+        return;
+    }
+
+    showToast(getAdminPwaCopy().desktopHint);
+};
 
 async function checkSession() {
     try {
@@ -1416,6 +1560,7 @@ async function showDashboard() {
     mountOwnerAdminLayout();
     refreshUI();
     initForms();
+    updateAdminInstallUi();
 }
 
 async function adminLogout() {
@@ -1448,6 +1593,7 @@ function refreshUI() {
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
     }
+    updateAdminInstallUi();
 }
 
 window.suggestMissingMenuImages = async function () {

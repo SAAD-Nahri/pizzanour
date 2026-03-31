@@ -1,0 +1,114 @@
+const fs = require("fs/promises");
+const path = require("path");
+const sharp = require("sharp");
+
+const ROOT = path.resolve(__dirname, "..");
+const OUT_DIR = path.join(ROOT, "images", "pwa");
+
+function buildAdminIconSvg({ maskable = false } = {}) {
+  const safePad = maskable ? 190 : 128;
+  const panelX = safePad;
+  const panelY = safePad;
+  const panelSize = 1024 - safePad * 2;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Restaurant Admin app icon</title>
+  <desc id="desc">Warm premium square icon for the restaurant admin application.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15161b"/>
+      <stop offset="52%" stop-color="#3c241c"/>
+      <stop offset="100%" stop-color="#9a4d22"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="12%" y1="10%" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.16)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+    </linearGradient>
+    <linearGradient id="dish" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff6e6"/>
+      <stop offset="100%" stop-color="#f0c98d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4b3a"/>
+      <stop offset="100%" stop-color="#ffa63d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="62%" cy="38%" r="56%">
+      <stop offset="0%" stop-color="rgba(255,184,94,0.38)"/>
+      <stop offset="100%" stop-color="rgba(255,184,94,0)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="228" fill="url(#bg)"/>
+  <circle cx="760" cy="238" r="220" fill="rgba(255,255,255,0.07)"/>
+  <circle cx="236" cy="822" r="284" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="664" cy="520" r="350" fill="url(#glow)"/>
+
+  <g opacity="0.68">
+    <rect x="${panelX}" y="${panelY}" width="${panelSize}" height="${panelSize}" rx="${Math.round(panelSize * 0.18)}" fill="url(#panel)" stroke="rgba(255,255,255,0.14)" stroke-width="4"/>
+    <rect x="${panelX + 70}" y="${panelY + 86}" width="${Math.round(panelSize * 0.32)}" height="22" rx="11" fill="rgba(255,255,255,0.18)"/>
+    <rect x="${panelX + 70}" y="${panelY + 130}" width="${Math.round(panelSize * 0.22)}" height="18" rx="9" fill="rgba(255,255,255,0.1)"/>
+    <rect x="${panelX + 70}" y="${panelY + 168}" width="${Math.round(panelSize * 0.38)}" height="18" rx="9" fill="rgba(255,255,255,0.08)"/>
+  </g>
+
+  <g transform="translate(0 46)">
+    <ellipse cx="514" cy="642" rx="282" ry="120" fill="url(#dish)" opacity="0.96"/>
+    <ellipse cx="514" cy="642" rx="212" ry="82" fill="#f7ecdc"/>
+    <path d="M372 590c48-42 112-62 188-58 78 3 146 28 204 76-22 16-48 30-78 42-76 31-150 40-222 31-42-5-81-16-116-35-20-11-40-24-60-40 25-4 53-8 84-16z" fill="#2f5f35" opacity="0.94"/>
+    <path d="M342 618c31-16 70-19 114-14 44 5 88 19 136 42 62 29 118 41 170 38 32-2 61-10 90-24-21 40-55 71-102 94-58 29-122 40-192 35-71-6-132-27-180-66-18-15-33-33-46-55 6-20 10-35 10-50z" fill="#7d2b28" opacity="0.92"/>
+    <circle cx="454" cy="602" r="22" fill="#f2c85e"/>
+    <circle cx="522" cy="572" r="17" fill="#f2c85e"/>
+    <circle cx="585" cy="618" r="20" fill="#f2c85e"/>
+    <circle cx="652" cy="592" r="17" fill="#f2c85e"/>
+  </g>
+
+  <g transform="translate(${panelX + panelSize - 212} ${panelY + 88})">
+    <rect x="0" y="0" width="126" height="126" rx="34" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" stroke-width="3"/>
+    <rect x="26" y="32" width="74" height="10" rx="5" fill="rgba(255,255,255,0.28)"/>
+    <rect x="26" y="56" width="54" height="10" rx="5" fill="rgba(255,255,255,0.18)"/>
+    <rect x="26" y="80" width="62" height="10" rx="5" fill="rgba(255,255,255,0.12)"/>
+  </g>
+
+  <g transform="translate(806 264)">
+    <path d="M0 46c20 0 33-12 33-31 0-18-10-32-28-45 6 16 1 30-10 39-11 9-25 10-41 2 10 23 25 35 46 35z" fill="url(#accent)"/>
+    <circle cx="-8" cy="72" r="16" fill="#ffd772"/>
+    <circle cx="26" cy="72" r="11" fill="#ffe6af"/>
+  </g>
+</svg>`;
+}
+
+async function writeSvg(name, content) {
+  await fs.writeFile(path.join(OUT_DIR, name), content, "utf8");
+}
+
+async function renderPng(name, svg, size) {
+  await sharp(Buffer.from(svg))
+    .resize(size, size, { fit: "contain" })
+    .png({ compressionLevel: 9, quality: 100 })
+    .toFile(path.join(OUT_DIR, name));
+}
+
+async function main() {
+  await fs.mkdir(OUT_DIR, { recursive: true });
+
+  const regularSvg = buildAdminIconSvg();
+  const maskableSvg = buildAdminIconSvg({ maskable: true });
+
+  await writeSvg("admin-app-icon.svg", regularSvg);
+  await writeSvg("admin-app-icon-maskable.svg", maskableSvg);
+
+  await Promise.all([
+    renderPng("admin-app-icon-64.png", regularSvg, 64),
+    renderPng("admin-app-icon-180.png", regularSvg, 180),
+    renderPng("admin-app-icon-192.png", regularSvg, 192),
+    renderPng("admin-app-icon-512.png", regularSvg, 512),
+    renderPng("admin-app-icon-maskable-512.png", maskableSvg, 512)
+  ]);
+
+  console.log("Admin PWA icons generated in images/pwa");
+}
+
+main().catch((error) => {
+  console.error("Failed to generate admin PWA icons:", error);
+  process.exitCode = 1;
+});

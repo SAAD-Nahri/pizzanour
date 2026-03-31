@@ -70,6 +70,8 @@ const build = createBuildFingerprint([
   path.join(__dirname, "admin-server.js"),
   path.join(__dirname, "admin.html"),
   path.join(__dirname, "admin.js"),
+  path.join(__dirname, "scripts", "generate-admin-pwa-icons.js"),
+  path.join(__dirname, "images", "pwa", "admin-app-icon.svg"),
   path.join(__dirname, "shared.js"),
   path.join(__dirname, "style.css")
 ]);
@@ -78,6 +80,15 @@ const dataRoot = process.env.DATA_FILE
   : __dirname;
 const authFile = process.env.AUTH_FILE || path.join(dataRoot, "auth.json");
 const loginAttempts = new Map();
+const adminPwaIconDir = path.join(__dirname, "images", "pwa");
+const adminPwaIconFiles = Object.freeze({
+  svg: path.join(adminPwaIconDir, "admin-app-icon.svg"),
+  icon64: path.join(adminPwaIconDir, "admin-app-icon-64.png"),
+  icon180: path.join(adminPwaIconDir, "admin-app-icon-180.png"),
+  icon192: path.join(adminPwaIconDir, "admin-app-icon-192.png"),
+  icon512: path.join(adminPwaIconDir, "admin-app-icon-512.png"),
+  maskable512: path.join(adminPwaIconDir, "admin-app-icon-maskable-512.png")
+});
 
 app.use(compression({
   threshold: 1024
@@ -3124,6 +3135,161 @@ app.get("/build.json", (_req, res) => {
   res.json({ status: "ok", service: "admin", build });
 });
 
+function getAdminPwaMeta() {
+  const data = readData();
+  const branding = data?.branding && typeof data.branding === "object" ? data.branding : {};
+  const restaurantName = typeof branding.restaurantName === "string" && branding.restaurantName.trim()
+    ? branding.restaurantName.trim()
+    : "Restaurant";
+  const shortName = typeof branding.shortName === "string" && branding.shortName.trim()
+    ? branding.shortName.trim()
+    : restaurantName;
+  const primaryColor = typeof branding.primaryColor === "string" && branding.primaryColor.trim()
+    ? branding.primaryColor.trim()
+    : "#ff8d08";
+  const menuBackground = typeof branding.menuBackground === "string" && branding.menuBackground.trim()
+    ? branding.menuBackground.trim()
+    : "#111318";
+
+  return {
+    restaurantName,
+    shortName,
+    primaryColor,
+    menuBackground
+  };
+}
+
+app.get("/manifest.webmanifest", (_req, res) => {
+  const meta = getAdminPwaMeta();
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.type("application/manifest+json");
+  res.send(JSON.stringify({
+    id: "/admin.html",
+    name: `${meta.restaurantName} Admin`,
+    short_name: `${meta.shortName}`.slice(0, 12) || "Admin",
+    description: `Manage ${meta.restaurantName} quickly from your phone or desktop home screen.`,
+    start_url: "/admin.html?source=pwa",
+    scope: "/",
+    display: "standalone",
+    orientation: "portrait-primary",
+    background_color: meta.menuBackground,
+    theme_color: meta.menuBackground,
+    categories: ["business", "food", "productivity"],
+    icons: [
+      {
+        src: `/images/pwa/admin-app-icon.svg?v=${build}`,
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "any"
+      },
+      {
+        src: `/images/pwa/admin-app-icon-192.png?v=${build}`,
+        sizes: "192x192",
+        type: "image/png"
+      },
+      {
+        src: `/images/pwa/admin-app-icon-512.png?v=${build}`,
+        sizes: "512x512",
+        type: "image/png"
+      },
+      {
+        src: `/images/pwa/admin-app-icon-maskable-512.png?v=${build}`,
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable"
+      }
+    ]
+  }, null, 2));
+});
+
+app.get("/admin-sw.js", (_req, res) => {
+  const precacheAssets = [
+    "/",
+    "/admin",
+    "/admin.html",
+    "/admin.js",
+    "/shared.js",
+    "/manifest.webmanifest",
+    "/images/pwa/admin-app-icon-64.png",
+    "/images/pwa/admin-app-icon-180.png",
+    "/images/pwa/admin-app-icon-192.png",
+    "/images/pwa/admin-app-icon-512.png",
+    "/images/pwa/admin-app-icon-maskable-512.png",
+    "/images/pwa/admin-app-icon.svg"
+  ];
+
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.type("application/javascript");
+  res.send(`
+const CACHE_NAME = "restaurant-admin-shell-${build}";
+const PRECACHE = ${JSON.stringify(precacheAssets)};
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: "reload" }))))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith("restaurant-admin-shell-") && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  const url = new URL(request.url);
+
+  if (request.method !== "GET" || url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/uploads/")) {
+    return;
+  }
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("/admin.html", responseClone));
+          }
+          return response;
+        })
+        .catch(() => caches.match("/admin.html"))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      const networkFetch = fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          }
+          return response;
+        })
+        .catch(() => cached);
+
+      return cached || networkFetch;
+    })
+  );
+});
+  `.trim());
+});
+
 app.post("/api/admin/login", (req, res) => {
   console.log("[AUTH] Login request received.");
   const username = typeof req.body?.username === "string" ? req.body.username : "";
@@ -3379,6 +3545,14 @@ app.post("/api/upload", requireAuth, (req, res, next) => {
 });
 
 app.get("/uploads/.thumbs/:file", createThumbnailRequestHandler());
+
+app.get("/favicon.ico", (_req, res) => {
+  res.sendFile(adminPwaIconFiles.icon64);
+});
+
+app.get("/apple-touch-icon.png", (_req, res) => {
+  res.sendFile(adminPwaIconFiles.icon180);
+});
 
 app.use("/uploads", express.static(uploadsDir, {
   immutable: true,
