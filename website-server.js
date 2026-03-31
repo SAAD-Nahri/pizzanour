@@ -467,45 +467,30 @@ app.get("/build.json", (_req, res) => {
 });
 
 app.get("/api/data", (req, res) => {
-  res.setHeader("Cache-Control", "private, max-age=0, must-revalidate");
   const version = getDataVersion();
-  const etag = `W/"${version}"`;
-  res.setHeader("ETag", etag);
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.setHeader("X-Data-Version", version);
-  if (req.headers["if-none-match"] === etag) {
-    res.status(304).end();
-    return;
-  }
-  const payload = getCachedPublicPayload(version);
-  res.type("application/json").send(payload.json);
+  res.type("application/json").send(JSON.stringify(buildPublicSitePayload(readData())));
 });
 
 app.get("/api/menu-data", (req, res) => {
-  res.setHeader("Cache-Control", "private, max-age=0, must-revalidate");
   const version = getDataVersion();
-  const etag = `W/"${version}"`;
-  res.setHeader("ETag", etag);
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.setHeader("X-Data-Version", version);
-  if (req.headers["if-none-match"] === etag) {
-    res.status(304).end();
-    return;
-  }
-  const payload = getCachedMenuPayload(version);
-  res.type("application/json").send(payload.json);
+  res.type("application/json").send(JSON.stringify(buildPublicMenuPayload(readData())));
 });
 
 app.get("/api/home-data", (req, res) => {
-  res.setHeader("Cache-Control", "private, max-age=0, must-revalidate");
   const version = getDataVersion();
-  const etag = `W/"${version}"`;
-  res.setHeader("ETag", etag);
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.setHeader("X-Data-Version", version);
-  if (req.headers["if-none-match"] === etag) {
-    res.status(304).end();
-    return;
-  }
-  const payload = getCachedHomePayload(version);
-  res.type("application/json").send(payload.json);
+  res.type("application/json").send(JSON.stringify(buildPublicHomePayload(readData())));
 });
 
 app.get("/uploads/.thumbs/:file", createThumbnailRequestHandler());

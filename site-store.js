@@ -1,5 +1,6 @@
 ﻿const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const bundledDataFile = path.join(__dirname, "data.json");
 const bundledUploadsDir = path.join(__dirname, "uploads");
@@ -497,8 +498,8 @@ function getDataVersion() {
   ensureStorage();
 
   try {
-    const stats = fs.statSync(dataFile);
-    return `${stats.size}-${Math.floor(stats.mtimeMs)}`;
+    const raw = fs.readFileSync(dataFile, "utf8");
+    return crypto.createHash("sha1").update(raw).digest("hex");
   } catch (_error) {
     return "0-0";
   }
