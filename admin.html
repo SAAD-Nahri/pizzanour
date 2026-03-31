@@ -4349,6 +4349,13 @@
         <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">&#9776;</button>
     </div>
 
+    <div class="admin-quickbar" id="adminQuickbar" hidden>
+        <button type="button" class="admin-quickbar-btn" id="adminQuickMenuBtn" onclick="showSection('menu', document.getElementById('menuMobileNavBtn'))">Menu</button>
+        <button type="button" class="admin-quickbar-btn" id="adminQuickBrandingBtn" onclick="showSection('branding', document.getElementById('brandingNavBtn'))">Branding</button>
+        <button type="button" class="admin-quickbar-btn" id="adminQuickImportBtn" onclick="showSection('data-tools', document.getElementById('sellerToolsNavBtn'))">Import</button>
+        <button type="button" class="admin-quickbar-btn is-primary" id="adminQuickSaveBtn" onclick="saveAndRefresh()">Save</button>
+    </div>
+
     <nav class="mobile-bottom-nav">
         <button class="nav-btn mobile-bottom-nav-btn active" id="menuMobileNavBtn" data-section="menu" onclick="showSection('menu', this)">
             <span class="mobile-bottom-nav-icon">&#127869;&#65039;</span>
@@ -5827,6 +5834,49 @@
             color: #ff9b9b;
         }
 
+        .admin-quickbar {
+            display: none;
+        }
+
+        .admin-quickbar-btn {
+            appearance: none;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 253, 249, 0.94);
+            color: var(--text);
+            min-height: 44px;
+            border-radius: 16px;
+            padding: 10px 12px;
+            font: inherit;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .admin-quickbar-btn:active {
+            transform: translateY(1px);
+        }
+
+        .admin-quickbar-btn.is-active {
+            border-color: rgba(255, 141, 8, 0.28);
+            background: linear-gradient(135deg, rgba(255, 141, 8, 0.18), rgba(224, 30, 47, 0.14));
+            color: #1f140d;
+            box-shadow: 0 14px 24px rgba(255, 141, 8, 0.16);
+        }
+
+        .admin-quickbar-btn.is-primary {
+            border-color: rgba(255, 141, 8, 0.24);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: #fff;
+            box-shadow: 0 16px 28px rgba(255, 141, 8, 0.2);
+        }
+
+        .admin-quickbar-btn.is-primary[disabled] {
+            opacity: 0.74;
+            box-shadow: none;
+        }
+
         @media (max-width: 992px) {
             body:not(.is-authenticated) .mobile-header,
             body:not(.is-authenticated) .mobile-bottom-nav,
@@ -5883,7 +5933,24 @@
                 border-color: rgba(255, 255, 255, 0.1);
             }
 
+            body.admin-standalone .admin-quickbar {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 8px;
+                position: sticky;
+                top: calc(84px + env(safe-area-inset-top, 0px));
+                z-index: 930;
+                margin: 0 12px 10px;
+                padding: 10px;
+                border-radius: 20px;
+                background: rgba(255, 249, 241, 0.94);
+                border: 1px solid rgba(232, 216, 197, 0.96);
+                box-shadow: 0 16px 30px rgba(15, 23, 42, 0.1);
+                backdrop-filter: blur(14px) saturate(1.02);
+            }
+
             body.admin-standalone .main {
+                padding-top: 8px;
                 padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
             }
 
