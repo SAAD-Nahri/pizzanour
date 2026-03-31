@@ -57,6 +57,20 @@ const ADMIN_PWA_COPY = Object.freeze({
         desktopHint: 'استخدم خيار التثبيت من المتصفح لإضافة التطبيق.'
     }
 });
+const ADMIN_PWA_SHELL_COPY = Object.freeze({
+    fr: {
+        standalone: 'Application admin',
+        browser: 'Interface web'
+    },
+    en: {
+        standalone: 'Admin app',
+        browser: 'Web access'
+    },
+    ar: {
+        standalone: 'تطبيق الإدارة',
+        browser: 'نسخة الويب'
+    }
+});
 const ADMIN_ICON = Object.freeze({
     bullet: String.fromCodePoint(0x2022),
     heart: String.fromCodePoint(0x2764, 0xFE0F),
@@ -84,6 +98,10 @@ function getAdminPwaCopy() {
     return ADMIN_PWA_COPY[getAdminPwaLanguage()] || ADMIN_PWA_COPY.fr;
 }
 
+function getAdminPwaShellCopy() {
+    return ADMIN_PWA_SHELL_COPY[getAdminPwaLanguage()] || ADMIN_PWA_SHELL_COPY.fr;
+}
+
 function isIosStandaloneCapable() {
     const ua = window.navigator.userAgent || '';
     return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
@@ -95,10 +113,12 @@ function isAndroidLike() {
 }
 
 function isAdminStandaloneMode() {
+    const url = new URL(window.location.href);
+    const launchedFromPwa = (url.searchParams.get('source') || '').trim().toLowerCase() === 'pwa';
     const displayModeStandalone = typeof window.matchMedia === 'function'
         ? window.matchMedia('(display-mode: standalone)').matches
         : false;
-    return displayModeStandalone || window.navigator.standalone === true;
+    return displayModeStandalone || window.navigator.standalone === true || launchedFromPwa;
 }
 
 function getRequestedAdminSection() {
@@ -175,6 +195,19 @@ function getAdminInstallFallbackCopy() {
     };
 }
 
+function syncAdminAppShell() {
+    if (!document.body) return;
+    const standalone = isAdminStandaloneMode();
+    document.body.classList.toggle('admin-standalone', standalone);
+    document.body.classList.toggle('admin-browser-shell', !standalone);
+
+    const stateBadge = document.getElementById('adminMobileStateBadge');
+    if (stateBadge) {
+        const shellCopy = getAdminPwaShellCopy();
+        stateBadge.textContent = standalone ? shellCopy.standalone : shellCopy.browser;
+    }
+}
+
 function updateAdminInstallUi() {
     const card = document.getElementById('adminInstallCard');
     const sidebarBtn = document.getElementById('adminSidebarInstallBtn');
@@ -197,6 +230,7 @@ function updateAdminInstallUi() {
 
     card.hidden = installed;
     sidebarBtn.hidden = installed;
+    syncAdminAppShell();
 }
 
 async function registerAdminPwa() {
@@ -957,6 +991,7 @@ async function loadDataFromServer() {
 document.addEventListener('DOMContentLoaded', async () => {
     const websiteHomeLink = document.querySelector('.back-btn');
     if (websiteHomeLink) websiteHomeLink.setAttribute('href', '/');
+    syncAdminAppShell();
 
     window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
