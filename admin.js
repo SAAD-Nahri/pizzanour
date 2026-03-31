@@ -221,6 +221,24 @@ function syncAdminAppShell(activeSection = '') {
         const sectionLabel = isAuthenticated ? getAdminShellSectionLabel(activeSection || getRequestedAdminSection() || getSavedAdminSection() || 'menu') : '';
         stateBadge.textContent = sectionLabel || (standalone ? shellCopy.standalone : shellCopy.browser);
     }
+
+    syncAdminMobileSaveBadge();
+}
+
+function syncAdminMobileSaveBadge() {
+    const badge = document.getElementById('adminMobileSaveBadge');
+    if (!badge) return;
+
+    const labelMap = {
+        idle: t('admin.save_state.idle_label', 'Ready'),
+        saving: t('admin.save_state.saving_label', 'Saving'),
+        success: t('admin.save_state.success_label', 'Saved'),
+        error: t('admin.save_state.error_label', 'Attention')
+    };
+    const stateType = adminSaveState.type || 'idle';
+    badge.classList.remove('is-idle', 'is-saving', 'is-success', 'is-error');
+    badge.classList.add(`is-${stateType}`);
+    badge.textContent = labelMap[stateType] || labelMap.idle;
 }
 
 function updateAdminInstallUi() {
@@ -1085,7 +1103,10 @@ async function checkSession() {
 
 function renderAdminSaveState() {
     const el = document.getElementById('adminSaveStatus');
-    if (!el) return;
+    if (!el) {
+        syncAdminMobileSaveBadge();
+        return;
+    }
 
     const palette = {
         idle: { bg: '#f5f5f5', color: '#555', dot: '#999', label: t('admin.save_state.idle_label', 'Ready') },
@@ -1105,6 +1126,7 @@ function renderAdminSaveState() {
         <span class="admin-save-status-dot" style="background:${style.dot};"></span>
         <span>${style.label}: ${message}${timeText ? ` (${timeText})` : ''}</span>
     `;
+    syncAdminMobileSaveBadge();
 }
 
 function setAdminSaveState(type, message) {

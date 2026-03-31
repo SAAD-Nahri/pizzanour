@@ -4340,7 +4340,10 @@
     <div class="mobile-header">
         <div class="mobile-header-copy">
             <span id="mobileAdminTitleText" data-i18n="admin.mobile_title">RESTAURANT ADMIN</span>
-            <span class="mobile-header-status" id="adminMobileStateBadge">Admin app</span>
+            <div class="mobile-header-meta">
+                <span class="mobile-header-status" id="adminMobileStateBadge">Admin app</span>
+                <span class="mobile-header-save" id="adminMobileSaveBadge">Ready</span>
+            </div>
         </div>
         <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">&#9776;</button>
     </div>
@@ -5725,6 +5728,13 @@
             white-space: nowrap;
         }
 
+        .mobile-header-meta {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
         .mobile-header-status {
             display: inline-flex;
             align-items: center;
@@ -5740,6 +5750,47 @@
             letter-spacing: 0.08em;
             text-transform: uppercase;
             white-space: nowrap;
+        }
+
+        .mobile-header-save {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 248, 240, 0.82);
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .mobile-header-save::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.9;
+        }
+
+        .mobile-header-save.is-idle {
+            color: #d7d0ca;
+        }
+
+        .mobile-header-save.is-saving {
+            color: #ffc14d;
+        }
+
+        .mobile-header-save.is-success {
+            color: #75d89a;
+        }
+
+        .mobile-header-save.is-error {
+            color: #ff9b9b;
         }
 
         @media (max-width: 992px) {
@@ -5786,6 +5837,11 @@
                 background: linear-gradient(135deg, rgba(243, 58, 44, 0.16), rgba(255, 152, 47, 0.18));
                 border-color: rgba(255, 179, 102, 0.26);
                 color: #fff4e7;
+            }
+
+            body.admin-standalone .mobile-header-save {
+                background: rgba(255, 255, 255, 0.07);
+                border-color: rgba(255, 255, 255, 0.1);
             }
 
             body.admin-standalone .main {
