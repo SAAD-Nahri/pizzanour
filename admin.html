@@ -4343,6 +4343,7 @@
             <div class="mobile-header-meta">
                 <span class="mobile-header-status" id="adminMobileStateBadge">Admin app</span>
                 <span class="mobile-header-save" id="adminMobileSaveBadge">Ready</span>
+                <span class="mobile-header-connection" id="adminMobileConnectionBadge">Online</span>
             </div>
         </div>
         <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">&#9776;</button>
@@ -5793,6 +5794,39 @@
             color: #ff9b9b;
         }
 
+        .mobile-header-connection {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 248, 240, 0.82);
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .mobile-header-connection::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.95;
+        }
+
+        .mobile-header-connection.is-online {
+            color: #7fe2a2;
+        }
+
+        .mobile-header-connection.is-offline {
+            color: #ff9b9b;
+        }
+
         @media (max-width: 992px) {
             body:not(.is-authenticated) .mobile-header,
             body:not(.is-authenticated) .mobile-bottom-nav,
@@ -5840,6 +5874,11 @@
             }
 
             body.admin-standalone .mobile-header-save {
+                background: rgba(255, 255, 255, 0.07);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+
+            body.admin-standalone .mobile-header-connection {
                 background: rgba(255, 255, 255, 0.07);
                 border-color: rgba(255, 255, 255, 0.1);
             }

@@ -102,6 +102,32 @@ function getAdminPwaShellCopy() {
     return ADMIN_PWA_SHELL_COPY[getAdminPwaLanguage()] || ADMIN_PWA_SHELL_COPY.fr;
 }
 
+function getAdminConnectionCopy() {
+    const lang = getAdminPwaLanguage();
+    if (lang === 'ar') {
+        return {
+            online: 'متصل',
+            offline: 'غير متصل',
+            onlineToast: 'تمت استعادة الاتصال.',
+            offlineToast: 'أنت الآن دون اتصال. قد لا يتم حفظ التغييرات حتى يعود الاتصال.'
+        };
+    }
+    if (lang === 'en') {
+        return {
+            online: 'Online',
+            offline: 'Offline',
+            onlineToast: 'Connection restored.',
+            offlineToast: 'You are offline. Changes may not save until the connection returns.'
+        };
+    }
+    return {
+        online: 'En ligne',
+        offline: 'Hors ligne',
+        onlineToast: 'Connexion rétablie.',
+        offlineToast: "Vous êtes hors ligne. Les changements ne seront peut-être pas enregistrés tant que la connexion n'est pas revenue."
+    };
+}
+
 function getAdminShellSectionLabel(sectionId) {
     const topLevelSection = resolveTopLevelSection(sectionId || 'menu');
     const button = topLevelSection === 'branding'
@@ -223,6 +249,7 @@ function syncAdminAppShell(activeSection = '') {
     }
 
     syncAdminMobileSaveBadge();
+    syncAdminConnectionBadge();
 }
 
 function syncAdminMobileSaveBadge() {
@@ -239,6 +266,16 @@ function syncAdminMobileSaveBadge() {
     badge.classList.remove('is-idle', 'is-saving', 'is-success', 'is-error');
     badge.classList.add(`is-${stateType}`);
     badge.textContent = labelMap[stateType] || labelMap.idle;
+}
+
+function syncAdminConnectionBadge() {
+    const badge = document.getElementById('adminMobileConnectionBadge');
+    if (!badge) return;
+    const copy = getAdminConnectionCopy();
+    const online = navigator.onLine !== false;
+    badge.classList.remove('is-online', 'is-offline');
+    badge.classList.add(online ? 'is-online' : 'is-offline');
+    badge.textContent = online ? copy.online : copy.offline;
 }
 
 function updateAdminInstallUi() {
@@ -1026,6 +1063,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (websiteHomeLink) websiteHomeLink.setAttribute('href', '/');
     syncAdminAppShell();
     document.body.classList.remove('is-authenticated');
+
+    window.addEventListener('online', () => {
+        syncAdminConnectionBadge();
+        showToast(getAdminConnectionCopy().onlineToast);
+    });
+
+    window.addEventListener('offline', () => {
+        syncAdminConnectionBadge();
+        showToast(getAdminConnectionCopy().offlineToast);
+    });
 
     window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
