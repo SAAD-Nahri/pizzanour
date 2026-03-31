@@ -90,6 +90,40 @@
         }).filter(Boolean).join(' • ');
     }
 
+    function escapeUiHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function buildModalEmptyStateMarkup({
+        icon = MENU_UI_ICONS.sparkle,
+        eyebrow = '',
+        title = '',
+        text = '',
+        actionLabel = '',
+        action = ''
+    } = {}) {
+        const safeEyebrow = String(eyebrow || '').trim();
+        const safeTitle = String(title || '').trim();
+        const safeText = String(text || '').trim();
+        const safeActionLabel = String(actionLabel || '').trim();
+        const safeAction = String(action || '').trim();
+
+        return `
+            <div class="menu-empty-state is-modal">
+                <div class="menu-empty-state-icon">${icon}</div>
+                ${safeEyebrow ? `<div class="menu-empty-state-eyebrow">${escapeUiHtml(safeEyebrow)}</div>` : ''}
+                ${safeTitle ? `<h3 class="menu-empty-state-title">${escapeUiHtml(safeTitle)}</h3>` : ''}
+                ${safeText ? `<p class="menu-empty-state-copy">${escapeUiHtml(safeText)}</p>` : ''}
+                ${safeActionLabel && safeAction ? `<button class="menu-empty-state-action" onclick="${escapeUiHtml(safeAction)}">${escapeUiHtml(safeActionLabel)}</button>` : ''}
+            </div>
+        `;
+    }
+
     function repeatCartItem(cartId) {
         const item = getCart().find((entry) => String(entry.cartId) === String(cartId));
         if (!item) return;
@@ -491,6 +525,32 @@
             { key: 'delivery', icon: MENU_UI_ICONS.delivery, label: t('service_delivery', 'Livraison') }
         ];
 
+        if (!cart.length) {
+            content.innerHTML = `
+                <div class="cart-drawer-body is-empty">
+                    <div class="cart-drawer-header">
+                        <div class="cart-drawer-title">${restaurantName}</div>
+                        <div class="cart-drawer-meta">
+                            <div class="cart-drawer-count">${t('cart_items_count', '{count} item(s)', { count: 0 })}</div>
+                        </div>
+                    </div>
+                    ${buildModalEmptyStateMarkup({
+                        icon: MENU_UI_ICONS.plate,
+                        eyebrow: t('confirm_cart_label', 'Mon panier'),
+                        title: t('cart_empty_title', 'Votre panier est vide'),
+                        text: t('cart_empty_text', 'Ajoutez quelques plats pour commencer votre commande.'),
+                        actionLabel: t('cart_empty_action', 'Continuer'),
+                        action: 'closeAllModals(); showLanding();'
+                    })}
+                </div>
+            `;
+
+            if (typeof window.applyBranding === 'function') {
+                window.applyBranding();
+            }
+            return;
+        }
+
         content.innerHTML = `
             <div class="cart-drawer-body">
                 <div class="cart-drawer-header">
@@ -567,7 +627,14 @@
         const container = document.getElementById('historyContent');
         if (!container) return;
         container.innerHTML = history.length === 0
-            ? `<p class="history-empty">${t('history_empty', 'Aucune commande recente.')}</p>`
+            ? buildModalEmptyStateMarkup({
+                icon: MENU_UI_ICONS.sparkle,
+                eyebrow: t('history_title', 'Historique'),
+                title: t('history_empty_title', 'Aucune commande récente'),
+                text: t('history_empty_text', 'Vos tickets validés apparaitront ici pour être retrouvés rapidement.'),
+                actionLabel: t('history_empty_action', 'Retour au menu'),
+                action: 'closeHistory(); showLanding();'
+            })
             : history.map((ticketHtml, index) => `
                 <div class="history-ticket history-ticket-wrap">
                     ${renderHistoryTicketCard(ticketHtml)}

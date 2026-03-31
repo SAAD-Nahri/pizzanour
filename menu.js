@@ -229,8 +229,16 @@ async function syncDataFromServer() {
     syncInFlight = (async () => {
     try {
         const res = await fetchPublicDataWithTimeout();
-        if (res.status === 304) return;
-        if (!res.ok) return;
+        if (res.status === 304) {
+            initialMenuSyncState = 'ready';
+            refreshLandingFeatured();
+            return;
+        }
+        if (!res.ok) {
+            initialMenuSyncState = 'error';
+            refreshLandingFeatured();
+            return;
+        }
         const nextVersion = res.headers.get('etag') || res.headers.get('x-data-version') || '';
         const data = await res.json();
         const nextDataVersion = nextVersion || JSON.stringify(data);
@@ -309,7 +317,10 @@ async function syncDataFromServer() {
 
         lastDataVersion = nextDataVersion;
         menuCategoryMarkupCache = new Map();
+        initialMenuSyncState = 'ready';
     } catch (e) {
+        initialMenuSyncState = 'error';
+        refreshLandingFeatured();
         console.warn('[SYNC] Failed to fetch data:', e);
     } finally {
         syncInFlight = null;
@@ -425,6 +436,45 @@ function applyActiveCategoryBackdrop(cat = '') {
     contentArea.style.setProperty(
         '--menu-category-backdrop-image',
         buildCategoryBackdropImageValue(explicitCategoryImage)
+    );
+}
+
+function buildMenuEmptyStateMarkup({
+    icon = MENU_UI_ICONS.sparkle,
+    eyebrow = '',
+    title = '',
+    text = '',
+    actionLabel = '',
+    action = '',
+    className = ''
+} = {}) {
+    const safeEyebrow = String(eyebrow || '').trim();
+    const safeTitle = String(title || '').trim();
+    const safeText = String(text || '').trim();
+    const safeActionLabel = String(actionLabel || '').trim();
+    const safeAction = String(action || '').trim();
+
+    return `
+        <div class="menu-empty-state ${className} menu-reveal-observe">
+            <div class="menu-empty-state-icon">${icon}</div>
+            ${safeEyebrow ? `<div class="menu-empty-state-eyebrow">${escapeHtmlAttr(safeEyebrow)}</div>` : ''}
+            ${safeTitle ? `<h3 class="menu-empty-state-title">${escapeHtmlAttr(safeTitle)}</h3>` : ''}
+            ${safeText ? `<p class="menu-empty-state-copy">${escapeHtmlAttr(safeText)}</p>` : ''}
+            ${safeActionLabel && safeAction ? `<button class="menu-empty-state-action" onclick="${escapeHtmlAttr(safeAction)}">${escapeHtmlAttr(safeActionLabel)}</button>` : ''}
+        </div>
+    `;
+}
+
+function getAvailableSuperCategories() {
+    const currentCategories = new Set(
+        menu
+            .filter((item) => item?.available !== false)
+            .map((item) => item.cat)
+            .filter(Boolean)
+    );
+
+    return getSuperCategories().filter((entry) =>
+        Array.isArray(entry?.cats) && entry.cats.some((cat) => currentCategories.has(cat))
     );
 }
 
@@ -592,6 +642,7 @@ let activeCategoryRenderToken = 0;
 let featuredRenderToken = 0;
 let menuCategoryMarkupCache = new Map();
 let menuInteractionsScriptPromise = null;
+let initialMenuSyncState = Array.isArray(menu) && menu.length ? 'ready' : 'pending';
 
 function updateMenuFixedLayout() {
     const navView = document.getElementById('menuNavigationView');
@@ -972,6 +1023,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function initMenuApp() {
     applyMenuDataSnapshot(readStoredMenuSnapshot());
+    if (Array.isArray(menu) && menu.length) {
+        initialMenuSyncState = 'ready';
+    }
     const savedLang = typeof window.getStoredLanguage === 'function'
         ? window.getStoredLanguage()
         : 'fr';
@@ -1216,6 +1270,52 @@ function showMenuNavigationView(title) {
 }
 
 function refreshLandingFeatured() {
+    const container = document.getElementById('featuredLanding');
+    if (!container) return;
+
+    if (initialMenuSyncState === 'pending' && !menu.length) {
+        container.style.display = 'block';
+        container.innerHTML = buildMenuEmptyStateMarkup({
+            className: 'is-landing',
+            icon: MENU_UI_ICONS.sparkle,
+            eyebrow: t('nav_menu', 'Menu'),
+            title: t('menu_loading_title', 'La carte arrive'),
+            text: t('menu_loading_text', 'Nous préparons les plats et les catégories de cette table.')
+        });
+        scheduleMenuMotionRefresh();
+        return;
+    }
+
+    if (initialMenuSyncState === 'error' && !menu.length) {
+        container.style.display = 'block';
+        container.innerHTML = buildMenuEmptyStateMarkup({
+            className: 'is-landing',
+            icon: MENU_UI_ICONS.sparkle,
+            eyebrow: t('nav_menu', 'Menu'),
+            title: t('menu_loading_error_title', 'Impossible de charger la carte'),
+            text: t('menu_loading_error_text', 'Vérifiez la connexion puis réessayez dans un instant.'),
+            actionLabel: t('menu_empty_refresh', 'Actualiser'),
+            action: 'window.syncPublicMenuData && window.syncPublicMenuData()'
+        });
+        scheduleMenuMotionRefresh();
+        return;
+    }
+
+    if (!menu.length || !getAvailableSuperCategories().length) {
+        container.style.display = 'block';
+        container.innerHTML = buildMenuEmptyStateMarkup({
+            className: 'is-landing',
+            icon: MENU_UI_ICONS.plate,
+            eyebrow: t('featured_label', 'Sélection Signature'),
+            title: t('menu_empty_title', 'La carte se prépare'),
+            text: t('menu_empty_text', 'Les plats apparaitront ici dès qu’ils seront publiés.'),
+            actionLabel: t('menu_empty_refresh', 'Actualiser'),
+            action: 'window.syncPublicMenuData && window.syncPublicMenuData()'
+        });
+        scheduleMenuMotionRefresh();
+        return;
+    }
+
     scheduleDeferredFeaturedRender(
         menu.filter((item) => item?.featured && item?.available !== false),
         'featuredLanding'
@@ -1326,7 +1426,9 @@ function renderSuperCatSheet() {
     const list = document.getElementById('superCatList');
     if (!list) return;
     superCatSheetReady = true;
-    list.innerHTML = getSuperCategories().map(sc => `
+    const availableSuperCategories = getAvailableSuperCategories();
+    list.innerHTML = availableSuperCategories.length
+        ? availableSuperCategories.map(sc => `
         <div class="super-cat-row menu-reveal-observe" onclick="selectSuperCategory('${sc.id}')">
             <div class="super-cat-row-left">
                 <span class="super-cat-row-emoji">${sc.emoji}</span>
@@ -1337,7 +1439,16 @@ function renderSuperCatSheet() {
             </div>
             <span class="super-cat-row-arrow">&rsaquo;</span>
         </div>
-    `).join('');
+    `).join('')
+        : buildMenuEmptyStateMarkup({
+            className: 'is-sheet',
+            icon: MENU_UI_ICONS.plate,
+            eyebrow: t('nav_menu', 'Menu'),
+            title: t('menu_sheet_empty_title', 'Aucune section disponible'),
+            text: t('menu_sheet_empty_text', 'La carte revient très bientôt.'),
+            actionLabel: t('modal_close', 'Close'),
+            action: 'closeSuperCatSheet()'
+        });
     scheduleMenuMotionRefresh();
 }
 
@@ -1384,7 +1495,13 @@ function showSubCategoryGrid(sc, addToStack = true) {
     if (defaultCategory) {
         renderMenu(defaultCategory);
     } else {
-        menuContent.innerHTML = '';
+        menuContent.innerHTML = buildMenuEmptyStateMarkup({
+            className: 'is-surface',
+            icon: MENU_UI_ICONS.sparkle,
+            eyebrow: window.getLocalizedSuperCategoryName(sc, sc.name),
+            title: t('menu_category_waiting_title', 'Cette section arrive bientôt'),
+            text: t('menu_category_waiting_text', 'Les plats de cette section seront visibles dès qu’ils seront ajoutés.')
+        });
     }
 
     updateBackBtn();
@@ -1466,11 +1583,22 @@ function renderMenu(categoryFilter = null) {
 
     let categories = categoryFilter
         ? [categoryFilter]
-        : [...new Set(menu.map(m => m.cat))];
+        : [...new Set(menu.filter((item) => item.available !== false).map(m => m.cat))];
 
     if (categories.length === 1) {
         const cat = categories[0];
         const items = menu.filter(m => m.cat === cat && m.available !== false);
+        if (!items.length) {
+            wrap.innerHTML = buildMenuEmptyStateMarkup({
+                className: 'is-surface',
+                icon: catEmojis[cat] || MENU_UI_ICONS.plate,
+                eyebrow: window.getLocalizedCategoryName(cat, cat),
+                title: t('menu_category_empty_title', 'Aucun plat disponible'),
+                text: t('menu_category_empty_text', 'Cette catégorie sera bientôt garnie de nouvelles suggestions.')
+            });
+            scheduleMenuMotionRefresh();
+            return;
+        }
         const cachedMarkup = menuCategoryMarkupCache.get(getMenuCategoryCacheKey(cat));
         if (cachedMarkup) {
             wrap.innerHTML = cachedMarkup;
@@ -1519,6 +1647,16 @@ function renderMenu(categoryFilter = null) {
             </section>
         `;
     }).join('');
+
+    if (!wrap.innerHTML.trim()) {
+        wrap.innerHTML = buildMenuEmptyStateMarkup({
+            className: 'is-surface',
+            icon: MENU_UI_ICONS.sparkle,
+            eyebrow: t('nav_menu', 'Menu'),
+            title: t('menu_empty_title', 'La carte se prépare'),
+            text: t('menu_empty_text', 'Les plats apparaitront ici dès qu’ils seront publiés.')
+        });
+    }
     observeDeferredMenuImages(wrap);
     scheduleMenuMotionRefresh();
 }
@@ -1780,6 +1918,7 @@ window.getAvailableItemExtras = getAvailableItemExtras;
 window.getSelectedItemExtras = getSelectedItemExtras;
 window.getConfiguredItemPrice = getConfiguredItemPrice;
 window.handleMenuItemAdd = handleMenuItemAdd;
+window.syncPublicMenuData = syncDataFromServer;
 
 window.addEventListener('resize', scheduleMenuFixedLayout);
 window.addEventListener('orientationchange', scheduleMenuFixedLayout);

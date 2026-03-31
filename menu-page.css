@@ -4,6 +4,10 @@
             padding: 0;
         }
 
+        .featured-section > .menu-empty-state.is-landing {
+            margin-top: 6px;
+        }
+
         .featured-title {
             font-size: 1.1rem;
             font-weight: 700;
@@ -275,6 +279,16 @@
         .menu-content-area {
             position: relative;
             isolation: isolate;
+        }
+
+        .menu-content-area > .menu-empty-state.is-surface {
+            margin: 18px 0 6px;
+            min-height: 260px;
+            justify-content: center;
+        }
+
+        #superCatList > .menu-empty-state.is-sheet {
+            margin: 8px 2px 2px;
         }
 
         .menu-content-area > * {

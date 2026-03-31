@@ -71,29 +71,6 @@ const ADMIN_PWA_SHELL_COPY = Object.freeze({
         browser: 'نسخة الويب'
     }
 });
-const ADMIN_QUICKBAR_COPY = Object.freeze({
-    fr: {
-        menu: 'Menu',
-        branding: 'Branding',
-        importLabel: 'Import',
-        save: 'Enregistrer',
-        saving: 'Sauvegarde'
-    },
-    en: {
-        menu: 'Menu',
-        branding: 'Branding',
-        importLabel: 'Import',
-        save: 'Save',
-        saving: 'Saving'
-    },
-    ar: {
-        menu: 'القائمة',
-        branding: 'الهوية',
-        importLabel: 'الاستيراد',
-        save: 'حفظ',
-        saving: 'حفظ...'
-    }
-});
 const ADMIN_ICON = Object.freeze({
     bullet: String.fromCodePoint(0x2022),
     heart: String.fromCodePoint(0x2764, 0xFE0F),
@@ -123,10 +100,6 @@ function getAdminPwaCopy() {
 
 function getAdminPwaShellCopy() {
     return ADMIN_PWA_SHELL_COPY[getAdminPwaLanguage()] || ADMIN_PWA_SHELL_COPY.fr;
-}
-
-function getAdminQuickbarCopy() {
-    return ADMIN_QUICKBAR_COPY[getAdminPwaLanguage()] || ADMIN_QUICKBAR_COPY.fr;
 }
 
 function getAdminConnectionCopy() {
@@ -277,7 +250,6 @@ function syncAdminAppShell(activeSection = '') {
 
     syncAdminMobileSaveBadge();
     syncAdminConnectionBadge();
-    syncAdminQuickbar(activeSection);
 }
 
 function syncAdminMobileSaveBadge() {
@@ -304,48 +276,6 @@ function syncAdminConnectionBadge() {
     badge.classList.remove('is-online', 'is-offline');
     badge.classList.add(online ? 'is-online' : 'is-offline');
     badge.textContent = online ? copy.online : copy.offline;
-}
-
-function syncAdminQuickbar(activeSection = '') {
-    const quickbar = document.getElementById('adminQuickbar');
-    if (!quickbar) return;
-
-    const shouldShow = isAdminStandaloneMode()
-        && document.body.classList.contains('is-authenticated')
-        && window.innerWidth <= 992;
-    quickbar.hidden = !shouldShow;
-    if (!shouldShow) return;
-
-    const labels = getAdminQuickbarCopy();
-    const currentSection = resolveTopLevelSection(
-        activeSection
-        || document.querySelector('.section.active')?.id
-        || getRequestedAdminSection()
-        || getSavedAdminSection()
-        || 'menu'
-    );
-    const menuBtn = document.getElementById('adminQuickMenuBtn');
-    const brandingBtn = document.getElementById('adminQuickBrandingBtn');
-    const importBtn = document.getElementById('adminQuickImportBtn');
-    const saveBtn = document.getElementById('adminQuickSaveBtn');
-
-    if (menuBtn) {
-        menuBtn.textContent = labels.menu;
-        menuBtn.classList.toggle('is-active', currentSection === 'menu');
-    }
-    if (brandingBtn) {
-        brandingBtn.textContent = labels.branding;
-        brandingBtn.classList.toggle('is-active', currentSection === 'branding');
-    }
-    if (importBtn) {
-        importBtn.textContent = labels.importLabel;
-        importBtn.classList.toggle('is-active', currentSection === 'data-tools');
-    }
-    if (saveBtn) {
-        const saving = adminSaveState.type === 'saving';
-        saveBtn.textContent = saving ? labels.saving : labels.save;
-        saveBtn.disabled = saving;
-    }
 }
 
 function updateAdminInstallUi() {
@@ -1162,8 +1092,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             standaloneMedia.addEventListener('change', updateAdminInstallUi);
         }
     }
-    window.addEventListener('resize', () => syncAdminAppShell());
-
     // Check if we already have a valid session
     await checkSession();
 
@@ -1223,7 +1151,6 @@ function renderAdminSaveState() {
     const el = document.getElementById('adminSaveStatus');
     if (!el) {
         syncAdminMobileSaveBadge();
-        syncAdminQuickbar();
         return;
     }
 
@@ -1246,7 +1173,6 @@ function renderAdminSaveState() {
         <span>${style.label}: ${message}${timeText ? ` (${timeText})` : ''}</span>
     `;
     syncAdminMobileSaveBadge();
-    syncAdminQuickbar();
 }
 
 function setAdminSaveState(type, message) {
