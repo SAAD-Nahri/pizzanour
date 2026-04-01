@@ -24,6 +24,8 @@ let importStudioBusy = false;
 let activeImporterJobId = '';
 let activeImporterPollHandle = 0;
 let deferredAdminInstallPrompt = null;
+let adminSaveLoopPromise = null;
+let adminSaveRequested = false;
 const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
 const ADMIN_IMPORTER_ACTIVE_JOB_KEY = 'restaurant_admin_importer_active_job';
 const IMPORTER_JOB_POLL_MAX_FAILURES = 6;
@@ -86,6 +88,7 @@ const ADMIN_ICON = Object.freeze({
     trash: String.fromCodePoint(0x1F5D1, 0xFE0F),
     camera: String.fromCodePoint(0x1F4F7)
 });
+let adminActionDialogResolver = null;
 
 function clearActiveImporterPollHandle() {
     if (activeImporterPollHandle) {
@@ -184,8 +187,8 @@ function setImportStudioStatus(state = null) {
     cardEl.classList.toggle('is-error', state.status === 'failed');
     if (badgeEl) badgeEl.textContent = state.badge || (state.status === 'failed' ? 'Import failed' : state.status === 'succeeded' ? 'Draft ready' : 'Import in progress');
     if (metaEl) metaEl.textContent = state.meta || `${progress}% complete`;
-    if (titleEl) titleEl.textContent = state.title || 'Preparing your menu import';
-    if (copyEl) copyEl.textContent = state.copy || 'Keep this page open while the importer extracts and structures the menu.';
+    if (titleEl) titleEl.textContent = state.title || 'Preparing import';
+    if (copyEl) copyEl.textContent = state.copy || 'Keep this tab open while the draft is prepared.';
     if (fillEl) fillEl.style.width = `${progress}%`;
 }
 
@@ -209,6 +212,72 @@ function t(key, fallback = '', vars = {}) {
         return window.formatTranslation(key, fallback, vars);
     }
     return fallback;
+}
+
+window.resolveAdminActionDialog = function (confirmed = false) {
+    const dialog = document.getElementById('adminActionDialog');
+    if (dialog) {
+        if (typeof dialog.close === 'function' && dialog.open) {
+            dialog.close();
+        } else {
+            dialog.removeAttribute('open');
+        }
+    }
+    if (adminActionDialogResolver) {
+        const resolve = adminActionDialogResolver;
+        adminActionDialogResolver = null;
+        resolve(Boolean(confirmed));
+    }
+};
+
+function openAdminActionDialog(options = {}) {
+    const dialog = document.getElementById('adminActionDialog');
+    const card = document.getElementById('adminActionCard');
+    const kicker = document.getElementById('adminActionKicker');
+    const title = document.getElementById('adminActionTitle');
+    const copy = document.getElementById('adminActionCopy');
+    const note = document.getElementById('adminActionNote');
+    const cancelBtn = document.getElementById('adminActionCancel');
+    const confirmBtn = document.getElementById('adminActionConfirm');
+    if (!dialog || !card || !kicker || !title || !copy || !note || !cancelBtn || !confirmBtn) {
+        return Promise.resolve(Boolean(options.fallbackResult));
+    }
+
+    if (adminActionDialogResolver) {
+        const resolve = adminActionDialogResolver;
+        adminActionDialogResolver = null;
+        resolve(false);
+    }
+
+    const mode = options.mode === 'notice' ? 'notice' : 'confirm';
+    const tone = options.tone === 'danger' ? 'danger' : 'default';
+    card.classList.toggle('is-danger', tone === 'danger');
+    kicker.textContent = options.kicker || (mode === 'notice' ? 'Please note' : 'Please confirm');
+    title.textContent = options.title || (mode === 'notice' ? 'Update' : 'Are you sure?');
+    copy.textContent = options.copy || '';
+    note.hidden = !options.note;
+    note.textContent = options.note || '';
+    cancelBtn.hidden = mode === 'notice';
+    cancelBtn.textContent = options.cancelLabel || 'Cancel';
+    confirmBtn.textContent = options.confirmLabel || (mode === 'notice' ? 'OK' : 'Continue');
+    confirmBtn.classList.toggle('is-danger', tone === 'danger');
+
+    return new Promise((resolve) => {
+        adminActionDialogResolver = resolve;
+        if (typeof dialog.showModal === 'function') {
+            if (!dialog.open) dialog.showModal();
+        } else {
+            dialog.setAttribute('open', 'open');
+        }
+    });
+}
+
+function showAdminConfirm(options = {}) {
+    return openAdminActionDialog({ ...options, mode: 'confirm' });
+}
+
+function showAdminNotice(options = {}) {
+    return openAdminActionDialog({ ...options, mode: 'notice', fallbackResult: true });
 }
 
 function getAdminPwaLanguage() {
@@ -519,6 +588,9 @@ let currentMenuWorkspaceStep = 'supercategories';
 let currentBrandingWorkspaceTab = 'identity';
 let menuBuilderSelectedSuperCategoryId = '';
 let menuBuilderSelectedCategoryKey = '';
+let menuCrudDirty = false;
+let menuCrudBaselineState = '';
+let menuCrudTrackedFormId = '';
 const PRESET_THEME_TOKENS = {
     fast_food: {
         presetId: 'fast_food',
@@ -1208,7 +1280,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast(getAdminPwaCopy().installedToast);
     });
     window.addEventListener('beforeunload', (event) => {
-        if (!importStudioBusy && !activeImporterJobId && !document.body.classList.contains('admin-task-busy')) return;
+        refreshMenuCrudDirtyState();
+        if (!importStudioBusy && !activeImporterJobId && !document.body.classList.contains('admin-task-busy') && !menuCrudDirty) return;
         event.preventDefault();
         event.returnValue = '';
     });
@@ -1516,6 +1589,153 @@ function resetMenuBuilderNavigation() {
     menuBuilderSelectedCategoryKey = '';
 }
 
+function serializeMenuCrudForm(form) {
+    if (!form) return '';
+    const fields = Array.from(form.querySelectorAll('input, select, textarea')).map((field) => {
+        const key = field.id || field.name || field.className || field.tagName;
+        if (field.type === 'file') {
+            return `${key}::files=${field.files?.length || 0}`;
+        }
+        if (field.type === 'checkbox' || field.type === 'radio') {
+            return `${key}::checked=${field.checked ? '1' : '0'}`;
+        }
+        return `${key}::value=${field.value || ''}`;
+    });
+    return JSON.stringify(fields);
+}
+
+function refreshMenuCrudDirtyState() {
+    if (!menuCrudTrackedFormId) {
+        menuCrudDirty = false;
+        return;
+    }
+    const form = document.getElementById(menuCrudTrackedFormId);
+    if (!form) {
+        menuCrudDirty = false;
+        return;
+    }
+    menuCrudDirty = serializeMenuCrudForm(form) !== menuCrudBaselineState;
+}
+
+function startMenuCrudDirtyTracking(form) {
+    if (!form) return;
+    if (!form.dataset.dirtyBound) {
+        form.addEventListener('input', refreshMenuCrudDirtyState);
+        form.addEventListener('change', refreshMenuCrudDirtyState);
+        form.dataset.dirtyBound = 'true';
+    }
+    menuCrudTrackedFormId = form.id || '';
+    menuCrudBaselineState = serializeMenuCrudForm(form);
+    menuCrudDirty = false;
+}
+
+function clearMenuCrudDirtyTracking() {
+    menuCrudTrackedFormId = '';
+    menuCrudBaselineState = '';
+    menuCrudDirty = false;
+}
+
+function getMenuBuilderSetupState() {
+    const branding = restaurantConfig?.branding || {};
+    const defaultBranding = window.defaultBranding || {};
+    const configuredSuperCategories = (restaurantConfig.superCategories || []).filter((entry) => !entry?.isVirtual);
+    const categoryKeys = Object.keys(catEmojis || {});
+    const menuCount = Array.isArray(menu) ? menu.length : 0;
+    const hasBranding =
+        (typeof branding.restaurantName === 'string' && branding.restaurantName.trim() && branding.restaurantName !== defaultBranding.restaurantName)
+        || (typeof branding.logoImage === 'string' && branding.logoImage.trim())
+        || (typeof branding.heroImage === 'string' && branding.heroImage.trim());
+
+    return {
+        hasBranding: Boolean(hasBranding),
+        hasSuperCategories: configuredSuperCategories.length > 0,
+        hasCategories: categoryKeys.length > 0,
+        hasItems: menuCount > 0,
+        firstSuperCategoryId: configuredSuperCategories[0]?.id || '',
+        firstCategoryKey: categoryKeys[0] || '',
+        superCategoryCount: configuredSuperCategories.length,
+        categoryCount: categoryKeys.length,
+        itemCount: menuCount
+    };
+}
+
+function renderMenuBuilderOnboarding() {
+    const onboardingEl = document.getElementById('menuBuilderOnboarding');
+    if (!onboardingEl) return;
+
+    const state = getMenuBuilderSetupState();
+    const showOnboarding = currentMenuWorkspaceStep === 'supercategories'
+        && (!state.hasBranding || !state.hasSuperCategories || !state.hasCategories || !state.hasItems);
+
+    onboardingEl.hidden = !showOnboarding;
+    onboardingEl.classList.toggle('is-visible', showOnboarding);
+    if (!showOnboarding) {
+        onboardingEl.innerHTML = '';
+        return;
+    }
+
+    const steps = [
+        {
+            title: 'Set the brand',
+            copy: 'Add the restaurant name, logo, and hero image so the public site starts feeling real from the first visit.',
+            complete: state.hasBranding
+        },
+        {
+            title: 'Create super categories',
+            copy: state.hasSuperCategories
+                ? `${state.superCategoryCount} super categor${state.superCategoryCount > 1 ? 'ies are' : 'y is'} ready.`
+                : 'These are the first groups customers open before they drill into categories.',
+            complete: state.hasSuperCategories
+        },
+        {
+            title: 'Add categories',
+            copy: state.hasCategories
+                ? `${state.categoryCount} categor${state.categoryCount > 1 ? 'ies are' : 'y is'} linked into the menu tree.`
+                : 'Create the sections customers will browse inside each super category.',
+            complete: state.hasCategories
+        },
+        {
+            title: 'Publish the first dishes',
+            copy: state.hasItems
+                ? `${state.itemCount} item${state.itemCount > 1 ? 's are' : ' is'} already live in the menu workspace.`
+                : 'Add at least one dish so the public menu can open into real content instead of an empty section.',
+            complete: state.hasItems
+        }
+    ];
+
+    onboardingEl.innerHTML = `
+        <div class="menu-builder-onboarding-head">
+            <span class="menu-builder-onboarding-kicker">Quick start</span>
+            <h4 class="menu-builder-onboarding-title">Build the first version of the menu in four moves.</h4>
+            <p class="menu-builder-onboarding-copy">This keeps the owner focused on the right order: identity first, structure second, dishes last. Nothing here changes the live site until the content is actually saved.</p>
+        </div>
+        <div class="menu-builder-onboarding-grid">
+            ${steps.map((step, index) => `
+                <article class="menu-builder-onboarding-step ${step.complete ? 'is-complete' : ''}">
+                    <div class="menu-builder-onboarding-step-top">
+                        <span class="menu-builder-onboarding-index">${index + 1}</span>
+                        <span class="menu-builder-onboarding-state">${step.complete ? 'Ready' : 'Pending'}</span>
+                    </div>
+                    <h5>${escapeHtml(step.title)}</h5>
+                    <p>${escapeHtml(step.copy)}</p>
+                </article>
+            `).join('')}
+        </div>
+        <div class="menu-builder-onboarding-actions">
+            <button type="button" class="primary-btn btn-auto" onclick="openMenuBuilderSetupAction()">${escapeHtml(
+                !state.hasBranding
+                    ? 'Open Branding'
+                    : !state.hasSuperCategories
+                        ? 'Add Super Category'
+                        : !state.hasCategories
+                            ? 'Add Category'
+                            : 'Add First Dish'
+            )}</button>
+            ${adminCapabilities.sellerToolsEnabled ? '<button type="button" class="brand-secondary-btn btn-auto" onclick="openMenuBuilderSetupAction(\'import\')">Open Import Studio</button>' : ''}
+        </div>
+    `;
+}
+
 function renderMenuBuilder() {
     const table = document.getElementById('menuBuilderTable');
     const empty = document.getElementById('menuBuilderEmpty');
@@ -1529,6 +1749,8 @@ function renderMenuBuilder() {
     const thead = table.querySelector('thead');
     const tbody = table.querySelector('tbody');
     if (!thead || !tbody) return;
+
+    renderMenuBuilderOnboarding();
 
     if (currentMenuWorkspaceStep !== 'supercategories' && !getMenuBuilderCurrentSuperCategory()) {
         currentMenuWorkspaceStep = 'supercategories';
@@ -1616,8 +1838,8 @@ function renderMenuBuilder() {
                     <td data-label="Includes"><span class="menu-builder-count-pill">${categoriesCount} categories</span></td>
                     <td data-label="Actions">
                         <div class="menu-builder-item-actions">
-                            ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>${ADMIN_ICON.edit}</button>`}
-                            ${entry.isVirtual ? '' : `<button type="button" class="action-btn" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>${ADMIN_ICON.trash}</button>`}
+                            ${entry.isVirtual ? '' : `<button type="button" class="action-btn" title="Edit super category" aria-label="Edit super category" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>${ADMIN_ICON.edit}</button>`}
+                            ${entry.isVirtual ? '' : `<button type="button" class="action-btn" title="Delete super category" aria-label="Delete super category" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>${ADMIN_ICON.trash}</button>`}
                         </div>
                     </td>
                 </tr>
@@ -1645,9 +1867,9 @@ function renderMenuBuilder() {
                     <td data-label="Items"><span class="menu-builder-count-pill">${entry.itemCount} items</span></td>
                     <td data-label="Actions">
                         <div class="menu-builder-item-actions">
-                            <button type="button" class="action-btn" title="Category image" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.image}</button>
-                            <button type="button" class="action-btn" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.edit}</button>
-                            <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>${ADMIN_ICON.trash}</button>
+                            <button type="button" class="action-btn" title="Edit category image" aria-label="Edit category image" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.image}</button>
+                            <button type="button" class="action-btn" title="Edit category" aria-label="Edit category" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.edit}</button>
+                            <button type="button" class="action-btn" title="Delete category" aria-label="Delete category" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>${ADMIN_ICON.trash}</button>
                         </div>
                     </td>
                 </tr>
@@ -1675,12 +1897,12 @@ function renderMenuBuilder() {
                 </td>
                 <td data-label="Price"><span class="menu-builder-row-meta">MAD ${price.toFixed(2)}</span></td>
                 <td data-label="Likes"><span class="menu-builder-likes">${ADMIN_ICON.heart} ${likes}</span></td>
-                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</button></td>
+                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" title="${item.featured ? 'Remove featured status' : 'Mark as featured'}" aria-label="${item.featured ? 'Remove featured status' : 'Mark as featured'}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</button></td>
                 <td data-label="Actions">
                     <div class="menu-builder-item-actions">
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); editItem(${inlineId})'>${ADMIN_ICON.edit}</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); openImageModal(${inlineId})'>${ADMIN_ICON.image}</button>
-                        <button type="button" class="action-btn" onclick='event.stopPropagation(); deleteItem(${inlineId})'>${ADMIN_ICON.trash}</button>
+                        <button type="button" class="action-btn" title="Edit dish" aria-label="Edit dish" onclick='event.stopPropagation(); editItem(${inlineId})'>${ADMIN_ICON.edit}</button>
+                        <button type="button" class="action-btn" title="Manage dish images" aria-label="Manage dish images" onclick='event.stopPropagation(); openImageModal(${inlineId})'>${ADMIN_ICON.image}</button>
+                        <button type="button" class="action-btn" title="Delete dish" aria-label="Delete dish" onclick='event.stopPropagation(); deleteItem(${inlineId})'>${ADMIN_ICON.trash}</button>
                     </div>
                 </td>
             </tr>
@@ -1738,9 +1960,27 @@ function openMenuCrudModal(type, title) {
         body.scrollTop = 0;
         if (card) card.scrollTop = 0;
     });
+    startMenuCrudDirtyTracking(form);
 }
 
-window.closeMenuCrudModal = function () {
+window.closeMenuCrudModal = async function (force = false) {
+    if (!force) {
+        refreshMenuCrudDirtyState();
+        if (menuCrudDirty) {
+            const confirmed = await showAdminConfirm({
+                kicker: 'Unsaved changes',
+                title: 'Discard changes in this form?',
+                copy: 'The edits inside this sheet have not been saved yet. If you close it now, those changes will be lost.',
+                note: 'Save first if you want these changes to appear on the live restaurant site.',
+                confirmLabel: 'Discard changes',
+                cancelLabel: 'Keep editing',
+                tone: 'danger'
+            });
+            if (!confirmed) {
+                return;
+            }
+        }
+    }
     const modal = document.getElementById('menuCrudModal');
     if (modal) {
         if (typeof modal.close === 'function' && modal.open) {
@@ -1751,6 +1991,7 @@ window.closeMenuCrudModal = function () {
     }
     document.documentElement.classList.remove('menu-crud-open');
     document.body.classList.remove('menu-crud-open');
+    clearMenuCrudDirtyTracking();
     mountMenuCrudForms();
 };
 
@@ -1759,6 +2000,14 @@ if (menuCrudDialog) {
     menuCrudDialog.addEventListener('cancel', (event) => {
         event.preventDefault();
         window.closeMenuCrudModal();
+    });
+}
+
+const adminActionDialog = document.getElementById('adminActionDialog');
+if (adminActionDialog) {
+    adminActionDialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        window.resolveAdminActionDialog(false);
     });
 }
 
@@ -1901,6 +2150,67 @@ async function showDashboard() {
     updateAdminInstallUi();
     await resumeActiveImporterJobIfNeeded();
 }
+
+window.openMenuBuilderSetupAction = function (action = '') {
+    const state = getMenuBuilderSetupState();
+
+    if (action === 'import') {
+        const sellerToolsBtn = document.getElementById('sellerToolsNavBtn');
+        if (sellerToolsBtn) {
+            showSection('data-tools', sellerToolsBtn);
+        }
+        return;
+    }
+
+    if (!state.hasBranding) {
+        const brandingBtn = document.getElementById('brandingNavBtn');
+        if (brandingBtn) {
+            showSection('branding', brandingBtn);
+        }
+        return;
+    }
+
+    if (!state.hasSuperCategories) {
+        resetSuperCategoryFormState();
+        resetMenuBuilderNavigation();
+        renderMenuBuilder();
+        openMenuCrudModal('supercategory', 'Add Super Category');
+        return;
+    }
+
+    if (!state.hasCategories) {
+        const targetSuperCategoryId = state.firstSuperCategoryId || '';
+        if (targetSuperCategoryId) {
+            menuBuilderSelectedSuperCategoryId = targetSuperCategoryId;
+        }
+        menuBuilderSelectedCategoryKey = '';
+        currentMenuWorkspaceStep = 'categories';
+        renderMenuBuilder();
+        resetCategoryFormState();
+        const superSelect = document.getElementById('catSuperCategory');
+        if (superSelect && targetSuperCategoryId) {
+            superSelect.value = targetSuperCategoryId;
+        }
+        openMenuCrudModal('category', 'Add Category');
+        return;
+    }
+
+    const targetSuperCategory = getAdminMenuSuperCategoryRows().find((row) =>
+        Array.isArray(row.cats) && row.cats.includes(state.firstCategoryKey)
+    );
+    if (targetSuperCategory?.id) {
+        menuBuilderSelectedSuperCategoryId = targetSuperCategory.id;
+    }
+    menuBuilderSelectedCategoryKey = state.firstCategoryKey || '';
+    currentMenuWorkspaceStep = 'items';
+    renderMenuBuilder();
+    resetFoodForm();
+    const itemCat = document.getElementById('itemCat');
+    if (itemCat && state.firstCategoryKey) {
+        itemCat.value = state.firstCategoryKey;
+    }
+    openMenuCrudModal('item', 'Add Item');
+};
 
 async function adminLogout() {
     document.body.classList.remove('is-authenticated');
@@ -2278,6 +2588,7 @@ function editItem(id) {
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = `Edit Item - ${getAdminItemDisplayName(item)}`;
     document.querySelector('#foodForm .primary-btn').textContent = 'Save';
+    startMenuCrudDirtyTracking(document.getElementById('foodForm'));
 }
 
 function resetFoodForm() {
@@ -2405,7 +2716,7 @@ function initForms() {
         const saved = await saveAndRefresh();
         if (saved) {
             resetFoodForm();
-            closeMenuCrudModal();
+            closeMenuCrudModal(true);
         }
     };
 
@@ -2476,7 +2787,7 @@ function initForms() {
         if (saved) {
             menuBuilderSelectedSuperCategoryId = selectedSuperCategoryId;
             resetCategoryFormState();
-            closeMenuCrudModal();
+            closeMenuCrudModal(true);
             showToast(previousKey ? 'Category updated.' : 'Category added.');
         }
     };
@@ -2605,7 +2916,7 @@ function initForms() {
         const saved = await saveAndRefresh();
         if (saved) {
             resetSuperCategoryFormState();
-            closeMenuCrudModal();
+            closeMenuCrudModal(true);
             showToast(existingIdx !== -1 ? 'Super category updated.' : 'Super category saved.');
         }
     };
@@ -3223,8 +3534,8 @@ function renderSuperCatTable() {
             <td><strong>${sc.name}</strong><br><small>${sc.time || ''}</small></td>
             <td>${sc.cats.join(', ')}</td>
             <td>
-                <button class="action-btn" onclick="editSuperCat('${sc.id}')">${ADMIN_ICON.edit}</button>
-                <button class="action-btn" onclick="deleteSuperCat('${sc.id}')">${ADMIN_ICON.trash}</button>
+                <button class="action-btn" title="Edit super category" aria-label="Edit super category" onclick="editSuperCat('${sc.id}')">${ADMIN_ICON.edit}</button>
+                <button class="action-btn" title="Delete super category" aria-label="Delete super category" onclick="deleteSuperCat('${sc.id}')">${ADMIN_ICON.trash}</button>
             </td>
         </tr>
             `).join('');
@@ -3246,13 +3557,23 @@ function editSuperCat(id) {
 
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
+    startMenuCrudDirtyTracking(document.getElementById('superCatForm'));
 }
 
-function deleteSuperCat(id) {
-    if (confirm('Delete this super category?')) {
-        restaurantConfig.superCategories = restaurantConfig.superCategories.filter(s => s.id !== id);
-        saveAndRefresh();
-    }
+async function deleteSuperCat(id) {
+    const target = (restaurantConfig.superCategories || []).find((entry) => entry.id === id);
+    const confirmed = await showAdminConfirm({
+        kicker: 'Delete super category',
+        title: `Delete ${target?.name || 'this super category'}?`,
+        copy: 'This removes the super category from the menu builder. Categories themselves stay in the database, but they will no longer be grouped here.',
+        note: 'Use this only when you are intentionally changing the restaurant menu structure.',
+        confirmLabel: 'Delete super category',
+        cancelLabel: 'Keep it',
+        tone: 'danger'
+    });
+    if (!confirmed) return;
+    restaurantConfig.superCategories = restaurantConfig.superCategories.filter(s => s.id !== id);
+    saveAndRefresh();
 }
 
 async function uploadImageToServer(file) {
@@ -3267,7 +3588,12 @@ async function uploadImageToServer(file) {
 
     if (!response.ok) {
         if (response.status === 401) {
-            alert('Session expired. Please sign in again.');
+            await showAdminNotice({
+                kicker: 'Session expired',
+                title: 'Please sign in again',
+                copy: 'Your admin session expired while uploading an image. Sign in again and retry the upload.',
+                confirmLabel: 'Reload now'
+            });
             location.reload();
             return;
         }
@@ -3540,8 +3866,8 @@ function buildImporterResumeUiState(jobId) {
         status: 'running',
         progress: 14,
         badge: 'Resuming import',
-        title: 'Recovering the active importer job',
-        copy: 'A menu import is already running. The admin is reconnecting to that job instead of starting a second one.',
+        title: 'Reconnecting to the running import',
+        copy: 'An import is already running. The admin is reconnecting to it now.',
         meta: jobId ? `Job ${jobId}` : 'Recovering active job',
         hint: 'Keep this page open while the running import finishes.'
     };
@@ -3553,7 +3879,7 @@ function buildImporterReconnectNeededUiState(jobId = '', copyOverride = '') {
         progress: 100,
         badge: 'Reconnect needed',
         title: 'Importer connection lost',
-        copy: copyOverride || 'The importer may still be running on the server, but this page lost track of it. Reopen Import to reconnect.',
+        copy: copyOverride || 'The importer may still be running. Reopen Import to reconnect.',
         meta: jobId ? `Job ${jobId}` : 'Reconnect to continue',
         hint: 'Try opening the Import section again in a moment.'
     };
@@ -3674,10 +4000,10 @@ async function resumeActiveImporterJobIfNeeded() {
                 status: 'succeeded',
                 badge: 'Draft ready',
                 title: 'Menu draft generated',
-                copy: 'Review blockers and warnings below before applying anything live.',
+                copy: 'Review the draft before publishing.',
                 progress: 100,
                 meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
-                hint: 'You can review and apply the draft now.'
+                hint: 'Review it, then publish what you want.'
             });
             setTimeout(() => {
                 setAdminTaskOverlay(null);
@@ -3808,7 +4134,7 @@ window.generateImporterDraft = async function () {
             status: 'running',
             badge: 'Import in progress',
             title: 'Uploading menu files',
-            copy: 'Your files are being prepared for extraction.',
+            copy: 'Preparing your files.',
             progress: 6,
             meta: 'Uploading assets'
         });
@@ -3824,8 +4150,8 @@ window.generateImporterDraft = async function () {
                 badge: 'Import in progress',
                 title: 'Uploading menu files',
                 copy: fileName
-                    ? `Uploading ${fileName} so the importer can work from the current files.`
-                    : 'Your files are being prepared for extraction.',
+                    ? `Uploading ${fileName}.`
+                    : 'Preparing your files.',
                 progress,
                 meta: `${label} ${index}/${total}`
             });
@@ -3838,7 +4164,7 @@ window.generateImporterDraft = async function () {
             status: 'running',
             badge: 'Import in progress',
             title: 'Starting the AI importer',
-            copy: 'The importer job has started. Extraction and structuring will continue in the background while this screen stays locked.',
+            copy: 'The draft job has started and the admin is locked until it finishes.',
             progress: 18,
             meta: 'Job queued'
         });
@@ -3872,10 +4198,10 @@ window.generateImporterDraft = async function () {
                 status: 'succeeded',
                 badge: 'Draft ready',
                 title: 'Menu draft generated',
-                copy: 'Review blockers and warnings below before applying anything live.',
+                copy: 'Review the draft before publishing.',
                 progress: 100,
                 meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
-                hint: 'You can review and apply the draft now.'
+                hint: 'Review it, then publish what you want.'
             });
             setTimeout(() => {
                 setAdminTaskOverlay(null);
@@ -3900,14 +4226,14 @@ window.generateImporterDraft = async function () {
         };
         renderImporterDraftOutputs(lastImporterDraft);
         applyImportStudioProgress({
-            status: 'succeeded',
-            badge: 'Draft ready',
-            title: 'Menu draft generated',
-            copy: 'Review blockers and warnings below before applying anything live.',
-            progress: 100,
-            meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
-            hint: 'You can review and apply the draft now.'
-        });
+                status: 'succeeded',
+                badge: 'Draft ready',
+                title: 'Menu draft generated',
+                copy: 'Review the draft before publishing.',
+                progress: 100,
+                meta: lastImporterDraftMeta.jobId ? `Job ${lastImporterDraftMeta.jobId}` : 'Ready',
+                hint: 'Review it, then publish what you want.'
+            });
         setTimeout(() => {
             setAdminTaskOverlay(null);
             setImportStudioControlsBusy(false);
@@ -3918,7 +4244,7 @@ window.generateImporterDraft = async function () {
         activeImporterJobId = '';
         console.error('Importer draft error:', error);
         const message = error?.code === 'importer_poll_lost'
-            ? 'The importer connection was lost. The server job may still be running.'
+            ? 'The importer connection was lost. The job may still be running.'
             : error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY on the admin server before using AI Import Studio.'
             : error?.message === 'invalid_json_from_openai'
@@ -3968,15 +4294,24 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
     const confirmText = scope === 'menu_structure'
         ? 'Apply menu items and imported category structure to the current restaurant instance? Branding, landing, gallery, and other site identity settings will stay unchanged.'
         : 'Apply menu items only to the current restaurant instance? Category structure and site identity settings will stay unchanged.';
-    if (!confirm(confirmText)) {
+    const confirmed = await showAdminConfirm({
+        kicker: scope === 'menu_structure' ? 'Apply menu + structure' : 'Apply menu only',
+        title: scope === 'menu_structure' ? 'Publish menu and structure?' : 'Publish menu items?',
+        copy: confirmText,
+        note: 'This writes the reviewed draft into the active restaurant data.',
+        confirmLabel: scope === 'menu_structure' ? 'Publish everything' : 'Publish menu',
+        cancelLabel: 'Not yet',
+        tone: 'danger'
+    });
+    if (!confirmed) {
         return;
     }
 
     try {
         applyImportStudioProgress({
             status: 'running',
-            badge: 'Applying draft',
-            title: scope === 'menu_structure' ? 'Applying menu and structure' : 'Applying menu items',
+            badge: 'Publishing draft',
+            title: scope === 'menu_structure' ? 'Publishing menu and structure' : 'Publishing menu items',
             copy: 'The reviewed draft is being written into the live restaurant data.',
             progress: 42,
             meta: scope === 'menu_structure' ? 'Menu + structure' : 'Menu only',
@@ -3999,16 +4334,16 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         refreshUI();
         applyImportStudioProgress({
             status: 'succeeded',
-            badge: 'Apply complete',
-            title: scope === 'menu_structure' ? 'Menu and structure applied' : 'Menu items applied',
+            badge: 'Publish complete',
+            title: scope === 'menu_structure' ? 'Menu and structure published' : 'Menu items published',
             copy: 'The public site can now use the reviewed importer data.',
             progress: 100,
             meta: 'Saved',
-            hint: 'You can continue editing or generate another draft.'
+            hint: 'You can keep editing or generate another draft.'
         }, { overlay: false });
         setAdminTaskOverlay(null);
         setImportStudioControlsBusy(false);
-        showToast(scope === 'menu_structure' ? 'Menu and structure applied.' : 'Menu items applied.');
+        showToast(scope === 'menu_structure' ? 'Menu and structure published.' : 'Menu items published.');
     } catch (error) {
         console.error('Apply importer draft error:', error);
         applyImportStudioProgress({
@@ -4044,7 +4379,22 @@ window.copyImporterDraftJson = async function () {
 // Image handling helper
 const toImageUrl = (img) => img;
 
-function deleteItem(id) { if (confirm('Supprimer cet article ?')) { menu = menu.filter(m => m.id != id); promoIds = promoIds.filter(pid => pid != id); saveAndRefresh(); } }
+async function deleteItem(id) {
+    const target = menu.find((entry) => String(entry.id) === String(id));
+    const confirmed = await showAdminConfirm({
+        kicker: 'Delete dish',
+        title: `Delete ${getAdminItemDisplayName(target) || 'this item'}?`,
+        copy: 'This removes the dish from the admin menu builder and the customer-facing menu.',
+        note: 'The deletion is published after saving and cannot be undone automatically.',
+        confirmLabel: 'Delete dish',
+        cancelLabel: 'Keep dish',
+        tone: 'danger'
+    });
+    if (!confirmed) return;
+    menu = menu.filter(m => m.id != id);
+    promoIds = promoIds.filter(pid => pid != id);
+    saveAndRefresh();
+}
 function hasPromoId(id) {
     return promoIds.some((pid) => String(pid) === String(id));
 }
@@ -4090,7 +4440,12 @@ async function forceSaveChangesLegacy() {
         }
     } catch (e) {
         console.error('Save Error:', e);
-        alert('Save error: ' + e.message);
+        await showAdminNotice({
+            kicker: 'Save failed',
+            title: 'The changes could not be saved',
+            copy: e.message || 'A server error blocked this save.',
+            confirmLabel: 'OK'
+        });
     }
 }
 async function saveAndRefreshLegacy() {
@@ -4142,7 +4497,12 @@ async function saveAndRefreshLegacy() {
         });
         if (!res.ok) {
             if (res.status === 401) {
-                alert('Session expired. Please sign in again.');
+                await showAdminNotice({
+                    kicker: 'Session expired',
+                    title: 'Please sign in again',
+                    copy: 'Your admin session expired before this save completed.',
+                    confirmLabel: 'Reload now'
+                });
                 location.reload();
                 return;
             }
@@ -4347,9 +4707,7 @@ async function forceSaveChanges() {
     }
 }
 
-async function saveAndRefresh() {
-    setAdminSaveState('saving', 'Saving changes to the server...');
-
+async function performAdminSaveRequest() {
     const cleanMenu = menu.map(item => {
         const imgs = item.images || (item.img ? [item.img] : []);
         const urlOnly = imgs.filter(img => !img.startsWith('data:'));
@@ -4386,35 +4744,70 @@ async function saveAndRefresh() {
         }
     };
 
-    try {
-        const res = await fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-        });
+    const res = await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+    });
 
-        if (!res.ok) {
-            if (res.status === 401) {
-                setAdminSaveState('error', t('admin.save_state.session_expired', 'Session expired. Please sign in again.'));
-                showToast(t('admin.save_state.session_expired', 'Session expired. Please sign in again.'));
-                location.reload();
-                return false;
-            }
-
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || 'Server save failed');
+    if (!res.ok) {
+        if (res.status === 401) {
+            setAdminSaveState('error', t('admin.save_state.session_expired', 'Session expired. Please sign in again.'));
+            showToast(t('admin.save_state.session_expired', 'Session expired. Please sign in again.'));
+            location.reload();
+            return false;
         }
 
-        refreshUI();
-        setAdminSaveState('success', t('admin.save_state.success_message', 'All current changes are saved on the server.'));
-        return true;
-    } catch (e) {
-        console.error('Save Error:', e);
-        setAdminSaveState('error', e.message || t('admin.save_state.error_message', 'Save failed.'));
-        showToast(`${t('admin.save_state.error_prefix', 'Save failed')}: ${e.message}`);
-        return false;
+        const err = await res.json().catch(() => ({}));
+        const error = new Error(err.error || 'Server save failed');
+        error.code = err.error || '';
+        error.jobId = err.jobId || '';
+        throw error;
     }
+
+    refreshUI();
+    return true;
+}
+
+async function saveAndRefresh() {
+    adminSaveRequested = true;
+
+    if (adminSaveLoopPromise) {
+        setAdminSaveState('saving', t('admin.save_state.saving_message', 'Saving changes to the server...'));
+        return adminSaveLoopPromise;
+    }
+
+    adminSaveLoopPromise = (async () => {
+        let saved = false;
+        try {
+            while (adminSaveRequested) {
+                adminSaveRequested = false;
+                setAdminSaveState(
+                    'saving',
+                    saved
+                        ? t('admin.save_state.saving_more_message', 'Saving your latest changes...')
+                        : t('admin.save_state.saving_message', 'Saving changes to the server...')
+                );
+                saved = await performAdminSaveRequest();
+            }
+
+            if (saved) {
+                setAdminSaveState('success', t('admin.save_state.success_message', 'All current changes are saved on the server.'));
+            }
+            return saved;
+        } catch (e) {
+            console.error('Save Error:', e);
+            const message = getLongTaskConflictMessage(e) || e.message || t('admin.save_state.error_message', 'Save failed.');
+            setAdminSaveState('error', message);
+            showToast(`${t('admin.save_state.error_prefix', 'Save failed')}: ${message}`);
+            return false;
+        } finally {
+            adminSaveLoopPromise = null;
+        }
+    })();
+
+    return adminSaveLoopPromise;
 }
 
 function showToast(msg) { const t = document.getElementById('adminToast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
@@ -4491,7 +4884,7 @@ function renderCatTable() {
         const media = image
             ? `<span class="menu-builder-entry-thumb"><img src="${escapeHtml(image)}" alt="${escapeHtml(cat)}" loading="lazy" decoding="async"></span>`
             : `${catEmojis[cat]}`;
-        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" title="Category image" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.image}</button><button class="action-btn" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
+        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" title="Edit category image" aria-label="Edit category image" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.image}</button><button class="action-btn" title="Edit category" aria-label="Edit category" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" title="Delete category" aria-label="Delete category" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
     }).join('');
 }
 function editCat(cat) {
@@ -4511,9 +4904,28 @@ function editCat(cat) {
     setCategoryTranslationFields(cat);
     updateCategoryImagePreview();
     syncCategoryImageAiControls();
+    startMenuCrudDirtyTracking(document.getElementById('catForm'));
 }
-function deleteCat(cat) {
-    if (menu.some(m => m.cat === cat)) return alert('Delete the products in this category first.');
+async function deleteCat(cat) {
+    if (menu.some(m => m.cat === cat)) {
+        await showAdminNotice({
+            kicker: 'Category still in use',
+            title: `Remove the dishes in ${window.getLocalizedCategoryName(cat, cat)} first`,
+            copy: 'This category still contains products. Delete or move those dishes before removing the category itself.',
+            confirmLabel: 'OK'
+        });
+        return;
+    }
+    const confirmed = await showAdminConfirm({
+        kicker: 'Delete category',
+        title: `Delete ${window.getLocalizedCategoryName(cat, cat)}?`,
+        copy: 'This removes the category from the menu structure and also clears its saved image and translations.',
+        note: 'Only continue if the restaurant no longer needs this section.',
+        confirmLabel: 'Delete category',
+        cancelLabel: 'Keep category',
+        tone: 'danger'
+    });
+    if (!confirmed) return;
     (restaurantConfig.superCategories || []).forEach((sc) => {
         if (Array.isArray(sc.cats)) {
             sc.cats = sc.cats.filter((entry) => entry !== cat);
@@ -4942,11 +5354,18 @@ function renderGalleryAdmin() {
         `).join('') + (images.length === 0 ? '<p style="grid-column: 1/-1; color:#888; text-align:center; padding:40px; border:2px dashed #eee; border-radius:15px;">The gallery is empty.</p>' : '');
 }
 
-function deleteGalleryImage(index) {
-    if (confirm('Supprimer cette image de la galerie ?')) {
-        restaurantConfig.gallery.splice(index, 1);
-        saveAndRefresh();
-        renderGalleryAdmin();
-        showToast('Image removed.');
-    }
+async function deleteGalleryImage(index) {
+    const confirmed = await showAdminConfirm({
+        kicker: 'Delete gallery image',
+        title: 'Remove this gallery image?',
+        copy: 'This image will disappear from the public gallery once the next save is published.',
+        confirmLabel: 'Delete image',
+        cancelLabel: 'Keep image',
+        tone: 'danger'
+    });
+    if (!confirmed) return;
+    restaurantConfig.gallery.splice(index, 1);
+    saveAndRefresh();
+    renderGalleryAdmin();
+    showToast('Image removed.');
 }

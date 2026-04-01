@@ -622,6 +622,148 @@
             text-align: center;
         }
 
+        .menu-builder-onboarding {
+            display: none;
+            gap: 18px;
+            padding: 22px;
+            border-radius: 24px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background:
+                linear-gradient(180deg, rgba(255, 251, 245, 0.98) 0%, rgba(255, 246, 236, 0.94) 100%),
+                radial-gradient(circle at top right, rgba(255, 171, 34, 0.16), transparent 42%);
+            box-shadow: 0 20px 44px rgba(75, 47, 24, 0.08);
+        }
+
+        .menu-builder-onboarding.is-visible {
+            display: grid;
+        }
+
+        .menu-builder-onboarding-head {
+            display: grid;
+            gap: 8px;
+            max-width: 640px;
+        }
+
+        .menu-builder-onboarding-kicker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 191, 128, 0.34);
+            background: rgba(255, 255, 255, 0.82);
+            color: #8a4b00;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu-builder-onboarding-title {
+            margin: 0;
+            font-size: clamp(1.2rem, 2vw, 1.55rem);
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .menu-builder-onboarding-copy {
+            margin: 0;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        .menu-builder-onboarding-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .menu-builder-onboarding-step {
+            display: grid;
+            gap: 8px;
+            padding: 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 12px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .menu-builder-onboarding-step.is-complete {
+            border-color: rgba(16, 185, 129, 0.22);
+            background:
+                linear-gradient(180deg, rgba(246, 255, 251, 0.98) 0%, rgba(236, 253, 245, 0.94) 100%);
+        }
+
+        .menu-builder-onboarding-step-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .menu-builder-onboarding-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: rgba(255, 248, 240, 0.9);
+            color: var(--text);
+            font-weight: 900;
+            box-shadow: inset 0 0 0 1px rgba(232, 216, 197, 0.92);
+        }
+
+        .menu-builder-onboarding-state {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text2);
+        }
+
+        .menu-builder-onboarding-state::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+        }
+
+        .menu-builder-onboarding-step.is-complete .menu-builder-onboarding-state {
+            color: #166534;
+        }
+
+        .menu-builder-onboarding-step.is-complete .menu-builder-onboarding-state::before {
+            background: #10b981;
+        }
+
+        .menu-builder-onboarding-step h5 {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        .menu-builder-onboarding-step p {
+            margin: 0;
+            color: var(--text2);
+            line-height: 1.55;
+            font-size: 0.9rem;
+        }
+
+        .menu-builder-onboarding-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
         .menu-crud-dialog {
             padding: 0;
             border: 0;
@@ -1038,6 +1180,115 @@
             border-radius: 16px;
             background: #fffaf3;
             font-size: 0.92rem;
+        }
+
+        .admin-action-dialog {
+            width: min(100vw - 28px, 440px);
+            border: none;
+            padding: 0;
+            background: transparent;
+            color: inherit;
+        }
+
+        .admin-action-dialog::backdrop {
+            background: rgba(17, 19, 24, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-action-card {
+            display: grid;
+            gap: 14px;
+            padding: 24px 24px 22px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 236, 216, 0.9);
+            background:
+                linear-gradient(180deg, rgba(255, 252, 247, 0.98) 0%, rgba(255, 246, 236, 0.95) 100%),
+                radial-gradient(circle at top right, rgba(255, 171, 34, 0.14), transparent 48%);
+            box-shadow: 0 28px 60px rgba(17, 19, 24, 0.24);
+        }
+
+        .admin-action-card.is-danger {
+            border-color: rgba(248, 113, 113, 0.28);
+            background:
+                linear-gradient(180deg, rgba(255, 249, 249, 0.98) 0%, rgba(255, 242, 242, 0.95) 100%),
+                radial-gradient(circle at top right, rgba(248, 113, 113, 0.14), transparent 48%);
+        }
+
+        .admin-action-kicker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 187, 92, 0.32);
+            background: rgba(255, 248, 240, 0.88);
+            color: #a85600;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .admin-action-card.is-danger .admin-action-kicker {
+            border-color: rgba(248, 113, 113, 0.28);
+            background: rgba(254, 242, 242, 0.9);
+            color: #b91c1c;
+        }
+
+        .admin-action-title {
+            margin: 0;
+            font-size: 1.22rem;
+            line-height: 1.2;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .admin-action-copy {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .admin-action-note {
+            margin: 0;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 187, 92, 0.26);
+            background: rgba(255, 255, 255, 0.78);
+            color: #7c4a10;
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .admin-action-note[hidden] {
+            display: none;
+        }
+
+        .admin-action-actions {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 2px;
+        }
+
+        .admin-action-actions .primary-btn,
+        .admin-action-actions .secondary-btn {
+            min-width: 132px;
+            justify-content: center;
+        }
+
+        .admin-action-actions .primary-btn.is-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 16px 34px rgba(220, 38, 38, 0.22);
+        }
+
+        .admin-action-actions .primary-btn.is-danger:hover,
+        .admin-action-actions .primary-btn.is-danger:focus-visible {
+            box-shadow: 0 18px 36px rgba(220, 38, 38, 0.28);
         }
 
         .admin-disclosure {
@@ -1655,9 +1906,11 @@
         }
 
         .copy-muted {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
+            color: #7a6c61;
+            font-size: 0.84rem;
+            line-height: 1.5;
+            max-width: 54ch;
+            margin-bottom: 16px;
         }
 
         .btn-auto {
@@ -1876,6 +2129,13 @@
             transform: translateY(-1px);
             border-color: rgba(255, 141, 8, 0.24);
             box-shadow: 0 12px 22px rgba(75, 47, 24, 0.08);
+        }
+
+        .action-btn:focus-visible,
+        .menu-crud-close:focus-visible,
+        .image-modal-close:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
         }
 
         /* WiFi Details */
@@ -4124,6 +4384,27 @@
                 overscroll-behavior: contain;
             }
 
+            .admin-action-dialog {
+                width: min(100vw - 18px, 420px);
+            }
+
+            .admin-action-card {
+                gap: 12px;
+                padding: 20px 18px 18px;
+                border-radius: 24px;
+            }
+
+            .admin-action-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .admin-action-actions .primary-btn,
+            .admin-action-actions .secondary-btn {
+                width: 100%;
+                min-width: 0;
+            }
+
             .image-modal-close {
                 position: sticky;
                 top: 0;
@@ -4651,13 +4932,14 @@
                             <span class="menu-builder-kicker">Menu Builder</span>
                             <div id="menuBuilderBreadcrumbs" class="menu-builder-breadcrumbs"></div>
                             <h3 id="menuBuilderTitle" style="margin:0;">Super Categories</h3>
-                            <p id="menuBuilderCopy" class="copy-muted" style="margin:0;">Start from the top of the menu tree, then drill into categories and items.</p>
+                            <p id="menuBuilderCopy" class="copy-muted" style="margin:0;">Build the menu structure, then fill each section with dishes.</p>
                         </div>
-                        <div class="menu-builder-actions">
-                            <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="&#8592;" onclick="goBackMenuBuilder()">Back</button>
-                            <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto menu-icon-btn" data-mobile-icon="+" onclick="openMenuBuilderAdd()">Add</button>
-                        </div>
+                    <div class="menu-builder-actions">
+                        <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="&#8592;" onclick="goBackMenuBuilder()">Back</button>
+                        <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto menu-icon-btn" data-mobile-icon="+" onclick="openMenuBuilderAdd()">Add</button>
                     </div>
+                </div>
+                    <div id="menuBuilderOnboarding" class="menu-builder-onboarding" hidden></div>
                     <div class="table-container menu-builder-table-wrap">
                         <table id="menuBuilderTable" class="menu-builder-table">
                             <thead></thead>
@@ -4672,10 +4954,10 @@
                 <div id="menuCrudCategoryHost"></div>
                 <div id="menuCrudItemHost"></div>
             </div>
-            <dialog id="menuCrudModal" class="menu-crud-dialog">
+            <dialog id="menuCrudModal" class="menu-crud-dialog" aria-labelledby="menuCrudModalTitle">
                 <div class="menu-crud-modal-card">
                     <div class="menu-crud-modal-header">
-                        <button type="button" class="menu-crud-close" onclick="closeMenuCrudModal()">&times;</button>
+                        <button type="button" class="menu-crud-close" aria-label="Close form" title="Close form" onclick="closeMenuCrudModal()">&times;</button>
                         <h3 id="menuCrudModalTitle" class="menu-crud-modal-title">Edit</h3>
                     </div>
                     <div id="menuCrudModalBody"></div>
@@ -4731,7 +5013,7 @@
                         <summary>
                             <span>
                                 <span data-i18n="admin.menu.localized_names">Localized Names & Descriptions</span>
-                                <span class="admin-disclosure-copy">Open only when you need FR / EN / AR overrides.</span>
+                                <span class="admin-disclosure-copy">Optional translations.</span>
                             </span>
                         </summary>
                         <div class="admin-disclosure-body">
@@ -4815,7 +5097,7 @@
                         <summary>
                             <span>
                                 <span>Advanced & Media</span>
-                                <span class="admin-disclosure-copy">Open only for ingredients, media, availability, or featured status.</span>
+                                <span class="admin-disclosure-copy">Advanced item settings.</span>
                             </span>
                         </summary>
                         <div class="admin-disclosure-body">
@@ -4878,7 +5160,7 @@
         </div>
 
         <div id="info" class="section">
-            <p class="copy-muted">Keep restaurant contact, public information, hours, WiFi, and admin access in one place.</p>
+            <p class="copy-muted">Edit the public essentials for the live site.</p>
             <div class="owner-section-stack">
                 <div class="owner-section-card" data-admin-subsection="landing">
                     <div class="owner-subsection-heading">
@@ -4894,7 +5176,7 @@
                     <summary>
                         <span>
                             <span>Social Links</span>
-                            <span class="admin-disclosure-copy">Open this only when the restaurant wants public social or directory links.</span>
+                            <span class="admin-disclosure-copy">Public links.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -4905,7 +5187,7 @@
                     <summary>
                         <span>
                             <span>Guest Facilities & Payments</span>
-                            <span class="admin-disclosure-copy">Open this only when you want to show accepted payments or on-site amenities.</span>
+                            <span class="admin-disclosure-copy">Guest-facing facilities.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -4916,7 +5198,7 @@
                     <summary>
                         <span>
                             <span>Hours</span>
-                            <span class="admin-disclosure-copy">Open this only when the restaurant schedule changes.</span>
+                            <span class="admin-disclosure-copy">Opening hours.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -4927,7 +5209,7 @@
                     <summary>
                         <span>
                             <span>WiFi</span>
-                            <span class="admin-disclosure-copy">Open this only when the network name or password changes.</span>
+                            <span class="admin-disclosure-copy">WiFi access.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -4938,7 +5220,7 @@
                     <summary>
                         <span>
                             <span>Admin Access</span>
-                            <span class="admin-disclosure-copy">Open this only when login credentials need to be changed.</span>
+                            <span class="admin-disclosure-copy">Admin credentials.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -4949,11 +5231,11 @@
         </div>
 
         <!-- IMAGE MANAGEMENT MODAL -->
-        <div id="imageModal" class="modal-overlay"
+        <div id="imageModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="imgModalHeading"
             style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
             <div class="modal-card image-modal-card">
-                <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
-                <h2 class="image-modal-title">Manage Images: <span id="imgModalItemName"></span></h2>
+                <button class="image-modal-close" aria-label="Close image manager" title="Close image manager" onclick="closeImageModal()">&times;</button>
+                <h2 id="imgModalHeading" class="image-modal-title">Manage Images: <span id="imgModalItemName"></span></h2>
 
                 <div class="image-modal-dropzone">
                     <label class="image-modal-label">Add Images</label>
@@ -5038,7 +5320,7 @@
                         <summary>
                             <span>
                                 <span>Translations</span>
-                                <span class="admin-disclosure-copy">Only open this when you need category labels in multiple languages.</span>
+                                <span class="admin-disclosure-copy">Optional translations.</span>
                             </span>
                         </summary>
                         <div class="admin-disclosure-body">
@@ -5189,7 +5471,7 @@
                     <summary>
                         <span>
                             <span>Advanced Theme Colors</span>
-                            <span class="admin-disclosure-copy">Open this only when the default palette needs deeper tuning for the site and menu surfaces.</span>
+                            <span class="admin-disclosure-copy">Advanced palette controls.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -5225,7 +5507,7 @@
                     <summary>
                         <span>
                             <span>Logo & Hero Media</span>
-                            <span class="admin-disclosure-copy">Open this for uploads or extra homepage slider images beyond the main hero.</span>
+                            <span class="admin-disclosure-copy">Logo and hero media.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -5417,7 +5699,7 @@
                     <summary>
                         <span>
                             <span>Social & Directory Links</span>
-                            <span class="admin-disclosure-copy">Only open this when the restaurant wants public social links.</span>
+                            <span class="admin-disclosure-copy">Public links.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -5446,7 +5728,7 @@
                     <summary>
                         <span>
                             <span>Guest Facilities & Payments</span>
-                            <span class="admin-disclosure-copy">Open this when the restaurant wants to show amenities or accepted payment methods.</span>
+                            <span class="admin-disclosure-copy">Payments and facilities.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -5483,7 +5765,7 @@
                     <summary>
                         <span>
                             <span>Homepage Layout</span>
-                            <span class="admin-disclosure-copy">Use this only when the restaurant wants different homepage sections or a different order.</span>
+                            <span class="admin-disclosure-copy">Section order and visibility.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -5520,7 +5802,7 @@
                     <summary>
                         <span>
                             <span>Homepage Copy</span>
-                            <span class="admin-disclosure-copy">Open only when you need custom homepage text in multiple languages.</span>
+                            <span class="admin-disclosure-copy">Homepage text overrides.</span>
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
@@ -5578,7 +5860,7 @@
                         <summary>
                             <span>
                                 <span>Translations</span>
-                                <span class="admin-disclosure-copy">Open only when you need FR / EN / AR labels for the customer-facing menu.</span>
+                                <span class="admin-disclosure-copy">Optional translations.</span>
                             </span>
                         </summary>
                         <div class="admin-disclosure-body">
@@ -5704,7 +5986,7 @@
         <!-- GALLERY SECTION -->
         <div id="gallery" class="section">
             <h3>Gallery</h3>
-            <p class="copy-muted">Add photos to the website gallery. You can upload multiple files or use image URLs.</p>
+            <p class="copy-muted">Manage the homepage gallery images.</p>
 
             <form id="galleryForm" class="panel-soft">
                 <div class="form-group">
@@ -5729,13 +6011,13 @@
         <!-- DATA TOOLS SECTION -->
         <div id="data-tools" class="section">
             <h3>Menu Import</h3>
-            <p class="copy-muted">Use this internal tool to turn menu images or a PDF into a reviewable menu draft before applying it to the site.</p>
+            <p class="copy-muted">Turn menu images or a PDF into a reviewable draft before publishing.</p>
             <div class="tool-grid">
                 <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow">Importer</div>
                     <h4>AI Import Studio</h4>
-                    <p>Upload menu images or a menu PDF, then generate a menu draft. The importer extracts dishes, prices, categories, super-categories, and FR / EN / AR translations into a reviewable draft before anything is applied live.</p>
-                    <p class="muted-copy">Current scope: menu structure only. Branding, landing copy, gallery, and site identity stay untouched and continue to use the current admin data.</p>
+                    <p>Upload menu files, generate a draft, review it, then publish only what you trust.</p>
+                    <p class="muted-copy">Imports affect menu data only. Branding, landing, and gallery stay untouched.</p>
                     <div class="form-group">
                         <label for="importStudioMenuFiles">Menu Images / PDF</label>
                         <input type="file" id="importStudioMenuFiles" accept="image/*,.pdf,application/pdf" multiple />
@@ -5755,32 +6037,32 @@
                     </div>
                     <div id="importStudioReviewGrid" class="importer-review-grid"></div>
                     <div class="importer-apply-panel">
-                        <h5>Apply Scope</h5>
-                        <p>Choose how much of the reviewed menu draft should replace the current site data.</p>
+                        <h5>Publish Scope</h5>
+                        <p>Choose what this draft replaces.</p>
                         <div class="importer-scope-grid">
                             <label class="importer-scope-option">
                                 <input type="radio" name="importApplyScope" value="menu_only" checked />
                                 <div>
-                                    <strong>Menu items only</strong>
-                                    <span>Apply dishes, prices, descriptions, and translations, while keeping the current category structure untouched.</span>
+                                    <strong>Menu only</strong>
+                                    <span>Dishes, prices, descriptions, and translations only.</span>
                                 </div>
                             </label>
                             <label class="importer-scope-option">
                                 <input type="radio" name="importApplyScope" value="menu_structure" />
                                 <div>
-                                    <strong>Menu + category structure</strong>
-                                    <span>Apply dishes plus imported categories and super-categories. Site identity, landing, gallery, and branding remain unchanged.</span>
+                                    <strong>Menu + structure</strong>
+                                    <span>Dishes plus imported categories and super-categories.</span>
                                 </div>
                             </label>
                         </div>
                         <div class="tool-actions">
-                            <button type="button" id="applyImporterMenuOnlyBtn" class="primary-btn btn-auto" onclick="applyImporterDraft('menu_only')">Apply Menu Only</button>
-                            <button type="button" id="applyImporterStructureBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_structure')">Apply Menu + Structure</button>
+                            <button type="button" id="applyImporterMenuOnlyBtn" class="primary-btn btn-auto" onclick="applyImporterDraft('menu_only')">Publish Menu</button>
+                            <button type="button" id="applyImporterStructureBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_structure')">Publish Menu + Structure</button>
                         </div>
                         <div id="importStudioApplyNote" class="importer-apply-note"></div>
                     </div>
-                    <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft generated yet. Upload menu images or a PDF, generate the menu draft, then review blockers and warnings here."></textarea>
-                    <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON will appear here for seller review before apply."></textarea>
+                    <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft yet. Upload menu files and generate one."></textarea>
+                    <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON appears here before publishing."></textarea>
                 </div>
             </div>
         </div>
@@ -5789,7 +6071,7 @@
         <div id="security" class="section">
             <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.security.title">Admin Security</h3>
-            <p class="copy-muted" data-i18n="admin.security.subtitle">Update the admin login used for this restaurant. Credential changes are stored in persisted server storage and survive redeploys.</p>
+            <p class="copy-muted" data-i18n="admin.security.subtitle">Update the admin login for this restaurant.</p>
 
             <div class="security-layout">
                 <div class="security-main">
@@ -5799,13 +6081,13 @@
                         <div class="form-group">
                             <label for="adminNewUser" data-i18n="admin.security.admin_username">Admin Username</label>
                             <input type="text" id="adminNewUser" required placeholder="admin" data-i18n-placeholder="admin.security.admin_username_placeholder" />
-                            <small class="security-help" data-i18n="admin.security.admin_username_help">Minimum 3 characters. This becomes the next admin login for this restaurant.</small>
+                            <small class="security-help" data-i18n="admin.security.admin_username_help">Minimum 3 characters.</small>
                         </div>
 
                         <div class="form-group">
                             <label for="adminNewPass" data-i18n="admin.security.new_password">New Password</label>
                             <input type="password" id="adminNewPass" placeholder="********" data-i18n-placeholder="admin.security.password_placeholder" />
-                            <small class="security-help" data-i18n="admin.security.new_password_help">Minimum 8 characters. Leave blank only if you want to keep the current password.</small>
+                            <small class="security-help" data-i18n="admin.security.new_password_help">Minimum 8 characters. Leave blank to keep the current password.</small>
                         </div>
 
                         <div class="form-group">
@@ -5835,6 +6117,19 @@
         </div>
 
     </main>
+
+    <dialog id="adminActionDialog" class="admin-action-dialog" aria-labelledby="adminActionTitle" aria-describedby="adminActionCopy">
+        <div id="adminActionCard" class="admin-action-card">
+            <span id="adminActionKicker" class="admin-action-kicker">Please confirm</span>
+            <h3 id="adminActionTitle" class="admin-action-title">Are you sure?</h3>
+            <p id="adminActionCopy" class="admin-action-copy">This action changes the current restaurant workspace.</p>
+            <p id="adminActionNote" class="admin-action-note" hidden></p>
+            <div class="admin-action-actions">
+                <button type="button" id="adminActionCancel" class="secondary-btn" onclick="resolveAdminActionDialog(false)">Cancel</button>
+                <button type="button" id="adminActionConfirm" class="primary-btn" onclick="resolveAdminActionDialog(true)">Continue</button>
+            </div>
+        </div>
+    </dialog>
 
     <div id="adminToast" class="toast"></div>
 
@@ -5966,6 +6261,20 @@
 
             .menu-builder-table td {
                 padding: 14px;
+            }
+
+            .menu-builder-onboarding {
+                padding: 16px;
+                border-radius: 22px;
+            }
+
+            .menu-builder-onboarding-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-builder-onboarding-step {
+                padding: 14px;
+                border-radius: 18px;
             }
 
             .mobile-bottom-nav {

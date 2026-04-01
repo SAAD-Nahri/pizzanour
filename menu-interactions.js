@@ -140,6 +140,8 @@
     let interactionDomReady = false;
     let currentDishImages = [];
     let currentDishImageIdx = 0;
+    let orderPromptResolver = null;
+    let lastOrderPromptFocus = null;
 
     function buildGalleryEntries(items) {
         return (Array.isArray(items) ? items : []).flatMap((entry) => {
@@ -236,20 +238,190 @@
                     <div id="galleryCount" class="gallery-count"></div>
                 </div>
             </div>
+
+            <div id="orderPromptOverlay" class="order-prompt-overlay" onclick="resolveOrderPrompt(false)">
+                <div id="orderPromptCard" class="order-prompt-card" onclick="event.stopPropagation()">
+                    <div id="orderPromptIcon" class="order-prompt-icon">${MENU_UI_ICONS.sparkle}</div>
+                    <div id="orderPromptEyebrow" class="order-prompt-eyebrow"></div>
+                    <h3 id="orderPromptTitle" class="order-prompt-title"></h3>
+                    <p id="orderPromptCopy" class="order-prompt-copy"></p>
+                    <div id="orderPromptNote" class="order-prompt-note"></div>
+                    <div class="order-prompt-actions">
+                        <button id="orderPromptCancel" class="order-prompt-btn is-muted" type="button" onclick="resolveOrderPrompt(false)">${t('action_cancel', 'Annuler')}</button>
+                        <button id="orderPromptConfirm" class="order-prompt-btn is-primary" type="button" onclick="resolveOrderPrompt(true)">${t('action_confirm', 'Confirmer')}</button>
+                    </div>
+                </div>
+            </div>
         `;
 
         document.body.appendChild(template.content);
         interactionDomReady = true;
     }
 
+    function resolveOrderPrompt(confirmed = false) {
+        const overlay = document.getElementById('orderPromptOverlay');
+        const resolver = orderPromptResolver;
+        orderPromptResolver = null;
+        if (overlay) {
+            overlay.classList.remove('open');
+        }
+        if (lastOrderPromptFocus && typeof lastOrderPromptFocus.focus === 'function') {
+            queueMicrotask(() => {
+                lastOrderPromptFocus.focus();
+                lastOrderPromptFocus = null;
+            });
+        } else {
+            lastOrderPromptFocus = null;
+        }
+        resolver?.(confirmed);
+    }
+
+    function openOrderPrompt({
+        mode = 'confirm',
+        icon = MENU_UI_ICONS.sparkle,
+        eyebrow = '',
+        title = '',
+        text = '',
+        note = '',
+        confirmLabel = '',
+        cancelLabel = '',
+        danger = false
+    } = {}) {
+        ensureMenuInteractionDom();
+
+        const overlay = document.getElementById('orderPromptOverlay');
+        const card = document.getElementById('orderPromptCard');
+        const iconEl = document.getElementById('orderPromptIcon');
+        const eyebrowEl = document.getElementById('orderPromptEyebrow');
+        const titleEl = document.getElementById('orderPromptTitle');
+        const copyEl = document.getElementById('orderPromptCopy');
+        const noteEl = document.getElementById('orderPromptNote');
+        const cancelBtn = document.getElementById('orderPromptCancel');
+        const confirmBtn = document.getElementById('orderPromptConfirm');
+        if (!overlay || !card || !iconEl || !eyebrowEl || !titleEl || !copyEl || !noteEl || !cancelBtn || !confirmBtn) {
+            return Promise.resolve(false);
+        }
+
+        orderPromptResolver?.(false);
+        orderPromptResolver = null;
+        lastOrderPromptFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        iconEl.textContent = icon || MENU_UI_ICONS.sparkle || '!';
+        eyebrowEl.textContent = String(eyebrow || '').trim();
+        titleEl.textContent = String(title || '').trim();
+        copyEl.textContent = String(text || '').trim();
+        noteEl.textContent = String(note || '').trim();
+
+        eyebrowEl.hidden = !eyebrowEl.textContent;
+        titleEl.hidden = !titleEl.textContent;
+        copyEl.hidden = !copyEl.textContent;
+        noteEl.hidden = !noteEl.textContent;
+
+        const isNotice = mode === 'notice';
+        cancelBtn.textContent = String(cancelLabel || t('action_cancel', 'Annuler')).trim();
+        confirmBtn.textContent = String(confirmLabel || (isNotice ? t('action_continue', 'Continuer') : t('action_confirm', 'Confirmer'))).trim();
+        cancelBtn.hidden = isNotice;
+
+        card.classList.toggle('is-danger', Boolean(danger));
+        card.classList.toggle('is-notice', isNotice);
+        overlay.classList.add('open');
+
+        return new Promise((resolve) => {
+            orderPromptResolver = resolve;
+            queueMicrotask(() => {
+                (isNotice ? confirmBtn : cancelBtn).focus();
+            });
+        });
+    }
+
+    function showOrderConfirm(options = {}) {
+        return openOrderPrompt({ ...options, mode: 'confirm' });
+    }
+
+    function showOrderNotice(options = {}) {
+        return openOrderPrompt({ ...options, mode: 'notice' });
+    }
+
+    function clearDeliveryAddressAttention() {
+        window.deliveryAddressNeedsAttention = false;
+        const field = document.getElementById('deliveryAddress');
+        const hint = document.getElementById('deliveryAddressHint');
+        if (field) field.classList.remove('is-invalid');
+        if (hint) {
+            hint.textContent = t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.');
+            hint.classList.remove('is-warning');
+        }
+    }
+
+    function focusDeliveryAddressField() {
+        const field = document.getElementById('deliveryAddress');
+        if (!field) return;
+        field.focus();
+        field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+
+    function setDeliveryAddressAttention() {
+        window.deliveryAddressNeedsAttention = true;
+        const field = document.getElementById('deliveryAddress');
+        const hint = document.getElementById('deliveryAddressHint');
+        if (field) field.classList.add('is-invalid');
+        if (hint) {
+            hint.textContent = t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.');
+            hint.classList.add('is-warning');
+        }
+    }
+
+    function handleDeliveryAddressInput(field) {
+        window.currentDeliveryAddress = field?.value || '';
+        if ((field?.value || '').trim()) {
+            clearDeliveryAddressAttention();
+        }
+    }
+
+    async function confirmClearCart() {
+        const confirmed = await showOrderConfirm({
+            icon: MENU_UI_ICONS.cart || MENU_UI_ICONS.plate,
+            eyebrow: t('confirm_cart_label', 'Mon panier'),
+            title: t('cart_clear_title', 'Vider le panier ?'),
+            text: t('cart_clear_text', 'Cette commande en cours sera supprimée de cet appareil.'),
+            note: t('cart_clear_note', 'Les plats pourront toujours être ajoutés à nouveau depuis la carte.'),
+            confirmLabel: t('cart_clear_confirm_action', 'Vider le panier'),
+            cancelLabel: t('action_keep', 'Garder')
+        });
+        if (!confirmed) return;
+        setCart([]);
+        clearDeliveryAddressAttention();
+        runtime()?.saveCart?.();
+        runtime()?.updateCartUI?.();
+        closeAllModals();
+        runtime()?.showLanding?.();
+        window.showToast?.(t('cart_cleared', 'Panier vidé.'));
+    }
+
     function closeAllModals() {
         ensureMenuInteractionDom();
-        ['sharedOverlay', 'cartDrawer', 'ticketModal', 'dishPage', 'historyOverlay', 'superCatSheet', 'superCatOverlay'].forEach((id) => {
+        ['sharedOverlay', 'cartDrawer', 'ticketModal', 'dishPage', 'historyOverlay', 'superCatSheet', 'superCatOverlay', 'orderPromptOverlay'].forEach((id) => {
             document.getElementById(id)?.classList.remove('open');
         });
+        orderPromptResolver = null;
         const galleryOverlay = document.getElementById('galleryOverlay');
         if (galleryOverlay) galleryOverlay.style.display = 'none';
         document.body.style.overflow = '';
+    }
+
+    function closeTransientUi(exceptIds = []) {
+        ensureMenuInteractionDom();
+        const except = new Set(exceptIds);
+        ['sharedOverlay', 'cartDrawer', 'ticketModal', 'dishPage', 'historyOverlay', 'superCatSheet', 'superCatOverlay', 'orderPromptOverlay'].forEach((id) => {
+            if (!except.has(id)) {
+                document.getElementById(id)?.classList.remove('open');
+            }
+        });
+        if (!except.has('galleryOverlay')) {
+            const galleryOverlay = document.getElementById('galleryOverlay');
+            if (galleryOverlay) galleryOverlay.style.display = 'none';
+        }
+        orderPromptResolver = null;
     }
 
     function openDishPage(id) {
@@ -503,6 +675,7 @@
 
     function openDrawer() {
         ensureMenuInteractionDom();
+        closeTransientUi(['sharedOverlay', 'cartDrawer']);
         document.getElementById('sharedOverlay')?.classList.add('open');
         document.getElementById('cartDrawer')?.classList.add('open');
         renderDrawer();
@@ -513,6 +686,9 @@
         ensureMenuInteractionDom();
         const cart = getCart();
         const serviceType = getServiceType();
+        if (serviceType !== 'delivery' || (window.currentDeliveryAddress || '').trim()) {
+            window.deliveryAddressNeedsAttention = false;
+        }
         const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
         const content = document.getElementById('drawerContent');
         if (!content) return;
@@ -556,7 +732,7 @@
                 <div class="cart-drawer-header">
                     <div class="cart-drawer-title">${restaurantName}</div>
                     <div class="cart-drawer-meta">
-                        <button onclick="if(confirm('${t('cart_clear_confirm', 'Vider le panier ?')}')) { window.__foodyGetMenuRuntime().setCart([]); window.__foodyGetMenuRuntime().saveCart(); window.__foodyGetMenuRuntime().updateCartUI(); closeAllModals(); }" class="cart-drawer-clear">${t('cart_clear', 'Vider')}</button>
+                        <button onclick="window.confirmClearCart()" class="cart-drawer-clear" aria-label="${t('cart_clear', 'Vider')}" title="${t('cart_clear', 'Vider')}">${t('cart_clear', 'Vider')}</button>
                         <div class="cart-drawer-count">${t('cart_items_count', '{count} item(s)', { count: cart.length })}</div>
                     </div>
                 </div>
@@ -589,7 +765,8 @@
                 ${serviceType === 'delivery' ? `
                 <div class="cart-delivery-block">
                     <label class="cart-delivery-label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
-                    <textarea id="deliveryAddress" rows="2" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.currentDeliveryAddress = this.value" class="cart-delivery-input">${window.currentDeliveryAddress || ''}</textarea>
+                    <textarea id="deliveryAddress" rows="2" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${window.currentDeliveryAddress || ''}</textarea>
+                    <div id="deliveryAddressHint" class="cart-delivery-hint${window.deliveryAddressNeedsAttention ? ' is-warning' : ''}">${window.deliveryAddressNeedsAttention ? t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.') : t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.')}</div>
                 </div>
                 ` : ''}
                 <div class="cart-total-card">
@@ -608,6 +785,7 @@
 
     function openHistory() {
         ensureMenuInteractionDom();
+        closeTransientUi(['historyOverlay']);
         renderHistory();
         document.getElementById('historyOverlay')?.classList.add('open');
         document.body.style.overflow = 'hidden';
@@ -638,13 +816,23 @@
             : history.map((ticketHtml, index) => `
                 <div class="history-ticket history-ticket-wrap">
                     ${renderHistoryTicketCard(ticketHtml)}
-                    <button onclick="deleteHistoryItem(${index})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}">${MENU_UI_ICONS.trash}</button>
+                    <button onclick="deleteHistoryItem(${index})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}" aria-label="${t('history_delete_title', 'Supprimer')}">${MENU_UI_ICONS.trash}</button>
                 </div>
             `).join('');
     }
 
-    function deleteHistoryItem(index) {
-        if (!confirm(t('history_delete_confirm', "Supprimer ce ticket de l'historique ?"))) return;
+    async function deleteHistoryItem(index) {
+        const confirmed = await showOrderConfirm({
+            icon: MENU_UI_ICONS.trash,
+            eyebrow: t('history_title', 'Historique'),
+            title: t('history_delete_title_confirm', 'Supprimer ce ticket ?'),
+            text: t('history_delete_confirm', "Supprimer ce ticket de l'historique ?"),
+            note: t('history_delete_note', "Cette suppression n'affecte que cet appareil."),
+            confirmLabel: t('history_delete_action', 'Supprimer'),
+            cancelLabel: t('action_keep', 'Garder'),
+            danger: true
+        });
+        if (!confirmed) return;
         let history = typeof window.getStoredHistory === 'function'
             ? window.getStoredHistory()
             : [];
@@ -654,6 +842,7 @@
         }
         renderHistory();
         runtime()?.updateHistoryBadge?.();
+        window.showToast?.(t('history_deleted', 'Ticket supprimé.'));
     }
 
     function saveToHistory(text) {
@@ -786,7 +975,7 @@
                     </div>
                     ${dateParts.time ? `
                         <div class="history-ticket-meta-row">
-                            <span>Time</span>
+                            <span>${t('ticket_time', 'Heure')}</span>
                             <strong>${escapeHistoryHtml(dateParts.time)}</strong>
                         </div>
                     ` : ''}
@@ -813,7 +1002,17 @@
         const cart = getCart();
         const serviceType = getServiceType();
         if (serviceType === 'delivery' && (!window.currentDeliveryAddress || window.currentDeliveryAddress.trim() === '')) {
-            alert(t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.'));
+            setDeliveryAddressAttention();
+            showOrderNotice({
+                icon: MENU_UI_ICONS.address,
+                eyebrow: t('service_delivery', 'Livraison'),
+                title: t('ticket_delivery_required_title', 'Adresse requise'),
+                text: t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.'),
+                note: t('ticket_delivery_required_note', 'Ajoutez une adresse claire avant de confirmer la commande.'),
+                confirmLabel: t('action_continue', 'Continuer')
+            }).then(() => {
+                focusDeliveryAddressField();
+            });
             return;
         }
 
@@ -823,6 +1022,7 @@
         const ticketModal = document.getElementById('ticketModal');
         const ticketContent = document.getElementById('ticketContent');
         if (!ticketModal || !ticketContent) return;
+        closeTransientUi(['sharedOverlay', 'ticketModal']);
         const restaurantName = typeof window.getRestaurantDisplayName === 'function' ? window.getRestaurantDisplayName() : 'Restaurant';
         const restaurantAddress = typeof window.getRestaurantAddress === 'function' ? window.getRestaurantAddress() : '';
 
@@ -956,15 +1156,40 @@
 
         const phone = window.getWhatsAppNumber();
         if (!phone) {
-            window.showToast(t('social_empty', 'No links configured yet.'));
+            showOrderNotice({
+                icon: MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
+                eyebrow: t('social_whatsapp', 'WhatsApp'),
+                title: t('wa_missing_title', 'WhatsApp indisponible'),
+                text: t('social_empty', 'No links configured yet.'),
+                note: t('wa_missing_note', 'Ajoutez un numéro WhatsApp dans les paramètres du restaurant pour activer cette action.'),
+                confirmLabel: t('action_ok', 'Compris')
+            });
+            return;
+        }
+
+        const opened = window.openSafeExternalUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
+        if (!opened) {
+            showOrderNotice({
+                icon: MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
+                eyebrow: t('social_whatsapp', 'WhatsApp'),
+                title: t('wa_popup_blocked_title', 'Autorisez l’ouverture de WhatsApp'),
+                text: t('wa_popup_blocked_text', 'Votre navigateur a bloqué l’ouverture de WhatsApp pour cette commande.'),
+                note: t('wa_popup_blocked_note', 'Autorisez les popups pour ce site puis réessayez depuis le ticket.'),
+                confirmLabel: t('action_ok', 'Compris')
+            });
             return;
         }
 
         finalizeOrder(orderNo, total, serviceLabel);
-        window.openSafeExternalUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
     }
 
     document.addEventListener('keydown', (event) => {
+        const promptOverlay = document.getElementById('orderPromptOverlay');
+        if (promptOverlay?.classList.contains('open') && event.key === 'Escape') {
+            event.preventDefault();
+            resolveOrderPrompt(false);
+            return;
+        }
         const overlay = document.getElementById('galleryOverlay');
         if (overlay && overlay.style.display === 'flex') {
             if (event.key === 'ArrowRight') nextGalleryImage();
@@ -992,6 +1217,9 @@
     window.renderHistory = renderHistory;
     window.deleteHistoryItem = deleteHistoryItem;
     window.saveToHistory = saveToHistory;
+    window.resolveOrderPrompt = resolveOrderPrompt;
+    window.confirmClearCart = confirmClearCart;
+    window.handleDeliveryAddressInput = handleDeliveryAddressInput;
     window.generateTicket = generateTicket;
     window.finalizeOrder = finalizeOrder;
     window.finalizeOrderSilent = finalizeOrderSilent;

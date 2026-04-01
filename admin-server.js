@@ -3653,7 +3653,7 @@ app.get("/api/data", requireAuth, (_req, res) => {
   res.json(readData());
 });
 
-app.post("/api/data", requireAuth, (req, res) => {
+app.post("/api/data", requireAuth, requireNoActiveImporterJob, (req, res) => {
   const saved = writeData(req.body);
   res.json({ ok: true, data: saved });
 });
