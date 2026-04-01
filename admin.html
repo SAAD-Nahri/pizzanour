@@ -260,6 +260,389 @@
             padding: 0 24px 24px;
         }
 
+        .info-workspace-shell {
+            gap: 28px;
+        }
+
+        .info-overview-card {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.22), transparent 34%),
+                radial-gradient(circle at bottom left, rgba(226, 27, 27, 0.08), transparent 30%),
+                linear-gradient(145deg, rgba(255, 253, 249, 0.98), rgba(255, 247, 236, 0.94));
+            border-color: rgba(232, 216, 197, 0.98);
+            box-shadow: 0 24px 54px rgba(75, 47, 24, 0.08);
+        }
+
+        .info-overview-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.42) 0 1px, transparent 1px 100%),
+                linear-gradient(rgba(255, 255, 255, 0.32) 0 1px, transparent 1px 100%);
+            background-size: 28px 28px;
+            opacity: 0.18;
+            pointer-events: none;
+        }
+
+        .info-overview-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-hero-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .info-hero-copy {
+            display: grid;
+            gap: 12px;
+            max-width: 620px;
+        }
+
+        .info-hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 141, 8, 0.1);
+            color: #9a3412;
+            border: 1px solid rgba(255, 141, 8, 0.16);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .info-hero-copy h3 {
+            margin: 0;
+            font-size: clamp(1.75rem, 2.4vw, 2.4rem);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+        }
+
+        .info-hero-copy p {
+            margin: 0;
+            color: var(--text2);
+            line-height: 1.6;
+            max-width: 60ch;
+        }
+
+        .info-hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .info-save-btn {
+            min-width: 168px;
+            justify-content: center;
+            position: relative;
+            min-height: 50px;
+            letter-spacing: 0.01em;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+        }
+
+        .info-save-btn.is-saving,
+        .info-save-btn:disabled {
+            opacity: 0.92;
+            cursor: wait;
+            pointer-events: none;
+        }
+
+        .info-save-btn.is-saving {
+            background: linear-gradient(135deg, #ff9a33, #ff7a1a);
+            box-shadow: 0 16px 34px rgba(255, 141, 8, 0.22);
+        }
+
+        .info-save-btn.is-saved {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            box-shadow: 0 16px 34px rgba(22, 163, 74, 0.22);
+        }
+
+        .info-form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(232, 216, 197, 0.78);
+        }
+
+        .info-form-actions--stacked {
+            justify-content: stretch;
+        }
+
+        .info-form-actions--stacked .info-save-btn {
+            width: 100%;
+        }
+
+        .info-form-actions--stacked .info-save-note {
+            margin-right: auto;
+        }
+
+        .info-save-note {
+            color: var(--text2);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        .info-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .info-summary-card {
+            position: relative;
+            overflow: hidden;
+            padding: 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            box-shadow: 0 16px 34px rgba(75, 47, 24, 0.06);
+            min-height: 126px;
+            display: grid;
+            gap: 10px;
+            align-content: start;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .info-summary-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 72px;
+            height: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #ff6b2c, #ffb648);
+            opacity: 0.92;
+        }
+
+        .info-summary-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 141, 8, 0.18);
+            box-shadow: 0 20px 38px rgba(75, 47, 24, 0.08);
+        }
+
+        .info-summary-label {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(38, 26, 22, 0.05);
+            color: var(--text2);
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .info-summary-value {
+            font-size: 1.16rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.1;
+            word-break: break-word;
+        }
+
+        .info-summary-note {
+            color: var(--text2);
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+
+        .info-workspace-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .info-main-column,
+        .info-side-column {
+            display: grid;
+            gap: 18px;
+        }
+
+        .info-primary-card {
+            padding-bottom: 20px;
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 28%),
+                linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+        }
+
+        .info-primary-card .owner-subsection-heading {
+            margin-bottom: 22px;
+        }
+
+        .info-primary-card .owner-subsection-heading h4 {
+            font-size: 1.15rem;
+        }
+
+        .info-primary-card .owner-subsection-heading p {
+            max-width: 52ch;
+        }
+
+        .info-panel-card {
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 241, 0.92));
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .info-panel-card:hover {
+            border-color: rgba(255, 141, 8, 0.18);
+            box-shadow: 0 24px 42px rgba(75, 47, 24, 0.08);
+        }
+
+        .info-panel-card[open] {
+            box-shadow: 0 26px 44px rgba(75, 47, 24, 0.09);
+        }
+
+        .info-panel-card summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            min-height: 88px;
+        }
+
+        .info-panel-card summary>span:first-child {
+            min-width: 0;
+        }
+
+        .info-panel-heading {
+            display: grid;
+            gap: 4px;
+        }
+
+        .info-panel-heading strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .info-panel-heading .admin-disclosure-copy {
+            display: block;
+            max-width: 34ch;
+            line-height: 1.45;
+        }
+
+        .info-panel-metric {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 141, 8, 0.1);
+            color: #9a3412;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .info-contact-grid,
+        .info-social-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px 20px;
+            margin-top: 0 !important;
+        }
+
+        .info-contact-grid .info-group,
+        .info-social-grid .info-group {
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            box-shadow: 0 12px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        #info .selection-card {
+            background: linear-gradient(180deg, #fffefb 0%, #fff8ef 100%);
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            box-shadow: 0 14px 32px rgba(75, 47, 24, 0.05);
+        }
+
+        #info .selection-card > h4 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        #info .form-group label {
+            color: #8a6b57;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        #info input[type="text"],
+        #info input[type="url"],
+        #info input[type="password"],
+        #info input[type="time"],
+        #info select,
+        #info textarea {
+            border-radius: 16px;
+            border-color: rgba(232, 216, 197, 0.94);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+        }
+
+        #info textarea {
+            min-height: 118px;
+        }
+
+        #info .hours-grid {
+            gap: 14px;
+        }
+
+        #info .hours-admin-row {
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.88);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+        }
+
+        #info .hours-admin-row.is-header {
+            background: linear-gradient(180deg, rgba(255, 245, 233, 0.96), rgba(255, 236, 214, 0.92));
+            border-color: rgba(255, 141, 8, 0.16);
+        }
+
+        #info .wifi-preview,
+        #info .security-status-card {
+            background: linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(255, 246, 233, 0.92));
+            border-style: solid;
+            box-shadow: 0 14px 30px rgba(75, 47, 24, 0.05);
+        }
+
+        .info-contact-grid .info-group:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+
+        #info .section-divider:first-child {
+            margin-top: 0;
+        }
+
+        #info .selection-card {
+            background: linear-gradient(180deg, #fffefb 0%, #fff8ef 100%);
+        }
+
         .menu-workspace-intro {
             margin-bottom: 18px;
             color: var(--text2);
@@ -1848,10 +2231,357 @@
             display: block;
         }
 
+        .branding-workspace-shell {
+            display: grid;
+            gap: 24px;
+        }
+
+        .branding-overview-card {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.2), transparent 34%),
+                radial-gradient(circle at bottom left, rgba(226, 27, 27, 0.08), transparent 30%),
+                linear-gradient(145deg, rgba(255, 253, 249, 0.98), rgba(255, 247, 236, 0.94));
+            border-color: rgba(232, 216, 197, 0.98);
+            box-shadow: 0 24px 54px rgba(75, 47, 24, 0.08);
+        }
+
+        .branding-overview-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.42) 0 1px, transparent 1px 100%),
+                linear-gradient(rgba(255, 255, 255, 0.32) 0 1px, transparent 1px 100%);
+            background-size: 28px 28px;
+            opacity: 0.16;
+            pointer-events: none;
+        }
+
+        .branding-overview-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .branding-overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .branding-overview-copy {
+            display: grid;
+            gap: 12px;
+            max-width: 680px;
+        }
+
+        .branding-overview-kicker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 141, 8, 0.1);
+            color: #9a3412;
+            border: 1px solid rgba(255, 141, 8, 0.16);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .branding-overview-copy h4 {
+            margin: 0;
+            font-size: clamp(1.9rem, 2.6vw, 2.5rem);
+            line-height: 0.96;
+            letter-spacing: -0.04em;
+        }
+
+        .branding-overview-copy p {
+            margin: 0;
+            color: var(--text2);
+            line-height: 1.6;
+            max-width: 60ch;
+        }
+
+        .branding-overview-actions {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .branding-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .branding-overview-metric {
+            position: relative;
+            overflow: hidden;
+            padding: 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            box-shadow: 0 16px 34px rgba(75, 47, 24, 0.06);
+            display: grid;
+            gap: 10px;
+        }
+
+        .branding-overview-metric::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 76px;
+            height: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #ff6b2c, #ffb648);
+        }
+
+        .branding-overview-metric strong {
+            display: block;
+            font-size: 1.08rem;
+            line-height: 1.15;
+            color: var(--text);
+        }
+
+        .branding-overview-metric span {
+            color: var(--text2);
+            line-height: 1.5;
+            font-size: 0.88rem;
+        }
+
+        .branding-form-shell {
+            display: grid;
+            gap: 22px;
+        }
+
+        .branding-studio-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .branding-form-main,
+        .branding-form-side {
+            display: grid;
+            gap: 18px;
+        }
+
+        .branding-section-card {
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 28%),
+                linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+        }
+
+        .branding-section-card .owner-subsection-heading {
+            margin-bottom: 20px;
+        }
+
+        .branding-section-card .owner-subsection-heading h4 {
+            font-size: 1.16rem;
+        }
+
+        .branding-section-card .owner-subsection-heading p {
+            max-width: 54ch;
+        }
+
+        .branding-form-grid,
+        .branding-color-grid,
+        .branding-media-url-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .branding-form-grid .form-group:last-child:nth-child(odd),
+        .branding-color-grid .form-group:last-child:nth-child(odd),
+        .branding-media-url-grid .form-group:last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+
+        .branding-color-grid--core {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 4px;
+        }
+
+        .branding-section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0 16px;
+            color: #8a6b57;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .branding-section-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(232, 216, 197, 0.86), rgba(255, 141, 8, 0.16));
+        }
+
+        .branding-form-grid .form-group,
+        .branding-color-grid .form-group,
+        .branding-media-url-grid .form-group {
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            box-shadow: 0 12px 28px rgba(75, 47, 24, 0.05);
+            margin-bottom: 0;
+        }
+
+        .branding-form-grid .form-group label,
+        .branding-color-grid .form-group label,
+        .branding-media-url-grid .form-group label {
+            color: #8a6b57;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .branding-form-grid input[type="text"],
+        .branding-color-grid input[type="color"],
+        .branding-media-url-grid input[type="text"] {
+            margin-top: 6px;
+        }
+
         .branding-workspace-stack {
             display: flex;
             flex-direction: column;
             gap: 18px;
+        }
+
+        .branding-tab-shell {
+            display: grid;
+            gap: 22px;
+        }
+
+        .branding-tab-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .branding-tab-main,
+        .branding-tab-side {
+            display: grid;
+            gap: 18px;
+        }
+
+        .branding-tab-card {
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 26%),
+                linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+        }
+
+        .branding-tab-card .owner-subsection-heading {
+            margin-bottom: 18px;
+        }
+
+        .branding-tab-savebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 18px 20px;
+            border-radius: 22px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+        }
+
+        .branding-tab-savebar .info-save-btn {
+            min-width: 220px;
+        }
+
+        .branding-homepage-mount,
+        .branding-gallery-mount {
+            display: grid;
+            gap: 16px;
+        }
+
+        .branding-homepage-mount .admin-disclosure,
+        .branding-gallery-mount .panel-soft,
+        .branding-gallery-mount .table-container {
+            margin: 0;
+        }
+
+        .branding-homepage-mount .admin-disclosure,
+        .branding-gallery-mount .panel-soft,
+        .branding-gallery-mount .table-container {
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            box-shadow: 0 12px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .branding-homepage-mount .section-divider:first-child {
+            margin-top: 0;
+        }
+
+        .branding-gallery-mount .table-container h3 {
+            display: none;
+        }
+
+        .branding-gallery-mount .copy-muted {
+            display: none !important;
+        }
+
+        .branding-gallery-mount #galleryForm {
+            padding: 0;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .branding-gallery-mount .table-container {
+            padding: 18px;
+        }
+
+        .branding-gallery-mount .gallery-grid {
+            margin-top: 0;
+        }
+
+        .branding-tab-note-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .branding-tab-note-list li {
+            padding: 14px 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            box-shadow: 0 12px 24px rgba(75, 47, 24, 0.04);
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.55;
+        }
+
+        .branding-tab-note-list strong {
+            display: block;
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-bottom: 4px;
         }
 
         .owner-subsection-heading {
@@ -2412,14 +3142,16 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
-            margin-top: 6px;
+            margin-top: 16px;
         }
 
         .brand-asset-card,
         .brand-preview-panel {
             border: 1px solid var(--border);
             border-radius: 22px;
-            background: #fafbfc;
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 30%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 238, 0.94));
             padding: 18px;
             box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -2447,12 +3179,86 @@
             line-height: 1.5;
         }
 
+        .branding-disclosure {
+            margin-top: 18px;
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 24%),
+                linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            box-shadow: 0 14px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .branding-preview-panel {
+            position: sticky;
+            top: 88px;
+            margin-top: 0;
+        }
+
         .brand-asset-tools {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
             margin-top: 12px;
+        }
+
+        .branding-notes-card {
+            display: grid;
+            gap: 14px;
+        }
+
+        .branding-note-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .branding-note-list li {
+            display: grid;
+            gap: 4px;
+            padding: 14px 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            box-shadow: 0 12px 24px rgba(75, 47, 24, 0.04);
+        }
+
+        .branding-note-list strong {
+            display: block;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .branding-note-list span {
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .branding-save-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 18px 20px;
+            border-radius: 22px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+        }
+
+        .branding-save-note {
+            color: var(--text2);
+            font-size: 0.86rem;
+            line-height: 1.55;
+            max-width: 56ch;
+        }
+
+        .branding-overview-actions .info-save-btn,
+        .branding-save-bar .info-save-btn {
+            min-width: 188px;
         }
 
         .brand-secondary-btn {
@@ -3644,6 +4450,40 @@
                 box-sizing: border-box;
             }
 
+            .branding-overview-header {
+                display: grid;
+                gap: 16px;
+            }
+
+            .branding-overview-grid,
+            .branding-studio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .branding-overview-actions,
+            .branding-save-bar {
+                width: 100%;
+            }
+
+            .branding-overview-actions .info-save-btn,
+            .branding-save-bar .info-save-btn {
+                width: 100%;
+            }
+
+            .branding-color-grid--core {
+                grid-template-columns: 1fr;
+            }
+
+            .branding-preview-panel {
+                position: static;
+            }
+
+            .branding-save-bar,
+            .branding-tab-savebar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
             .header {
                 display: none;
             }
@@ -3988,6 +4828,71 @@
                 padding: 14px 16px;
             }
 
+            .info-hero-header,
+            .info-workspace-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-hero-header {
+                gap: 16px;
+            }
+
+            .info-hero-actions {
+                justify-content: flex-start;
+                width: 100%;
+            }
+
+            .info-hero-actions .info-save-btn {
+                width: 100%;
+            }
+
+            .info-summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .info-summary-card {
+                min-height: 0;
+            }
+
+            .info-main-column,
+            .info-side-column {
+                gap: 14px;
+            }
+
+            .branding-overview-card,
+            .branding-section-card,
+            .branding-save-bar,
+            .branding-tab-card,
+            .branding-tab-savebar,
+            .brand-asset-card,
+            .brand-preview-panel,
+            .branding-note-list li {
+                border-radius: 20px;
+            }
+
+            .branding-form-grid,
+            .branding-color-grid,
+            .branding-media-url-grid,
+            .branding-media-grid,
+            .branding-overview-grid,
+            .brand-preview-surfaces {
+                grid-template-columns: 1fr;
+            }
+
+            .branding-form-grid .form-group,
+            .branding-color-grid .form-group,
+            .branding-media-url-grid .form-group {
+                padding: 14px 15px;
+            }
+
+            .branding-save-note {
+                max-width: none;
+            }
+
+            .branding-tab-grid {
+                grid-template-columns: 1fr;
+            }
+
             #menuBuilderTable {
                 min-width: 0;
                 width: 100%;
@@ -4270,6 +5175,38 @@
 
             .landing-copy-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .info-overview-card {
+                padding: 18px 16px;
+            }
+
+            .info-hero-copy h3 {
+                font-size: 1.8rem;
+            }
+
+            .info-summary-grid,
+            .info-contact-grid,
+            .info-social-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-form-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .info-form-actions .info-save-btn {
+                width: 100%;
+            }
+
+            .info-panel-card summary {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .info-panel-metric {
+                white-space: normal;
             }
 
             #menuCrudModal {
@@ -5160,73 +6097,120 @@
         </div>
 
         <div id="info" class="section">
-            <p class="copy-muted">Edit the public essentials for the live site.</p>
-            <div class="owner-section-stack">
-                <div class="owner-section-card" data-admin-subsection="landing">
-                    <div class="owner-subsection-heading">
-                        <h4>Public Information</h4>
-                        <p>Update the public address, map link, and phone number the restaurant wants customers to use.</p>
+            <div class="info-workspace-shell owner-section-stack">
+                <section class="owner-section-card info-overview-card">
+                    <div class="info-hero-header">
+                        <div class="info-hero-copy">
+                            <span class="info-hero-kicker">Info Workspace</span>
+                            <h3>Public site essentials</h3>
+                            <p>Keep the guest-facing details clean, accurate, and ready for the live restaurant site without digging through separate admin sections.</p>
+                        </div>
+                        <div class="info-hero-actions">
+                            <button type="submit" id="infoLandingSaveBtn" form="landingPageForm" class="primary-btn info-save-btn">Save Public Details</button>
+                        </div>
                     </div>
-                    <div id="infoLandingPrimaryMount"></div>
-                    <div class="modal-form-actions">
-                        <button type="submit" form="landingPageForm" class="primary-btn">Save Info</button>
+                    <div class="info-summary-grid">
+                        <article class="info-summary-card">
+                            <span class="info-summary-label">Location</span>
+                            <div class="info-summary-value" id="infoSummaryLocationValue">Add address</div>
+                            <div class="info-summary-note" id="infoSummaryLocationNote">Map link pending</div>
+                        </article>
+                        <article class="info-summary-card">
+                            <span class="info-summary-label">Contact</span>
+                            <div class="info-summary-value" id="infoSummaryContactValue">Add phone number</div>
+                            <div class="info-summary-note" id="infoSummaryContactNote">No public links yet</div>
+                        </article>
+                        <article class="info-summary-card">
+                            <span class="info-summary-label">Guest Experience</span>
+                            <div class="info-summary-value" id="infoSummaryGuestValue">Review facilities</div>
+                            <div class="info-summary-note" id="infoSummaryGuestNote">Public experience details not configured</div>
+                        </article>
+                        <article class="info-summary-card">
+                            <span class="info-summary-label">Operations</span>
+                            <div class="info-summary-value" id="infoSummaryOpsValue">Admin access</div>
+                            <div class="info-summary-note" id="infoSummaryOpsNote">Set WiFi and opening hours</div>
+                        </article>
+                    </div>
+                </section>
+
+                <div class="info-workspace-grid">
+                    <div class="info-main-column">
+                        <section class="owner-section-card info-primary-card" data-admin-subsection="landing">
+                            <div class="owner-subsection-heading">
+                                <h4>Public information</h4>
+                                <p>Update the address, maps link, and phone number customers should use first.</p>
+                            </div>
+                            <div id="infoLandingPrimaryMount"></div>
+                        </section>
+
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card">
+                            <summary>
+                                <span class="info-panel-heading">
+                                    <strong>Social Links</strong>
+                                    <span class="admin-disclosure-copy">Public links and directory references.</span>
+                                </span>
+                                <span class="info-panel-metric" id="infoSocialMetric">0 links live</span>
+                            </summary>
+                            <div class="admin-disclosure-body">
+                                <div id="infoLandingSocialMount"></div>
+                            </div>
+                        </details>
+
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card">
+                            <summary>
+                                <span class="info-panel-heading">
+                                    <strong>Guest Facilities & Payments</strong>
+                                    <span class="admin-disclosure-copy">What customers can expect on-site and how they can pay.</span>
+                                </span>
+                                <span class="info-panel-metric" id="infoFacilitiesMetric">0 active</span>
+                            </summary>
+                            <div class="admin-disclosure-body">
+                                <div id="infoLandingFacilitiesMount"></div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="info-side-column">
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" data-admin-subsection="hours">
+                            <summary>
+                                <span class="info-panel-heading">
+                                    <strong>Hours</strong>
+                                    <span class="admin-disclosure-copy">Opening schedule shown on the public site.</span>
+                                </span>
+                                <span class="info-panel-metric" id="infoHoursMetric">Not configured</span>
+                            </summary>
+                            <div class="admin-disclosure-body">
+                                <div id="infoHoursMount"></div>
+                            </div>
+                        </details>
+
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" data-admin-subsection="wifi">
+                            <summary>
+                                <span class="info-panel-heading">
+                                    <strong>WiFi</strong>
+                                    <span class="admin-disclosure-copy">Guest network details and preview.</span>
+                                </span>
+                                <span class="info-panel-metric" id="infoWifiMetric">Not configured</span>
+                            </summary>
+                            <div class="admin-disclosure-body">
+                                <div id="infoWifiMount"></div>
+                            </div>
+                        </details>
+
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" data-admin-subsection="security">
+                            <summary>
+                                <span class="info-panel-heading">
+                                    <strong>Admin Access</strong>
+                                    <span class="admin-disclosure-copy">Credentials used to sign in to the admin app.</span>
+                                </span>
+                                <span class="info-panel-metric" id="infoSecurityMetric">Review login</span>
+                            </summary>
+                            <div class="admin-disclosure-body">
+                                <div id="infoSecurityMount"></div>
+                            </div>
+                        </details>
                     </div>
                 </div>
-                <details class="admin-disclosure admin-panel-disclosure">
-                    <summary>
-                        <span>
-                            <span>Social Links</span>
-                            <span class="admin-disclosure-copy">Public links.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div id="infoLandingSocialMount"></div>
-                    </div>
-                </details>
-                <details class="admin-disclosure admin-panel-disclosure">
-                    <summary>
-                        <span>
-                            <span>Guest Facilities & Payments</span>
-                            <span class="admin-disclosure-copy">Guest-facing facilities.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div id="infoLandingFacilitiesMount"></div>
-                    </div>
-                </details>
-                <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="hours">
-                    <summary>
-                        <span>
-                            <span>Hours</span>
-                            <span class="admin-disclosure-copy">Opening hours.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div id="infoHoursMount"></div>
-                    </div>
-                </details>
-                <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="wifi">
-                    <summary>
-                        <span>
-                            <span>WiFi</span>
-                            <span class="admin-disclosure-copy">WiFi access.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div id="infoWifiMount"></div>
-                    </div>
-                </details>
-                <details class="admin-disclosure admin-panel-disclosure" data-admin-subsection="security">
-                    <summary>
-                        <span>
-                            <span>Admin Access</span>
-                            <span class="admin-disclosure-copy">Admin credentials.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div id="infoSecurityMount"></div>
-                    </div>
-                </details>
             </div>
         </div>
 
@@ -5380,7 +6364,10 @@
                     <label data-i18n="admin.wifi.password">Password</label>
                     <input type="text" id="wifiPassInput" required />
                 </div>
-                <button type="submit" class="primary-btn" data-i18n="admin.wifi.update">Save Network</button>
+                <div class="info-form-actions info-form-actions--stacked">
+                    <span class="info-save-note">This only updates the guest WiFi details shown on the public site.</span>
+                    <button type="submit" id="infoWifiSaveBtn" class="primary-btn info-save-btn" data-i18n="admin.wifi.update">Save Network</button>
+                </div>
             </form>
             <div class="wifi-preview">
                 <strong data-i18n="admin.wifi.preview">Customer View Preview:</strong>
@@ -5419,153 +6406,191 @@
                 <button type="button" id="brandingTabBtn-gallery" class="parameter-tab-btn" onclick="setBrandingWorkspaceTab('gallery')">Gallery</button>
             </div>
             <div id="brandingPanel-identity" class="branding-workspace-panel active">
-            <form id="brandingForm">
-                <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.preset">Preset</label>
-                        <select id="brandPresetId">
-                            <option value="core">Core / White Label</option>
-                            <option value="fast_food">Fast Food / Street Food</option>
-                            <option value="cafe">Cafe / Brunch</option>
-                            <option value="traditional">Traditional / Family Restaurant</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.restaurant_name">Restaurant Name</label>
-                        <input type="text" id="brandRestaurantName" placeholder="e.g. Atlas Restaurant" data-i18n-placeholder="admin.quick_launch.restaurant_name_placeholder" required />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.short_brand_name">Short Brand Name</label>
-                        <input type="text" id="brandShortName" placeholder="e.g. Atlas" data-i18n-placeholder="admin.quick_launch.short_brand_name_placeholder" required />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.tagline">Tagline</label>
-                        <input type="text" id="brandTagline" placeholder="e.g. Local cuisine, brunch & coffee" data-i18n-placeholder="admin.branding.tagline_placeholder" />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.logo_mark">Logo Mark</label>
-                        <input type="text" id="brandLogoMark" placeholder="e.g. A" data-i18n-placeholder="admin.branding.logo_mark_placeholder" />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.primary_color">Primary Color</label>
-                        <input type="color" id="brandPrimaryColor" value="#e21b1b" />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.secondary_color">Secondary Color</label>
-                        <input type="color" id="brandSecondaryColor" value="#ff8d08" />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.accent_color">Accent Color</label>
-                        <input type="color" id="brandAccentColor" value="#ffd700" />
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.branding.logo_image_url">Logo Image URL</label>
-                        <input type="text" id="brandLogoImage" placeholder="/uploads/logo.png or https://..." data-i18n-placeholder="admin.branding.logo_image_placeholder" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="admin.branding.hero_image_url">Hero Image URL</label>
-                    <input type="text" id="brandHeroImage" placeholder="/uploads/cover.jpg or https://..." data-i18n-placeholder="admin.branding.hero_image_placeholder" />
-                </div>
-                <details class="admin-disclosure">
-                    <summary>
-                        <span>
-                            <span>Advanced Theme Colors</span>
-                            <span class="admin-disclosure-copy">Advanced palette controls.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 6px;">
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.surface_color">Surface Color</label>
-                                <input type="color" id="brandSurfaceColor" value="#fff8f0" />
+                <div class="branding-workspace-shell owner-section-stack">
+                    <section class="owner-section-card branding-overview-card">
+                        <div class="branding-overview-header">
+                            <div class="branding-overview-copy">
+                                <span class="branding-overview-kicker">Brand Studio</span>
+                                <h4>Shape one identity across the site, menu, and installed admin app.</h4>
+                                <p>Set the core brand system once, tune the public media, and validate the result in one live preview before saving anything.</p>
                             </div>
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.muted_surface">Muted Surface</label>
-                                <input type="color" id="brandSurfaceMuted" value="#f4ebdd" />
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.text_color">Text Color</label>
-                                <input type="color" id="brandTextColor" value="#261a16" />
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.muted_text">Muted Text</label>
-                                <input type="color" id="brandTextMuted" value="#75655c" />
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.menu_background">Menu Background</label>
-                                <input type="color" id="brandMenuBackground" value="#111318" />
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.menu_surface">Menu Surface</label>
-                                <input type="color" id="brandMenuSurface" value="#1b1f26" />
+                            <div class="branding-overview-actions">
+                                <button type="submit" form="brandingForm" class="primary-btn info-save-btn" data-i18n="admin.branding.save">Save Branding</button>
                             </div>
                         </div>
-                    </div>
-                </details>
-                <details class="admin-disclosure">
-                    <summary>
-                        <span>
-                            <span>Logo & Hero Media</span>
-                            <span class="admin-disclosure-copy">Logo and hero media.</span>
-                        </span>
-                    </summary>
-                    <div class="admin-disclosure-body">
-                        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 6px;">
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.hero_slide_2_url">Hero Slide 2 URL</label>
-                                <input type="text" id="brandHeroSlide2" placeholder="/uploads/cover-2.jpg or https://..." data-i18n-placeholder="admin.branding.hero_slide_2_placeholder" />
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="admin.branding.hero_slide_3_url">Hero Slide 3 URL</label>
-                                <input type="text" id="brandHeroSlide3" placeholder="/uploads/cover-3.jpg or https://..." data-i18n-placeholder="admin.branding.hero_slide_3_placeholder" />
-                            </div>
+                        <div class="branding-overview-grid">
+                            <article class="branding-overview-metric">
+                                <strong>Identity first</strong>
+                                <span>Name, short name, tagline, preset, and logo mark should all point to the same restaurant voice.</span>
+                            </article>
+                            <article class="branding-overview-metric">
+                                <strong>Theme system</strong>
+                                <span>Keep the palette tight so the homepage, menu shell, and CTA states stay coherent.</span>
+                            </article>
+                            <article class="branding-overview-metric">
+                                <strong>Media quality</strong>
+                                <span>Use one strong hero and only add extra slides when they genuinely improve the story.</span>
+                            </article>
                         </div>
-                        <div class="branding-media-grid">
-                            <div class="brand-asset-card">
-                                <h4 data-i18n="admin.branding.logo_upload">Logo Upload</h4>
-                                <p data-i18n="admin.branding.logo_upload_desc">Use upload for faster delivery, while still keeping the URL field available when needed.</p>
-                                <div class="brand-asset-tools">
-                                    <input type="file" id="brandLogoFile" accept="image/*"
-                                        onchange="handleBrandAssetUpload('brandLogoImage', this)" />
-                                    <button type="button" class="brand-secondary-btn"
-                                        onclick="clearBrandAsset('brandLogoImage')" data-i18n="admin.branding.clear_logo">Clear logo</button>
-                                </div>
+                    </section>
+                    <form id="brandingForm" class="branding-form-shell">
+                        <div class="branding-studio-grid">
+                            <div class="branding-form-main">
+                                <section class="owner-section-card branding-section-card">
+                                    <div class="owner-subsection-heading">
+                                        <h4>Identity & core palette</h4>
+                                        <p>Define the naming system and the three colors that should make the restaurant instantly recognizable.</p>
+                                    </div>
+                                    <div class="branding-form-grid">
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.preset">Preset</label>
+                                            <select id="brandPresetId">
+                                                <option value="core">Core / White Label</option>
+                                                <option value="fast_food">Fast Food / Street Food</option>
+                                                <option value="cafe">Cafe / Brunch</option>
+                                                <option value="traditional">Traditional / Family Restaurant</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.restaurant_name">Restaurant Name</label>
+                                            <input type="text" id="brandRestaurantName" placeholder="e.g. Atlas Restaurant" data-i18n-placeholder="admin.quick_launch.restaurant_name_placeholder" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.short_brand_name">Short Brand Name</label>
+                                            <input type="text" id="brandShortName" placeholder="e.g. Atlas" data-i18n-placeholder="admin.quick_launch.short_brand_name_placeholder" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.tagline">Tagline</label>
+                                            <input type="text" id="brandTagline" placeholder="e.g. Local cuisine, brunch & coffee" data-i18n-placeholder="admin.branding.tagline_placeholder" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.logo_mark">Logo Mark</label>
+                                            <input type="text" id="brandLogoMark" placeholder="e.g. A" data-i18n-placeholder="admin.branding.logo_mark_placeholder" />
+                                        </div>
+                                    </div>
+                                    <div class="branding-section-divider">
+                                        <span>Core palette</span>
+                                    </div>
+                                    <div class="branding-color-grid branding-color-grid--core">
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.primary_color">Primary Color</label>
+                                            <input type="color" id="brandPrimaryColor" value="#e21b1b" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.secondary_color">Secondary Color</label>
+                                            <input type="color" id="brandSecondaryColor" value="#ff8d08" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.accent_color">Accent Color</label>
+                                            <input type="color" id="brandAccentColor" value="#ffd700" />
+                                        </div>
+                                    </div>
+                                    <details class="admin-disclosure branding-disclosure">
+                                        <summary>
+                                            <span>
+                                                <span>Advanced theme colors</span>
+                                                <span class="admin-disclosure-copy">Fine-tune surfaces and text treatment.</span>
+                                            </span>
+                                        </summary>
+                                        <div class="admin-disclosure-body">
+                                            <div class="branding-color-grid">
+                                                <div class="form-group">
+                                                    <label data-i18n="admin.branding.surface_color">Surface Color</label>
+                                                    <input type="color" id="brandSurfaceColor" value="#fff8f0" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-i18n="admin.branding.muted_surface">Muted Surface</label>
+                                                    <input type="color" id="brandSurfaceMuted" value="#f4ebdd" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-i18n="admin.branding.text_color">Text Color</label>
+                                                    <input type="color" id="brandTextColor" value="#261a16" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-i18n="admin.branding.muted_text">Muted Text</label>
+                                                    <input type="color" id="brandTextMuted" value="#75655c" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-i18n="admin.branding.menu_background">Menu Background</label>
+                                                    <input type="color" id="brandMenuBackground" value="#111318" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-i18n="admin.branding.menu_surface">Menu Surface</label>
+                                                    <input type="color" id="brandMenuSurface" value="#1b1f26" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </section>
+                                <section class="owner-section-card branding-section-card">
+                                    <div class="owner-subsection-heading">
+                                        <h4>Logo & hero media</h4>
+                                        <p>Keep the media set disciplined. One strong logo and one strong hero do more than four average uploads.</p>
+                                    </div>
+                                    <div class="branding-media-url-grid">
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.logo_image_url">Logo Image URL</label>
+                                            <input type="text" id="brandLogoImage" placeholder="/uploads/logo.png or https://..." data-i18n-placeholder="admin.branding.logo_image_placeholder" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.hero_image_url">Hero Image URL</label>
+                                            <input type="text" id="brandHeroImage" placeholder="/uploads/cover.jpg or https://..." data-i18n-placeholder="admin.branding.hero_image_placeholder" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.hero_slide_2_url">Hero Slide 2 URL</label>
+                                            <input type="text" id="brandHeroSlide2" placeholder="/uploads/cover-2.jpg or https://..." data-i18n-placeholder="admin.branding.hero_slide_2_placeholder" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-i18n="admin.branding.hero_slide_3_url">Hero Slide 3 URL</label>
+                                            <input type="text" id="brandHeroSlide3" placeholder="/uploads/cover-3.jpg or https://..." data-i18n-placeholder="admin.branding.hero_slide_3_placeholder" />
+                                        </div>
+                                    </div>
+                                    <div class="branding-media-grid">
+                                        <div class="brand-asset-card">
+                                            <h4 data-i18n="admin.branding.logo_upload">Logo Upload</h4>
+                                            <p data-i18n="admin.branding.logo_upload_desc">Use upload for faster delivery, while still keeping the URL field available when needed.</p>
+                                            <div class="brand-asset-tools">
+                                                <input type="file" id="brandLogoFile" accept="image/*"
+                                                    onchange="handleBrandAssetUpload('brandLogoImage', this)" />
+                                                <button type="button" class="brand-secondary-btn"
+                                                    onclick="clearBrandAsset('brandLogoImage')" data-i18n="admin.branding.clear_logo">Clear logo</button>
+                                            </div>
+                                        </div>
+                                        <div class="brand-asset-card">
+                                            <h4 data-i18n="admin.branding.hero_upload">Hero Upload</h4>
+                                            <p data-i18n="admin.branding.hero_upload_desc">Upload the cover image here and the URL field will be filled automatically.</p>
+                                            <div class="brand-asset-tools">
+                                                <input type="file" id="brandHeroFile" accept="image/*"
+                                                    onchange="handleBrandAssetUpload('brandHeroImage', this)" />
+                                                <button type="button" class="brand-secondary-btn"
+                                                    onclick="clearBrandAsset('brandHeroImage')" data-i18n="admin.branding.clear_hero">Clear hero</button>
+                                            </div>
+                                        </div>
+                                        <div class="brand-asset-card">
+                                            <h4 data-i18n="admin.branding.hero_slide_2_upload">Hero Slide 2 Upload</h4>
+                                            <p data-i18n="admin.branding.hero_slide_2_upload_desc">Use a second visual for the homepage slider if the client gives you more than one strong image.</p>
+                                            <div class="brand-asset-tools">
+                                                <input type="file" id="brandHeroSlide2File" accept="image/*"
+                                                    onchange="handleBrandAssetUpload('brandHeroSlide2', this)" />
+                                                <button type="button" class="brand-secondary-btn"
+                                                    onclick="clearBrandAsset('brandHeroSlide2')" data-i18n="admin.branding.clear_slide_2">Clear slide 2</button>
+                                            </div>
+                                        </div>
+                                        <div class="brand-asset-card">
+                                            <h4 data-i18n="admin.branding.hero_slide_3_upload">Hero Slide 3 Upload</h4>
+                                            <p data-i18n="admin.branding.hero_slide_3_upload_desc">Add a third branded visual so the homepage slider feels fully finished instead of repeated.</p>
+                                            <div class="brand-asset-tools">
+                                                <input type="file" id="brandHeroSlide3File" accept="image/*"
+                                                    onchange="handleBrandAssetUpload('brandHeroSlide3', this)" />
+                                                <button type="button" class="brand-secondary-btn"
+                                                    onclick="clearBrandAsset('brandHeroSlide3')" data-i18n="admin.branding.clear_slide_3">Clear slide 3</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
                             </div>
-                            <div class="brand-asset-card">
-                                <h4 data-i18n="admin.branding.hero_upload">Hero Upload</h4>
-                                <p data-i18n="admin.branding.hero_upload_desc">Upload the cover image here and the URL field will be filled automatically.</p>
-                                <div class="brand-asset-tools">
-                                    <input type="file" id="brandHeroFile" accept="image/*"
-                                        onchange="handleBrandAssetUpload('brandHeroImage', this)" />
-                                    <button type="button" class="brand-secondary-btn"
-                                        onclick="clearBrandAsset('brandHeroImage')" data-i18n="admin.branding.clear_hero">Clear hero</button>
-                                </div>
-                            </div>
-                            <div class="brand-asset-card">
-                                <h4 data-i18n="admin.branding.hero_slide_2_upload">Hero Slide 2 Upload</h4>
-                                <p data-i18n="admin.branding.hero_slide_2_upload_desc">Use a second visual for the homepage slider if the client gives you more than one strong image.</p>
-                                <div class="brand-asset-tools">
-                                    <input type="file" id="brandHeroSlide2File" accept="image/*"
-                                        onchange="handleBrandAssetUpload('brandHeroSlide2', this)" />
-                                    <button type="button" class="brand-secondary-btn"
-                                        onclick="clearBrandAsset('brandHeroSlide2')" data-i18n="admin.branding.clear_slide_2">Clear slide 2</button>
-                                </div>
-                            </div>
-                            <div class="brand-asset-card">
-                                <h4 data-i18n="admin.branding.hero_slide_3_upload">Hero Slide 3 Upload</h4>
-                                <p data-i18n="admin.branding.hero_slide_3_upload_desc">Add a third branded visual so the homepage slider feels fully finished instead of repeated.</p>
-                                <div class="brand-asset-tools">
-                                    <input type="file" id="brandHeroSlide3File" accept="image/*"
-                                        onchange="handleBrandAssetUpload('brandHeroSlide3', this)" />
-                                    <button type="button" class="brand-secondary-btn"
-                                        onclick="clearBrandAsset('brandHeroSlide3')" data-i18n="admin.branding.clear_slide_3">Clear slide 3</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </details>
-                <div class="brand-preview-panel" style="margin-top: 18px;">
+                            <div class="branding-form-side">
+                <div class="brand-preview-panel branding-preview-panel">
                     <h4 data-i18n="admin.branding.live_preview">Live Brand Preview</h4>
                     <p data-i18n="admin.branding.live_preview_desc">This preview helps you validate the colors, logo fallback, and hero feel before publishing.</p>
                     <div class="brand-preview-card">
@@ -5639,37 +6664,167 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="primary-btn" data-i18n="admin.branding.save">Save Branding</button>
-            </form>
+                                <section class="owner-section-card branding-section-card branding-notes-card">
+                                    <div class="owner-subsection-heading">
+                                        <h4>Studio checklist</h4>
+                                        <p>Use this as the final review before you publish the restaurant identity live.</p>
+                                    </div>
+                                    <ul class="branding-note-list">
+                                        <li>
+                                            <strong>Keep one dominant story</strong>
+                                            <span>Pick a preset, one hero mood, and one brand promise. Avoid mixing directions.</span>
+                                        </li>
+                                        <li>
+                                            <strong>Use the strongest hero first</strong>
+                                            <span>The main hero should carry the homepage. Extra slides should support it, not replace it.</span>
+                                        </li>
+                                        <li>
+                                            <strong>Check contrast in the preview</strong>
+                                            <span>If the preview feels weak or muddy here, it will feel weak live too.</span>
+                                        </li>
+                                    </ul>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="branding-save-bar">
+                            <span class="branding-save-note">Save only when the preview, homepage mock, and menu shell all feel like the same restaurant. This publishes the core brand system used across the public experience.</span>
+                            <button type="submit" class="primary-btn info-save-btn" data-i18n="admin.branding.save">Save Branding</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div id="brandingPanel-homepage" class="branding-workspace-panel">
-                <div class="branding-workspace-stack">
-                    <div class="owner-section-card">
-                        <div class="owner-subsection-heading">
-                            <h4>Homepage Layout</h4>
-                            <p>Control which homepage sections are visible and in what order they appear.</p>
+                <div class="branding-tab-shell">
+                    <section class="owner-section-card branding-overview-card">
+                        <div class="branding-overview-header">
+                            <div class="branding-overview-copy">
+                                <span class="branding-overview-kicker">Homepage Studio</span>
+                                <h4>Control the public landing rhythm without leaving the brand workspace.</h4>
+                                <p>Decide what the first visit should emphasize, tighten the section order, and keep the public copy coherent across all three languages.</p>
+                            </div>
+                            <div class="branding-overview-actions">
+                                <button type="submit" id="brandingHomepageSaveBtn" form="landingPageForm" class="primary-btn info-save-btn">Save Homepage Settings</button>
+                            </div>
                         </div>
-                        <div id="brandingHomepageLayoutMount"></div>
-                    </div>
-                    <div class="owner-section-card">
-                        <div class="owner-subsection-heading">
-                            <h4>Homepage Copy</h4>
-                            <p>Update multilingual homepage text and public copy overrides.</p>
+                        <div class="branding-overview-grid">
+                            <article class="branding-overview-metric">
+                                <strong>Visibility first</strong>
+                                <span>Only leave live the homepage sections that make the restaurant stronger.</span>
+                            </article>
+                            <article class="branding-overview-metric">
+                                <strong>Copy discipline</strong>
+                                <span>Keep each language short, direct, and aligned with the same visual promise.</span>
+                            </article>
+                            <article class="branding-overview-metric">
+                                <strong>Order with intent</strong>
+                                <span>The first scroll should feel deliberate, not like a list of leftover sections.</span>
+                            </article>
                         </div>
-                        <div id="brandingHomepageCopyMount"></div>
+                    </section>
+                    <div class="branding-tab-grid">
+                        <div class="branding-tab-main">
+                            <section class="owner-section-card branding-tab-card">
+                                <div class="owner-subsection-heading">
+                                    <h4>Homepage layout</h4>
+                                    <p>Control what is visible and in what sequence those sections appear after the hero.</p>
+                                </div>
+                                <div id="brandingHomepageLayoutMount" class="branding-homepage-mount"></div>
+                            </section>
+                            <section class="owner-section-card branding-tab-card">
+                                <div class="owner-subsection-heading">
+                                    <h4>Homepage copy</h4>
+                                    <p>Refine multilingual copy without leaving the branding workflow.</p>
+                                </div>
+                                <div id="brandingHomepageCopyMount" class="branding-homepage-mount"></div>
+                            </section>
+                        </div>
+                        <div class="branding-tab-side">
+                            <section class="owner-section-card branding-tab-card branding-notes-card">
+                                <div class="owner-subsection-heading">
+                                    <h4>Homepage review</h4>
+                                    <p>Use this check before publishing the homepage changes live.</p>
+                                </div>
+                                <ul class="branding-tab-note-list">
+                                    <li>
+                                        <strong>Keep the first visit focused</strong>
+                                        Let the homepage explain one restaurant, not every possible message at once.
+                                    </li>
+                                    <li>
+                                        <strong>Use section order deliberately</strong>
+                                        The strongest proof should come first after the hero, especially on mobile.
+                                    </li>
+                                    <li>
+                                        <strong>Trim copy before styling more</strong>
+                                        If a section still feels weak, shorter copy usually helps more than extra UI.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
                     </div>
-                    <div class="modal-form-actions">
-                        <button type="submit" form="landingPageForm" class="primary-btn">Save Homepage Settings</button>
+                    <div class="branding-tab-savebar">
+                        <span class="branding-save-note">This saves public contact, social links, homepage layout visibility, section order, and multilingual homepage copy together.</span>
+                        <button type="submit" form="landingPageForm" class="primary-btn info-save-btn">Save Homepage Settings</button>
                     </div>
                 </div>
             </div>
             <div id="brandingPanel-gallery" class="branding-workspace-panel">
-                <div class="owner-section-card" data-admin-subsection="gallery">
-                    <div class="owner-subsection-heading">
-                        <h4>Gallery</h4>
-                        <p>Manage homepage gallery images and supporting brand visuals.</p>
+                <div class="branding-tab-shell">
+                    <section class="owner-section-card branding-overview-card">
+                        <div class="branding-overview-header">
+                            <div class="branding-overview-copy">
+                                <span class="branding-overview-kicker">Gallery Studio</span>
+                                <h4>Keep the supporting gallery aligned with the same restaurant story.</h4>
+                                <p>Add only the visuals that strengthen the homepage and remove anything that feels repetitive, weak, or off-brand.</p>
+                            </div>
+                        </div>
+                        <div class="branding-overview-grid">
+                            <article class="branding-overview-metric">
+                                <strong>Curate, do not collect</strong>
+                                <span>The gallery should feel edited, not like a dump of every uploaded photo.</span>
+                            </article>
+                            <article class="branding-overview-metric">
+                                <strong>Support the hero</strong>
+                                <span>Gallery images should extend the same atmosphere already set by the main hero.</span>
+                            </article>
+                            <article class="branding-overview-metric">
+                                <strong>Changes publish immediately</strong>
+                                <span>Uploads and removals save to the live restaurant data as soon as they complete.</span>
+                            </article>
+                        </div>
+                    </section>
+                    <div class="branding-tab-grid">
+                        <div class="branding-tab-main">
+                            <section class="owner-section-card branding-tab-card" data-admin-subsection="gallery">
+                                <div class="owner-subsection-heading">
+                                    <h4>Gallery assets</h4>
+                                    <p>Upload visuals or attach hosted images, then review the live grid below.</p>
+                                </div>
+                                <div id="brandingGalleryMount" class="branding-gallery-mount"></div>
+                            </section>
+                        </div>
+                        <div class="branding-tab-side">
+                            <section class="owner-section-card branding-tab-card branding-notes-card">
+                                <div class="owner-subsection-heading">
+                                    <h4>Gallery quality guide</h4>
+                                    <p>Use these rules so the gallery stays useful and premium.</p>
+                                </div>
+                                <ul class="branding-tab-note-list">
+                                    <li>
+                                        <strong>Prefer atmosphere over repetition</strong>
+                                        Show different moments of the restaurant instead of repeating the same plate from slightly different angles.
+                                    </li>
+                                    <li>
+                                        <strong>Use bright, stable crops</strong>
+                                        If the image feels muddy or overbusy in admin, it will feel worse on the public site.
+                                    </li>
+                                    <li>
+                                        <strong>Keep weak images out</strong>
+                                        One strong gallery row is better than six mediocre uploads.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
                     </div>
-                    <div id="brandingGalleryMount"></div>
                 </div>
             </div>
         </div>
@@ -5680,8 +6835,7 @@
             <h3 data-i18n="admin.landing.title">Landing Page Configuration</h3>
             <p data-i18n="admin.landing.subtitle">Update what your customers see when they first visit your site.</p>
             <form id="landingPageForm">
-                <div id="landingContactBlock" class="form-grid"
-                    style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top:20px;">
+                <div id="landingContactBlock" class="form-grid info-contact-grid">
                     <div class="info-group">
                         <label data-i18n="admin.landing.address">Address</label>
                         <input type="text" id="lpAddress" placeholder="e.g. Avenue Hassan II, Casablanca" data-i18n-placeholder="admin.quick_launch.address_placeholder" required />
@@ -5703,8 +6857,7 @@
                         </span>
                     </summary>
                     <div class="admin-disclosure-body">
-                        <div class="form-grid"
-                            style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top:6px;">
+                        <div class="form-grid info-social-grid">
                             <div class="info-group">
                                 <label data-i18n="admin.landing.instagram">Instagram Username</label>
                                 <input type="text" id="lpInsta" placeholder="@restaurant.officiel" data-i18n-placeholder="admin.landing.instagram_placeholder" />
@@ -5979,7 +7132,10 @@
                     <input type="text" id="hoursNote"
                         placeholder="e.g. Open every day. Delivery available." />
                 </div>
-                <button type="submit" class="primary-btn" style="margin-top:15px;">Save Hours</button>
+                <div class="info-form-actions info-form-actions--stacked">
+                    <span class="info-save-note">This only updates the published opening hours shown to guests.</span>
+                    <button type="submit" id="infoHoursSaveBtn" class="primary-btn info-save-btn">Save Hours</button>
+                </div>
             </form>
         </div>
 
@@ -5997,7 +7153,7 @@
                     <label>Or add an existing image URL</label>
                     <input type="text" id="galleryUrlInput" placeholder="https://..." />
                 </div>
-                <button type="submit" class="primary-btn btn-auto" style="padding:10px 30px;">Add to Gallery</button>
+                <button type="submit" id="brandingGallerySaveBtn" class="primary-btn btn-auto" style="padding:10px 30px;">Add to Gallery</button>
             </form>
 
             <div class="table-container">
@@ -6094,8 +7250,10 @@
                             <label for="adminConfirmPass" data-i18n="admin.security.confirm_password">Confirm New Password</label>
                             <input type="password" id="adminConfirmPass" placeholder="********" data-i18n-placeholder="admin.security.password_placeholder" />
                         </div>
-
-                        <button type="submit" class="primary-btn security-submit" data-i18n="admin.security.save_credentials">Save Credentials</button>
+                        <div class="info-form-actions info-form-actions--stacked">
+                            <span class="info-save-note">This updates the sign-in credentials for the admin app only.</span>
+                            <button type="submit" id="infoSecuritySaveBtn" class="primary-btn security-submit info-save-btn" data-i18n="admin.security.save_credentials">Save Credentials</button>
+                        </div>
                     </form>
                 </div>
 

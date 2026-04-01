@@ -1446,6 +1446,39 @@ function moveSectionChildren(sourceId, targetId) {
     target.dataset.mounted = 'true';
 }
 
+function moveSectionContentToHost(sourceId, targetId, skipSelectors = []) {
+    const source = document.getElementById(sourceId);
+    const target = document.getElementById(targetId);
+    if (!source || !target || target.dataset.mounted === 'true') return;
+
+    Array.from(source.children).forEach((child) => {
+        if (child.hasAttribute('data-parameter-shell')) return;
+        if (skipSelectors.some((selector) => child.matches(selector))) return;
+        target.appendChild(child);
+    });
+
+    target.dataset.mounted = 'true';
+}
+
+function moveDisclosureBodyContentToHost(sourceId, targetId) {
+    const source = document.getElementById(sourceId);
+    const target = document.getElementById(targetId);
+    if (!source || !target || target.dataset.mounted === 'true') return;
+
+    const body = source.querySelector('.admin-disclosure-body');
+    if (!body) {
+        moveNodeToHost(sourceId, targetId);
+        target.dataset.mounted = 'true';
+        return;
+    }
+
+    Array.from(body.children).forEach((child) => {
+        target.appendChild(child);
+    });
+
+    target.dataset.mounted = 'true';
+}
+
 function moveNodeToHost(nodeId, hostId) {
     const node = document.getElementById(nodeId);
     const host = document.getElementById(hostId);
@@ -1459,11 +1492,11 @@ function mountOwnerAdminLayout() {
     moveSectionChildren('supercategories', 'menuSuperCategoryMount');
     moveSectionChildren('categories', 'menuCategoryMount');
     moveNodeToHost('landingContactBlock', 'infoLandingPrimaryMount');
-    moveNodeToHost('landingSocialBlock', 'infoLandingSocialMount');
-    moveNodeToHost('landingFacilitiesBlock', 'infoLandingFacilitiesMount');
-    moveSectionChildren('hours', 'infoHoursMount');
-    moveSectionChildren('wifi', 'infoWifiMount');
-    moveSectionChildren('security', 'infoSecurityMount');
+    moveDisclosureBodyContentToHost('landingSocialBlock', 'infoLandingSocialMount');
+    moveDisclosureBodyContentToHost('landingFacilitiesBlock', 'infoLandingFacilitiesMount');
+    moveSectionContentToHost('hours', 'infoHoursMount', ['h3', 'p']);
+    moveSectionContentToHost('wifi', 'infoWifiMount', ['h3', 'p']);
+    moveSectionContentToHost('security', 'infoSecurityMount', ['h3', 'p']);
     moveNodeToHost('landingLayoutBlock', 'brandingHomepageLayoutMount');
     moveNodeToHost('landingCopyBlock', 'brandingHomepageCopyMount');
     moveSectionChildren('gallery', 'brandingGalleryMount');
@@ -2792,15 +2825,23 @@ function initForms() {
         }
     };
 
-    document.getElementById('wifiForm').onsubmit = (e) => {
+    document.getElementById('wifiForm').onsubmit = async (e) => {
         e.preventDefault();
+        const saveButton = e.submitter || document.getElementById('infoWifiSaveBtn');
+        setInfoSaveButtonState(saveButton, 'saving');
         restaurantConfig.wifi.name = document.getElementById('wifiSSID').value;
         restaurantConfig.wifi.code = document.getElementById('wifiPassInput').value;
-        saveAndRefresh();
-        showToast('WiFi updated.');
+        const saved = await saveAndRefresh();
+        if (saved) {
+            renderInfoWorkspaceSummary();
+            setInfoSaveButtonState(saveButton, 'saved');
+            showToast('WiFi updated.');
+        } else {
+            setInfoSaveButtonState(saveButton, 'idle');
+        }
     };
 
-    document.getElementById('brandingForm').onsubmit = (e) => {
+    document.getElementById('brandingForm').onsubmit = async (e) => {
         e.preventDefault();
         const brandingDraft = getBrandingDraftFromForm();
 
@@ -2827,12 +2868,19 @@ function initForms() {
         }
 
         window.updateBrandingPreview();
-        saveAndRefresh();
-        showToast('Branding saved.');
+        setBrandingSaveButtonsState('saving');
+        const saved = await saveAndRefresh();
+        if (saved) {
+            setBrandingSaveButtonsState('saved');
+            showToast('Branding saved.');
+        } else {
+            setBrandingSaveButtonsState('idle');
+        }
     };
 
-    document.getElementById('landingPageForm').onsubmit = (e) => {
+    document.getElementById('landingPageForm').onsubmit = async (e) => {
         e.preventDefault();
+        const saveButton = e.submitter || document.getElementById('infoLandingSaveBtn');
         const nextContentTranslations = buildLandingContentTranslations();
         const guestExperience = buildGuestExperienceConfig();
         const sectionVisibility = buildSectionVisibilityConfig();
@@ -2868,6 +2916,7 @@ function initForms() {
             return;
         }
 
+        setInfoSaveButtonState(saveButton, 'saving');
         restaurantConfig.location.address = document.getElementById('lpAddress').value;
         restaurantConfig.location.url = mapUrl;
         restaurantConfig.phone = phone;
@@ -2887,8 +2936,14 @@ function initForms() {
             window.restaurantConfig.contentTranslations = nextContentTranslations;
         }
 
-        saveAndRefresh();
-        showToast('Homepage content saved.');
+        const saved = await saveAndRefresh();
+        if (saved) {
+            renderInfoWorkspaceSummary();
+            setInfoSaveButtonState(saveButton, 'saved');
+            showToast('Public details saved.');
+        } else {
+            setInfoSaveButtonState(saveButton, 'idle');
+        }
     };
 
     document.getElementById('superCatForm').onsubmit = async (e) => {
@@ -3029,6 +3084,149 @@ function buildSectionVisibilityConfig() {
     });
 
     return out;
+}
+
+function summarizeInfoCopy(value, fallback = '') {
+    const raw = String(value || '').trim();
+    if (!raw) return fallback;
+    if (raw.length <= 42) return raw;
+    return `${raw.slice(0, 39)}...`;
+}
+
+function setInfoWorkspaceText(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value;
+}
+
+function renderInfoWorkspaceSummary() {
+    const readValue = (id, fallback = '') => {
+        const el = document.getElementById(id);
+        if (!el) return String(fallback || '').trim();
+        if (el.type === 'checkbox') return el.checked;
+        return String(el.value || '').trim();
+    };
+
+    const address = readValue('lpAddress', restaurantConfig.location?.address || '');
+    const mapUrl = readValue('lpMapUrl', restaurantConfig.location?.url || '');
+    const phone = readValue('lpPhone', restaurantConfig.phone || '');
+    const socialLinks = [
+        readValue('lpInsta', restaurantConfig.socials?.instagram || ''),
+        readValue('lpFb', restaurantConfig.socials?.facebook || ''),
+        readValue('lpTiktok', restaurantConfig.socials?.tiktok || ''),
+        readValue('lpTrip', restaurantConfig.socials?.tripadvisor || '')
+    ].filter(Boolean);
+
+    const selectedPayments = Object.entries(GUEST_EXPERIENCE_PAYMENT_FIELDS)
+        .filter(([, fieldId]) => {
+            const input = document.getElementById(fieldId);
+            return input ? input.checked : false;
+        })
+        .map(([id]) => id);
+
+    const selectedFacilities = Object.entries(GUEST_EXPERIENCE_FACILITY_FIELDS)
+        .filter(([, fieldId]) => {
+            const input = document.getElementById(fieldId);
+            return input ? input.checked : false;
+        })
+        .map(([id]) => id);
+
+    const guestSignalCount = selectedPayments.length + selectedFacilities.length;
+
+    const visibleSectionCount = Object.entries(SECTION_VISIBILITY_FIELDS).filter(([, fieldId]) => {
+        const input = document.getElementById(fieldId);
+        return input ? input.checked : true;
+    }).length;
+
+    const hoursNote = readValue('hoursNote', restaurantConfig._hoursNote || '');
+    const hoursSource = Array.isArray(restaurantConfig._hours) && restaurantConfig._hours.length
+        ? restaurantConfig._hours
+        : (Array.isArray(window.defaultHours) ? window.defaultHours : []);
+    const configuredHoursCount = hoursSource.filter((entry) => entry && entry.open && entry.close).length;
+    const hoursSummary = hoursNote
+        ? summarizeInfoCopy(hoursNote)
+        : (configuredHoursCount ? `${configuredHoursCount} days configured` : 'Set opening hours');
+
+    const wifiName = readValue('wifiSSID', restaurantConfig.wifi?.name || '');
+    const securityUser = readValue('adminNewUser', adminAuth?.user || '');
+
+    setInfoWorkspaceText('infoSummaryLocationValue', address || 'Add address');
+    setInfoWorkspaceText('infoSummaryLocationNote', mapUrl && isValidAbsoluteUrl(mapUrl) ? 'Map link ready' : 'Map link pending');
+
+    setInfoWorkspaceText('infoSummaryContactValue', phone || 'Add phone number');
+    setInfoWorkspaceText('infoSummaryContactNote', socialLinks.length
+        ? `${socialLinks.length} public link${socialLinks.length > 1 ? 's' : ''} live`
+        : 'No public links yet');
+
+    setInfoWorkspaceText('infoSummaryGuestValue', guestSignalCount ? `${guestSignalCount} guest signals live` : 'Review facilities');
+    setInfoWorkspaceText('infoSummaryGuestNote', `${visibleSectionCount} homepage section${visibleSectionCount > 1 ? 's' : ''} visible`);
+
+    setInfoWorkspaceText('infoSummaryOpsValue', securityUser ? `@${securityUser}` : 'Review access');
+    setInfoWorkspaceText('infoSummaryOpsNote', wifiName ? `WiFi: ${summarizeInfoCopy(wifiName)}` : 'WiFi not configured');
+
+    setInfoWorkspaceText('infoSocialMetric', socialLinks.length
+        ? `${socialLinks.length} link${socialLinks.length > 1 ? 's' : ''} live`
+        : 'No links live');
+    setInfoWorkspaceText('infoFacilitiesMetric', guestSignalCount ? `${guestSignalCount} active` : 'Nothing active');
+    setInfoWorkspaceText('infoHoursMetric', hoursSummary);
+    setInfoWorkspaceText('infoWifiMetric', wifiName ? summarizeInfoCopy(wifiName, 'Configured') : 'Not configured');
+    setInfoWorkspaceText('infoSecurityMetric', securityUser ? `@${securityUser}` : 'Update login');
+}
+
+function getInfoSaveButtonOriginalLabel(button) {
+    if (!button) return '';
+    if (!button.dataset.originalLabel) {
+        button.dataset.originalLabel = button.textContent.trim();
+    }
+    return button.dataset.originalLabel;
+}
+
+function setInfoSaveButtonState(button, state) {
+    if (!button) return;
+
+    const originalLabel = getInfoSaveButtonOriginalLabel(button);
+    if (button._saveFeedbackTimer) {
+        clearTimeout(button._saveFeedbackTimer);
+        button._saveFeedbackTimer = null;
+    }
+
+    button.classList.remove('is-saving', 'is-saved');
+    button.disabled = false;
+
+    if (state === 'saving') {
+        button.classList.add('is-saving');
+        button.disabled = true;
+        button.textContent = t('admin.save_state.saving_label', 'Saving');
+        return;
+    }
+
+    if (state === 'saved') {
+        button.classList.add('is-saved');
+        button.textContent = t('admin.save_state.success_label', 'Saved');
+        button._saveFeedbackTimer = setTimeout(() => {
+            button.classList.remove('is-saved');
+            button.textContent = getInfoSaveButtonOriginalLabel(button);
+        }, 1600);
+        return;
+    }
+
+    button.textContent = originalLabel;
+}
+
+function getBrandingSaveButtons() {
+    return Array.from(document.querySelectorAll('#brandingForm button[type="submit"]'));
+}
+
+function setBrandingSaveButtonsState(state) {
+    getBrandingSaveButtons().forEach((button) => {
+        setInfoSaveButtonState(button, state);
+    });
+}
+
+function setGallerySaveButtonState(state) {
+    const button = document.getElementById('brandingGallerySaveBtn');
+    if (!button) return;
+    setInfoSaveButtonState(button, state);
 }
 
 function initSectionVisibilityFields() {
@@ -3477,6 +3675,32 @@ function initLandingPageForm() {
     );
     renderSectionOrderEditor();
     renderLandingContentEditor();
+    [
+        'lpAddress',
+        'lpMapUrl',
+        'lpPhone',
+        'lpInsta',
+        'lpFb',
+        'lpTiktok',
+        'lpTrip'
+    ].forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.oninput = renderInfoWorkspaceSummary;
+        input.onchange = renderInfoWorkspaceSummary;
+    });
+
+    [
+        ...Object.values(GUEST_EXPERIENCE_PAYMENT_FIELDS),
+        ...Object.values(GUEST_EXPERIENCE_FACILITY_FIELDS),
+        ...Object.values(SECTION_VISIBILITY_FIELDS)
+    ].forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.onchange = renderInfoWorkspaceSummary;
+    });
+
+    renderInfoWorkspaceSummary();
 }
 
 function initBrandingForm() {
@@ -4628,9 +4852,13 @@ function initSecurityForm() {
 
     const newUserInput = document.getElementById('adminNewUser');
     if (newUserInput && adminAuth.user) newUserInput.value = adminAuth.user;
+    if (newUserInput) {
+        newUserInput.oninput = renderInfoWorkspaceSummary;
+    }
 
     form.onsubmit = async (e) => {
         e.preventDefault();
+        const saveButton = e.submitter || document.getElementById('infoSecuritySaveBtn');
         const newUsername = document.getElementById('adminNewUser').value.trim();
         const newPassword = document.getElementById('adminNewPass').value;
         const confirmPassword = document.getElementById('adminConfirmPass').value;
@@ -4641,6 +4869,7 @@ function initSecurityForm() {
         }
 
         try {
+            setInfoSaveButtonState(saveButton, 'saving');
             const res = await fetch('/api/admin/credentials', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -4652,18 +4881,24 @@ function initSecurityForm() {
 
             if (res.ok && data.ok) {
                 adminAuth.user = data.user || newUsername;
+                setInfoSaveButtonState(saveButton, 'saved');
                 showToast(data.message || t('admin.security.credentials_updated', 'Credentials updated successfully.'));
                 document.getElementById('adminNewPass').value = '';
                 document.getElementById('adminConfirmPass').value = '';
                 loadSecurityStatus();
+                renderInfoWorkspaceSummary();
             } else {
+                setInfoSaveButtonState(saveButton, 'idle');
                 showToast(data.error || t('admin.security.credentials_update_failed', 'Unable to update credentials.'));
             }
         } catch (err) {
             console.error('Credentials update error:', err);
+            setInfoSaveButtonState(saveButton, 'idle');
             showToast(t('admin.login.server_connection_error', 'Server connection error.'));
         }
     };
+
+    renderInfoWorkspaceSummary();
 }
 
 function getFloatingSaveButtonMarkup(saved = false) {
@@ -4950,6 +5185,17 @@ function initWifiForm() {
     const hintP = document.getElementById('hintP');
     if (hintS) hintS.textContent = restaurantConfig.wifi.name;
     if (hintP) hintP.textContent = restaurantConfig.wifi.code;
+    ['wifiSSID', 'wifiPassInput'].forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.oninput = () => {
+            if (hintS) hintS.textContent = document.getElementById('wifiSSID')?.value || '';
+            if (hintP) hintP.textContent = document.getElementById('wifiPassInput')?.value || '';
+            renderInfoWorkspaceSummary();
+        };
+        input.onchange = input.oninput;
+    });
+    renderInfoWorkspaceSummary();
 }
 function updateStats() {
     const p = document.getElementById('stat-products');
@@ -5271,11 +5517,27 @@ function initHoursForm() {
     const noteEl = document.getElementById('hoursNote');
     if (noteEl) noteEl.value = note;
 
+    HOUR_KEYS.forEach((key) => {
+        const openEl = document.getElementById(`h_${key}_open`);
+        const closeEl = document.getElementById(`h_${key}_close`);
+        const hlEl = document.getElementById(`h_${key}_hl`);
+        [openEl, closeEl, hlEl].forEach((input) => {
+            if (!input) return;
+            input.onchange = renderInfoWorkspaceSummary;
+        });
+    });
+    if (noteEl) {
+        noteEl.oninput = renderInfoWorkspaceSummary;
+        noteEl.onchange = renderInfoWorkspaceSummary;
+    }
+
     // Form submit
     const form = document.getElementById('hoursForm');
     if (form) {
-        form.onsubmit = function (e) {
+        form.onsubmit = async function (e) {
             e.preventDefault();
+            const saveButton = e.submitter || document.getElementById('infoHoursSaveBtn');
+            setInfoSaveButtonState(saveButton, 'saving');
             const updatedHours = window.defaultHours.map((def, i) => {
                 const key = HOUR_KEYS[i];
                 const openEl = document.getElementById(`h_${key}_open`);
@@ -5293,10 +5555,18 @@ function initHoursForm() {
             const updatedNote = noteEl ? noteEl.value.trim() : '';
             restaurantConfig._hours = updatedHours;
             restaurantConfig._hoursNote = updatedNote;
-            saveAndRefresh();
-            showToast('Hours updated.');
+            const saved = await saveAndRefresh();
+            if (saved) {
+                renderInfoWorkspaceSummary();
+                setInfoSaveButtonState(saveButton, 'saved');
+                showToast('Hours updated.');
+            } else {
+                setInfoSaveButtonState(saveButton, 'idle');
+            }
         };
     }
+
+    renderInfoWorkspaceSummary();
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GALLERY MANAGEMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -5312,31 +5582,55 @@ function initGalleryForm() {
         if (!fileInput || !urlInput) return;
 
         if (!restaurantConfig.gallery) restaurantConfig.gallery = [];
+        const previousGallery = Array.isArray(restaurantConfig.gallery) ? [...restaurantConfig.gallery] : [];
+        const nextGallery = [...previousGallery];
+        const saveButton = e.submitter || document.getElementById('brandingGallerySaveBtn');
+
+        if (urlInput.value.trim() && !isValidAssetUrl(urlInput.value.trim())) {
+            showToast('Gallery image must be an absolute URL or a local /uploads path.');
+            return;
+        }
+
+        if (!urlInput.value.trim() && fileInput.files.length === 0) {
+            showToast('Add an image URL or upload at least one image.');
+            return;
+        }
 
         // Handle URLs
         if (urlInput.value.trim()) {
-            restaurantConfig.gallery.push(urlInput.value.trim());
+            nextGallery.push(urlInput.value.trim());
             urlInput.value = '';
         }
 
         // Handle Files
+        setGallerySaveButtonState('saving');
         if (fileInput.files.length > 0) {
             showToast('Uploading gallery images...');
             for (let file of fileInput.files) {
                 try {
                     const url = await uploadImageToServer(file);
-                    restaurantConfig.gallery.push(url);
+                    nextGallery.push(url);
                 } catch (err) {
                     console.error('Gallery upload failed:', err);
                     showToast('Gallery upload failed.');
+                    setGallerySaveButtonState('idle');
+                    return;
                 }
             }
             fileInput.value = '';
         }
 
-        saveAndRefresh();
-        renderGalleryAdmin();
-        showToast('Gallery images added.');
+        restaurantConfig.gallery = nextGallery;
+        const saved = await saveAndRefresh();
+        if (saved) {
+            renderGalleryAdmin();
+            setGallerySaveButtonState('saved');
+            showToast('Gallery images added.');
+        } else {
+            restaurantConfig.gallery = previousGallery;
+            renderGalleryAdmin();
+            setGallerySaveButtonState('idle');
+        }
     };
 }
 
@@ -5364,8 +5658,14 @@ async function deleteGalleryImage(index) {
         tone: 'danger'
     });
     if (!confirmed) return;
+    const previousGallery = Array.isArray(restaurantConfig.gallery) ? [...restaurantConfig.gallery] : [];
     restaurantConfig.gallery.splice(index, 1);
-    saveAndRefresh();
-    renderGalleryAdmin();
-    showToast('Image removed.');
+    const saved = await saveAndRefresh();
+    if (saved) {
+        renderGalleryAdmin();
+        showToast('Image removed.');
+    } else {
+        restaurantConfig.gallery = previousGallery;
+        renderGalleryAdmin();
+    }
 }
