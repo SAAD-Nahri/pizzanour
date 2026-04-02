@@ -7665,6 +7665,324 @@
             background: linear-gradient(135deg, rgba(243, 58, 44, 0.24), rgba(255, 152, 47, 0.24));
             color: #fff;
         }
+
+        /* Clean builder + modal polish */
+        .menu-builder-heading.admin-help-host {
+            position: relative;
+            padding-right: 42px;
+        }
+
+        .menu-builder-overview {
+            display: grid;
+            gap: 12px;
+            padding: 16px 18px;
+            border-radius: 22px;
+            border: 1px dashed rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.76);
+            box-shadow: none;
+        }
+
+        .menu-builder-summary-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .menu-builder-summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 38px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--text2);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .menu-builder-summary-pill strong {
+            font-size: 0.96rem;
+            line-height: 1;
+            color: var(--text);
+        }
+
+        .menu-builder-summary-pill em {
+            font-style: normal;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .menu-builder-focus-inline {
+            display: grid;
+            gap: 10px;
+        }
+
+        .menu-builder-focus-inline-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-builder-focus-inline-head strong {
+            font-size: 0.98rem;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        .menu-builder-focus-note {
+            padding: 11px 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.84);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+        }
+
+        .menu-crud-form-intro {
+            gap: 10px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .menu-crud-form-intro-shell {
+            position: relative;
+            gap: 6px;
+            padding-right: 42px;
+        }
+
+        .menu-crud-step-nav {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 8px;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+
+        .menu-crud-step-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu-crud-step-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 0;
+            padding: 10px 12px;
+            border-radius: 999px;
+        }
+
+        .menu-crud-step-status {
+            white-space: nowrap;
+        }
+
+        .menu-crud-nav-footer {
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 2px;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .menu-crud-nav-copy {
+            gap: 2px;
+        }
+
+        .menu-crud-progress-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--text2);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .menu-crud-progress-back:disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+
+        .menu-crud-footer-stack {
+            gap: 8px;
+            padding: 12px 0 4px;
+        }
+
+        .menu-crud-primary-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.18fr);
+            gap: 10px;
+        }
+
+        .menu-crud-primary-actions .primary-btn,
+        .menu-crud-primary-actions .secondary-btn {
+            width: 100%;
+            min-width: 0;
+            min-height: 48px;
+            border-radius: 16px;
+        }
+
+        .menu-crud-primary-actions .menu-crud-save-btn {
+            box-shadow: 0 16px 30px rgba(255, 141, 8, 0.18);
+        }
+
+        .menu-crud-modal-card {
+            width: min(960px, 92vw);
+            max-width: min(960px, 92vw);
+            padding: 20px 20px 18px;
+            gap: 16px;
+        }
+
+        .menu-crud-modal-header {
+            padding-top: 2px;
+            padding-bottom: 8px;
+        }
+
+        #menuCrudModalBody > form {
+            gap: 12px;
+        }
+
+        .menu-crud-modal-card .menu-form-block {
+            padding: 18px;
+            border-radius: 20px;
+            box-shadow: 0 12px 24px rgba(75, 47, 24, 0.045);
+        }
+
+        .menu-form-block-header {
+            gap: 3px;
+            padding-bottom: 4px;
+            border-bottom: none;
+        }
+
+        .menu-crud-modal-card .form-group {
+            gap: 6px;
+        }
+
+        .menu-crud-modal-card input,
+        .menu-crud-modal-card select,
+        .menu-crud-modal-card textarea {
+            border-radius: 14px;
+        }
+
+        .menu-crud-modal-card textarea {
+            min-height: 112px;
+        }
+
+        @media (max-width: 768px) {
+            .menu-builder-actions {
+                display: grid;
+                grid-template-columns: 56px minmax(0, 1fr);
+                gap: 8px;
+                width: 100%;
+            }
+
+            .menu-builder-actions .primary-btn,
+            .menu-builder-actions .brand-secondary-btn {
+                width: 100%;
+            }
+
+            #menuBuilderBackBtn.menu-icon-btn {
+                font-size: 0;
+            }
+
+            #menuBuilderBackBtn.menu-icon-btn::before {
+                content: attr(data-mobile-icon);
+                font-size: 1.2rem;
+                font-weight: 800;
+                line-height: 1;
+            }
+
+            #menuBuilderAddBtn.menu-icon-btn {
+                font-size: 0.92rem;
+            }
+
+            #menuBuilderAddBtn.menu-icon-btn::before {
+                display: none;
+            }
+
+            .menu-builder-overview {
+                padding: 14px;
+            }
+
+            .menu-builder-summary-pill {
+                min-height: 36px;
+                padding-inline: 11px;
+            }
+
+            .menu-builder-focus-inline-head strong {
+                font-size: 0.92rem;
+            }
+
+            .menu-crud-primary-actions {
+                grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+                gap: 8px;
+            }
+
+            .menu-crud-nav-footer {
+                padding: 0 2px;
+            }
+
+            .menu-crud-nav-kicker,
+            .menu-crud-step-status {
+                display: none;
+            }
+
+            .menu-crud-modal-card {
+                width: min(100vw - 12px, 100vw - 12px);
+                max-width: min(100vw - 12px, 100vw - 12px);
+                height: min(94dvh, 94dvh);
+                max-height: min(94dvh, 94dvh);
+                padding: 16px 14px 14px;
+                gap: 14px;
+                border-radius: 24px;
+            }
+
+            #menuCrudModalBody > form {
+                gap: 10px;
+            }
+
+            .menu-crud-modal-card .menu-form-block {
+                padding: 15px;
+                border-radius: 18px;
+            }
+
+            .menu-crud-modal-card input,
+            .menu-crud-modal-card select,
+            .menu-crud-modal-card textarea {
+                border-radius: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-builder-heading.admin-help-host {
+                padding-right: 38px;
+            }
+
+            .menu-builder-summary-strip {
+                gap: 8px;
+            }
+
+            .menu-crud-step-btn {
+                padding: 9px 11px;
+            }
+
+            .menu-crud-nav-copy span:last-child {
+                font-size: 0.74rem;
+            }
+        }
     </style>
 </head>
 
@@ -8064,13 +8382,12 @@
                         <span id="foodFormNavHint">Step 1 of 6 · 0 steps ready</span>
                     </div>
                     <div class="menu-crud-nav-actions">
-                        <button type="button" id="foodFormPrevBtn" class="secondary-btn menu-crud-nav-btn" onclick="stepMenuCrudSection('foodForm', -1)">Previous</button>
-                        <button type="button" id="foodFormNextBtn" class="secondary-btn menu-crud-nav-btn is-primary" onclick="stepMenuCrudSection('foodForm', 1)">Next step</button>
+                        <button type="button" id="foodFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('foodForm', -1)">Previous</button>
                     </div>
                 </div>
-                <div class="modal-form-actions">
+                <div class="modal-form-actions menu-crud-primary-actions">
                     <button type="button" class="secondary-btn menu-crud-cancel-btn" onclick="closeMenuCrudModal()">Cancel</button>
-                    <button type="submit" class="primary-btn menu-crud-save-btn" data-i18n="admin.menu.save_product">Save</button>
+                    <button type="button" id="foodFormPrimaryBtn" class="primary-btn menu-crud-save-btn menu-crud-primary-action" data-save-label="Save item" onclick="handleMenuCrudPrimaryAction('foodForm')">Continue</button>
                 </div>
                 </div>
             </form>
@@ -8415,13 +8732,12 @@
                         <span id="catFormNavHint">Step 1 of 3 · 0 steps ready</span>
                     </div>
                     <div class="menu-crud-nav-actions">
-                        <button type="button" id="catFormPrevBtn" class="secondary-btn menu-crud-nav-btn" onclick="stepMenuCrudSection('catForm', -1)">Previous</button>
-                        <button type="button" id="catFormNextBtn" class="secondary-btn menu-crud-nav-btn is-primary" onclick="stepMenuCrudSection('catForm', 1)">Next step</button>
+                        <button type="button" id="catFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('catForm', -1)">Previous</button>
                     </div>
                 </div>
-                <div class="modal-form-actions">
+                <div class="modal-form-actions menu-crud-primary-actions">
                     <button type="button" class="secondary-btn menu-crud-cancel-btn" onclick="closeMenuCrudModal()">Cancel</button>
-                    <button type="submit" class="primary-btn menu-crud-save-btn" data-i18n="admin.categories.add">Save</button>
+                    <button type="button" id="catFormPrimaryBtn" class="primary-btn menu-crud-save-btn menu-crud-primary-action" data-save-label="Save category" onclick="handleMenuCrudPrimaryAction('catForm')">Continue</button>
                 </div>
                 </div>
             </form>
@@ -9256,13 +9572,12 @@
                         <span id="superCatFormNavHint">Step 1 of 3 · 0 steps ready</span>
                     </div>
                     <div class="menu-crud-nav-actions">
-                        <button type="button" id="superCatFormPrevBtn" class="secondary-btn menu-crud-nav-btn" onclick="stepMenuCrudSection('superCatForm', -1)">Previous</button>
-                        <button type="button" id="superCatFormNextBtn" class="secondary-btn menu-crud-nav-btn is-primary" onclick="stepMenuCrudSection('superCatForm', 1)">Next step</button>
+                        <button type="button" id="superCatFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('superCatForm', -1)">Previous</button>
                     </div>
                 </div>
-                <div class="modal-form-actions">
+                <div class="modal-form-actions menu-crud-primary-actions">
                     <button type="button" class="secondary-btn menu-crud-cancel-btn" onclick="closeMenuCrudModal()">Cancel</button>
-                    <button type="submit" class="primary-btn menu-crud-save-btn">Save</button>
+                    <button type="button" id="superCatFormPrimaryBtn" class="primary-btn menu-crud-save-btn menu-crud-primary-action" data-save-label="Save group" onclick="handleMenuCrudPrimaryAction('superCatForm')">Continue</button>
                 </div>
                 </div>
             </form>

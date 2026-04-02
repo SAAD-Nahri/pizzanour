@@ -121,15 +121,15 @@ let adminActionDialogResolver = null;
 let superCategoryIconManuallyChosen = false;
 const ADMIN_HELP_TOGGLE_RULES = Object.freeze([
     {
-        hostSelector: '.menu-builder-heading',
-        anchorSelector: 'h3',
-        helpSelector: '#menuBuilderCopy',
+        hostSelector: '.menu-builder-stage',
+        anchorSelector: '.menu-builder-heading',
+        helpSelector: '#menuBuilderCopy, #menuBuilderOnboarding, #menuBuilderOverview',
         label: 'Menu builder help'
     },
     {
         hostSelector: '.menu-crud-form-intro',
         anchorSelector: '.menu-crud-form-intro-shell',
-        helpSelector: '.menu-crud-form-intro-copy',
+        helpSelector: '.menu-crud-form-intro-copy, .menu-crud-form-meta',
         label: 'Form guidance'
     },
     {
@@ -2091,7 +2091,7 @@ function syncMenuCrudFooter(form) {
 
     const hintEl = document.getElementById(`${form.id}NavHint`);
     if (hintEl) {
-        hintEl.textContent = `Step ${activeIndex + 1} of ${total} · ${readyCount} ${readyCount === 1 ? 'step' : 'steps'} ready`;
+        hintEl.textContent = `Step ${activeIndex + 1} of ${total} · ${readyCount} ${readyCount === 1 ? 'section' : 'sections'} ready`;
     }
 
     const prevBtn = document.getElementById(`${form.id}PrevBtn`);
@@ -2099,19 +2099,40 @@ function syncMenuCrudFooter(form) {
         prevBtn.disabled = activeIndex <= 0;
     }
 
-    const nextBtn = document.getElementById(`${form.id}NextBtn`);
+    const nextBtn = document.getElementById(`${form.id}PrimaryBtn`);
     if (!nextBtn) return;
     if (activeIndex < total - 1) {
         nextBtn.disabled = false;
-        nextBtn.textContent = 'Next step';
+        nextBtn.dataset.mode = 'next';
+        nextBtn.textContent = 'Continue';
     } else if (firstMissing && firstMissing !== activeSectionId) {
         nextBtn.disabled = false;
-        nextBtn.textContent = 'First missing';
+        nextBtn.dataset.mode = 'missing';
+        nextBtn.textContent = 'Finish missing step';
     } else {
-        nextBtn.disabled = true;
-        nextBtn.textContent = 'Ready to save';
+        nextBtn.disabled = false;
+        nextBtn.dataset.mode = 'save';
+        nextBtn.textContent = nextBtn.dataset.saveLabel || 'Save';
     }
 }
+
+window.handleMenuCrudPrimaryAction = function (formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const button = document.getElementById(`${formId}PrimaryBtn`);
+    const mode = button?.dataset.mode || 'next';
+
+    if (mode === 'save') {
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+        } else {
+            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }
+        return;
+    }
+
+    stepMenuCrudSection(formId, 1);
+};
 
 function refreshMenuCrudFormUx(target) {
     const form = typeof target === 'string' ? document.getElementById(target) : target;
@@ -2151,12 +2172,12 @@ function focusMenuCrudField(formId, sectionId, fieldId) {
 
 function setMenuCrudPrimaryButtonState(formId, state) {
     const form = document.getElementById(formId);
-    const button = form?.querySelector('.modal-form-actions button[type="submit"]');
+    const button = form?.querySelector('.menu-crud-primary-action');
     const cancelButton = form?.querySelector('.menu-crud-cancel-btn');
     if (!button) return;
 
     if (!button.dataset.defaultLabel) {
-        button.dataset.defaultLabel = button.textContent.trim() || 'Save';
+        button.dataset.defaultLabel = button.textContent.trim() || 'Continue';
     }
 
     if (state === 'saving') {
@@ -2174,8 +2195,8 @@ function setMenuCrudPrimaryButtonState(formId, state) {
     }
 
     button.disabled = false;
-    button.textContent = button.dataset.defaultLabel;
     if (cancelButton) cancelButton.disabled = false;
+    syncMenuCrudFooter(form);
 }
 
 function initializeMenuCrudFormEnhancements(form) {
@@ -2944,9 +2965,9 @@ function renderMenuBuilderOverview() {
     let focusTitle = 'Shape the first customer choices';
     let focusCopy = 'Each super category should feel like a clear browsing path, not a loose label. Keep the structure small, deliberate, and easy to scan.';
     let focusPills = [
-        `<span class="menu-builder-focus-pill">${state.superCategoryCount} groups</span>`,
-        `<span class="menu-builder-focus-pill">${state.categoryCount} categories</span>`,
-        `<span class="menu-builder-focus-pill">${state.itemCount} dishes</span>`
+        `${state.superCategoryCount} groups`,
+        `${state.categoryCount} categories`,
+        `${state.itemCount} dishes`
     ];
     let focusNote = unassignedCount
         ? `<strong>Attention:</strong> ${unassignedCount} categor${unassignedCount > 1 ? 'ies are' : 'y is'} still outside a super category.`
@@ -2962,9 +2983,9 @@ function renderMenuBuilderOverview() {
             : 'Organize the selected super category';
         focusCopy = 'Categories should stay narrow and visual. Customers should understand each section without reading a long explanation.';
         focusPills = [
-            `<span class="menu-builder-focus-pill">${categoryKeys.length} categor${categoryKeys.length === 1 ? 'y' : 'ies'}</span>`,
-            `<span class="menu-builder-focus-pill">${itemsInGroup.length} dishes</span>`,
-            `<span class="menu-builder-focus-pill">${imageReadyCount} backdrop${imageReadyCount === 1 ? '' : 's'} ready</span>`
+            `${categoryKeys.length} categor${categoryKeys.length === 1 ? 'y' : 'ies'}`,
+            `${itemsInGroup.length} dishes`,
+            `${imageReadyCount} backdrop${imageReadyCount === 1 ? '' : 's'} ready`
         ];
         focusNote = categoryKeys.length
             ? '<strong>Next:</strong> Open a category row to work on the actual dishes and featured status.'
@@ -2979,9 +3000,9 @@ function renderMenuBuilderOverview() {
             : 'Fill the active category';
         focusCopy = 'Use short names, honest prices, and reserve the featured marker for a few signature dishes. Keep hidden items deliberate.';
         focusPills = [
-            `<span class="menu-builder-focus-pill">${getMenuBuilderCurrentItems().length} dishes</span>`,
-            `<span class="menu-builder-focus-pill">${featuredCount} featured</span>`,
-            `<span class="menu-builder-focus-pill">${extrasCount} with extras</span>`
+            `${getMenuBuilderCurrentItems().length} dishes`,
+            `${featuredCount} featured`,
+            `${extrasCount} with extras`
         ];
         focusNote = unavailableCount
             ? `<strong>Attention:</strong> ${unavailableCount} dish${unavailableCount > 1 ? 'es are' : ' is'} hidden from customers right now.`
@@ -2990,29 +3011,31 @@ function renderMenuBuilderOverview() {
     }
 
     overviewEl.innerHTML = `
-        <div class="menu-builder-summary-grid">
+        <div class="menu-builder-summary-strip">
             ${stageCards.map((entry) => `
-                <article class="menu-builder-summary-card">
+                <span class="menu-builder-summary-pill">
                     <strong>${escapeHtml(String(entry.value))}</strong>
-                    <span>${escapeHtml(entry.label)}</span>
-                    <small>${escapeHtml(entry.note)}</small>
-                </article>
+                    <em>${escapeHtml(entry.label)}</em>
+                </span>
             `).join('')}
         </div>
-        <aside class="menu-builder-focus-card">
-            <span class="menu-builder-focus-kicker ${focusStateClass}">${escapeHtml(
-                currentMenuWorkspaceStep === 'supercategories'
-                    ? 'Structure'
-                    : currentMenuWorkspaceStep === 'categories'
-                        ? 'Categories'
-                        : 'Dishes'
-            )}</span>
-            <h4 class="menu-builder-focus-title">${escapeHtml(focusTitle)}</h4>
+        <div class="menu-builder-focus-inline ${focusStateClass}">
+            <div class="menu-builder-focus-inline-head">
+                <span class="menu-builder-focus-kicker ${focusStateClass}">${escapeHtml(
+                    currentMenuWorkspaceStep === 'supercategories'
+                        ? 'Structure'
+                        : currentMenuWorkspaceStep === 'categories'
+                            ? 'Categories'
+                            : 'Dishes'
+                )}</span>
+                <strong>${escapeHtml(focusTitle)}</strong>
+            </div>
             <p class="menu-builder-focus-copy">${escapeHtml(focusCopy)}</p>
-            <div class="menu-builder-focus-pills">${focusPills.join('')}</div>
+            <div class="menu-builder-focus-pills">${focusPills.map((pill) => `<span class="menu-builder-focus-pill">${escapeHtml(pill)}</span>`).join('')}</div>
             <div class="menu-builder-focus-note">${focusNote}</div>
-        </aside>
+        </div>
     `;
+    initializeAdminHelpToggles();
 }
 
 function renderMenuBuilderEmptyState(emptyEl, options = {}) {
@@ -3113,6 +3136,7 @@ function renderMenuBuilderOnboarding() {
             ${adminCapabilities.sellerToolsEnabled ? '<button type="button" class="brand-secondary-btn btn-auto" onclick="openMenuBuilderSetupAction(\'import\')">Open Import Studio</button>' : ''}
         </div>
     `;
+    initializeAdminHelpToggles();
 }
 
 function renderMenuBuilder() {
