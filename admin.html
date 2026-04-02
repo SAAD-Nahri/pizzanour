@@ -1537,20 +1537,23 @@
         }
 
         #menuCrudModalBody {
-            display: block;
+            display: flex;
+            flex-direction: column;
             min-height: 0;
             flex: 1 1 auto;
             overflow-y: auto;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
-            padding: 0 6px 156px 0;
+            padding: 0 6px 118px 0;
         }
 
         #menuCrudModalBody > form {
             width: min(100%, 860px);
             margin-inline: auto;
-            display: grid;
+            display: flex;
+            flex-direction: column;
             gap: 16px;
+            flex: 1 1 auto;
         }
 
         #menuCrudModalBody > #catForm,
@@ -7047,13 +7050,13 @@
                 z-index: 12000 !important;
             }
 
-            #menuCrudModalBody {
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                -webkit-overflow-scrolling: touch;
-                touch-action: pan-y;
-                padding: 0 2px calc(172px + env(safe-area-inset-bottom, 0px)) 0;
-            }
+        #menuCrudModalBody {
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            padding: 0 2px calc(110px + env(safe-area-inset-bottom, 0px)) 0;
+        }
 
             .menu-crud-footer-stack {
                 position: sticky;
@@ -7747,6 +7750,10 @@
             box-shadow: none;
         }
 
+        .menu-crud-form-shell {
+            min-height: 100%;
+        }
+
         .menu-crud-form-intro-shell {
             position: relative;
             gap: 6px;
@@ -7819,8 +7826,13 @@
 
         .menu-crud-footer-stack {
             gap: 8px;
-            padding: 12px 0 4px;
+            padding: 10px 0 6px;
             margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(255, 251, 244, 0) 0%, rgba(255, 251, 244, 0.85) 36%, rgba(255, 249, 241, 0.98) 100%);
+            box-shadow: 0 -16px 28px rgba(255, 249, 241, 0.6);
         }
 
         .menu-crud-primary-actions {
