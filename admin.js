@@ -88,7 +88,142 @@ const ADMIN_ICON = Object.freeze({
     trash: String.fromCodePoint(0x1F5D1, 0xFE0F),
     camera: String.fromCodePoint(0x1F4F7)
 });
+const DEFAULT_SUPER_CATEGORY_ICON = '🍽️';
+const SUPER_CATEGORY_ICON_PRESETS = Object.freeze([
+    { icon: '🍽️', label: 'General' },
+    { icon: '🍳', label: 'Breakfast' },
+    { icon: '☕', label: 'Coffee' },
+    { icon: '🥐', label: 'Bakery' },
+    { icon: '🥗', label: 'Fresh' },
+    { icon: '🍔', label: 'Burgers' },
+    { icon: '🍕', label: 'Pizza' },
+    { icon: '🍝', label: 'Pasta' },
+    { icon: '🍲', label: 'Meals' },
+    { icon: '🥩', label: 'Grill' },
+    { icon: '🍰', label: 'Desserts' },
+    { icon: '🍹', label: 'Beverages' }
+]);
+const SUPER_CATEGORY_ICON_RULES = Object.freeze([
+    { icon: '🍳', terms: ['breakfast', 'morning', 'brunch', 'petit déjeuner', 'petit-dejeuner', 'matin', 'فطور', 'إفطار', 'صباح'] },
+    { icon: '☕', terms: ['coffee', 'cafe', 'café', 'espresso', 'tea', 'thé', 'boisson chaude', 'قهوة', 'شاي'] },
+    { icon: '🥐', terms: ['bakery', 'viennoiserie', 'pastry', 'croissant', 'boulangerie', 'معجنات'] },
+    { icon: '🥗', terms: ['salad', 'healthy', 'fresh', 'veg', 'vég', 'green', 'سلطة', 'طازج'] },
+    { icon: '🍔', terms: ['burger', 'sandwich', 'snack', 'tacos', 'wrap', 'برغر', 'ساندويتش'] },
+    { icon: '🍕', terms: ['pizza', 'pizzeria'] },
+    { icon: '🍝', terms: ['pasta', 'italian', 'italien', 'mac', 'spaghetti'] },
+    { icon: '🍲', terms: ['meal', 'main', 'lunch', 'dinner', 'plat', 'plats', 'repas', 'tajine', 'طاجين', 'وجبات', 'رئيسية'] },
+    { icon: '🥩', terms: ['grill', 'bbq', 'steak', 'meat', 'viande', 'grillade', 'مشاوي', 'لحم'] },
+    { icon: '🍰', terms: ['dessert', 'sweet', 'cake', 'gateau', 'gâteau', 'patisserie', 'حلويات', 'تحلية'] },
+    { icon: '🍹', terms: ['drink', 'drinks', 'juice', 'cocktail', 'beverage', 'boisson', 'boissons', 'عصير', 'مشروبات'] }
+]);
 let adminActionDialogResolver = null;
+let superCategoryIconManuallyChosen = false;
+
+function getSuperCategoryIconPresetMeta(icon = '') {
+    const normalized = String(icon || '').trim();
+    return SUPER_CATEGORY_ICON_PRESETS.find((entry) => entry.icon === normalized) || null;
+}
+
+function normalizeSuperCategoryIconSource(name = '', desc = '') {
+    return `${name} ${desc}`
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, ' ');
+}
+
+function suggestSuperCategoryIcon(name = '', desc = '') {
+    const source = normalizeSuperCategoryIconSource(name, desc);
+    if (source) {
+        const match = SUPER_CATEGORY_ICON_RULES.find((rule) =>
+            rule.terms.some((term) => source.includes(normalizeSuperCategoryIconSource(term)))
+        );
+        if (match?.icon) return match.icon;
+    }
+    return DEFAULT_SUPER_CATEGORY_ICON;
+}
+
+function updateSuperCategoryIconPreview(icon = '') {
+    const normalized = String(icon || '').trim() || DEFAULT_SUPER_CATEGORY_ICON;
+    const previewGlyph = document.getElementById('superIconPreviewGlyph');
+    const previewTitle = document.getElementById('superIconPreviewTitle');
+    const previewNote = document.getElementById('superIconPreviewNote');
+    const preset = getSuperCategoryIconPresetMeta(normalized);
+
+    if (previewGlyph) previewGlyph.textContent = normalized;
+    if (previewTitle) {
+        previewTitle.textContent = preset
+            ? `${preset.label} icon`
+            : 'Custom fallback icon';
+    }
+    if (previewNote) {
+        previewNote.textContent = preset
+            ? 'Used in the builder, structure lists, and quick menu cues.'
+            : 'Custom icon kept for this group. Use it only when the quick picks do not fit.';
+    }
+
+    const picker = document.getElementById('superCategoryIconPicker');
+    if (picker) {
+        picker.querySelectorAll('.super-icon-picker-btn').forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.icon === normalized);
+            button.setAttribute('aria-selected', button.dataset.icon === normalized ? 'true' : 'false');
+        });
+    }
+
+    const manualDisclosure = document.querySelector('.super-icon-manual');
+    if (manualDisclosure) {
+        manualDisclosure.open = !preset;
+    }
+}
+
+function applySuperCategoryIcon(icon, options = {}) {
+    const {
+        manual = false,
+        dispatch = false
+    } = options;
+    const input = document.getElementById('scEmoji');
+    if (!input) return;
+
+    const normalized = String(icon || '').trim() || DEFAULT_SUPER_CATEGORY_ICON;
+    input.value = normalized;
+    superCategoryIconManuallyChosen = Boolean(manual);
+    updateSuperCategoryIconPreview(normalized);
+    refreshMenuCrudFormUx('superCatForm');
+
+    if (dispatch) {
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+function renderSuperCategoryIconPicker(selectedIcon = DEFAULT_SUPER_CATEGORY_ICON) {
+    const picker = document.getElementById('superCategoryIconPicker');
+    if (!picker) return;
+    const normalized = String(selectedIcon || '').trim() || DEFAULT_SUPER_CATEGORY_ICON;
+    picker.innerHTML = SUPER_CATEGORY_ICON_PRESETS.map((entry) => `
+        <button
+            type="button"
+            class="super-icon-picker-btn${entry.icon === normalized ? ' is-active' : ''}"
+            data-icon="${escapeHtmlAttr(entry.icon)}"
+            aria-pressed="${entry.icon === normalized ? 'true' : 'false'}"
+            aria-selected="${entry.icon === normalized ? 'true' : 'false'}"
+            title="${escapeHtmlAttr(entry.label)}"
+        >
+            <span class="super-icon-picker-emoji">${escapeHtml(entry.icon)}</span>
+            <span class="super-icon-picker-label">${escapeHtml(entry.label)}</span>
+        </button>
+    `).join('');
+
+    picker.querySelectorAll('.super-icon-picker-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            applySuperCategoryIcon(button.dataset.icon || DEFAULT_SUPER_CATEGORY_ICON, {
+                manual: true,
+                dispatch: true
+            });
+        });
+    });
+
+    updateSuperCategoryIconPreview(normalized);
+}
 
 function clearActiveImporterPollHandle() {
     if (activeImporterPollHandle) {
@@ -151,7 +286,7 @@ function setImportStudioControlsBusy(active) {
     importStudioBusy = Boolean(active);
     const menuFilesEl = document.getElementById('importStudioMenuFiles');
     const generateBtn = document.querySelector('#data-tools .tool-actions .primary-btn');
-    const copyBtn = document.querySelector('#data-tools .tool-actions .brand-secondary-btn');
+    const copyBtn = document.getElementById('copyImporterDraftJsonBtn');
     const applyMenuBtn = document.getElementById('applyImporterMenuOnlyBtn');
     const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
 
@@ -178,6 +313,7 @@ function setImportStudioStatus(state = null) {
         cardEl.hidden = true;
         cardEl.classList.remove('is-complete', 'is-error');
         if (fillEl) fillEl.style.width = '0%';
+        renderImportStudioStageTimeline(null);
         return;
     }
 
@@ -190,6 +326,201 @@ function setImportStudioStatus(state = null) {
     if (titleEl) titleEl.textContent = state.title || 'Preparing import';
     if (copyEl) copyEl.textContent = state.copy || 'Keep this tab open while the draft is prepared.';
     if (fillEl) fillEl.style.width = `${progress}%`;
+    renderImportStudioStageTimeline(state);
+}
+
+function getImportStudioPhaseKey(state = {}) {
+    const stageKey = String(state.stageKey || '').trim().toLowerCase();
+    const signal = `${state.badge || ''} ${state.title || ''} ${state.meta || ''}`.toLowerCase();
+
+    if (signal.includes('publish')) return 'publish';
+    if (signal.includes('upload')) return 'upload';
+    if (stageKey === 'succeeded' || signal.includes('draft ready') || signal.includes('menu draft generated')) return 'review';
+    if (['queued', 'prepare_input', 'source_extraction', 'source_structuring', 'direct_structuring', 'finalize'].includes(stageKey)) return 'extract';
+    if (signal.includes('extract') || signal.includes('structur') || signal.includes('import')) return 'extract';
+    if (state.status === 'failed') return signal.includes('publish') ? 'publish' : 'extract';
+    return 'upload';
+}
+
+function renderImportStudioStageTimeline(state = null) {
+    const timelineEl = document.getElementById('importStudioStageTimeline');
+    if (!timelineEl) return;
+    if (!state) {
+        timelineEl.innerHTML = '';
+        return;
+    }
+
+    const phases = [
+        { key: 'upload', label: 'Upload', copy: 'Collect the files' },
+        { key: 'extract', label: 'Extract', copy: 'Read and structure the menu' },
+        { key: 'review', label: 'Review', copy: 'Check draft quality' },
+        { key: 'publish', label: 'Publish', copy: 'Write to live data' }
+    ];
+    const activePhase = getImportStudioPhaseKey(state);
+    const activeIndex = Math.max(0, phases.findIndex((phase) => phase.key === activePhase));
+
+    timelineEl.innerHTML = phases.map((phase, index) => {
+        let status = 'pending';
+        if (state.status === 'failed' && index === activeIndex) {
+            status = 'failed';
+        } else if (index < activeIndex) {
+            status = 'ready';
+        } else if (index === activeIndex) {
+            status = state.status === 'succeeded'
+                ? (activePhase === 'review' && phase.key === 'publish' ? 'pending' : 'ready')
+                : 'active';
+        }
+
+        return `
+            <div class="importer-stage-pill is-${status}">
+                <strong>${escapeHtml(phase.label)}</strong>
+                <span>${escapeHtml(phase.copy)}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function getImporterConfidenceTone(value = '') {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized === 'high') return 'high';
+    if (normalized === 'medium') return 'medium';
+    if (normalized === 'low') return 'low';
+    return 'unknown';
+}
+
+function renderImporterIssuePanelMarkup({ title, badge, tone, copy, items, emptyCopy }) {
+    const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+    return `
+        <section class="importer-issue-panel is-${escapeHtml(tone || 'info')}">
+            <div class="importer-issue-head">
+                <div>
+                    <h6>${escapeHtml(title)}</h6>
+                    <p class="importer-issue-copy">${escapeHtml(copy || '')}</p>
+                </div>
+                <span class="importer-issue-badge">${escapeHtml(badge || '')}</span>
+            </div>
+            ${safeItems.length
+                ? `<ul class="importer-issue-list">${safeItems.map((entry) => `<li>${escapeHtml(entry)}</li>`).join('')}</ul>`
+                : `<p class="importer-issue-empty">${escapeHtml(emptyCopy || 'Nothing to review here.')}</p>`}
+        </section>
+    `;
+}
+
+function renderImporterImpactPanel(report, draft, meta = {}) {
+    const impactEl = document.getElementById('importStudioImpactPanel');
+    if (!impactEl) return;
+    if (!report || !draft) {
+        impactEl.innerHTML = `
+            <h5>Publish decision</h5>
+            <p class="importer-impact-copy">Create a draft first to see what will change before anything goes live.</p>
+        `;
+        return;
+    }
+
+    const review = draft.review || {};
+    const confidence = review.confidence || {};
+    const menuOnlyState = report.canApplyMenuOnly ? 'is-ready' : report.blockers.length ? 'is-block' : 'is-warn';
+    const structureState = report.canApplyMenuStructure ? 'is-ready' : report.blockers.length ? 'is-block' : 'is-warn';
+
+    impactEl.innerHTML = `
+        <h5>Publish decision</h5>
+        <p class="importer-impact-copy">This draft stays inside admin until you publish it. Use this panel to choose the safest scope.</p>
+        <ul class="importer-impact-list">
+            <li>
+                <div>
+                    <strong>Menu data only</strong>
+                    <span>Replaces dish data without changing category structure.</span>
+                </div>
+                <span class="importer-impact-state ${menuOnlyState}">${report.canApplyMenuOnly ? 'Ready' : report.blockers.length ? 'Blocked' : 'Review'}</span>
+            </li>
+            <li>
+                <div>
+                    <strong>Menu + structure</strong>
+                    <span>Also replaces imported categories and super categories.</span>
+                </div>
+                <span class="importer-impact-state ${structureState}">${report.canApplyMenuStructure ? 'Ready' : report.blockers.length ? 'Blocked' : 'Review'}</span>
+            </li>
+            <li>
+                <div>
+                    <strong>Library matches</strong>
+                    <span>Existing media auto-matched into the draft.</span>
+                </div>
+                <span class="importer-impact-state">${escapeHtml(String(Number(meta.mediaLibraryMatches) || 0))}</span>
+            </li>
+            <li>
+                <div>
+                    <strong>Confidence mix</strong>
+                    <span>Extraction ${escapeHtml(confidence.menuExtraction || 'unknown')} / Translation ${escapeHtml(confidence.translations || 'unknown')} / Media ${escapeHtml(confidence.mediaMatching || 'unknown')}</span>
+                </div>
+                <span class="importer-impact-state">${escapeHtml(meta.jobId ? `Job ${meta.jobId}` : 'Draft')}</span>
+            </li>
+        </ul>
+    `;
+}
+
+function buildImporterConfidencePillsMarkup(review = {}) {
+    const confidence = review.confidence || {};
+    const entries = [
+        { label: 'Extraction', value: confidence.menuExtraction || 'unknown' },
+        { label: 'Translation', value: confidence.translations || 'unknown' },
+        { label: 'Media', value: confidence.mediaMatching || 'unknown' }
+    ];
+
+    return entries.map((entry) => `
+        <span class="importer-confidence-pill is-${escapeHtml(getImporterConfidenceTone(entry.value))}">
+            ${escapeHtml(entry.label)} · ${escapeHtml(String(entry.value))}
+        </span>
+    `).join('');
+}
+
+function buildImporterIssuePanelsMarkup(report, untranslatedItems = []) {
+    const translationNotes = [];
+    if ((report?.missingTranslationCount || 0) > 0) {
+        translationNotes.push(`${report.missingTranslationCount} item(s) still miss one or more translated names.`);
+    }
+    if ((report?.weakTranslationCount || 0) > 0) {
+        translationNotes.push(`${report.weakTranslationCount} item(s) still look like fallback translations and should be reviewed manually.`);
+    }
+    if ((report?.missingDescriptionCount || 0) > 0) {
+        translationNotes.push(`${report.missingDescriptionCount} item(s) still miss a description.`);
+    }
+
+    const untranslatedPreview = Array.isArray(untranslatedItems)
+        ? untranslatedItems.filter(Boolean).slice(0, 6)
+        : [];
+
+    return [
+        renderImporterIssuePanelMarkup({
+            title: 'Blockers',
+            badge: report?.blockers?.length ? `${report.blockers.length} blocking` : 'Clear',
+            tone: report?.blockers?.length ? 'block' : 'info',
+            copy: report?.blockers?.length
+                ? 'These issues should be resolved before anything is published live.'
+                : 'No hard blockers were detected in the current draft.',
+            items: report?.blockers || [],
+            emptyCopy: 'No blockers are holding this draft back right now.'
+        }),
+        renderImporterIssuePanelMarkup({
+            title: 'Warnings',
+            badge: report?.warnings?.length ? `${report.warnings.length} review` : 'Stable',
+            tone: report?.warnings?.length ? 'warn' : 'info',
+            copy: report?.warnings?.length
+                ? 'These are review signals, not hard stops. Read them before you publish.'
+                : 'No secondary warnings were detected.',
+            items: report?.warnings || [],
+            emptyCopy: 'No warnings were raised for this draft.'
+        }),
+        renderImporterIssuePanelMarkup({
+            title: 'Translation review',
+            badge: untranslatedPreview.length || translationNotes.length ? 'Check labels' : 'Covered',
+            tone: untranslatedPreview.length || translationNotes.length ? 'warn' : 'info',
+            copy: untranslatedPreview.length || translationNotes.length
+                ? 'The importer filled the language set, but these items still deserve a manual look.'
+                : 'Translations and descriptions look complete at this stage.',
+            items: [...translationNotes, ...untranslatedPreview.map((name) => `Review labels for ${name}.`)],
+            emptyCopy: 'No translation cleanup is recommended.'
+        })
+    ].join('');
 }
 
 function applyImportStudioProgress(state = null, options = {}) {
@@ -630,10 +961,36 @@ function getPresetThemePack(presetId) {
     }
     return PRESET_THEME_TOKENS[presetId] || PRESET_THEME_TOKENS.fast_food;
 }
-const ONBOARDING_PRESETS = {
+
+function repairAdminMojibake(value) {
+    let result = typeof value === 'string' ? value : '';
+    for (let i = 0; i < 2; i += 1) {
+        if (!/[ÃØÙðâ]/.test(result)) break;
+        try {
+            const repaired = decodeURIComponent(escape(result));
+            if (!repaired || repaired === result) break;
+            result = repaired;
+        } catch (_error) {
+            break;
+        }
+    }
+    return result;
+}
+
+function normalizeAdminPresetStrings(input) {
+    if (typeof input === 'string') return repairAdminMojibake(input);
+    if (Array.isArray(input)) return input.map((entry) => normalizeAdminPresetStrings(entry));
+    if (!input || typeof input !== 'object') return input;
+
+    return Object.fromEntries(
+        Object.entries(input).map(([key, value]) => [key, normalizeAdminPresetStrings(value)])
+    );
+}
+
+const ONBOARDING_PRESETS = normalizeAdminPresetStrings({
     fast_food: {
         branding: {
-            logoMark: 'ðŸ”',
+            logoMark: '🍔',
             primaryColor: '#c62828',
             secondaryColor: '#ff8f00',
             accentColor: '#ffd54f',
@@ -656,25 +1013,25 @@ const ONBOARDING_PRESETS = {
             fr: {
                 hero_sub1: 'Une adresse pour',
                 hero_title1: 'FAIM <span>BIEN SERVIE</span>',
-                hero_sub2: 'DÃ©couvrez les',
+                hero_sub2: 'Découvrez les',
                 hero_title2: 'INCONTOURNABLES <span>{{shortName}}</span>',
-                hero_desc2: 'Des recettes gÃ©nÃ©reuses, rapides et pensÃ©es pour revenir souvent.',
-                hero_sub3: 'Sur place, Ã  emporter',
+                hero_desc2: 'Des recettes généreuses, rapides et pensées pour revenir souvent.',
+                hero_sub3: 'Sur place, à emporter',
                 hero_title3: 'CHAUD <span>ET RAPIDE</span>',
-                hero_desc3: 'Une expÃ©rience simple, gourmande et efficace toute la journÃ©e.',
-                about_p1: '{{restaurantName}} propose une cuisine rÃ©confortante, bien exÃ©cutÃ©e et facile Ã  recommander.',
-                about_p2: 'Nous misons sur des recettes lisibles, des portions gÃ©nÃ©reuses et un service rÃ©gulier pour toutes les visites du quotidien.',
+                hero_desc3: 'Une expérience simple, gourmande et efficace toute la journée.',
+                about_p1: '{{restaurantName}} propose une cuisine réconfortante, bien exécutée et facile à recommander.',
+                about_p2: 'Nous misons sur des recettes lisibles, des portions généreuses et un service régulier pour toutes les visites du quotidien.',
                 about_p3: 'Notre ambition est simple : devenir une adresse fiable pour manger vite, bien, et avec plaisir.',
                 event_birthday: 'Anniversaires',
                 event_birthday_desc: 'Un format simple et convivial pour les petits groupes.',
                 event_family: 'Repas entre amis',
-                event_family_desc: 'Des plats Ã  partager et une ambiance dÃ©contractÃ©e.',
+                event_family_desc: 'Des plats à partager et une ambiance décontractée.',
                 event_corporate: 'Commandes de groupe',
-                event_corporate_desc: 'Une solution rapide pour les Ã©quipes et les commandes en volume.',
-                event_party: 'SoirÃ©es privÃ©es',
+                event_corporate_desc: 'Une solution rapide pour les équipes et les commandes en volume.',
+                event_party: 'Soirées privées',
                 event_party_desc: 'Un point de rencontre gourmand pour vos moments informels.',
-                events_cta_text: 'Besoin dâ€™un format groupe ou dâ€™une privatisation lÃ©gÃ¨re ? Contactez-nous.',
-                footer_note: 'Cuisine gÃ©nÃ©reuse, service rapide et adresse facile Ã  recommander.'
+                events_cta_text: 'Besoin d’un format groupe ou d’une privatisation légère ? Contactez-nous.',
+                footer_note: 'Cuisine généreuse, service rapide et adresse facile à recommander.'
             },
             en: {
                 hero_sub1: 'A place for',
@@ -748,26 +1105,26 @@ const ONBOARDING_PRESETS = {
         contentTranslations: {
             fr: {
                 hero_sub1: 'Un lieu pour',
-                hero_title1: 'CAFÃ‰ <span>& BRUNCH</span>',
+                hero_title1: 'CAFÉ <span>& BRUNCH</span>',
                 hero_sub2: 'Savourez les',
                 hero_title2: 'INSTANTS <span>{{shortName}}</span>',
-                hero_desc2: 'Une adresse chaleureuse pour le cafÃ©, les douceurs et les rendez-vous du quotidien.',
-                hero_sub3: 'Du matin au goÃ»ter',
-                hero_title3: 'DOUX <span>& SOIGNÃ‰</span>',
-                hero_desc3: 'Des recettes maison et une atmosphÃ¨re pensÃ©e pour prendre son temps.',
-                about_p1: '{{restaurantName}} est pensÃ© comme une adresse lumineuse pour le cafÃ©, le brunch et les pauses qui font du bien.',
-                about_p2: 'Nous travaillons une carte simple, soignÃ©e et accueillante, idÃ©ale pour un rendez-vous, une pause ou un moment Ã  partager.',
-                about_p3: 'Notre promesse : une expÃ©rience douce, rÃ©guliÃ¨re et agrÃ©able, du premier cafÃ© au dernier dessert.',
-                event_birthday: 'Brunchs privÃ©s',
-                event_birthday_desc: 'Un format convivial pour les matinÃ©es et anniversaires en petit comitÃ©.',
+                hero_desc2: 'Une adresse chaleureuse pour le café, les douceurs et les rendez-vous du quotidien.',
+                hero_sub3: 'Du matin au goûter',
+                hero_title3: 'DOUX <span>& SOIGNÉ</span>',
+                hero_desc3: 'Des recettes maison et une atmosphère pensée pour prendre son temps.',
+                about_p1: '{{restaurantName}} est pensé comme une adresse lumineuse pour le café, le brunch et les pauses qui font du bien.',
+                about_p2: 'Nous travaillons une carte simple, soignée et accueillante, idéale pour un rendez-vous, une pause ou un moment à partager.',
+                about_p3: 'Notre promesse : une expérience douce, régulière et agréable, du premier café au dernier dessert.',
+                event_birthday: 'Brunchs privés',
+                event_birthday_desc: 'Un format convivial pour les matinées et anniversaires en petit comité.',
                 event_family: 'Rencontres entre proches',
-                event_family_desc: 'Un lieu calme et chaleureux pour se retrouver autour dâ€™une belle table.',
-                event_corporate: 'RÃ©unions cafÃ©',
-                event_corporate_desc: 'Un cadre dÃ©tendu pour les rendez-vous professionnels et pauses dâ€™Ã©quipe.',
-                event_party: 'GoÃ»ters & cÃ©lÃ©brations',
-                event_party_desc: 'Une ambiance douce pour les moments Ã  partager.',
-                events_cta_text: 'Vous prÃ©parez un brunch, une rÃ©union ou un goÃ»ter privÃ© ? Ã‰crivez-nous.',
-                footer_note: 'CafÃ©, brunch et douceurs servis dans une ambiance chaleureuse.'
+                event_family_desc: 'Un lieu calme et chaleureux pour se retrouver autour d’une belle table.',
+                event_corporate: 'Réunions café',
+                event_corporate_desc: 'Un cadre détendu pour les rendez-vous professionnels et pauses d’équipe.',
+                event_party: 'Goûters & célébrations',
+                event_party_desc: 'Une ambiance douce pour les moments à partager.',
+                events_cta_text: 'Vous préparez un brunch, une réunion ou un goûter privé ? Écrivez-nous.',
+                footer_note: 'Café, brunch et douceurs servis dans une ambiance chaleureuse.'
             },
             en: {
                 hero_sub1: 'A place for',
@@ -819,7 +1176,7 @@ const ONBOARDING_PRESETS = {
     },
     traditional: {
         branding: {
-            logoMark: 'ðŸ²',
+            logoMark: '🍲',
             primaryColor: '#8d2f23',
             secondaryColor: '#b97745',
             accentColor: '#d6b17a',
@@ -844,23 +1201,23 @@ const ONBOARDING_PRESETS = {
                 hero_title1: 'SAVEURS <span>TRADITIONNELLES</span>',
                 hero_sub2: 'Retrouvez les',
                 hero_title2: 'RECETTES <span>{{shortName}}</span>',
-                hero_desc2: 'Des plats sincÃ¨res, une table familiale et un accueil gÃ©nÃ©reux.',
-                hero_sub3: 'Pour les repas Ã  partager',
+                hero_desc2: 'Des plats sincères, une table familiale et un accueil généreux.',
+                hero_sub3: 'Pour les repas à partager',
                 hero_title3: 'AUTHENTIQUE <span>& CHALEUREUX</span>',
-                hero_desc3: 'Une cuisine de tradition pensÃ©e pour les grandes et petites occasions.',
+                hero_desc3: 'Une cuisine de tradition pensée pour les grandes et petites occasions.',
                 about_p1: '{{restaurantName}} valorise la cuisine traditionnelle, les recettes de transmission et les repas qui rassemblent.',
-                about_p2: 'Nous privilÃ©gions la gÃ©nÃ©rositÃ©, les saveurs connues, et une atmosphÃ¨re familiale qui met les invitÃ©s Ã  lâ€™aise.',
-                about_p3: 'Notre objectif est dâ€™offrir une adresse de confiance pour les repas du quotidien comme pour les moments importants.',
+                about_p2: 'Nous privilégions la générosité, les saveurs connues, et une atmosphère familiale qui met les invités à l’aise.',
+                about_p3: 'Notre objectif est d’offrir une adresse de confiance pour les repas du quotidien comme pour les moments importants.',
                 event_birthday: 'Repas de famille',
-                event_birthday_desc: 'Une table accueillante pour cÃ©lÃ©brer les temps forts en famille.',
+                event_birthday_desc: 'Une table accueillante pour célébrer les temps forts en famille.',
                 event_family: 'Retrouvailles',
-                event_family_desc: 'Un cadre adaptÃ© aux repas gÃ©nÃ©reux et aux longues conversations.',
-                event_corporate: 'Repas dâ€™Ã©quipe',
-                event_corporate_desc: 'Un format chaleureux pour accueillir collÃ¨gues et partenaires.',
-                event_party: 'FÃªtes traditionnelles',
-                event_party_desc: 'Une cuisine de partage pour les cÃ©lÃ©brations privÃ©es.',
-                events_cta_text: 'Vous prÃ©parez un repas de groupe ou une cÃ©lÃ©bration ? Contactez-nous.',
-                footer_note: 'Recettes traditionnelles, table familiale et hospitalitÃ© gÃ©nÃ©reuse.'
+                event_family_desc: 'Un cadre adapté aux repas généreux et aux longues conversations.',
+                event_corporate: 'Repas d’équipe',
+                event_corporate_desc: 'Un format chaleureux pour accueillir collègues et partenaires.',
+                event_party: 'Fêtes traditionnelles',
+                event_party_desc: 'Une cuisine de partage pour les célébrations privées.',
+                events_cta_text: 'Vous préparez un repas de groupe ou une célébration ? Contactez-nous.',
+                footer_note: 'Recettes traditionnelles, table familiale et hospitalité généreuse.'
             },
             en: {
                 hero_sub1: 'A home for',
@@ -910,7 +1267,7 @@ const ONBOARDING_PRESETS = {
             }
         }
     }
-};
+});
 
 function escapeHtml(value) {
     return String(value || '')
@@ -1025,9 +1382,9 @@ function getCategoryTranslations(catKey) {
     return normalizeEntityTranslations(categoryTranslations?.[catKey]);
 }
 
-function setCategoryTranslationFields(catKey = '') {
-    const translations = getCategoryTranslations(catKey);
-    const baseName = typeof catKey === 'string' ? catKey.trim() : '';
+function setCategoryTranslationFieldsFromTranslations(input, fallbackName = '') {
+    const translations = normalizeEntityTranslations(input);
+    const baseName = typeof fallbackName === 'string' ? fallbackName.trim() : '';
     const fieldMap = {
         fr: 'catNameFr',
         en: 'catNameEn',
@@ -1040,6 +1397,12 @@ function setCategoryTranslationFields(catKey = '') {
             input.value = translations[lang].name || (lang === 'fr' ? baseName : '');
         }
     });
+}
+
+function setCategoryTranslationFields(catKey = '') {
+    const translations = getCategoryTranslations(catKey);
+    const baseName = typeof catKey === 'string' ? catKey.trim() : '';
+    setCategoryTranslationFieldsFromTranslations(translations, baseName);
 }
 
 function buildCategoryTranslations(baseName) {
@@ -1093,12 +1456,14 @@ function setSuperCategoryTranslationFields(input, fallbackName = '', fallbackDes
 function resetCategoryFormState() {
     const form = document.getElementById('catForm');
     if (form) form.reset();
+    setMenuTranslationWarnings('category');
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = '';
     populateCategorySuperCategoryOptions(menuBuilderSelectedSuperCategoryId || '');
     setCategoryTranslationFields();
     updateCategoryImagePreview();
     syncCategoryImageAiControls();
+    refreshMenuCrudFormUx('catForm');
 }
 
 function normalizeCategoryImagePath(value) {
@@ -1169,15 +1534,59 @@ function bindCategoryImageFormEvents() {
     }
 }
 
+function normalizeSuperCategoryIconValue(value) {
+    return String(value || '').trim();
+}
+
+function setSuperCategoryIcon(value, markTouched = true) {
+    applySuperCategoryIcon(value, {
+        manual: markTouched,
+        dispatch: false
+    });
+}
+
+function maybeSuggestSuperCategoryIcon() {
+    if (superCategoryIconManuallyChosen) return;
+    const name = document.getElementById('scName')?.value?.trim() || '';
+    const desc = document.getElementById('scDesc')?.value?.trim() || '';
+    setSuperCategoryIcon(suggestSuperCategoryIcon(name, desc), false);
+}
+
+function bindSuperCategoryIconControls() {
+    const iconInput = document.getElementById('scEmoji');
+    if (iconInput && !iconInput.dataset.iconBound) {
+        iconInput.dataset.iconBound = 'true';
+        iconInput.addEventListener('input', () => {
+            const normalized = normalizeSuperCategoryIconValue(iconInput.value);
+            superCategoryIconManuallyChosen = Boolean(normalized);
+            updateSuperCategoryIconPreview(normalized || DEFAULT_SUPER_CATEGORY_ICON);
+            refreshMenuCrudFormUx('superCatForm');
+        });
+    }
+
+    ['scName', 'scDesc'].forEach((id) => {
+        const field = document.getElementById(id);
+        if (field && !field.dataset.iconSuggestBound) {
+            field.dataset.iconSuggestBound = 'true';
+            field.addEventListener('input', () => maybeSuggestSuperCategoryIcon());
+        }
+    });
+}
+
 function resetSuperCategoryFormState() {
     const form = document.getElementById('superCatForm');
     if (form) form.reset();
+    setMenuTranslationWarnings('supercategory');
     const editingIdInput = document.getElementById('scEditingId');
     if (editingIdInput) editingIdInput.value = '';
+    superCategoryIconManuallyChosen = false;
+    renderSuperCategoryIconPicker(DEFAULT_SUPER_CATEGORY_ICON);
+    setSuperCategoryIcon(DEFAULT_SUPER_CATEGORY_ICON, false);
     setSuperCategoryTranslationFields();
     document.querySelectorAll('.sc-cat-check').forEach((cb) => {
         cb.checked = false;
     });
+    refreshMenuCrudFormUx('superCatForm');
 }
 
 function buildSuperCategoryTranslations(name, desc) {
@@ -1192,6 +1601,585 @@ function buildSuperCategoryTranslations(name, desc) {
     if (!next.fr.desc && desc) next.fr.desc = desc;
     return next;
 }
+
+const MENU_CRUD_FORM_DEFAULT_SECTIONS = {
+    foodForm: 'core',
+    catForm: 'identity',
+    superCatForm: 'identity'
+};
+
+const MENU_TRANSLATION_ENTITY_CONFIG = {
+    item: {
+        formId: 'foodForm',
+        summaryNoteId: 'itemTranslationSummaryNote',
+        statusRowId: 'itemTranslationStatusRow',
+        disclosureId: 'itemTranslationDisclosure',
+        buttonId: 'itemTranslationGenerateBtn',
+        warningId: 'itemTranslationAiNote'
+    },
+    category: {
+        formId: 'catForm',
+        summaryNoteId: 'catTranslationSummaryNote',
+        statusRowId: 'catTranslationStatusRow',
+        disclosureId: 'catTranslationDisclosure',
+        buttonId: 'catTranslationGenerateBtn',
+        warningId: 'catTranslationAiNote'
+    },
+    supercategory: {
+        formId: 'superCatForm',
+        summaryNoteId: 'superTranslationSummaryNote',
+        statusRowId: 'superTranslationStatusRow',
+        disclosureId: 'superTranslationDisclosure',
+        buttonId: 'superTranslationGenerateBtn',
+        warningId: 'superTranslationAiNote'
+    }
+};
+
+const menuTranslationWarnings = {
+    item: [],
+    category: [],
+    supercategory: []
+};
+
+function getMenuCrudSections(form) {
+    if (!form) return [];
+    const sections = Array.from(form.querySelectorAll('[data-menu-section]'));
+    if (!sections.length) return [];
+    const navButtons = Array.from(document.querySelectorAll(`.menu-crud-step-btn[data-form-id="${form.id}"]`));
+    if (!navButtons.length) return sections;
+    const ordered = navButtons
+        .map((button) => button.dataset.sectionTarget || '')
+        .map((sectionId) => sections.find((section) => section.dataset.menuSection === sectionId))
+        .filter(Boolean);
+    return ordered.length === sections.length ? ordered : sections;
+}
+
+function setMenuCrudMetaText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+function setTextIfPresent(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+function getFilledTranslationCount(translations) {
+    const normalized = normalizeEntityTranslations(translations);
+    return ['fr', 'en', 'ar'].reduce((total, lang) => total + (normalized[lang].name ? 1 : 0), 0);
+}
+
+function buildTranslationStatusMarkup(translations) {
+    const normalized = normalizeEntityTranslations(translations);
+    return [
+        { lang: 'fr', label: 'French' },
+        { lang: 'en', label: 'English' },
+        { lang: 'ar', label: 'Arabic' }
+    ].map(({ lang, label }) => {
+        const ready = Boolean(normalized[lang]?.name);
+        return `<span class="translation-status-pill ${ready ? 'is-ready' : ''}">${label} ${ready ? 'Ready' : 'Missing'}</span>`;
+    }).join('');
+}
+
+function setMenuTranslationWarnings(entityType, warnings = []) {
+    if (!Object.prototype.hasOwnProperty.call(menuTranslationWarnings, entityType)) return;
+    menuTranslationWarnings[entityType] = Array.isArray(warnings)
+        ? warnings.map((warning) => String(warning || '').trim()).filter(Boolean)
+        : [];
+}
+
+function renderMenuTranslationWarnings(entityType) {
+    const config = MENU_TRANSLATION_ENTITY_CONFIG[entityType];
+    if (!config?.warningId) return;
+    const el = document.getElementById(config.warningId);
+    if (!el) return;
+    const warnings = menuTranslationWarnings[entityType] || [];
+    if (!warnings.length) {
+        el.hidden = true;
+        el.innerHTML = '';
+        return;
+    }
+    el.hidden = false;
+    el.innerHTML = `
+        <strong>AI review notes</strong>
+        <ul>${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join('')}</ul>
+    `;
+}
+
+function refreshTranslationSummary(entityType) {
+    const config = MENU_TRANSLATION_ENTITY_CONFIG[entityType];
+    if (!config) return;
+    let translations = normalizeEntityTranslations();
+    let note = 'No translations yet';
+
+    if (entityType === 'item') {
+        translations = buildMenuItemTranslations();
+    } else if (entityType === 'category') {
+        const baseName = document.getElementById('catName')?.value?.trim() || '';
+        translations = buildCategoryTranslations(baseName);
+    } else if (entityType === 'supercategory') {
+        const name = document.getElementById('scName')?.value?.trim() || '';
+        const desc = document.getElementById('scDesc')?.value?.trim() || '';
+        translations = buildSuperCategoryTranslations(name, desc);
+    }
+
+    const filledCount = getFilledTranslationCount(translations);
+    if (filledCount === 3) note = 'All customer labels are ready';
+    else if (filledCount > 0) note = `${filledCount}/3 language labels ready`;
+    const noteEl = document.getElementById(config.summaryNoteId);
+    if (noteEl) noteEl.textContent = note;
+    const row = document.getElementById(config.statusRowId);
+    if (row) row.innerHTML = buildTranslationStatusMarkup(translations);
+    renderMenuTranslationWarnings(entityType);
+    if (entityType === 'item') {
+        setMenuCrudMetaText(
+            'foodFormMetaTranslations',
+            filledCount === 3 ? 'Translations ready' : filledCount > 0 ? `${filledCount}/3 labels ready` : 'Translations pending'
+        );
+    }
+
+    if (entityType === 'category') {
+        setMenuCrudMetaText(
+            'catFormMetaLabels',
+            filledCount === 3 ? 'Labels ready' : filledCount > 0 ? `${filledCount}/3 labels ready` : 'Labels pending'
+        );
+    }
+
+    if (entityType === 'supercategory') {
+        setMenuCrudMetaText(
+            'superCatFormMetaLabels',
+            filledCount === 3 ? 'Labels ready' : filledCount > 0 ? `${filledCount}/3 labels ready` : 'Labels pending'
+        );
+    }
+}
+
+function refreshFoodFormReview() {
+    const name = document.getElementById('itemName')?.value?.trim() || 'Start with a dish name';
+    const desc = document.getElementById('itemDesc')?.value?.trim() || 'The default description will appear here once it is filled.';
+    const hasSizes = Boolean(document.getElementById('itemHasSizes')?.checked);
+    const price = Number.parseFloat(document.getElementById('itemPrice')?.value || '0') || 0;
+    const priceSmall = Number.parseFloat(document.getElementById('itemPriceSmall')?.value || '0') || 0;
+    const priceMedium = Number.parseFloat(document.getElementById('itemPriceMedium')?.value || '0') || 0;
+    const priceLarge = Number.parseFloat(document.getElementById('itemPriceLarge')?.value || '0') || 0;
+    const extras = typeof collectItemExtrasFromEditor === 'function' ? collectItemExtrasFromEditor() : [];
+    const images = (() => {
+        const urls = String(document.getElementById('itemImg')?.value || '')
+            .split(/\n/)
+            .map((value) => value.trim())
+            .filter(Boolean);
+        const files = document.getElementById('itemFile')?.files?.length || 0;
+        if (editingItemId) {
+            const existing = Array.isArray(window._editingImages) ? window._editingImages.filter(Boolean).length : 0;
+            return Math.max(existing, urls.length) + files;
+        }
+        return urls.length + files;
+    })();
+    const translationCount = getFilledTranslationCount(buildMenuItemTranslations());
+    const available = document.getElementById('itemAvailable')?.checked !== false;
+    const featured = Boolean(document.getElementById('itemFeatured')?.checked);
+    const pricingState = hasSizes
+        ? (['itemPriceSmall', 'itemPriceMedium', 'itemPriceLarge'].some((id) => (Number.parseFloat(document.getElementById(id)?.value || '0') || 0) > 0)
+            ? 'Size pricing ready'
+            : 'Pricing pending')
+        : (price > 0 ? 'Standard price ready' : 'Pricing pending');
+
+    setMenuCrudMetaText('foodFormMetaState', editingItemId ? 'Editing existing dish' : 'New dish draft');
+    setMenuCrudMetaText('foodFormMetaPricing', pricingState);
+    setTextIfPresent('itemReviewSummaryName', name);
+    setTextIfPresent('itemReviewSummaryDesc', desc);
+    setTextIfPresent('itemReviewPriceMode', hasSizes
+        ? `Sizes from ${[priceSmall, priceMedium, priceLarge].filter((value) => value > 0)[0] || 0} MAD`
+        : (price > 0 ? `${price} MAD standard price` : 'No pricing yet'));
+    setTextIfPresent('itemReviewExtrasCount', extras.length > 0
+        ? `${extras.length} paid extra${extras.length > 1 ? 's' : ''} configured`
+        : 'No extras configured');
+    setTextIfPresent('itemReviewMediaCount', images > 0
+        ? `${images} media asset${images > 1 ? 's' : ''}`
+        : 'No media yet');
+    setTextIfPresent('itemReviewMediaHint', editingItemId
+        ? 'Use the gallery manager if you need to curate the saved image order.'
+        : 'Save once, then the full gallery manager becomes available.');
+    setTextIfPresent('itemReviewTranslationState', translationCount === 3
+        ? 'Translations ready'
+        : translationCount > 0 ? `${translationCount}/3 labels ready` : 'Translations pending');
+    setTextIfPresent('itemReviewAvailabilityState', `${available ? 'Visible' : 'Hidden'} on the live menu${featured ? ' · featured' : ''}`);
+}
+
+function getMenuCrudSectionStatus(formId, sectionId) {
+    if (formId === 'foodForm') {
+        const name = document.getElementById('itemName')?.value?.trim() || '';
+        const cat = document.getElementById('itemCat')?.value?.trim() || '';
+        const desc = document.getElementById('itemDesc')?.value?.trim() || '';
+        const hasSizes = Boolean(document.getElementById('itemHasSizes')?.checked);
+        const hasSingle = (Number.parseFloat(document.getElementById('itemPrice')?.value || '0') || 0) > 0;
+        const hasSized = ['itemPriceSmall', 'itemPriceMedium', 'itemPriceLarge'].some((id) => (Number.parseFloat(document.getElementById(id)?.value || '0') || 0) > 0);
+        if (sectionId === 'core') return name && cat && desc ? 'ready' : 'missing';
+        if (sectionId === 'pricing') {
+            return hasSizes ? (hasSized ? 'ready' : 'missing') : (hasSingle ? 'ready' : 'missing');
+        }
+        if (sectionId === 'extras') {
+            const extrasCount = typeof collectItemExtrasFromEditor === 'function' ? collectItemExtrasFromEditor().length : 0;
+            return extrasCount > 0 ? 'ready' : 'optional';
+        }
+        if (sectionId === 'media') {
+            const hasImages = Boolean(String(document.getElementById('itemImg')?.value || '').trim())
+                || Boolean(document.getElementById('itemFile')?.files?.length)
+                || Boolean(Array.isArray(window._editingImages) && window._editingImages.length);
+            return hasImages ? 'ready' : 'optional';
+        }
+        if (sectionId === 'labels') {
+            return getFilledTranslationCount(buildMenuItemTranslations()) === 3 ? 'ready' : 'missing';
+        }
+        if (sectionId === 'review') {
+            return name && cat && desc && (hasSizes ? hasSized : hasSingle) ? 'ready' : 'missing';
+        }
+    }
+
+    if (formId === 'catForm') {
+        const name = document.getElementById('catName')?.value?.trim() || '';
+        const superCategory = document.getElementById('catSuperCategory')?.value?.trim() || '';
+        if (sectionId === 'identity') return name && superCategory ? 'ready' : 'missing';
+        if (sectionId === 'visual') {
+            const hasImage = Boolean(String(document.getElementById('catImage')?.value || '').trim())
+                || Boolean(document.getElementById('catImageUpload')?.files?.length);
+            return hasImage ? 'ready' : 'optional';
+        }
+        if (sectionId === 'labels') {
+            return getFilledTranslationCount(buildCategoryTranslations(name)) === 3 ? 'ready' : 'missing';
+        }
+    }
+
+    if (formId === 'superCatForm') {
+        const name = document.getElementById('scName')?.value?.trim() || '';
+        const desc = document.getElementById('scDesc')?.value?.trim() || '';
+        const icon = normalizeSuperCategoryIconValue(document.getElementById('scEmoji')?.value || '');
+        if (sectionId === 'identity') return name && desc && icon ? 'ready' : 'missing';
+        if (sectionId === 'labels') {
+            return getFilledTranslationCount(buildSuperCategoryTranslations(name, desc)) === 3 ? 'ready' : 'missing';
+        }
+        if (sectionId === 'structure') {
+            return Array.from(document.querySelectorAll('.sc-cat-check:checked')).length > 0 ? 'ready' : 'missing';
+        }
+    }
+
+    return 'optional';
+}
+
+function refreshMenuCrudSectionButtons(form) {
+    if (!form?.id) return;
+    const buttons = document.querySelectorAll(`.menu-crud-step-btn[data-form-id="${form.id}"]`);
+    buttons.forEach((button) => {
+        const sectionId = button.dataset.sectionTarget || '';
+        const status = getMenuCrudSectionStatus(form.id, sectionId);
+        button.dataset.status = status;
+        const statusEl = button.querySelector('.menu-crud-step-status');
+        if (statusEl) {
+            statusEl.textContent = status === 'ready' ? 'Ready' : status === 'optional' ? 'Optional' : 'Missing';
+        }
+    });
+}
+
+function getActiveMenuCrudSectionId(form) {
+    return getMenuCrudSections(form).find((section) => section.classList.contains('is-active'))?.dataset.menuSection
+        || MENU_CRUD_FORM_DEFAULT_SECTIONS[form?.id]
+        || '';
+}
+
+function getMenuCrudSectionLabel(formId, sectionId) {
+    return document.querySelector(`.menu-crud-step-btn[data-form-id="${formId}"][data-section-target="${sectionId}"] .menu-crud-step-label`)?.textContent?.trim()
+        || sectionId;
+}
+
+function syncMenuCrudFooter(form) {
+    if (!form?.id) return;
+    const sections = getMenuCrudSections(form);
+    if (!sections.length) return;
+    const activeSectionId = getActiveMenuCrudSectionId(form);
+    const activeIndex = Math.max(0, sections.findIndex((section) => section.dataset.menuSection === activeSectionId));
+    const total = sections.length;
+    const readyCount = sections.filter((section) => getMenuCrudSectionStatus(form.id, section.dataset.menuSection) === 'ready').length;
+    const firstMissing = sections.find((section) => getMenuCrudSectionStatus(form.id, section.dataset.menuSection) === 'missing')?.dataset.menuSection || '';
+
+    const titleEl = document.getElementById(`${form.id}NavTitle`);
+    if (titleEl) titleEl.textContent = getMenuCrudSectionLabel(form.id, activeSectionId);
+
+    const hintEl = document.getElementById(`${form.id}NavHint`);
+    if (hintEl) {
+        hintEl.textContent = `Step ${activeIndex + 1} of ${total} · ${readyCount} ${readyCount === 1 ? 'step' : 'steps'} ready`;
+    }
+
+    const prevBtn = document.getElementById(`${form.id}PrevBtn`);
+    if (prevBtn) {
+        prevBtn.disabled = activeIndex <= 0;
+    }
+
+    const nextBtn = document.getElementById(`${form.id}NextBtn`);
+    if (!nextBtn) return;
+    if (activeIndex < total - 1) {
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Next step';
+    } else if (firstMissing && firstMissing !== activeSectionId) {
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'First missing';
+    } else {
+        nextBtn.disabled = true;
+        nextBtn.textContent = 'Ready to save';
+    }
+}
+
+function refreshMenuCrudFormUx(target) {
+    const form = typeof target === 'string' ? document.getElementById(target) : target;
+    if (!form) return;
+    refreshMenuCrudSectionButtons(form);
+    if (form.id === 'foodForm') {
+        refreshTranslationSummary('item');
+        refreshFoodFormReview();
+        const galleryBtn = document.getElementById('itemOpenGalleryBtn');
+        if (galleryBtn) {
+            galleryBtn.disabled = !editingItemId;
+            galleryBtn.textContent = editingItemId ? 'Open image manager' : 'Save once to manage gallery';
+        }
+    } else if (form.id === 'catForm') {
+        refreshTranslationSummary('category');
+        const hasImage = Boolean(String(document.getElementById('catImage')?.value || '').trim())
+            || Boolean(document.getElementById('catImageUpload')?.files?.length);
+        setMenuCrudMetaText('catFormMetaState', document.getElementById('catEditingKey')?.value ? 'Editing category' : 'Category draft');
+        setMenuCrudMetaText('catFormMetaVisual', hasImage ? 'Image ready' : 'Image optional');
+    } else if (form.id === 'superCatForm') {
+        refreshTranslationSummary('supercategory');
+        const selectedCount = Array.from(document.querySelectorAll('.sc-cat-check:checked')).length;
+        setMenuCrudMetaText('superCatFormMetaState', selectedCount > 0 ? `${selectedCount} categories linked` : 'Structure draft');
+    }
+    syncMenuCrudFooter(form);
+}
+
+function focusMenuCrudField(formId, sectionId, fieldId) {
+    activateMenuCrudSection(formId, sectionId, false);
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    requestAnimationFrame(() => {
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof field.focus === 'function') field.focus();
+    });
+}
+
+function setMenuCrudPrimaryButtonState(formId, state) {
+    const form = document.getElementById(formId);
+    const button = form?.querySelector('.modal-form-actions button[type="submit"]');
+    if (!button) return;
+
+    if (!button.dataset.defaultLabel) {
+        button.dataset.defaultLabel = button.textContent.trim() || 'Save';
+    }
+
+    if (state === 'saving') {
+        button.disabled = true;
+        button.textContent = 'Saving...';
+        return;
+    }
+
+    if (state === 'saved') {
+        button.disabled = false;
+        button.textContent = 'Saved';
+        return;
+    }
+
+    button.disabled = false;
+    button.textContent = button.dataset.defaultLabel;
+}
+
+function initializeMenuCrudFormEnhancements(form) {
+    if (!form) return;
+    if (!form.dataset.menuUxBound) {
+        form.addEventListener('input', () => refreshMenuCrudFormUx(form));
+        form.addEventListener('change', () => refreshMenuCrudFormUx(form));
+        form.dataset.menuUxBound = 'true';
+    }
+    const defaultSection = MENU_CRUD_FORM_DEFAULT_SECTIONS[form.id];
+    if (defaultSection) activateMenuCrudSection(form.id, defaultSection, false);
+    refreshMenuCrudFormUx(form);
+}
+
+window.activateMenuCrudSection = function (formId, sectionId, shouldScroll = true) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const sections = getMenuCrudSections(form);
+    sections.forEach((section) => {
+        section.classList.toggle('is-active', section.dataset.menuSection === sectionId);
+    });
+    document.querySelectorAll(`.menu-crud-step-btn[data-form-id="${formId}"]`).forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.sectionTarget === sectionId);
+    });
+    if (shouldScroll) {
+        const targetSection = sections.find((section) => section.dataset.menuSection === sectionId);
+        targetSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    refreshMenuCrudFormUx(form);
+};
+
+window.stepMenuCrudSection = function (formId, direction) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const sections = getMenuCrudSections(form);
+    if (!sections.length) return;
+    const activeSectionId = getActiveMenuCrudSectionId(form);
+    const activeIndex = Math.max(0, sections.findIndex((section) => section.dataset.menuSection === activeSectionId));
+    if (direction < 0) {
+        const previous = sections[activeIndex - 1];
+        if (previous) {
+            activateMenuCrudSection(formId, previous.dataset.menuSection);
+        }
+        return;
+    }
+
+    const next = sections[activeIndex + 1];
+    if (next) {
+        activateMenuCrudSection(formId, next.dataset.menuSection);
+        return;
+    }
+
+    const firstMissing = sections.find((section) => getMenuCrudSectionStatus(formId, section.dataset.menuSection) === 'missing');
+    if (firstMissing && firstMissing.dataset.menuSection !== activeSectionId) {
+        activateMenuCrudSection(formId, firstMissing.dataset.menuSection);
+    }
+};
+
+window.toggleTranslationEditor = function (entityType) {
+    const config = MENU_TRANSLATION_ENTITY_CONFIG[entityType];
+    if (!config) return;
+    const disclosure = document.getElementById(config.disclosureId);
+    if (!disclosure) return;
+    disclosure.open = !disclosure.open;
+    if (disclosure.open) {
+        disclosure.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+};
+
+window.openItemImageManagerFromForm = function () {
+    if (!editingItemId) {
+        showToast('Save the dish first, then open the full image manager.');
+        return;
+    }
+    openImageModal(editingItemId);
+};
+
+window.generateEntityTranslations = async function (entityType) {
+    if (!adminCapabilities.aiMediaToolsEnabled) {
+        showToast('AI generation is disabled.');
+        return;
+    }
+    const config = MENU_TRANSLATION_ENTITY_CONFIG[entityType];
+    if (!config) return;
+
+    let payload = {};
+    let title = 'Generating translations';
+    let copy = 'The admin is creating customer-facing labels across French, English, and Arabic.';
+    if (entityType === 'item') {
+        const fallbackName = document.getElementById('itemName')?.value?.trim() || '';
+        if (!fallbackName) {
+            showToast('Default dish name is required before generating translations.');
+            return;
+        }
+        payload = {
+            entityType: 'item',
+            fallbackName,
+            fallbackDesc: document.getElementById('itemDesc')?.value?.trim() || '',
+            categoryName: typeof window.getLocalizedCategoryName === 'function'
+                ? window.getLocalizedCategoryName(document.getElementById('itemCat')?.value || '', document.getElementById('itemCat')?.value || '')
+                : (document.getElementById('itemCat')?.value || ''),
+            existingTranslations: buildMenuItemTranslations()
+        };
+        title = 'Generating dish translations';
+    } else if (entityType === 'category') {
+        const fallbackName = document.getElementById('catName')?.value?.trim() || '';
+        if (!fallbackName) {
+            showToast('Category name is required before generating translations.');
+            return;
+        }
+        const selectedSuperCategoryId = document.getElementById('catSuperCategory')?.value?.trim() || '';
+        const selectedSuperCategory = (restaurantConfig.superCategories || []).find((entry) => entry.id === selectedSuperCategoryId);
+        payload = {
+            entityType: 'category',
+            fallbackName,
+            superCategoryName: selectedSuperCategory?.name || '',
+            existingTranslations: buildCategoryTranslations(fallbackName),
+            sampleItems: menu.filter((item) => item.cat === fallbackName).slice(0, 4).map((item) => getAdminItemDisplayName(item))
+        };
+        title = 'Generating category translations';
+    } else {
+        const fallbackName = document.getElementById('scName')?.value?.trim() || '';
+        if (!fallbackName) {
+            showToast('Super category name is required before generating translations.');
+            return;
+        }
+        payload = {
+            entityType: 'supercategory',
+            fallbackName,
+            fallbackDesc: document.getElementById('scDesc')?.value?.trim() || '',
+            existingTranslations: buildSuperCategoryTranslations(fallbackName, document.getElementById('scDesc')?.value?.trim() || ''),
+            includedCategories: Array.from(document.querySelectorAll('.sc-cat-check:checked')).map((entry) => entry.value)
+        };
+        title = 'Generating group translations';
+    }
+
+    const buttonEl = document.getElementById(config.buttonId);
+    const originalLabel = buttonEl?.textContent || 'Generate with AI';
+    if (buttonEl) {
+        buttonEl.disabled = true;
+        buttonEl.textContent = 'Generating...';
+    }
+    setAdminTaskOverlay({
+        badge: 'AI labels',
+        title,
+        copy,
+        progress: 54,
+        stage: 'Translation generation',
+        hint: 'The admin is locked while AI prepares the customer-facing labels.'
+    });
+
+    try {
+        const response = await fetch('/api/ai/translate-menu-entity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok || !data.translations) {
+            throw new Error(data.error || 'AI translation generation failed.');
+        }
+
+        if (entityType === 'item') {
+            setMenuItemTranslationFields(data.translations);
+        } else if (entityType === 'category') {
+            setCategoryTranslationFieldsFromTranslations(data.translations, document.getElementById('catName')?.value?.trim() || '');
+        } else {
+            setSuperCategoryTranslationFields(data.translations, document.getElementById('scName')?.value?.trim() || '', document.getElementById('scDesc')?.value?.trim() || '');
+        }
+
+        setMenuTranslationWarnings(entityType, data.warnings || []);
+        activateMenuCrudSection(config.formId, 'labels', false);
+        const disclosure = document.getElementById(config.disclosureId);
+        if (disclosure) {
+            disclosure.open = true;
+            disclosure.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        refreshMenuCrudFormUx(config.formId);
+        showToast(data.warnings?.length ? 'Translations generated. Review the wording before saving.' : 'Translations generated.');
+    } catch (error) {
+        console.error('AI translation generation error:', error);
+        const message = getLongTaskConflictMessage(error) || (error?.message === 'openai_not_configured'
+            ? 'Set OPENAI_API_KEY before using AI translation generation.'
+            : error.message);
+        showToast(`AI translation generation failed: ${message}`);
+    } finally {
+        if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.textContent = originalLabel;
+        }
+        setAdminTaskOverlay(null);
+    }
+};
 
 // Load all data from server API
 async function loadDataFromServer() {
@@ -1566,6 +2554,10 @@ function mountMenuCrudForms() {
     mountNodeIntoHost('superCatForm', 'menuCrudSuperHost');
     mountNodeIntoHost('catForm', 'menuCrudCategoryHost');
     mountNodeIntoHost('foodForm', 'menuCrudItemHost');
+    ['superCatForm', 'catForm', 'foodForm'].forEach((formId) => {
+        const form = document.getElementById(formId);
+        if (form) initializeMenuCrudFormEnhancements(form);
+    });
 }
 
 function getAdminMenuSuperCategoryRows() {
@@ -1580,7 +2572,7 @@ function getAdminMenuSuperCategoryRows() {
             id: '__unassigned__',
             name: 'Unassigned Categories',
             desc: 'Categories not linked to a super category yet.',
-            emoji: 'ðŸ§©',
+            emoji: '🧩',
             cats: unassigned,
             time: '',
             isVirtual: true
@@ -1614,6 +2606,18 @@ function getMenuBuilderCurrentItems() {
     return menu
         .filter((item) => item.cat === menuBuilderSelectedCategoryKey)
         .sort((left, right) => getAdminItemDisplayName(left).localeCompare(getAdminItemDisplayName(right)));
+}
+
+function formatMenuBuilderCategoryPreview(categoryKeys = [], maxVisible = 2) {
+    const keys = Array.isArray(categoryKeys) ? categoryKeys.filter(Boolean) : [];
+    if (!keys.length) return '';
+    const visible = keys
+        .slice(0, maxVisible)
+        .map((catKey) => window.getLocalizedCategoryName(catKey, catKey));
+    const remaining = keys.length - visible.length;
+    return remaining > 0
+        ? `${visible.join(' • ')} • +${remaining} more`
+        : visible.join(' • ');
 }
 
 function resetMenuBuilderNavigation() {
@@ -1690,6 +2694,158 @@ function getMenuBuilderSetupState() {
         categoryCount: categoryKeys.length,
         itemCount: menuCount
     };
+}
+
+function getMenuBuilderItemsForCategories(categoryKeys = []) {
+    const keys = new Set(Array.isArray(categoryKeys) ? categoryKeys.filter(Boolean) : []);
+    if (!keys.size) return [];
+    return (Array.isArray(menu) ? menu : []).filter((item) => keys.has(item?.cat));
+}
+
+function getMenuBuilderCategoryImageCount(categoryKeys = []) {
+    return (Array.isArray(categoryKeys) ? categoryKeys : []).filter((key) => {
+        const image = typeof categoryImages?.[key] === 'string' ? categoryImages[key].trim() : '';
+        return Boolean(image);
+    }).length;
+}
+
+function renderMenuBuilderOverview() {
+    const overviewEl = document.getElementById('menuBuilderOverview');
+    if (!overviewEl) return;
+
+    const state = getMenuBuilderSetupState();
+    const currentSuperCategory = getMenuBuilderCurrentSuperCategory();
+    const currentCategoryKey = menuBuilderSelectedCategoryKey || '';
+    const currentCategoryName = currentCategoryKey
+        ? window.getLocalizedCategoryName(currentCategoryKey, currentCategoryKey)
+        : '';
+    const unassignedCount = getAdminMenuSuperCategoryRows().find((entry) => entry.id === '__unassigned__')?.cats?.length || 0;
+    const stageCards = [
+        {
+            value: state.superCategoryCount,
+            label: 'Super Categories',
+            note: state.superCategoryCount ? 'Top-level groups ready' : 'No groups yet'
+        },
+        {
+            value: state.categoryCount,
+            label: 'Categories',
+            note: state.categoryCount ? 'Linked into the menu tree' : 'No categories yet'
+        },
+        {
+            value: state.itemCount,
+            label: 'Dishes',
+            note: state.itemCount ? 'Visible in the workspace' : 'No dishes yet'
+        },
+        {
+            value: currentMenuWorkspaceStep === 'supercategories'
+                ? 'Map'
+                : currentMenuWorkspaceStep === 'categories'
+                    ? 'Browse'
+                    : 'Fill',
+            label: 'Current Focus',
+            note: currentMenuWorkspaceStep === 'supercategories'
+                ? 'Shape the menu structure'
+                : currentMenuWorkspaceStep === 'categories'
+                    ? 'Organize sections'
+                    : 'Edit sellable dishes'
+        }
+    ];
+
+    let focusTitle = 'Shape the first customer choices';
+    let focusCopy = 'Each super category should feel like a clear browsing path, not a loose label. Keep the structure small, deliberate, and easy to scan.';
+    let focusPills = [
+        `<span class="menu-builder-focus-pill">${state.superCategoryCount} groups</span>`,
+        `<span class="menu-builder-focus-pill">${state.categoryCount} categories</span>`,
+        `<span class="menu-builder-focus-pill">${state.itemCount} dishes</span>`
+    ];
+    let focusNote = unassignedCount
+        ? `<strong>Attention:</strong> ${unassignedCount} categor${unassignedCount > 1 ? 'ies are' : 'y is'} still outside a super category.`
+        : '<strong>Ready:</strong> The top-level structure is connected. Add or refine groups as the menu grows.';
+    let focusStateClass = state.hasSuperCategories ? 'is-ready' : '';
+
+    if (currentMenuWorkspaceStep === 'categories') {
+        const categoryKeys = Array.isArray(currentSuperCategory?.cats) ? currentSuperCategory.cats : [];
+        const itemsInGroup = getMenuBuilderItemsForCategories(categoryKeys);
+        const imageReadyCount = getMenuBuilderCategoryImageCount(categoryKeys);
+        focusTitle = currentSuperCategory
+            ? `Organize ${currentSuperCategory.name}`
+            : 'Organize the selected super category';
+        focusCopy = 'Categories should stay narrow and visual. Customers should understand each section without reading a long explanation.';
+        focusPills = [
+            `<span class="menu-builder-focus-pill">${categoryKeys.length} categor${categoryKeys.length === 1 ? 'y' : 'ies'}</span>`,
+            `<span class="menu-builder-focus-pill">${itemsInGroup.length} dishes</span>`,
+            `<span class="menu-builder-focus-pill">${imageReadyCount} backdrop${imageReadyCount === 1 ? '' : 's'} ready</span>`
+        ];
+        focusNote = categoryKeys.length
+            ? '<strong>Next:</strong> Open a category row to work on the actual dishes and featured status.'
+            : '<strong>Next:</strong> Add the first category so the public menu can drill down into a real section.';
+        focusStateClass = categoryKeys.length ? 'is-ready' : '';
+    } else if (currentMenuWorkspaceStep === 'items') {
+        const featuredCount = getMenuBuilderCurrentItems().filter((item) => item?.featured).length;
+        const extrasCount = getMenuBuilderCurrentItems().filter((item) => Array.isArray(item?.extras) && item.extras.length).length;
+        const unavailableCount = getMenuBuilderCurrentItems().filter((item) => item?.available === false).length;
+        focusTitle = currentCategoryName
+            ? `Fill ${currentCategoryName}`
+            : 'Fill the active category';
+        focusCopy = 'Use short names, honest prices, and reserve the featured marker for a few signature dishes. Keep hidden items deliberate.';
+        focusPills = [
+            `<span class="menu-builder-focus-pill">${getMenuBuilderCurrentItems().length} dishes</span>`,
+            `<span class="menu-builder-focus-pill">${featuredCount} featured</span>`,
+            `<span class="menu-builder-focus-pill">${extrasCount} with extras</span>`
+        ];
+        focusNote = unavailableCount
+            ? `<strong>Attention:</strong> ${unavailableCount} dish${unavailableCount > 1 ? 'es are' : ' is'} hidden from customers right now.`
+            : '<strong>Ready:</strong> This category is visible. Open any row to update copy, pricing, media, or extras.';
+        focusStateClass = getMenuBuilderCurrentItems().length ? 'is-ready' : '';
+    }
+
+    overviewEl.innerHTML = `
+        <div class="menu-builder-summary-grid">
+            ${stageCards.map((entry) => `
+                <article class="menu-builder-summary-card">
+                    <strong>${escapeHtml(String(entry.value))}</strong>
+                    <span>${escapeHtml(entry.label)}</span>
+                    <small>${escapeHtml(entry.note)}</small>
+                </article>
+            `).join('')}
+        </div>
+        <aside class="menu-builder-focus-card">
+            <span class="menu-builder-focus-kicker ${focusStateClass}">${escapeHtml(
+                currentMenuWorkspaceStep === 'supercategories'
+                    ? 'Structure'
+                    : currentMenuWorkspaceStep === 'categories'
+                        ? 'Categories'
+                        : 'Dishes'
+            )}</span>
+            <h4 class="menu-builder-focus-title">${escapeHtml(focusTitle)}</h4>
+            <p class="menu-builder-focus-copy">${escapeHtml(focusCopy)}</p>
+            <div class="menu-builder-focus-pills">${focusPills.join('')}</div>
+            <div class="menu-builder-focus-note">${focusNote}</div>
+        </aside>
+    `;
+}
+
+function renderMenuBuilderEmptyState(emptyEl, options = {}) {
+    if (!emptyEl) return;
+    const {
+        title = 'Nothing here yet.',
+        copy = 'Add content to continue.',
+        actionLabel = '',
+        actionHandler = '',
+        secondaryLabel = '',
+        secondaryHandler = ''
+    } = options;
+
+    emptyEl.innerHTML = `
+        <h4 class="menu-builder-empty-title">${escapeHtml(title)}</h4>
+        <p class="menu-builder-empty-copy">${escapeHtml(copy)}</p>
+        ${(actionLabel || secondaryLabel) ? `
+            <div class="menu-builder-empty-actions">
+                ${actionLabel ? `<button type="button" class="primary-btn btn-auto" onclick="${escapeHtmlAttr(actionHandler)}">${escapeHtml(actionLabel)}</button>` : ''}
+                ${secondaryLabel ? `<button type="button" class="brand-secondary-btn btn-auto" onclick="${escapeHtmlAttr(secondaryHandler)}">${escapeHtml(secondaryLabel)}</button>` : ''}
+            </div>
+        ` : ''}
+    `;
 }
 
 function renderMenuBuilderOnboarding() {
@@ -1772,6 +2928,7 @@ function renderMenuBuilderOnboarding() {
 function renderMenuBuilder() {
     const table = document.getElementById('menuBuilderTable');
     const empty = document.getElementById('menuBuilderEmpty');
+    const overview = document.getElementById('menuBuilderOverview');
     const title = document.getElementById('menuBuilderTitle');
     const copy = document.getElementById('menuBuilderCopy');
     const crumbs = document.getElementById('menuBuilderBreadcrumbs');
@@ -1841,12 +2998,36 @@ function renderMenuBuilder() {
     addBtn.textContent = addLabel;
     backBtn.style.display = currentMenuWorkspaceStep === 'supercategories' ? 'none' : '';
     thead.innerHTML = `<tr>${columns.map((label) => `<th>${escapeHtml(label)}</th>`).join('')}</tr>`;
+    if (overview) {
+        renderMenuBuilderOverview();
+    }
 
     if (rows.length === 0) {
         tbody.innerHTML = '';
         table.style.display = 'none';
         empty.style.display = 'block';
-        empty.textContent = emptyText;
+        renderMenuBuilderEmptyState(empty, currentMenuWorkspaceStep === 'supercategories'
+            ? {
+                title: 'Start the menu structure here.',
+                copy: emptyText,
+                actionLabel: 'Add Super Category',
+                actionHandler: 'openMenuBuilderAdd()',
+                secondaryLabel: adminCapabilities.sellerToolsEnabled ? 'Open Import Studio' : '',
+                secondaryHandler: "openMenuBuilderSetupAction('import')"
+            }
+            : currentMenuWorkspaceStep === 'categories'
+                ? {
+                    title: 'This group still needs its first category.',
+                    copy: emptyText,
+                    actionLabel: 'Add Category',
+                    actionHandler: 'openMenuBuilderAdd()'
+                }
+                : {
+                    title: 'This category has no dishes yet.',
+                    copy: emptyText,
+                    actionLabel: 'Add First Dish',
+                    actionHandler: 'openMenuBuilderAdd()'
+                });
         return;
     }
 
@@ -1857,6 +3038,8 @@ function renderMenuBuilder() {
         tbody.innerHTML = rows.map((entry) => {
             const inlineId = toInlineJsString(entry.id);
             const categoriesCount = Array.isArray(entry.cats) ? entry.cats.length : 0;
+            const categoryNames = formatMenuBuilderCategoryPreview(entry.cats, 2);
+            const dishesCount = getMenuBuilderItemsForCategories(entry.cats || []).length;
             return `
                 <tr onclick='openMenuBuilderRow(${inlineId})'>
                     <td data-label="Super Category">
@@ -1864,13 +3047,24 @@ function renderMenuBuilder() {
                             <span class="menu-builder-entry-emoji">${escapeHtml(entry.emoji || ADMIN_ICON.bullet)}</span>
                             <div class="menu-builder-entry-copy">
                                 <strong>${escapeHtml(entry.name || 'Super Category')}</strong>
-                                <div class="menu-builder-row-copy">${escapeHtml(entry.desc || '')}</div>
+                                ${entry.desc ? `<div class="menu-builder-row-copy">${escapeHtml(entry.desc)}</div>` : ''}
+                                <div class="menu-builder-entry-pills">
+                                    ${entry.time ? `<span class="menu-builder-entry-pill">${escapeHtml(entry.time)}</span>` : ''}
+                                    <span class="menu-builder-entry-pill ${entry.isVirtual ? 'is-attention' : 'is-ready'}">${entry.isVirtual ? 'Needs structure' : 'Structure ready'}</span>
+                                </div>
                             </div>
                         </div>
                     </td>
-                    <td data-label="Includes"><span class="menu-builder-count-pill">${categoriesCount} categories</span></td>
+                    <td data-label="Includes">
+                        <div class="menu-builder-side-stack">
+                            <span class="menu-builder-side-label">Coverage</span>
+                            <span class="menu-builder-count-pill">${categoriesCount} categories</span>
+                            <span class="menu-builder-stat-note ${dishesCount ? '' : 'is-muted'}">${dishesCount} dish${dishesCount === 1 ? '' : 'es'}</span>
+                            ${categoryNames ? `<div class="menu-builder-row-note">${escapeHtml(categoryNames)}</div>` : ''}
+                        </div>
+                    </td>
                     <td data-label="Actions">
-                        <div class="menu-builder-item-actions">
+                        <div class="menu-builder-item-actions menu-builder-action-rail">
                             ${entry.isVirtual ? '' : `<button type="button" class="action-btn" title="Edit super category" aria-label="Edit super category" onclick='event.stopPropagation(); openMenuBuilderEdit("supercategory", ${inlineId})'>${ADMIN_ICON.edit}</button>`}
                             ${entry.isVirtual ? '' : `<button type="button" class="action-btn" title="Delete super category" aria-label="Delete super category" onclick='event.stopPropagation(); deleteSuperCat(${inlineId})'>${ADMIN_ICON.trash}</button>`}
                         </div>
@@ -1885,6 +3079,8 @@ function renderMenuBuilder() {
         tbody.innerHTML = rows.map((entry) => {
             const inlineKey = toInlineJsString(entry.key);
             const categoryImage = typeof categoryImages?.[entry.key] === 'string' ? categoryImages[entry.key].trim() : '';
+            const featuredCount = menu.filter((item) => item.cat === entry.key && item.featured).length;
+            const extrasCount = menu.filter((item) => item.cat === entry.key && Array.isArray(item.extras) && item.extras.length > 0).length;
             return `
                 <tr onclick='openMenuBuilderCategory(${inlineKey})'>
                     <td data-label="Category">
@@ -1894,12 +3090,24 @@ function renderMenuBuilder() {
                                 : `<span class="menu-builder-entry-emoji">${escapeHtml(entry.emoji)}</span>`}
                             <div class="menu-builder-entry-copy">
                                 <strong>${escapeHtml(entry.name)}</strong>
+                                <div class="menu-builder-entry-pills">
+                                    <span class="menu-builder-entry-pill ${categoryImage ? 'is-ready' : 'is-attention'}">${categoryImage ? 'Image ready' : 'Image missing'}</span>
+                                    ${featuredCount ? `<span class="menu-builder-entry-pill">${featuredCount} featured</span>` : ''}
+                                    ${extrasCount ? `<span class="menu-builder-entry-pill">${extrasCount} with extras</span>` : ''}
+                                </div>
                             </div>
                         </div>
                     </td>
-                    <td data-label="Items"><span class="menu-builder-count-pill">${entry.itemCount} items</span></td>
+                    <td data-label="Items">
+                        <div class="menu-builder-side-stack">
+                            <span class="menu-builder-side-label">Category health</span>
+                            <span class="menu-builder-count-pill">${entry.itemCount} items</span>
+                            <span class="menu-builder-stat-note ${entry.itemCount ? '' : 'is-muted'}">${entry.itemCount ? 'Ready for editing' : 'Add first dish'}</span>
+                            <div class="menu-builder-row-note">${entry.itemCount ? 'Open to adjust pricing, extras, or media.' : 'Open this category and add the first dish.'}</div>
+                        </div>
+                    </td>
                     <td data-label="Actions">
-                        <div class="menu-builder-item-actions">
+                        <div class="menu-builder-item-actions menu-builder-action-rail">
                             <button type="button" class="action-btn" title="Edit category image" aria-label="Edit category image" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.image}</button>
                             <button type="button" class="action-btn" title="Edit category" aria-label="Edit category" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.edit}</button>
                             <button type="button" class="action-btn" title="Delete category" aria-label="Delete category" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>${ADMIN_ICON.trash}</button>
@@ -1914,25 +3122,56 @@ function renderMenuBuilder() {
     tbody.innerHTML = rows.map((item) => {
         const inlineId = toInlineJsString(item.id);
         const displayName = getAdminItemDisplayName(item);
+        const displayDescription = getAdminItemDisplayDescription(item);
         const price = Number(item.price) || 0;
         const previewImage = (Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : item.img) || '';
         const likes = Number(item.likes) || 0;
+        const sizesCount = item.hasSizes && item.sizes
+            ? Object.values(item.sizes).filter((value) => Number(value) > 0).length
+            : 0;
+        const extrasCount = Array.isArray(item.extras) ? item.extras.length : 0;
+        const availabilityLabel = item.available === false ? 'Hidden' : 'Visible';
         return `
             <tr onclick='editItem(${inlineId})'>
                 <td data-label="Item">
                     <div class="menu-builder-item-main">
-                        <div class="menu-builder-item-thumb">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="${escapeHtml(displayName)}" width="160" height="160" loading="lazy" decoding="async" fetchpriority="low" />` : ''}</div>
+                        <div class="menu-builder-item-thumb">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="${escapeHtml(displayName)}" width="160" height="160" loading="lazy" decoding="async" fetchpriority="low" />` : `<span class="menu-builder-item-thumb-fallback">${ADMIN_ICON.camera}</span>`}</div>
                         <div class="menu-builder-item-meta">
                             <strong>${escapeHtml(displayName)}</strong>
-                            <div class="menu-builder-row-copy">${escapeHtml(getAdminItemDisplayDescription(item))}</div>
+                            ${displayDescription ? `<div class="menu-builder-row-copy">${escapeHtml(displayDescription)}</div>` : ''}
+                            <div class="menu-builder-entry-pills">
+                                <span class="menu-builder-entry-pill ${item.available === false ? 'is-attention' : 'is-ready'}">${availabilityLabel}</span>
+                                ${item.featured ? '<span class="menu-builder-entry-pill is-ready">Featured</span>' : ''}
+                                ${previewImage ? '<span class="menu-builder-entry-pill">Image ready</span>' : '<span class="menu-builder-entry-pill is-muted">Image missing</span>'}
+                                ${sizesCount ? `<span class="menu-builder-entry-pill">${sizesCount} size${sizesCount === 1 ? '' : 's'}</span>` : ''}
+                                ${extrasCount ? `<span class="menu-builder-entry-pill">${extrasCount} extra${extrasCount === 1 ? '' : 's'}</span>` : ''}
+                            </div>
+                            </div>
                         </div>
+                    </td>
+                <td data-label="Price">
+                    <div class="menu-builder-stat-stack">
+                        <span class="menu-builder-stat-label">Price</span>
+                        <span class="menu-builder-row-meta">${item.hasSizes ? 'From ' : ''}MAD ${price.toFixed(2)}</span>
+                        <span class="menu-builder-stat-note ${item.hasSizes ? '' : 'is-muted'}">${item.hasSizes ? 'Multiple sizes' : 'Base price'}</span>
                     </div>
                 </td>
-                <td data-label="Price"><span class="menu-builder-row-meta">MAD ${price.toFixed(2)}</span></td>
-                <td data-label="Likes"><span class="menu-builder-likes">${ADMIN_ICON.heart} ${likes}</span></td>
-                <td data-label="Featured"><button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" title="${item.featured ? 'Remove featured status' : 'Mark as featured'}" aria-label="${item.featured ? 'Remove featured status' : 'Mark as featured'}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</button></td>
+                <td data-label="Likes">
+                    <div class="menu-builder-stat-stack">
+                        <span class="menu-builder-stat-label">Likes</span>
+                        <span class="menu-builder-likes">${ADMIN_ICON.heart} ${likes}</span>
+                        <span class="menu-builder-stat-note ${likes ? '' : 'is-muted'}">${likes ? 'Saved by guests' : 'No saves yet'}</span>
+                    </div>
+                </td>
+                <td data-label="Featured">
+                    <div class="menu-builder-stat-stack">
+                        <span class="menu-builder-stat-label">Highlight</span>
+                        <button type="button" class="promo-star action-btn menu-builder-toggle ${item.featured ? 'promo-active' : ''}" title="${item.featured ? 'Remove featured status' : 'Mark as featured'}" aria-label="${item.featured ? 'Remove featured status' : 'Mark as featured'}" onclick='event.stopPropagation(); toggleFeatured(${inlineId})' style="filter: ${item.featured ? 'none' : 'grayscale(1)'}; opacity: ${item.featured ? '1' : '0.5'};">${ADMIN_ICON.sparkle}</button>
+                        <span class="menu-builder-stat-note ${item.featured ? '' : 'is-muted'}">${item.featured ? 'On landing' : 'Standard'}</span>
+                    </div>
+                </td>
                 <td data-label="Actions">
-                    <div class="menu-builder-item-actions">
+                    <div class="menu-builder-item-actions menu-builder-action-rail">
                         <button type="button" class="action-btn" title="Edit dish" aria-label="Edit dish" onclick='event.stopPropagation(); editItem(${inlineId})'>${ADMIN_ICON.edit}</button>
                         <button type="button" class="action-btn" title="Manage dish images" aria-label="Manage dish images" onclick='event.stopPropagation(); openImageModal(${inlineId})'>${ADMIN_ICON.image}</button>
                         <button type="button" class="action-btn" title="Delete dish" aria-label="Delete dish" onclick='event.stopPropagation(); deleteItem(${inlineId})'>${ADMIN_ICON.trash}</button>
@@ -1980,6 +3219,7 @@ function openMenuCrudModal(type, title) {
     body.innerHTML = '';
     body.appendChild(form);
     titleEl.textContent = title;
+    initializeMenuCrudFormEnhancements(form);
     document.documentElement.classList.add('menu-crud-open');
     document.body.classList.add('menu-crud-open');
     if (typeof modal.showModal === 'function') {
@@ -2079,6 +3319,12 @@ function applyAdminCapabilities() {
     const sellerToolsNavBtn = document.getElementById('sellerToolsNavBtn');
     const dataToolsSection = document.getElementById('data-tools');
     const modalAiImageTools = document.getElementById('modalAiImageTools');
+    const translationButtons = [
+        document.getElementById('itemTranslationGenerateBtn'),
+        document.getElementById('catTranslationGenerateBtn'),
+        document.getElementById('superTranslationGenerateBtn'),
+        document.getElementById('catGenerateImageBtn')
+    ].filter(Boolean);
 
     if (!adminCapabilities.sellerToolsEnabled) {
         sellerToolsNavBtn?.remove();
@@ -2090,8 +3336,18 @@ function applyAdminCapabilities() {
 
     if (!adminCapabilities.aiMediaToolsEnabled) {
         modalAiImageTools?.remove();
+        translationButtons.forEach((button) => {
+            button.disabled = true;
+            button.classList.add('is-disabled');
+            button.title = 'Enable AI tools to use this action.';
+        });
     } else if (modalAiImageTools) {
         modalAiImageTools.style.display = '';
+        translationButtons.forEach((button) => {
+            button.disabled = false;
+            button.classList.remove('is-disabled');
+            button.removeAttribute('title');
+        });
     }
 
     if (!adminCapabilities.sellerToolsEnabled && dataToolsSection?.classList.contains('active')) {
@@ -2263,6 +3519,9 @@ function refreshUI() {
     initSuperCatForm();
     setCategoryTranslationFields();
     setSuperCategoryTranslationFields();
+    initializeMenuCrudFormEnhancements(document.getElementById('foodForm'));
+    initializeMenuCrudFormEnhancements(document.getElementById('catForm'));
+    initializeMenuCrudFormEnhancements(document.getElementById('superCatForm'));
     initSecurityForm();
     initHoursForm();
     initGalleryForm();
@@ -2577,6 +3836,7 @@ function editItem(id) {
     if (!item) return;
 
     editingItemId = id;
+    setMenuTranslationWarnings('item');
     currentMenuWorkspaceStep = 'items';
     menuBuilderSelectedCategoryKey = item.cat || '';
     openMenuCrudModal('item', `Edit Item - ${getAdminItemDisplayName(item)}`);
@@ -2621,12 +3881,14 @@ function editItem(id) {
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = `Edit Item - ${getAdminItemDisplayName(item)}`;
     document.querySelector('#foodForm .primary-btn').textContent = 'Save';
+    refreshMenuCrudFormUx('foodForm');
     startMenuCrudDirtyTracking(document.getElementById('foodForm'));
 }
 
 function resetFoodForm() {
     editingItemId = null;
     document.getElementById('foodForm').reset();
+    setMenuTranslationWarnings('item');
     setMenuItemTranslationFields();
     document.getElementById('itemFeatured').checked = false;
     document.getElementById('itemHasSizes').checked = false;
@@ -2637,6 +3899,7 @@ function resetFoodForm() {
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = 'Add Item';
     document.querySelector('#foodForm .primary-btn').textContent = 'Save';
+    refreshMenuCrudFormUx('foodForm');
 }
 
 function initForms() {
@@ -2647,6 +3910,7 @@ function initForms() {
 
     // --- Shared save logic, can be called directly without a form submit event ---
     window.commitFormItem = async function () {
+        setMenuCrudPrimaryButtonState('foodForm', 'saving');
         const fileInput = document.getElementById('itemFile');
         const urlInput = document.getElementById('itemImg').value;
 
@@ -2712,7 +3976,36 @@ function initForms() {
             price = parseFloat(document.getElementById('itemPrice').value) || 0;
         }
 
-        if (!name) { showToast('Item name is required.'); return; }
+        if (!name) {
+            setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            showToast('Item name is required.');
+            focusMenuCrudField('foodForm', 'core', 'itemName');
+            return;
+        }
+        if (!cat) {
+            setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            showToast('Choose a category for this dish.');
+            focusMenuCrudField('foodForm', 'core', 'itemCat');
+            return;
+        }
+        if (!desc) {
+            setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            showToast('Add a fallback description for this dish.');
+            focusMenuCrudField('foodForm', 'core', 'itemDesc');
+            return;
+        }
+        if (hasSizes && !Object.values(sizes || {}).some((value) => Number(value) > 0)) {
+            setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            showToast('Add at least one size price.');
+            focusMenuCrudField('foodForm', 'pricing', 'itemPriceSmall');
+            return;
+        }
+        if (!hasSizes && !(Number(price) > 0)) {
+            setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            showToast('Add a price before saving this dish.');
+            focusMenuCrudField('foodForm', 'pricing', 'itemPrice');
+            return;
+        }
 
         if (editingItemId) {
             const index = menu.findIndex(m => m.id == editingItemId);
@@ -2728,7 +4021,6 @@ function initForms() {
                     available
                 };
             }
-            showToast('Item updated.');
         } else {
             const newItem = {
                 id: Date.now(),
@@ -2743,28 +4035,36 @@ function initForms() {
                 badge: ''
             };
             menu.push(newItem);
-            showToast('Item added.');
         }
 
         const saved = await saveAndRefresh();
         if (saved) {
+            setMenuCrudPrimaryButtonState('foodForm', 'saved');
+            showToast(editingItemId ? 'Item updated.' : 'Item added.');
             resetFoodForm();
             closeMenuCrudModal(true);
+        } else {
+            setMenuCrudPrimaryButtonState('foodForm', 'idle');
         }
     };
 
     document.getElementById('catForm').onsubmit = async (e) => {
         e.preventDefault();
+        setMenuCrudPrimaryButtonState('catForm', 'saving');
         const editingKeyInput = document.getElementById('catEditingKey');
         const previousKey = editingKeyInput ? editingKeyInput.value.trim() : '';
         const categoryName = document.getElementById('catName').value.trim();
         const selectedSuperCategoryId = document.getElementById('catSuperCategory')?.value?.trim() || '';
         if (!categoryName) {
+            setMenuCrudPrimaryButtonState('catForm', 'idle');
             showToast('Category name is required.');
+            focusMenuCrudField('catForm', 'identity', 'catName');
             return;
         }
         if (!selectedSuperCategoryId) {
+            setMenuCrudPrimaryButtonState('catForm', 'idle');
             showToast('Please choose a super category.');
+            focusMenuCrudField('catForm', 'identity', 'catSuperCategory');
             return;
         }
         const nextEmoji = document.getElementById('catEmoji')?.value
@@ -2782,6 +4082,7 @@ function initForms() {
                 if (categoryImageInput) categoryImageInput.value = nextImage;
             } catch (error) {
                 console.error('Category image upload failed:', error);
+                setMenuCrudPrimaryButtonState('catForm', 'idle');
                 showToast('Category image upload failed.');
                 return;
             }
@@ -2803,6 +4104,7 @@ function initForms() {
 
         const selectedSuperCategory = (restaurantConfig.superCategories || []).find((sc) => sc.id === selectedSuperCategoryId);
         if (!selectedSuperCategory) {
+            setMenuCrudPrimaryButtonState('catForm', 'idle');
             showToast('Selected super category was not found.');
             return;
         }
@@ -2818,10 +4120,13 @@ function initForms() {
         categoryTranslations[categoryName] = nextTranslations;
         const saved = await saveAndRefresh();
         if (saved) {
+            setMenuCrudPrimaryButtonState('catForm', 'saved');
             menuBuilderSelectedSuperCategoryId = selectedSuperCategoryId;
             resetCategoryFormState();
             closeMenuCrudModal(true);
             showToast(previousKey ? 'Category updated.' : 'Category added.');
+        } else {
+            setMenuCrudPrimaryButtonState('catForm', 'idle');
         }
     };
 
@@ -2948,14 +4253,33 @@ function initForms() {
 
     document.getElementById('superCatForm').onsubmit = async (e) => {
         e.preventDefault();
+        setMenuCrudPrimaryButtonState('superCatForm', 'saving');
         const editingIdInput = document.getElementById('scEditingId');
         const editingId = editingIdInput ? editingIdInput.value.trim() : '';
         const selectedCats = Array.from(document.querySelectorAll('.sc-cat-check:checked')).map(cb => cb.value);
         const name = document.getElementById('scName').value.trim();
-        const emoji = document.getElementById('scEmoji').value;
+        let emoji = normalizeSuperCategoryIconValue(document.getElementById('scEmoji').value);
         const desc = document.getElementById('scDesc').value.trim();
         const time = document.getElementById('scTime').value;
         const translations = buildSuperCategoryTranslations(name, desc);
+
+        if (!name) {
+            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
+            showToast('Super category name is required.');
+            focusMenuCrudField('superCatForm', 'identity', 'scName');
+            return;
+        }
+        if (!desc) {
+            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
+            showToast('Add a fallback description for this group.');
+            focusMenuCrudField('superCatForm', 'identity', 'scDesc');
+            return;
+        }
+
+        if (!emoji) {
+            emoji = suggestSuperCategoryIcon(name, desc);
+            setSuperCategoryIcon(emoji, false);
+        }
 
         const id = editingId || name.toLowerCase().replace(/\s+/g, '_');
         const existingIdx = restaurantConfig.superCategories.findIndex(sc => sc.id === id);
@@ -2970,9 +4294,12 @@ function initForms() {
 
         const saved = await saveAndRefresh();
         if (saved) {
+            setMenuCrudPrimaryButtonState('superCatForm', 'saved');
             resetSuperCategoryFormState();
             closeMenuCrudModal(true);
             showToast(existingIdx !== -1 ? 'Super category updated.' : 'Super category saved.');
+        } else {
+            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
         }
     };
 }
@@ -3747,6 +5074,14 @@ function initSuperCatForm() {
                 <span>${escapeHtml(window.getLocalizedCategoryName(cat, cat))}</span>
             </label>
         `).join('');
+    bindSuperCategoryIconControls();
+    renderSuperCategoryIconPicker(document.getElementById('scEmoji')?.value || DEFAULT_SUPER_CATEGORY_ICON);
+    if (!normalizeSuperCategoryIconValue(document.getElementById('scEmoji')?.value || '')) {
+        superCategoryIconManuallyChosen = false;
+        setSuperCategoryIcon(DEFAULT_SUPER_CATEGORY_ICON, false);
+    } else {
+        updateSuperCategoryIconPreview(document.getElementById('scEmoji')?.value || DEFAULT_SUPER_CATEGORY_ICON);
+    }
 }
 
 function renderSuperCatTable() {
@@ -3768,19 +5103,22 @@ function renderSuperCatTable() {
 function editSuperCat(id) {
     const sc = restaurantConfig.superCategories.find(s => s.id === id);
     if (!sc) return;
+    setMenuTranslationWarnings('supercategory');
     currentMenuWorkspaceStep = 'supercategories';
     openMenuCrudModal('supercategory', `Edit Super Category - ${sc.name}`);
 
     const editingIdInput = document.getElementById('scEditingId');
     if (editingIdInput) editingIdInput.value = sc.id;
     document.getElementById('scName').value = sc.name;
-    document.getElementById('scEmoji').value = sc.emoji;
+    setSuperCategoryIcon(sc.emoji || DEFAULT_SUPER_CATEGORY_ICON, false);
+    superCategoryIconManuallyChosen = true;
     document.getElementById('scDesc').value = sc.desc;
     document.getElementById('scTime').value = sc.time || '';
     setSuperCategoryTranslationFields(sc.translations, sc.name, sc.desc);
 
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
+    refreshMenuCrudFormUx('superCatForm');
     startMenuCrudDirtyTracking(document.getElementById('superCatForm'));
 }
 
@@ -3839,6 +5177,11 @@ function renderImporterDraftOutputs(draft) {
     const summaryEl = document.getElementById('importStudioSummaryOutput');
     const jsonEl = document.getElementById('importStudioJsonOutput');
     const reviewGridEl = document.getElementById('importStudioReviewGrid');
+    const reviewSummaryEl = document.getElementById('importStudioReviewSummary');
+    const reviewTitleEl = document.getElementById('importStudioReviewTitle');
+    const reviewNarrativeEl = document.getElementById('importStudioReviewNarrative');
+    const confidenceRowEl = document.getElementById('importStudioConfidenceRow');
+    const issueGridEl = document.getElementById('importStudioIssueGrid');
     const applyNoteEl = document.getElementById('importStudioApplyNote');
     const applyMenuOnlyBtn = document.getElementById('applyImporterMenuOnlyBtn');
     const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
@@ -3850,9 +5193,14 @@ function renderImporterDraftOutputs(draft) {
         jsonEl.value = '';
         lastImporterReviewReport = null;
         if (reviewGridEl) reviewGridEl.innerHTML = '';
+        if (issueGridEl) issueGridEl.innerHTML = '';
+        if (confidenceRowEl) confidenceRowEl.innerHTML = '';
+        if (reviewSummaryEl) reviewSummaryEl.hidden = true;
+        renderImporterImpactPanel(null, null);
         if (applyNoteEl) {
             applyNoteEl.className = 'importer-apply-note';
             applyNoteEl.textContent = '';
+            applyNoteEl.style.display = '';
         }
         if (applyMenuOnlyBtn) applyMenuOnlyBtn.disabled = true;
         if (applyStructureBtn) applyStructureBtn.disabled = true;
@@ -3864,8 +5212,6 @@ function renderImporterDraftOutputs(draft) {
     const review = draft.review || {};
     const menuItems = Array.isArray(restaurantData.menu) ? restaurantData.menu : [];
     const superCategories = Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : [];
-    const blockers = Array.isArray(review.blockers) ? review.blockers : [];
-    const warnings = Array.isArray(review.warnings) ? review.warnings : [];
     const untranslatedItems = Array.isArray(review.untranslatedItems) ? review.untranslatedItems : [];
     const reviewReport = getImporterReviewReport(draft);
     lastImporterReviewReport = reviewReport;
@@ -3896,9 +5242,9 @@ function renderImporterDraftOutputs(draft) {
             { value: reviewReport.menuItemCount, label: 'Items' },
             { value: reviewReport.categoryCount, label: 'Categories' },
             { value: reviewReport.superCategoryCount, label: 'Super Categories' },
-            { value: reviewReport.missingPriceCount, label: 'Missing Prices' },
-            { value: reviewReport.missingTranslationCount + reviewReport.weakTranslationCount, label: 'Translation Issues' },
-            { value: reviewReport.uncategorizedCount, label: 'Unmapped Items' }
+            { value: reviewReport.missingPriceCount, label: 'Missing Price' },
+            { value: reviewReport.missingTranslationCount + reviewReport.weakTranslationCount, label: 'Language Review' },
+            { value: reviewReport.uncategorizedCount, label: 'Needs Placement' }
         ].map((entry) => `
             <div class="importer-review-stat">
                 <strong>${entry.value}</strong>
@@ -3906,6 +5252,23 @@ function renderImporterDraftOutputs(draft) {
             </div>
         `).join('');
     }
+
+    if (reviewSummaryEl) reviewSummaryEl.hidden = false;
+    if (reviewTitleEl) {
+        reviewTitleEl.textContent = review.summary ? 'Review the draft' : 'Review the imported draft';
+    }
+    if (reviewNarrativeEl) {
+        reviewNarrativeEl.textContent = review.summary
+            ? `${review.summary} Check blockers, warnings, and translation quality before you publish anything live.`
+            : 'The importer generated a draft. Review the quality signals before you publish it live.';
+    }
+    if (confidenceRowEl) {
+        confidenceRowEl.innerHTML = buildImporterConfidencePillsMarkup(review);
+    }
+    if (issueGridEl) {
+        issueGridEl.innerHTML = buildImporterIssuePanelsMarkup(reviewReport, untranslatedItems);
+    }
+    renderImporterImpactPanel(reviewReport, draft, lastImporterDraftMeta || {});
 
     if (applyMenuOnlyBtn) {
         applyMenuOnlyBtn.disabled = importStudioBusy || !reviewReport.canApplyMenuOnly;
@@ -3918,13 +5281,16 @@ function renderImporterDraftOutputs(draft) {
     if (applyNoteEl) {
         if (reviewReport.blockers.length) {
             applyNoteEl.className = 'importer-apply-note is-block';
-            applyNoteEl.textContent = `Blockers found: ${reviewReport.blockers.join(' | ')}`;
+            applyNoteEl.style.display = '';
+            applyNoteEl.textContent = `Resolve the blocking issues before publish: ${reviewReport.blockers.slice(0, 3).join(' | ')}`;
         } else if (reviewReport.warnings.length) {
             applyNoteEl.className = 'importer-apply-note is-warn';
-            applyNoteEl.textContent = `Warnings: ${reviewReport.warnings.slice(0, 4).join(' | ')}`;
+            applyNoteEl.style.display = '';
+            applyNoteEl.textContent = `Review these warnings before publish: ${reviewReport.warnings.slice(0, 3).join(' | ')}`;
         } else {
             applyNoteEl.className = 'importer-apply-note';
-            applyNoteEl.textContent = '';
+            applyNoteEl.textContent = 'This draft is ready. Choose the scope you want to replace.';
+            applyNoteEl.style.display = 'block';
         }
     }
 }
@@ -4074,6 +5440,7 @@ function buildImporterJobUiState(job) {
     const stage = typeof job?.stage === 'string' ? job.stage : '';
     return {
         status,
+        stageKey: stage,
         progress,
         badge: status === 'failed' ? 'Import failed' : status === 'succeeded' ? 'Draft ready' : 'Import in progress',
         title: job?.title || 'Processing import',
@@ -4088,6 +5455,7 @@ function buildImporterJobUiState(job) {
 function buildImporterResumeUiState(jobId) {
     return {
         status: 'running',
+        stageKey: 'queued',
         progress: 14,
         badge: 'Resuming import',
         title: 'Reconnecting to the running import',
@@ -4100,6 +5468,7 @@ function buildImporterResumeUiState(jobId) {
 function buildImporterReconnectNeededUiState(jobId = '', copyOverride = '') {
     return {
         status: 'failed',
+        stageKey: 'extract',
         progress: 100,
         badge: 'Reconnect needed',
         title: 'Importer connection lost',
@@ -4356,6 +5725,7 @@ window.generateImporterDraft = async function () {
     try {
         applyImportStudioProgress({
             status: 'running',
+            stageKey: 'upload',
             badge: 'Import in progress',
             title: 'Uploading menu files',
             copy: 'Preparing your files.',
@@ -4371,6 +5741,7 @@ window.generateImporterDraft = async function () {
                 : 12;
             applyImportStudioProgress({
                 status: 'running',
+                stageKey: 'upload',
                 badge: 'Import in progress',
                 title: 'Uploading menu files',
                 copy: fileName
@@ -4386,6 +5757,7 @@ window.generateImporterDraft = async function () {
 
         applyImportStudioProgress({
             status: 'running',
+            stageKey: 'queued',
             badge: 'Import in progress',
             title: 'Starting the AI importer',
             copy: 'The draft job has started and the admin is locked until it finishes.',
@@ -4420,6 +5792,7 @@ window.generateImporterDraft = async function () {
             renderImporterDraftOutputs(lastImporterDraft);
             applyImportStudioProgress({
                 status: 'succeeded',
+                stageKey: 'succeeded',
                 badge: 'Draft ready',
                 title: 'Menu draft generated',
                 copy: 'Review the draft before publishing.',
@@ -4451,6 +5824,7 @@ window.generateImporterDraft = async function () {
         renderImporterDraftOutputs(lastImporterDraft);
         applyImportStudioProgress({
                 status: 'succeeded',
+                stageKey: 'succeeded',
                 badge: 'Draft ready',
                 title: 'Menu draft generated',
                 copy: 'Review the draft before publishing.',
@@ -4482,6 +5856,7 @@ window.generateImporterDraft = async function () {
             ? buildImporterReconnectNeededUiState(error?.jobId || activeImporterJobId || '', `${message}${jobLabel}`.trim())
             : {
                 status: 'failed',
+                stageKey: error?.stage || 'failed',
                 badge: 'Import failed',
                 title: 'The menu draft could not be completed',
                 copy: `${message}${jobLabel}`.trim(),
@@ -4534,6 +5909,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
     try {
         applyImportStudioProgress({
             status: 'running',
+            stageKey: 'publish',
             badge: 'Publishing draft',
             title: scope === 'menu_structure' ? 'Publishing menu and structure' : 'Publishing menu items',
             copy: 'The reviewed draft is being written into the live restaurant data.',
@@ -4558,6 +5934,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         refreshUI();
         applyImportStudioProgress({
             status: 'succeeded',
+            stageKey: 'publish',
             badge: 'Publish complete',
             title: scope === 'menu_structure' ? 'Menu and structure published' : 'Menu items published',
             copy: 'The public site can now use the reviewed importer data.',
@@ -4572,6 +5949,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         console.error('Apply importer draft error:', error);
         applyImportStudioProgress({
             status: 'failed',
+            stageKey: 'publish',
             badge: 'Apply failed',
             title: 'The reviewed draft could not be applied',
             copy: error.message,
@@ -5123,6 +6501,7 @@ function renderCatTable() {
     }).join('');
 }
 function editCat(cat) {
+    setMenuTranslationWarnings('category');
     currentMenuWorkspaceStep = 'categories';
     menuBuilderSelectedCategoryKey = cat;
     openMenuCrudModal('category', `Edit Category - ${window.getLocalizedCategoryName(cat, cat)}`);
@@ -5139,6 +6518,7 @@ function editCat(cat) {
     setCategoryTranslationFields(cat);
     updateCategoryImagePreview();
     syncCategoryImageAiControls();
+    refreshMenuCrudFormUx('catForm');
     startMenuCrudDirtyTracking(document.getElementById('catForm'));
 }
 async function deleteCat(cat) {
@@ -5201,9 +6581,10 @@ function updateStats() {
     const p = document.getElementById('stat-products');
     const c = document.getElementById('stat-cats');
     const pr = document.getElementById('stat-promo');
+    const featuredCount = Array.isArray(menu) ? menu.filter((item) => item?.featured).length : 0;
     if (p) p.textContent = menu.length;
     if (c) c.textContent = Object.keys(catEmojis).length;
-    if (pr) pr.textContent = promoIds.length;
+    if (pr) pr.textContent = String(featuredCount);
 }
 
 // IMAGE MODAL LOGIC

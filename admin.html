@@ -395,6 +395,24 @@
             color: var(--text2);
             font-size: 0.82rem;
             line-height: 1.45;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 249, 241, 0.92);
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            max-width: 100%;
+        }
+
+        .info-save-note::before {
+            content: "Note";
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--primary);
         }
 
         .info-summary-grid {
@@ -963,6 +981,17 @@
             display: block;
         }
 
+        .menu-builder-item-thumb-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            color: var(--text2);
+            font-size: 1.15rem;
+            background: linear-gradient(180deg, #fff7eb 0%, #fff1db 100%);
+        }
+
         .menu-builder-item-meta {
             display: flex;
             flex-direction: column;
@@ -1145,6 +1174,296 @@
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
+        }
+
+        .menu-builder-overview {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.95fr);
+            gap: 14px;
+            align-items: stretch;
+        }
+
+        .menu-builder-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .menu-builder-summary-card {
+            display: grid;
+            gap: 8px;
+            padding: 16px 18px;
+            border-radius: 22px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 243, 0.94) 100%);
+            box-shadow: 0 16px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .menu-builder-summary-card strong {
+            display: block;
+            font-size: 1.3rem;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .menu-builder-summary-card span {
+            color: var(--text2);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .menu-builder-summary-card small {
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .menu-builder-focus-card {
+            display: grid;
+            gap: 12px;
+            padding: 18px 20px;
+            border-radius: 24px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background:
+                linear-gradient(180deg, rgba(255, 253, 248, 0.99) 0%, rgba(255, 247, 237, 0.96) 100%),
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.12), transparent 48%);
+            box-shadow: 0 18px 36px rgba(75, 47, 24, 0.07);
+        }
+
+        .menu-builder-focus-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            color: var(--text2);
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu-builder-focus-kicker::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+        }
+
+        .menu-builder-focus-kicker.is-ready::before {
+            background: #10b981;
+        }
+
+        .menu-builder-focus-title {
+            margin: 0;
+            font-size: 1.08rem;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .menu-builder-focus-copy {
+            margin: 0;
+            color: var(--text2);
+            line-height: 1.55;
+        }
+
+        .menu-builder-focus-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .menu-builder-focus-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            color: var(--text2);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .menu-builder-focus-note {
+            color: var(--text2);
+            font-size: 0.86rem;
+            line-height: 1.5;
+        }
+
+        .menu-builder-focus-note strong {
+            color: var(--text);
+        }
+
+        .menu-builder-entry-copy {
+            display: grid;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .menu-builder-entry-copy strong {
+            font-size: 1rem;
+            line-height: 1.2;
+        }
+
+        .menu-builder-entry-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .menu-builder-entry-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: #fff7ec;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            color: var(--text2);
+            font-size: 0.74rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .menu-builder-entry-pill.is-ready {
+            background: rgba(236, 253, 245, 0.96);
+            border-color: rgba(16, 185, 129, 0.22);
+            color: #166534;
+        }
+
+        .menu-builder-entry-pill.is-attention {
+            background: rgba(255, 247, 237, 0.98);
+            border-color: rgba(245, 158, 11, 0.24);
+            color: #9a6200;
+        }
+
+        .menu-builder-entry-pill.is-muted {
+            background: rgba(249, 250, 251, 0.96);
+            border-color: rgba(209, 213, 219, 0.8);
+            color: #6b7280;
+        }
+
+        .menu-builder-row-note {
+            color: var(--text2);
+            font-size: 0.8rem;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .menu-builder-side-label,
+        .menu-builder-stat-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(75, 47, 24, 0.54);
+        }
+
+        .menu-builder-side-stack {
+            display: grid;
+            gap: 8px;
+            align-content: start;
+        }
+
+        .menu-builder-stat-stack {
+            display: grid;
+            gap: 6px;
+            justify-items: flex-start;
+        }
+
+        .menu-builder-stat-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(255, 249, 241, 0.9);
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            color: var(--text2);
+            font-size: 0.74rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .menu-builder-stat-note.is-muted {
+            background: rgba(249, 250, 251, 0.94);
+            border-color: rgba(209, 213, 219, 0.8);
+            color: #6b7280;
+        }
+
+        .menu-builder-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .menu-builder-action-rail {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px;
+            border-radius: 16px;
+            background: rgba(255, 249, 241, 0.92);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .menu-builder-action-rail .action-btn,
+        .menu-builder-action-rail .menu-builder-toggle {
+            border-radius: 12px;
+        }
+
+        .menu-builder-item-actions .action-btn,
+        .menu-builder-item-actions .menu-builder-toggle {
+            box-shadow: none;
+        }
+
+        .menu-builder-empty {
+            display: none;
+            padding: 30px;
+            border: 1px dashed rgba(232, 216, 197, 0.96);
+            border-radius: 24px;
+            background:
+                linear-gradient(180deg, #fffdf9 0%, #fff8ef 100%),
+                radial-gradient(circle at top right, rgba(255, 171, 34, 0.12), transparent 44%);
+            color: var(--text2);
+        }
+
+        .menu-builder-empty-title {
+            margin: 0 0 8px;
+            font-size: 1.1rem;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        .menu-builder-empty-copy {
+            margin: 0;
+            max-width: 560px;
+            line-height: 1.6;
+        }
+
+        .menu-builder-empty-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
         }
 
         .menu-crud-dialog {
@@ -1730,9 +2049,286 @@
             padding: 0 16px 16px;
         }
 
+        .admin-quiet-disclosure {
+            background:
+                radial-gradient(circle at top right, rgba(255, 182, 79, 0.08), transparent 24%),
+                linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            box-shadow: 0 14px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .admin-quiet-disclosure summary {
+            padding: 16px 18px;
+        }
+
+        .admin-quiet-disclosure .admin-disclosure-copy {
+            font-size: 0.76rem;
+        }
+
+        .admin-quiet-disclosure .admin-disclosure-body {
+            padding: 0 18px 18px;
+        }
+
         .menu-crud-form-shell {
             display: grid;
             gap: 14px;
+        }
+
+        .menu-crud-form-shell.has-step-nav {
+            gap: 16px;
+        }
+
+        .menu-crud-form-shell.has-step-nav [data-menu-section] {
+            display: none;
+        }
+
+        .menu-crud-form-shell.has-step-nav [data-menu-section].is-active {
+            display: grid;
+        }
+
+        .menu-crud-form-intro {
+            display: grid;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 24px;
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            background:
+                radial-gradient(circle at top right, rgba(255, 182, 79, 0.18), transparent 45%),
+                linear-gradient(180deg, rgba(255, 253, 248, 0.98) 0%, rgba(255, 248, 239, 0.95) 100%);
+            box-shadow: 0 18px 32px rgba(75, 47, 24, 0.06);
+        }
+
+        .menu-crud-form-intro-shell {
+            display: grid;
+            gap: 8px;
+        }
+
+        .menu-crud-form-intro-kicker {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            justify-content: center;
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.82);
+            color: var(--text2);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu-crud-form-intro-title {
+            margin: 0;
+            font-size: 1.18rem;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+        }
+
+        .menu-crud-form-intro-copy {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            max-width: 60ch;
+        }
+
+        .menu-crud-form-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .menu-crud-form-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--text2);
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .menu-crud-step-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .menu-crud-step-btn {
+            display: grid;
+            gap: 4px;
+            align-content: start;
+            width: 100%;
+            padding: 14px 14px 13px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            background: rgba(255, 255, 255, 0.78);
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.16s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .menu-crud-step-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 141, 8, 0.28);
+            box-shadow: 0 14px 28px rgba(75, 47, 24, 0.06);
+        }
+
+        .menu-crud-step-btn.is-active {
+            border-color: rgba(255, 141, 8, 0.34);
+            background: linear-gradient(180deg, rgba(255, 248, 239, 0.98) 0%, rgba(255, 240, 221, 0.94) 100%);
+            box-shadow: 0 16px 30px rgba(255, 141, 8, 0.12);
+        }
+
+        .menu-crud-step-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .menu-crud-step-status {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text2);
+        }
+
+        .menu-form-split {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(240px, 0.95fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .menu-form-side-panel {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .menu-form-side-panel h5 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 800;
+        }
+
+        .menu-form-side-panel p {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .menu-form-side-panel ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--text2);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            display: grid;
+            gap: 8px;
+        }
+
+        .menu-review-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .menu-review-card {
+            display: grid;
+            gap: 6px;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+        }
+
+        .menu-review-card--wide {
+            grid-column: 1 / -1;
+        }
+
+        .menu-review-label {
+            color: var(--text2);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu-review-card strong {
+            font-size: 0.96rem;
+            line-height: 1.3;
+        }
+
+        .menu-review-card p {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        .menu-crud-nav-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 14px 28px rgba(75, 47, 24, 0.06);
+        }
+
+        .menu-crud-nav-copy {
+            display: grid;
+            gap: 3px;
+        }
+
+        .menu-crud-nav-kicker {
+            color: var(--text2);
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu-crud-nav-copy strong {
+            font-size: 0.92rem;
+        }
+
+        .menu-crud-nav-copy span:last-child {
+            color: var(--text2);
+            font-size: 0.78rem;
+        }
+
+        .menu-crud-nav-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .menu-crud-nav-btn {
+            min-width: 116px;
+        }
+
+        .menu-crud-nav-btn.is-primary {
+            border-color: rgba(255, 141, 8, 0.3);
+            background: linear-gradient(135deg, rgba(255, 141, 8, 0.12), rgba(255, 107, 53, 0.16));
+            color: var(--text);
         }
 
         .menu-form-block {
@@ -1973,6 +2569,117 @@
             display: grid;
             grid-template-columns: 1fr 100px;
             gap: 15px;
+        }
+
+        .super-icon-picker {
+            display: grid;
+            gap: 12px;
+        }
+
+        .super-icon-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: linear-gradient(180deg, rgba(255, 250, 244, 0.98) 0%, rgba(255, 246, 235, 0.94) 100%);
+            box-shadow: 0 14px 30px rgba(75, 47, 24, 0.08);
+        }
+
+        .super-icon-preview-glyph {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            min-width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(226, 27, 27, 0.12), rgba(255, 141, 8, 0.16));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+
+        .super-icon-preview-copy {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .super-icon-preview-title {
+            margin: 0;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text1);
+        }
+
+        .super-icon-preview-note {
+            margin: 0;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            color: var(--text2);
+        }
+
+        .super-icon-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .super-icon-picker-btn {
+            display: grid;
+            justify-items: center;
+            gap: 6px;
+            padding: 12px 10px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--text1);
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .super-icon-picker-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 141, 8, 0.28);
+            box-shadow: 0 12px 24px rgba(75, 47, 24, 0.08);
+        }
+
+        .super-icon-picker-btn.is-active {
+            background: linear-gradient(135deg, rgba(226, 27, 27, 0.1), rgba(255, 141, 8, 0.14));
+            border-color: rgba(255, 141, 8, 0.34);
+            box-shadow: 0 14px 28px rgba(255, 141, 8, 0.12);
+        }
+
+        .super-icon-picker-btn:focus-visible {
+            outline: 2px solid rgba(255, 141, 8, 0.42);
+            outline-offset: 2px;
+        }
+
+        .super-icon-picker-emoji {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .super-icon-picker-label {
+            font-size: 0.73rem;
+            font-weight: 700;
+            line-height: 1.3;
+            text-align: center;
+            color: var(--text2);
+        }
+
+        .super-icon-helper {
+            margin: 0;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            color: var(--text2);
+        }
+
+        .super-icon-manual .admin-disclosure-copy {
+            max-width: none;
         }
 
         .category-image-field {
@@ -2877,7 +3584,7 @@
             border: 1.5px dashed var(--border);
         }
 
-        /* Promo Toggle */
+        /* Featured Toggle */
         .promo-star {
             cursor: pointer;
             font-size: 1.5rem;
@@ -3055,7 +3762,6 @@
             line-height: 1.5;
         }
 
-        .menu-form-block-copy,
         .admin-disclosure-copy,
         .translation-hint,
         .copy-muted,
@@ -3106,6 +3812,106 @@
             resize: vertical;
         }
 
+        .translation-summary-card {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: linear-gradient(180deg, rgba(255, 251, 245, 0.98) 0%, rgba(255, 245, 233, 0.94) 100%);
+            box-shadow: 0 14px 30px rgba(75, 47, 24, 0.05);
+        }
+
+        .translation-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 14px;
+        }
+
+        .translation-summary-header h5 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .translation-summary-header p,
+        .translation-summary-note {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .translation-inline-note {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 32px;
+            padding: 0 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            color: var(--text2);
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .translation-status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .translation-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.84);
+            color: #9c4f45;
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+
+        .translation-status-pill::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: currentColor;
+            opacity: 0.78;
+        }
+
+        .translation-status-pill.is-ready {
+            color: #0f8f58;
+            background: rgba(240, 255, 248, 0.92);
+        }
+
+        .translation-summary-actions,
+        .media-action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .translation-ai-note {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: 7px 10px;
+            border-radius: 12px;
+            background: rgba(255, 141, 8, 0.12);
+            color: #9a3412;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
         .translation-badges {
             display: flex;
             flex-wrap: wrap;
@@ -3136,6 +3942,268 @@
 
         .item-copy-meta {
             margin: 6px 0 4px;
+        }
+
+        .menu-crud-form-shell.has-step-nav {
+            display: grid;
+            gap: 18px;
+        }
+
+        .menu-crud-form-intro {
+            display: grid;
+            gap: 16px;
+            padding: 20px 22px;
+            border-radius: 24px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.1), transparent 30%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 238, 0.94));
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+        }
+
+        .menu-crud-form-intro-shell {
+            display: grid;
+            gap: 10px;
+        }
+
+        .menu-crud-form-intro-kicker,
+        .menu-crud-nav-kicker {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: 6px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            color: #9a3412;
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu-crud-form-intro-title {
+            margin: 0;
+            font-size: 1.24rem;
+            line-height: 1.25;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .menu-crud-form-intro-copy {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            max-width: 64ch;
+        }
+
+        .menu-crud-form-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .menu-crud-form-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            color: var(--text2);
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .menu-crud-step-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+            gap: 10px;
+        }
+
+        .menu-crud-step-btn {
+            display: grid;
+            gap: 4px;
+            padding: 12px 14px;
+            text-align: left;
+            border-radius: 18px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .menu-crud-step-btn:hover,
+        .menu-crud-step-btn:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(255, 141, 8, 0.28);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+            outline: none;
+        }
+
+        .menu-crud-step-btn.is-active {
+            background: linear-gradient(180deg, rgba(255, 246, 234, 0.98), rgba(255, 236, 211, 0.92));
+            border-color: rgba(255, 141, 8, 0.34);
+            box-shadow: 0 16px 32px rgba(255, 141, 8, 0.12);
+        }
+
+        .menu-crud-step-btn[data-status="ready"] .menu-crud-step-status {
+            color: #0f8f58;
+        }
+
+        .menu-crud-step-btn[data-status="missing"] .menu-crud-step-status {
+            color: #9c4f45;
+        }
+
+        .menu-crud-step-label {
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .menu-crud-step-status {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--text2);
+        }
+
+        .menu-form-block[data-menu-section] {
+            display: none;
+        }
+
+        .menu-form-block[data-menu-section].is-active {
+            display: block;
+        }
+
+        .menu-form-split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .menu-form-side-panel {
+            display: grid;
+            gap: 12px;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background:
+                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 28%),
+                linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 246, 234, 0.94));
+            box-shadow: 0 14px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .menu-form-side-panel h5 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .menu-form-side-panel p {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.6;
+        }
+
+        .menu-form-side-panel ul {
+            margin: 0;
+            padding-left: 18px;
+            display: grid;
+            gap: 8px;
+            color: var(--text2);
+            font-size: 0.8rem;
+            line-height: 1.55;
+        }
+
+        .menu-crud-nav-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 18px 20px;
+            border-radius: 22px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+        }
+
+        .menu-crud-nav-copy {
+            display: grid;
+            gap: 5px;
+        }
+
+        .menu-crud-nav-copy strong {
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .menu-crud-nav-copy span:last-child {
+            color: var(--text2);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .menu-crud-nav-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .menu-crud-nav-btn {
+            min-width: 124px;
+        }
+
+        .menu-crud-nav-btn.is-primary {
+            background: linear-gradient(135deg, var(--primary), #ff7b00);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .menu-review-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .menu-review-card {
+            display: grid;
+            gap: 8px;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 238, 0.94));
+            box-shadow: 0 14px 28px rgba(75, 47, 24, 0.05);
+        }
+
+        .menu-review-card--wide {
+            grid-column: 1 / -1;
+        }
+
+        .menu-review-label {
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #9a3412;
+        }
+
+        .menu-review-card strong {
+            font-size: 1rem;
+            line-height: 1.35;
+            color: var(--text);
+        }
+
+        .menu-review-card p {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.55;
         }
 
         .branding-media-grid {
@@ -3205,6 +4273,15 @@
         .branding-notes-card {
             display: grid;
             gap: 14px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        .branding-notes-card .admin-quiet-disclosure,
+        .security-side-card .admin-quiet-disclosure {
+            height: 100%;
         }
 
         .branding-note-list {
@@ -3251,9 +4328,26 @@
 
         .branding-save-note {
             color: var(--text2);
-            font-size: 0.86rem;
-            line-height: 1.55;
+            font-size: 0.84rem;
+            line-height: 1.5;
             max-width: 56ch;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 249, 241, 0.92);
+            border: 1px solid rgba(232, 216, 197, 0.9);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .branding-save-note::before {
+            content: "Scope";
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--primary);
         }
 
         .branding-overview-actions .info-save-btn,
@@ -3988,19 +5082,38 @@
             align-items: center;
         }
 
+        .importer-review-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.95fr);
+            gap: 16px;
+            align-items: start;
+            margin-top: 14px;
+        }
+
+        .importer-review-main,
+        .importer-review-side {
+            display: grid;
+            gap: 14px;
+            align-content: start;
+        }
+
+        .importer-review-side {
+            position: sticky;
+            top: 88px;
+        }
+
         .importer-review-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 10px;
-            margin: 14px 0;
         }
 
         .importer-status-card {
             display: grid;
-            gap: 10px;
+            gap: 12px;
             margin: 14px 0;
-            padding: 16px 18px;
-            border-radius: 20px;
+            padding: 18px 20px;
+            border-radius: 22px;
             border: 1px solid rgba(255, 191, 128, 0.44);
             background:
                 linear-gradient(180deg, rgba(255, 252, 247, 0.98) 0%, rgba(255, 246, 236, 0.94) 100%),
@@ -4073,6 +5186,59 @@
             transition: width 0.28s ease;
         }
 
+        .importer-stage-timeline {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .importer-stage-pill {
+            display: grid;
+            gap: 5px;
+            min-height: 58px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(232, 216, 197, 0.94);
+            background: rgba(255, 255, 255, 0.68);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .importer-stage-pill strong {
+            font-size: 0.83rem;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        .importer-stage-pill span {
+            font-size: 0.73rem;
+            line-height: 1.35;
+            color: var(--text2);
+        }
+
+        .importer-stage-pill.is-active {
+            border-color: rgba(255, 141, 8, 0.34);
+            background: linear-gradient(180deg, rgba(255, 247, 235, 0.98), rgba(255, 238, 214, 0.92));
+            box-shadow: 0 14px 28px rgba(255, 141, 8, 0.12);
+        }
+
+        .importer-stage-pill.is-ready {
+            border-color: rgba(16, 185, 129, 0.22);
+            background: linear-gradient(180deg, rgba(244, 255, 249, 0.98), rgba(236, 253, 245, 0.94));
+        }
+
+        .importer-stage-pill.is-ready strong {
+            color: #0f8f58;
+        }
+
+        .importer-stage-pill.is-failed {
+            border-color: rgba(220, 38, 38, 0.24);
+            background: linear-gradient(180deg, rgba(255, 248, 248, 0.98), rgba(254, 242, 242, 0.94));
+        }
+
+        .importer-stage-pill.is-failed strong {
+            color: #991b1b;
+        }
+
         .importer-status-card.is-complete {
             border-color: rgba(52, 211, 153, 0.24);
             background:
@@ -4101,39 +5267,303 @@
             border-color: rgba(220, 38, 38, 0.22);
         }
 
+        .importer-review-summary,
+        .importer-impact-panel,
+        .importer-issue-panel,
+        .importer-apply-panel,
+        .importer-advanced-panel {
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .importer-review-summary {
+            padding: 18px 20px;
+        }
+
+        .importer-review-summary[hidden] {
+            display: none;
+        }
+
+        .importer-review-summary-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .importer-review-eyebrow {
+            margin-bottom: 12px;
+        }
+
+        .importer-review-title {
+            margin: 0 0 8px;
+            font-size: 1.06rem;
+            line-height: 1.25;
+            color: var(--text);
+        }
+
+        .importer-review-narrative {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 60ch;
+        }
+
+        .importer-confidence-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+            max-width: 280px;
+        }
+
+        .importer-confidence-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            background: rgba(255, 249, 241, 0.88);
+            color: var(--text2);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+        }
+
+        .importer-confidence-pill.is-high {
+            background: #ecfdf3;
+            border-color: #98e2b3;
+            color: #157347;
+        }
+
+        .importer-confidence-pill.is-medium {
+            background: #fffbeb;
+            border-color: rgba(245, 158, 11, 0.24);
+            color: #92400e;
+        }
+
+        .importer-confidence-pill.is-low,
+        .importer-confidence-pill.is-unknown {
+            background: #f8fafc;
+            border-color: rgba(148, 163, 184, 0.28);
+            color: #475569;
+        }
+
         .importer-review-stat {
             border: 1px solid var(--border);
             border-radius: 16px;
-            background: #fff;
-            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(250, 251, 252, 0.95));
+            padding: 14px 15px;
         }
 
         .importer-review-stat strong {
             display: block;
-            font-size: 1.15rem;
-            margin-bottom: 4px;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--text);
         }
 
         .importer-review-stat span {
             color: var(--text2);
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        .importer-apply-panel {
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            background: #fff;
-            padding: 16px;
-            margin: 14px 0;
+        .importer-issue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
         }
 
+        .importer-issue-panel {
+            padding: 16px 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .importer-issue-panel.is-block {
+            border-color: rgba(220, 38, 38, 0.18);
+            background: linear-gradient(180deg, rgba(255, 249, 249, 0.98), rgba(255, 243, 243, 0.94));
+        }
+
+        .importer-issue-panel.is-warn {
+            border-color: rgba(245, 158, 11, 0.2);
+            background: linear-gradient(180deg, rgba(255, 252, 242, 0.98), rgba(255, 247, 220, 0.94));
+        }
+
+        .importer-issue-panel.is-info {
+            border-color: rgba(59, 130, 246, 0.16);
+            background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(239, 246, 255, 0.94));
+        }
+
+        .importer-issue-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .importer-issue-head h6 {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.25;
+            color: var(--text);
+        }
+
+        .importer-issue-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 0.71rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.82);
+            color: var(--text2);
+        }
+
+        .importer-issue-panel.is-block .importer-issue-badge {
+            color: #991b1b;
+        }
+
+        .importer-issue-panel.is-warn .importer-issue-badge {
+            color: #92400e;
+        }
+
+        .importer-issue-panel.is-info .importer-issue-badge {
+            color: #1d4ed8;
+        }
+
+        .importer-issue-copy {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .importer-issue-list {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .importer-issue-list li {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(232, 216, 197, 0.74);
+            color: var(--text);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .importer-issue-empty {
+            color: var(--text2);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .importer-impact-panel {
+            padding: 18px 20px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .importer-impact-panel h5,
         .importer-apply-panel h5 {
-            margin: 0 0 8px;
+            margin: 0;
             font-size: 0.98rem;
         }
 
+        .importer-impact-copy,
         .importer-apply-panel p {
+            margin: 0;
+            color: var(--text2);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .importer-impact-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .importer-impact-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            padding: 11px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(232, 216, 197, 0.88);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 249, 241, 0.94));
+        }
+
+        .importer-impact-list strong {
+            display: block;
+            font-size: 0.84rem;
+            color: var(--text);
+        }
+
+        .importer-impact-list span {
+            display: block;
+            font-size: 0.77rem;
+            color: var(--text2);
+            line-height: 1.4;
+        }
+
+        .importer-impact-state {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 0.71rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text2);
+        }
+
+        .importer-impact-state.is-ready {
+            background: #ecfdf3;
+            color: #157347;
+        }
+
+        .importer-impact-state.is-warn {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .importer-impact-state.is-block {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .importer-apply-panel {
+            padding: 18px 20px;
+        }
+
+        .importer-panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
             margin-bottom: 12px;
         }
 
@@ -4151,6 +5581,13 @@
             border-radius: 14px;
             padding: 12px 14px;
             background: #fafbfc;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .importer-scope-option:has(input:checked) {
+            border-color: rgba(255, 141, 8, 0.24);
+            background: linear-gradient(180deg, rgba(255, 247, 235, 0.98), rgba(255, 240, 219, 0.92));
+            box-shadow: 0 12px 24px rgba(255, 141, 8, 0.08);
         }
 
         .importer-scope-option input {
@@ -4168,6 +5605,19 @@
             color: var(--text2);
             font-size: 0.82rem;
             line-height: 1.45;
+        }
+
+        .importer-advanced-panel summary {
+            min-height: 48px;
+            padding: 14px 16px;
+        }
+
+        .importer-advanced-panel .admin-disclosure-body {
+            padding: 0 16px 16px;
+        }
+
+        .importer-advanced-panel .summary-output {
+            min-height: 180px;
         }
 
         .importer-apply-note {
@@ -4277,11 +5727,11 @@
         }
 
         .security-side-card {
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            background: #fafbfc;
-            padding: 18px;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
         }
 
         .security-side-card h4 {
@@ -4722,7 +6172,11 @@
             .admin-disclosure-copy,
             .parameter-panel-intro,
             .section-divider-copy,
-            .translation-hint {
+            .translation-hint,
+            .muted-copy,
+            .branding-save-note,
+            .info-save-note,
+            .security-help {
                 display: none !important;
             }
 
@@ -4755,6 +6209,34 @@
                 box-shadow: 0 16px 30px rgba(75, 47, 24, 0.08);
             }
 
+            .menu-builder-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-builder-summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .menu-builder-summary-card,
+            .menu-builder-focus-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .menu-builder-summary-card strong {
+                font-size: 1.1rem;
+            }
+
+            .menu-builder-focus-title {
+                font-size: 0.98rem;
+            }
+
+            .menu-builder-focus-copy,
+            .menu-builder-focus-note {
+                font-size: 0.82rem;
+            }
+
             .menu-form-block {
                 padding: 16px;
                 border-radius: 18px;
@@ -4767,6 +6249,65 @@
 
             .menu-form-block-copy {
                 font-size: 0.84rem;
+            }
+
+            .menu-crud-form-intro {
+                padding: 16px;
+                border-radius: 20px;
+            }
+
+            .menu-crud-form-intro-title {
+                font-size: 1.08rem;
+            }
+
+            .menu-crud-step-nav {
+                display: flex;
+                gap: 8px;
+                overflow-x: auto;
+                padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+
+            .menu-crud-step-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+            .menu-crud-step-btn {
+                flex: 0 0 140px;
+                min-width: 140px;
+                padding: 11px 12px;
+            }
+
+            .menu-form-split {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .menu-form-side-panel {
+                padding: 15px 16px;
+                border-radius: 18px;
+            }
+
+            .menu-crud-nav-footer {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .menu-crud-nav-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .menu-crud-nav-btn {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .menu-review-grid {
+                grid-template-columns: 1fr;
             }
 
             .menu-builder-heading {
@@ -4816,6 +6357,30 @@
             .menu-builder-table-wrap {
                 padding: 8px;
                 border-radius: 18px;
+            }
+
+            .importer-review-side {
+                position: static;
+            }
+
+            .importer-confidence-row {
+                justify-content: flex-start;
+                max-width: none;
+            }
+
+            .importer-review-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .tool-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .tool-actions .primary-btn,
+            .tool-actions .brand-secondary-btn {
+                width: 100%;
+                justify-content: center;
             }
 
             .admin-summary-strip {
@@ -4890,6 +6455,38 @@
             }
 
             .branding-tab-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .importer-review-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .importer-stage-timeline {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .importer-review-summary,
+            .importer-impact-panel,
+            .importer-issue-panel,
+            .importer-apply-panel {
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .importer-review-summary-top,
+            .importer-panel-head {
+                display: grid;
+                gap: 12px;
+            }
+
+            .importer-confidence-row {
+                justify-content: flex-start;
+                max-width: none;
+            }
+
+            .importer-issue-grid,
+            .importer-review-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -4980,39 +6577,121 @@
                 font-size: 0.98rem;
             }
 
+            .menu-builder-entry-pills {
+                gap: 6px;
+            }
+
+            .menu-builder-entry-pill {
+                min-height: 25px;
+                padding: 0 8px;
+                font-size: 0.7rem;
+            }
+
             .menu-builder-count-pill {
                 min-height: 34px;
                 padding: 0 10px;
                 font-size: 0.8rem;
             }
 
+            #menuBuilderTable[data-step="supercategories"] tr,
+            #menuBuilderTable[data-step="categories"] tr {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 10px;
+                content-visibility: auto;
+                contain-intrinsic-size: 136px;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Super Category"],
+            #menuBuilderTable[data-step="categories"] td[data-label="Category"] {
+                padding: 0;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Includes"],
+            #menuBuilderTable[data-step="categories"] td[data-label="Items"],
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"],
+            #menuBuilderTable[data-step="categories"] td[data-label="Actions"] {
+                display: block;
+                width: 100%;
+                min-width: 0;
+                margin: 0;
+                padding: 0;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Includes"]::before,
+            #menuBuilderTable[data-step="categories"] td[data-label="Items"]::before,
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"]::before,
+            #menuBuilderTable[data-step="categories"] td[data-label="Actions"]::before {
+                display: none;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Includes"] .menu-builder-side-stack,
+            #menuBuilderTable[data-step="categories"] td[data-label="Items"] .menu-builder-side-stack {
+                gap: 6px;
+                padding: 10px 12px;
+                border-radius: 16px;
+                background: rgba(255, 249, 241, 0.88);
+                border: 1px solid rgba(232, 216, 197, 0.9);
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"],
+            #menuBuilderTable[data-step="categories"] td[data-label="Actions"] {
+                grid-column: 1 / -1;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"] .menu-builder-item-actions,
+            #menuBuilderTable[data-step="categories"] td[data-label="Actions"] .menu-builder-item-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"] .menu-builder-action-rail,
+            #menuBuilderTable[data-step="categories"] td[data-label="Actions"] .menu-builder-action-rail,
+            #menuBuilderTable[data-step="items"] td[data-label="Actions"] .menu-builder-action-rail {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+                width: 100%;
+            }
+
+            #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"] .menu-builder-action-rail .action-btn,
+            #menuBuilderTable[data-step="categories"] td[data-label="Actions"] .menu-builder-action-rail .action-btn,
+            #menuBuilderTable[data-step="items"] td[data-label="Actions"] .menu-builder-action-rail .action-btn,
+            #menuBuilderTable[data-step="items"] td[data-label="Actions"] .menu-builder-action-rail .menu-builder-toggle {
+                width: 100%;
+                min-width: 0;
+                justify-content: center;
+            }
+
             #menuBuilderTable[data-step="items"] tr {
-                padding: 8px;
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px;
                 content-visibility: auto;
                 contain-intrinsic-size: 150px;
             }
 
             #menuBuilderTable[data-step="items"] td[data-label="Item"] {
                 padding: 0;
+                grid-column: 1 / -1;
             }
 
             #menuBuilderTable[data-step="items"] td[data-label="Price"],
             #menuBuilderTable[data-step="items"] td[data-label="Likes"],
-            #menuBuilderTable[data-step="items"] td[data-label="Promo"],
             #menuBuilderTable[data-step="items"] td[data-label="Featured"],
             #menuBuilderTable[data-step="items"] td[data-label="Actions"] {
-                display: inline-flex;
-                align-items: center;
-                width: auto;
+                display: block;
+                align-items: stretch;
+                width: 100%;
                 min-width: 0;
-                margin: 8px 8px 0 0;
+                margin: 0;
                 padding: 0;
                 vertical-align: top;
             }
 
             #menuBuilderTable[data-step="items"] td[data-label="Price"]::before,
             #menuBuilderTable[data-step="items"] td[data-label="Likes"]::before,
-            #menuBuilderTable[data-step="items"] td[data-label="Promo"]::before,
             #menuBuilderTable[data-step="items"] td[data-label="Featured"]::before,
             #menuBuilderTable[data-step="items"] td[data-label="Actions"]::before {
                 display: none;
@@ -5022,6 +6701,8 @@
             #menuBuilderTable[data-step="items"] td[data-label="Likes"] .menu-builder-likes {
                 display: inline-flex;
                 align-items: center;
+                justify-content: center;
+                width: 100%;
                 min-height: 34px;
                 padding: 0 10px;
                 border-radius: 999px;
@@ -5029,8 +6710,35 @@
                 border: 1px solid #ebe2d6;
             }
 
+            #menuBuilderTable[data-step="items"] td[data-label="Featured"] .menu-builder-stat-stack,
+            #menuBuilderTable[data-step="items"] td[data-label="Price"] .menu-builder-stat-stack,
+            #menuBuilderTable[data-step="items"] td[data-label="Likes"] .menu-builder-stat-stack {
+                width: 100%;
+                gap: 6px;
+            }
+
+            #menuBuilderTable[data-step="items"] td[data-label="Featured"] .menu-builder-toggle {
+                width: 100%;
+                min-width: 0;
+                border-radius: 14px;
+            }
+
+            #menuBuilderTable[data-step="items"] td[data-label="Featured"] .menu-builder-stat-note,
+            #menuBuilderTable[data-step="items"] td[data-label="Price"] .menu-builder-stat-note,
+            #menuBuilderTable[data-step="items"] td[data-label="Likes"] .menu-builder-stat-note {
+                width: 100%;
+                justify-content: center;
+            }
+
             #menuBuilderTable[data-step="items"] td[data-label="Actions"] .menu-builder-item-actions {
                 gap: 4px;
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            #menuBuilderTable[data-step="items"] td[data-label="Actions"] {
+                grid-column: 1 / -1;
+                margin-top: 2px;
             }
 
             .menu-builder-item-main {
@@ -5067,9 +6775,58 @@
                 font-size: 0.78rem;
             }
 
+            .menu-builder-row-note {
+                font-size: 0.75rem;
+                display: none;
+            }
+
+            .menu-builder-side-stack,
+            .menu-builder-stat-stack {
+                gap: 6px;
+            }
+
+            .menu-form-side-panel {
+                padding: 12px 14px;
+                gap: 6px;
+                background: rgba(255, 255, 255, 0.58);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            }
+
+            .menu-form-side-panel h5 {
+                font-size: 0.82rem;
+                margin-bottom: 6px;
+            }
+
+            .menu-form-side-panel p {
+                font-size: 0.8rem;
+                margin-bottom: 0;
+            }
+
+            .menu-form-side-panel ul {
+                display: none;
+            }
+
+            .menu-builder-stat-note {
+                min-height: 26px;
+                padding: 0 9px;
+                font-size: 0.71rem;
+            }
+
+            .menu-builder-side-label,
+            .menu-builder-stat-label {
+                font-size: 0.62rem;
+            }
+
             .menu-builder-item-actions {
                 gap: 6px;
                 justify-content: flex-start;
+            }
+
+            .menu-builder-action-rail {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 5px;
+                border-radius: 14px;
             }
 
             .menu-builder-toggle {
@@ -5260,6 +7017,65 @@
             .menu-crud-modal-card .translation-grid {
                 grid-template-columns: 1fr !important;
                 gap: 10px;
+            }
+
+            .super-icon-picker-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .menu-crud-form-intro {
+                padding: 14px;
+                border-radius: 18px;
+            }
+
+            .menu-crud-form-intro-title {
+                font-size: 1rem;
+            }
+
+            .menu-crud-step-nav {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .menu-crud-step-btn {
+                padding: 12px 12px 11px;
+                border-radius: 16px;
+            }
+
+            .menu-crud-step-label {
+                font-size: 0.78rem;
+            }
+
+            .menu-crud-step-status {
+                font-size: 0.7rem;
+            }
+
+            .menu-form-split,
+            .menu-review-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-form-side-panel,
+            .menu-review-card {
+                padding: 14px;
+            }
+
+            .menu-crud-nav-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding: 14px;
+                border-radius: 18px;
+            }
+
+            .menu-crud-nav-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .menu-crud-nav-btn {
+                flex: 1 1 calc(50% - 8px);
+                min-width: 0;
             }
 
             .dish-extra-row {
@@ -5877,6 +7693,7 @@
                     </div>
                 </div>
                     <div id="menuBuilderOnboarding" class="menu-builder-onboarding" hidden></div>
+                    <div id="menuBuilderOverview" class="menu-builder-overview" aria-live="polite"></div>
                     <div class="table-container menu-builder-table-wrap">
                         <table id="menuBuilderTable" class="menu-builder-table">
                             <thead></thead>
@@ -5924,37 +7741,91 @@
                 <div id="menuCategoryMount" class="owner-section-stack"></div>
             </div>
             <div id="menuStepPanel-items" class="menu-step-panel" style="display:none;">
-            <h3 id="menuItemEditorTitle" data-i18n="admin.menu.title">Add Item</h3>
-            <form id="foodForm" class="menu-crud-form-shell">
-                <section class="menu-form-block">
+            <form id="foodForm" class="menu-crud-form-shell has-step-nav">
+                <div class="menu-crud-form-intro">
+                    <div class="menu-crud-form-intro-shell">
+                        <span class="menu-crud-form-intro-kicker">Dish editor</span>
+                        <h4 id="menuItemEditorTitle" class="menu-crud-form-intro-title" data-i18n="admin.menu.title">Add Item</h4>
+                        <p class="menu-crud-form-intro-copy">Move through the dish in the same order customers experience it: basics, pricing, extras, media, then final labels.</p>
+                        <div class="menu-crud-form-meta">
+                            <span class="menu-crud-form-meta-pill" id="foodFormMetaState">New dish draft</span>
+                            <span class="menu-crud-form-meta-pill" id="foodFormMetaPricing">Pricing pending</span>
+                            <span class="menu-crud-form-meta-pill" id="foodFormMetaTranslations">Translations pending</span>
+                        </div>
+                    </div>
+                    <div class="menu-crud-step-nav" aria-label="Dish form sections">
+                        <button type="button" class="menu-crud-step-btn is-active" data-form-id="foodForm" data-section-target="core" onclick="activateMenuCrudSection('foodForm','core')"><span class="menu-crud-step-label">Core</span><span class="menu-crud-step-status">Missing</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="foodForm" data-section-target="pricing" onclick="activateMenuCrudSection('foodForm','pricing')"><span class="menu-crud-step-label">Pricing</span><span class="menu-crud-step-status">Missing</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="foodForm" data-section-target="extras" onclick="activateMenuCrudSection('foodForm','extras')"><span class="menu-crud-step-label">Extras</span><span class="menu-crud-step-status">Optional</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="foodForm" data-section-target="media" onclick="activateMenuCrudSection('foodForm','media')"><span class="menu-crud-step-label">Media</span><span class="menu-crud-step-status">Optional</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="foodForm" data-section-target="labels" onclick="activateMenuCrudSection('foodForm','labels')"><span class="menu-crud-step-label">Labels</span><span class="menu-crud-step-status">Missing</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="foodForm" data-section-target="review" onclick="activateMenuCrudSection('foodForm','review')"><span class="menu-crud-step-label">Review</span><span class="menu-crud-step-status">Missing</span></button>
+                    </div>
+                </div>
+                <section class="menu-form-block is-active" data-menu-section="core">
+                    <div class="menu-form-split">
+                        <div>
+                            <div class="menu-form-block-header">
+                                <span class="menu-form-block-kicker">Step 1</span>
+                                <h4 class="menu-form-block-title">Fallback identity</h4>
+                                <p class="menu-form-block-copy">Set the core dish name, category, and fallback description first. Everything else builds on this version.</p>
+                            </div>
+                            <div class="form-grid form-grid-2">
+                                <div class="form-group">
+                                    <label data-i18n="admin.menu.default_name">Default Name</label>
+                                    <input type="text" id="itemName" placeholder="e.g. Signature Plate" data-i18n-placeholder="admin.menu.default_name_placeholder" required />
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="admin.menu.category">Category</label>
+                                    <select id="itemCat" required></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="admin.menu.default_description">Default Description</label>
+                                <input type="text" id="itemDesc" placeholder="Used as the fallback when a translation is missing" data-i18n-placeholder="admin.menu.default_description_placeholder" required />
+                            </div>
+                        </div>
+                        <aside class="menu-form-side-panel">
+                            <h5>What this controls</h5>
+                            <p>The fallback name and description are the source of truth for imports, AI translation, and every customer label that has not been customized yet.</p>
+                            <ul>
+                                <li>Keep the fallback name stable and easy to search later.</li>
+                                <li>Use category selection before working on pricing or visuals.</li>
+                                <li>If a translation is missing, this copy appears on the public menu.</li>
+                            </ul>
+                        </aside>
+                    </div>
+                </section>
+                <section class="menu-form-block" data-menu-section="labels">
                     <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Item</span>
-                        <h4 class="menu-form-block-title">Core details</h4>
-                        <p class="menu-form-block-copy">Set the default name, category, and fallback description first. This is the backbone of the dish entry.</p>
+                        <span class="menu-form-block-kicker">Step 5</span>
+                        <h4 class="menu-form-block-title">Customer labels</h4>
+                        <p class="menu-form-block-copy">Generate FR, EN, and AR labels from the fallback name and description, then only touch the translations that actually need manual nuance.</p>
                     </div>
-                    <div class="form-grid form-grid-2">
-                        <div class="form-group">
-                            <label data-i18n="admin.menu.default_name">Default Name</label>
-                            <input type="text" id="itemName" placeholder="e.g. Signature Plate" data-i18n-placeholder="admin.menu.default_name_placeholder" required />
+                    <div class="translation-summary-card">
+                        <div class="translation-summary-header">
+                            <div>
+                                <h5>Translation coverage</h5>
+                                <p>Use AI to draft customer-facing labels from the fallback dish name and description, then refine them only when needed.</p>
+                            </div>
+                            <span class="translation-inline-note" id="itemTranslationSummaryNote">No translations yet</span>
                         </div>
-                        <div class="form-group">
-                            <label data-i18n="admin.menu.category">Category</label>
-                            <select id="itemCat" required></select>
+                        <div id="itemTranslationStatusRow" class="translation-status-row"></div>
+                        <div id="itemTranslationAiNote" class="translation-ai-note" hidden></div>
+                        <div class="translation-summary-actions">
+                            <button type="button" id="itemTranslationGenerateBtn" class="secondary-btn" onclick="generateEntityTranslations('item')">Generate with AI</button>
+                            <button type="button" class="secondary-btn" onclick="toggleTranslationEditor('item')">Review manually</button>
                         </div>
+                        <p class="translation-summary-note">Generated labels stay editable before you save the dish.</p>
                     </div>
-                    <div class="form-group">
-                        <label data-i18n="admin.menu.default_description">Default Description</label>
-                        <input type="text" id="itemDesc" placeholder="Used as the fallback when a translation is missing" data-i18n-placeholder="admin.menu.default_description_placeholder" required />
-                    </div>
-                    <details class="admin-disclosure">
+                    <details id="itemTranslationDisclosure" class="admin-disclosure menu-translation-manual">
                         <summary>
                             <span>
                                 <span data-i18n="admin.menu.localized_names">Localized Names & Descriptions</span>
-                                <span class="admin-disclosure-copy">Optional translations.</span>
+                                <span class="admin-disclosure-copy">Open the manual fields only when a language needs extra nuance.</span>
                             </span>
                         </summary>
                         <div class="admin-disclosure-body">
-                            <p class="translation-hint" data-i18n="admin.menu.localized_names_hint">These fields power the French, English, and Arabic menu experience today and give the future AI importer a clean target schema.</p>
                             <div class="translation-grid">
                                 <div class="translation-card">
                                     <h4 data-i18n="admin.lang.french">French</h4>
@@ -5981,9 +7852,9 @@
                         </div>
                     </details>
                 </section>
-                <section class="menu-form-block">
+                <section class="menu-form-block" data-menu-section="pricing">
                     <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Pricing</span>
+                        <span class="menu-form-block-kicker">Step 2</span>
                         <h4 class="menu-form-block-title">Price structure</h4>
                         <p class="menu-form-block-copy">Use one standard price, or switch to size-based pricing when the dish needs small, medium, and large values.</p>
                     </div>
@@ -6013,9 +7884,9 @@
                         </div>
                     </div>
                 </section>
-                <section class="menu-form-block">
+                <section class="menu-form-block" data-menu-section="extras">
                     <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Extras</span>
+                        <span class="menu-form-block-kicker">Step 3</span>
                         <h4 class="menu-form-block-title">Optional paid add-ons</h4>
                         <p class="menu-form-block-copy">Use this for add-ons like extra sauce, extra cheese, or toppings. Customers will see them as checkboxes in the dish detail sheet.</p>
                     </div>
@@ -6024,9 +7895,9 @@
                         <button type="button" class="secondary-btn btn-auto" onclick="addItemExtraRow()">Add extra</button>
                     </div>
                 </section>
-                <section class="menu-form-block">
+                <section class="menu-form-block" data-menu-section="media">
                     <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Operations</span>
+                        <span class="menu-form-block-kicker">Step 4</span>
                         <h4 class="menu-form-block-title">Availability & media</h4>
                         <p class="menu-form-block-copy">Keep the essentials visible, and open the advanced area only when you need ingredients, flags, or image management.</p>
                     </div>
@@ -6059,9 +7930,71 @@
                                 <input type="file" id="itemFile" accept="image/*" multiple class="file-input-spaced" />
                                 <textarea id="itemImg" placeholder="Or paste URLs here (comma separated)..." data-i18n-placeholder="admin.menu.gallery_placeholder" rows="2"></textarea>
                             </div>
+                            <div class="media-action-row">
+                                <button type="button" id="itemOpenGalleryBtn" class="secondary-btn" onclick="openItemImageManagerFromForm()">Save once to manage gallery</button>
+                            </div>
                         </div>
                     </details>
                 </section>
+                <section class="menu-form-block" data-menu-section="review">
+                    <div class="menu-form-split">
+                        <div>
+                            <div class="menu-form-block-header">
+                                <span class="menu-form-block-kicker">Step 6</span>
+                                <h4 class="menu-form-block-title">Review before save</h4>
+                                <p class="menu-form-block-copy">Use this final step to catch missing pricing, translation, or media before publishing the dish to the live menu.</p>
+                            </div>
+                            <div class="menu-review-grid">
+                                <article class="menu-review-card menu-review-card--wide">
+                                    <span class="menu-review-label">Dish</span>
+                                    <strong id="itemReviewSummaryName">Start with a dish name</strong>
+                                    <p id="itemReviewSummaryDesc">The default description will appear here once it is filled.</p>
+                                </article>
+                                <article class="menu-review-card">
+                                    <span class="menu-review-label">Pricing</span>
+                                    <strong id="itemReviewPriceMode">No pricing yet</strong>
+                                </article>
+                                <article class="menu-review-card">
+                                    <span class="menu-review-label">Extras</span>
+                                    <strong id="itemReviewExtrasCount">No extras configured</strong>
+                                </article>
+                                <article class="menu-review-card">
+                                    <span class="menu-review-label">Media</span>
+                                    <strong id="itemReviewMediaCount">No media yet</strong>
+                                    <p id="itemReviewMediaHint">Save once, then the full gallery manager becomes available.</p>
+                                </article>
+                                <article class="menu-review-card">
+                                    <span class="menu-review-label">Translations</span>
+                                    <strong id="itemReviewTranslationState">Translations pending</strong>
+                                </article>
+                                <article class="menu-review-card">
+                                    <span class="menu-review-label">Live status</span>
+                                    <strong id="itemReviewAvailabilityState">Visible on the live menu</strong>
+                                </article>
+                            </div>
+                        </div>
+                        <aside class="menu-form-side-panel">
+                            <h5>Final check</h5>
+                            <p>This last step keeps mistakes visible before you save. If pricing, labels, or media still look incomplete, go back and finish them now.</p>
+                            <ul>
+                                <li>Fallback copy should still read well even without translations.</li>
+                                <li>Guests only see dishes marked available.</li>
+                                <li>Featured dishes may surface in highlighted customer views.</li>
+                            </ul>
+                        </aside>
+                    </div>
+                </section>
+                <div class="menu-crud-nav-footer" aria-live="polite">
+                    <div class="menu-crud-nav-copy">
+                        <span class="menu-crud-nav-kicker">Guided flow</span>
+                        <strong id="foodFormNavTitle">Core</strong>
+                        <span id="foodFormNavHint">Step 1 of 6 · 0 steps ready</span>
+                    </div>
+                    <div class="menu-crud-nav-actions">
+                        <button type="button" id="foodFormPrevBtn" class="secondary-btn menu-crud-nav-btn" onclick="stepMenuCrudSection('foodForm', -1)">Previous</button>
+                        <button type="button" id="foodFormNextBtn" class="secondary-btn menu-crud-nav-btn is-primary" onclick="stepMenuCrudSection('foodForm', 1)">Next step</button>
+                    </div>
+                </div>
                 <div class="modal-form-actions">
                     <button type="submit" class="primary-btn" data-i18n="admin.menu.save_product">Save</button>
                     <button type="button" class="primary-btn secondary-btn" onclick="closeMenuCrudModal()">Cancel</button>
@@ -6257,54 +8190,126 @@
         <!-- CATEGORIES SECTION -->
         <div id="categories" class="section">
             <h3 data-i18n="admin.categories.title">Add Category</h3>
-            <form id="catForm" class="menu-crud-form-shell">
+            <form id="catForm" class="menu-crud-form-shell has-step-nav">
                 <input type="hidden" id="catEditingKey" value="" />
-                <section class="menu-form-block">
+                <div class="menu-crud-form-intro">
+                    <div class="menu-crud-form-intro-shell">
+                        <span class="menu-crud-form-intro-kicker">Category editor</span>
+                        <h4 class="menu-crud-form-intro-title">Create a customer-facing menu section</h4>
+                        <p class="menu-crud-form-intro-copy">Define the stable fallback key first, then settle the visual identity and multilingual labels customers will actually see.</p>
+                        <div class="menu-crud-form-meta">
+                            <span class="menu-crud-form-meta-pill" id="catFormMetaState">Category draft</span>
+                            <span class="menu-crud-form-meta-pill" id="catFormMetaVisual">Image optional</span>
+                            <span class="menu-crud-form-meta-pill" id="catFormMetaLabels">Labels pending</span>
+                        </div>
+                    </div>
+                    <div class="menu-crud-step-nav" aria-label="Category form sections">
+                        <button type="button" class="menu-crud-step-btn is-active" data-form-id="catForm" data-section-target="identity" onclick="activateMenuCrudSection('catForm','identity')"><span class="menu-crud-step-label">Identity</span><span class="menu-crud-step-status">Missing</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="catForm" data-section-target="visual" onclick="activateMenuCrudSection('catForm','visual')"><span class="menu-crud-step-label">Visual</span><span class="menu-crud-step-status">Optional</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="catForm" data-section-target="labels" onclick="activateMenuCrudSection('catForm','labels')"><span class="menu-crud-step-label">Labels</span><span class="menu-crud-step-status">Missing</span></button>
+                    </div>
+                </div>
+                <section class="menu-form-block is-active" data-menu-section="identity">
+                    <div class="menu-form-split">
+                        <div>
+                            <div class="menu-form-block-header">
+                                <span class="menu-form-block-kicker">Step 1</span>
+                                <h4 class="menu-form-block-title">Category identity</h4>
+                                <p class="menu-form-block-copy">Use a stable fallback key and connect the category to the correct super category before working on its visual layer.</p>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label>Fallback / Internal Category Key</label>
+                                    <input type="text" id="catName" placeholder="e.g. Hot Drinks" data-i18n-placeholder="admin.categories.name_placeholder" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Super Category</label>
+                                    <select id="catSuperCategory" required>
+                                        <option value="">Select a super category</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="menu-form-side-panel">
+                            <h5>Structure notes</h5>
+                            <p>The fallback key is your stable internal reference. Customer-facing labels can change later without breaking dish assignments.</p>
+                            <ul>
+                                <li>Choose the correct super category before adding translations.</li>
+                                <li>Keep the fallback key simple and reusable.</li>
+                                <li>Renaming a category here updates the linked dishes safely.</li>
+                            </ul>
+                        </aside>
+                    </div>
+                </section>
+                <section class="menu-form-block" data-menu-section="visual">
+                    <div class="menu-form-split">
+                        <div>
+                            <div class="menu-form-block-header">
+                                <span class="menu-form-block-kicker">Step 2</span>
+                                <h4 class="menu-form-block-title">Visual identity</h4>
+                                <p class="menu-form-block-copy">Use one category image to create the backdrop feel in the public item list and reinforce the section mood.</p>
+                            </div>
+                            <div class="category-image-field">
+                                <div id="catImagePreview" class="category-image-preview">
+                                    <img id="catImagePreviewImg" src="" alt="Category preview" style="display:none;">
+                                    <span id="catImagePreviewFallback">Image</span>
+                                </div>
+                                <div class="category-image-controls">
+                                    <div class="form-group">
+                                        <label>Category Image URL / Path</label>
+                                        <input type="text" id="catImage" placeholder="/uploads/category-drinks.webp" />
+                                    </div>
+                                    <div class="category-image-upload">
+                                        <label for="catImageUpload">Upload category image</label>
+                                        <input type="file" id="catImageUpload" accept="image/*" />
+                                    </div>
+                                    <div class="category-image-actions">
+                                        <button type="button" id="catGenerateImageBtn" class="secondary-btn" onclick="generateCategoryImageWithAI()">Generate with AI</button>
+                                    </div>
+                                    <div id="catImageProgress" class="category-image-progress" hidden>
+                                        <div class="category-image-progress-bar"><span></span></div>
+                                        <p id="catImageProgressText" class="category-image-progress-text">Generating category image...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="menu-form-side-panel">
+                            <h5>Visual guidance</h5>
+                            <p>Use one atmosphere-driven image that represents the section, not one specific dish. This is the image that can tint and enrich the item-list background.</p>
+                            <ul>
+                                <li>Prefer broad category mood over a single plate.</li>
+                                <li>AI generation works best after the category and super-category are set.</li>
+                                <li>You can leave the visual empty and add it later.</li>
+                            </ul>
+                        </aside>
+                    </div>
+                </section>
+                <section class="menu-form-block" data-menu-section="labels">
                     <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Category</span>
-                        <h4 class="menu-form-block-title">Category identity</h4>
-                        <p class="menu-form-block-copy">Use a stable fallback key here. Customer-facing presentation now comes from the category image and translated labels below.</p>
+                        <span class="menu-form-block-kicker">Step 3</span>
+                        <h4 class="menu-form-block-title">Customer labels</h4>
+                        <p class="menu-form-block-copy">Generate translated category names from the fallback label, then review them only if a language needs a more nuanced version.</p>
                     </div>
-                    <div>
-                        <div class="form-group">
-                            <label>Fallback / Internal Category Key</label>
-                            <input type="text" id="catName" placeholder="e.g. Hot Drinks" data-i18n-placeholder="admin.categories.name_placeholder" required />
+                    <div class="translation-summary-card">
+                        <div class="translation-summary-header">
+                            <div>
+                                <h5>Customer labels</h5>
+                                <p>Draft multilingual category names from the fallback label after the category structure and image are settled.</p>
+                            </div>
+                            <span class="translation-inline-note" id="catTranslationSummaryNote">No translations yet</span>
                         </div>
-                        <div class="form-group">
-                            <label>Super Category</label>
-                            <select id="catSuperCategory" required>
-                                <option value="">Select a super category</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="category-image-field">
-                        <div id="catImagePreview" class="category-image-preview">
-                            <img id="catImagePreviewImg" src="" alt="Category preview" style="display:none;">
-                            <span id="catImagePreviewFallback">Image</span>
-                        </div>
-                        <div class="category-image-controls">
-                            <div class="form-group">
-                                <label>Category Image URL / Path</label>
-                                <input type="text" id="catImage" placeholder="/uploads/category-drinks.webp" />
-                            </div>
-                            <div class="category-image-upload">
-                                <label for="catImageUpload">Upload category image</label>
-                                <input type="file" id="catImageUpload" accept="image/*" />
-                            </div>
-                            <div class="category-image-actions">
-                                <button type="button" id="catGenerateImageBtn" class="secondary-btn" onclick="generateCategoryImageWithAI()">Generate with AI</button>
-                            </div>
-                            <div id="catImageProgress" class="category-image-progress" hidden>
-                                <div class="category-image-progress-bar"><span></span></div>
-                                <p id="catImageProgressText" class="category-image-progress-text">Generating category image...</p>
-                            </div>
+                        <div id="catTranslationStatusRow" class="translation-status-row"></div>
+                        <div id="catTranslationAiNote" class="translation-ai-note" hidden></div>
+                        <div class="translation-summary-actions">
+                            <button type="button" id="catTranslationGenerateBtn" class="secondary-btn" onclick="generateEntityTranslations('category')">Generate with AI</button>
+                            <button type="button" class="secondary-btn" onclick="toggleTranslationEditor('category')">Review manually</button>
                         </div>
                     </div>
-                    <details class="admin-disclosure">
+                    <details id="catTranslationDisclosure" class="admin-disclosure menu-translation-manual">
                         <summary>
                             <span>
                                 <span>Translations</span>
-                                <span class="admin-disclosure-copy">Optional translations.</span>
+                                <span class="admin-disclosure-copy">Open the manual fields only when a language needs extra refinement.</span>
                             </span>
                         </summary>
                         <div class="admin-disclosure-body">
@@ -6328,6 +8333,17 @@
                         </div>
                     </details>
                 </section>
+                <div class="menu-crud-nav-footer" aria-live="polite">
+                    <div class="menu-crud-nav-copy">
+                        <span class="menu-crud-nav-kicker">Guided flow</span>
+                        <strong id="catFormNavTitle">Identity</strong>
+                        <span id="catFormNavHint">Step 1 of 3 · 0 steps ready</span>
+                    </div>
+                    <div class="menu-crud-nav-actions">
+                        <button type="button" id="catFormPrevBtn" class="secondary-btn menu-crud-nav-btn" onclick="stepMenuCrudSection('catForm', -1)">Previous</button>
+                        <button type="button" id="catFormNextBtn" class="secondary-btn menu-crud-nav-btn is-primary" onclick="stepMenuCrudSection('catForm', 1)">Next step</button>
+                    </div>
+                </div>
                 <div class="modal-form-actions">
                     <button type="submit" class="primary-btn" data-i18n="admin.categories.add">Save</button>
                     <button type="button" class="primary-btn secondary-btn" onclick="closeMenuCrudModal()">Cancel</button>
@@ -6339,7 +8355,7 @@
                 <table id="catTable">
                     <thead>
                         <tr>
-                            <th data-i18n="admin.table.emoji">Emoji</th>
+                            <th>Visual</th>
                             <th data-i18n="admin.table.name">Name</th>
                             <th data-i18n="admin.table.items">Items</th>
                             <th data-i18n="admin.table.action">Action</th>
@@ -6388,8 +8404,8 @@
                     <div class="stat-val" id="stat-cats">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label" data-i18n="admin.stats.promo_status">Promo Status</div>
-                    <div class="stat-val" id="stat-promo">OFF</div>
+                    <div class="stat-label">Featured Items</div>
+                    <div class="stat-val" id="stat-promo">0</div>
                 </div>
             </div>
         </div>
@@ -6665,24 +8681,28 @@
                     </div>
                 </div>
                                 <section class="owner-section-card branding-section-card branding-notes-card">
-                                    <div class="owner-subsection-heading">
-                                        <h4>Studio checklist</h4>
-                                        <p>Use this as the final review before you publish the restaurant identity live.</p>
-                                    </div>
-                                    <ul class="branding-note-list">
-                                        <li>
-                                            <strong>Keep one dominant story</strong>
-                                            <span>Pick a preset, one hero mood, and one brand promise. Avoid mixing directions.</span>
-                                        </li>
-                                        <li>
-                                            <strong>Use the strongest hero first</strong>
-                                            <span>The main hero should carry the homepage. Extra slides should support it, not replace it.</span>
-                                        </li>
-                                        <li>
-                                            <strong>Check contrast in the preview</strong>
-                                            <span>If the preview feels weak or muddy here, it will feel weak live too.</span>
-                                        </li>
-                                    </ul>
+                                    <details class="admin-disclosure admin-quiet-disclosure">
+                                        <summary>
+                                            <span>Studio checklist</span>
+                                            <span class="admin-disclosure-copy">Final review notes before publishing the restaurant identity.</span>
+                                        </summary>
+                                        <div class="admin-disclosure-body">
+                                            <ul class="branding-note-list">
+                                                <li>
+                                                    <strong>Keep one dominant story</strong>
+                                                    <span>Pick a preset, one hero mood, and one brand promise. Avoid mixing directions.</span>
+                                                </li>
+                                                <li>
+                                                    <strong>Use the strongest hero first</strong>
+                                                    <span>The main hero should carry the homepage. Extra slides should support it, not replace it.</span>
+                                                </li>
+                                                <li>
+                                                    <strong>Check contrast in the preview</strong>
+                                                    <span>If the preview feels weak or muddy here, it will feel weak live too.</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </details>
                                 </section>
                             </div>
                         </div>
@@ -6740,24 +8760,28 @@
                         </div>
                         <div class="branding-tab-side">
                             <section class="owner-section-card branding-tab-card branding-notes-card">
-                                <div class="owner-subsection-heading">
-                                    <h4>Homepage review</h4>
-                                    <p>Use this check before publishing the homepage changes live.</p>
-                                </div>
-                                <ul class="branding-tab-note-list">
-                                    <li>
-                                        <strong>Keep the first visit focused</strong>
-                                        Let the homepage explain one restaurant, not every possible message at once.
-                                    </li>
-                                    <li>
-                                        <strong>Use section order deliberately</strong>
-                                        The strongest proof should come first after the hero, especially on mobile.
-                                    </li>
-                                    <li>
-                                        <strong>Trim copy before styling more</strong>
-                                        If a section still feels weak, shorter copy usually helps more than extra UI.
-                                    </li>
-                                </ul>
+                                <details class="admin-disclosure admin-quiet-disclosure">
+                                    <summary>
+                                        <span>Homepage review</span>
+                                        <span class="admin-disclosure-copy">Optional checklist before publishing the homepage changes.</span>
+                                    </summary>
+                                    <div class="admin-disclosure-body">
+                                        <ul class="branding-tab-note-list">
+                                            <li>
+                                                <strong>Keep the first visit focused</strong>
+                                                Let the homepage explain one restaurant, not every possible message at once.
+                                            </li>
+                                            <li>
+                                                <strong>Use section order deliberately</strong>
+                                                The strongest proof should come first after the hero, especially on mobile.
+                                            </li>
+                                            <li>
+                                                <strong>Trim copy before styling more</strong>
+                                                If a section still feels weak, shorter copy usually helps more than extra UI.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </details>
                             </section>
                         </div>
                     </div>
@@ -6804,24 +8828,28 @@
                         </div>
                         <div class="branding-tab-side">
                             <section class="owner-section-card branding-tab-card branding-notes-card">
-                                <div class="owner-subsection-heading">
-                                    <h4>Gallery quality guide</h4>
-                                    <p>Use these rules so the gallery stays useful and premium.</p>
-                                </div>
-                                <ul class="branding-tab-note-list">
-                                    <li>
-                                        <strong>Prefer atmosphere over repetition</strong>
-                                        Show different moments of the restaurant instead of repeating the same plate from slightly different angles.
-                                    </li>
-                                    <li>
-                                        <strong>Use bright, stable crops</strong>
-                                        If the image feels muddy or overbusy in admin, it will feel worse on the public site.
-                                    </li>
-                                    <li>
-                                        <strong>Keep weak images out</strong>
-                                        One strong gallery row is better than six mediocre uploads.
-                                    </li>
-                                </ul>
+                                <details class="admin-disclosure admin-quiet-disclosure">
+                                    <summary>
+                                        <span>Gallery quality guide</span>
+                                        <span class="admin-disclosure-copy">Optional curation notes to keep the gallery premium.</span>
+                                    </summary>
+                                    <div class="admin-disclosure-body">
+                                        <ul class="branding-tab-note-list">
+                                            <li>
+                                                <strong>Prefer atmosphere over repetition</strong>
+                                                Show different moments of the restaurant instead of repeating the same plate from slightly different angles.
+                                            </li>
+                                            <li>
+                                                <strong>Use bright, stable crops</strong>
+                                                If the image feels muddy or overbusy in admin, it will feel worse on the public site.
+                                            </li>
+                                            <li>
+                                                <strong>Keep weak images out</strong>
+                                                One strong gallery row is better than six mediocre uploads.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </details>
                             </section>
                         </div>
                     </div>
@@ -6983,33 +9011,108 @@
             <h3>Super Categories (Meal Periods)</h3>
             <p>Group your food categories into logical meal times (e.g. Breakfast, Lunch, Dinner).</p>
 
-            <form id="superCatForm" class="panel-soft menu-crud-form-shell">
+            <form id="superCatForm" class="panel-soft menu-crud-form-shell has-step-nav">
                 <input type="hidden" id="scEditingId" value="" />
-                <section class="menu-form-block">
+                <div class="menu-crud-form-intro">
+                    <div class="menu-crud-form-intro-shell">
+                        <span class="menu-crud-form-intro-kicker">Top-level menu group</span>
+                        <h4 class="menu-crud-form-intro-title">Define the first layer customers open in the menu</h4>
+                        <p class="menu-crud-form-intro-copy">Super-categories shape the high-level browsing flow. Set the fallback identity first, then choose the customer labels and linked categories.</p>
+                        <div class="menu-crud-form-meta">
+                            <span class="menu-crud-form-meta-pill" id="superCatFormMetaState">Structure draft</span>
+                            <span class="menu-crud-form-meta-pill" id="superCatFormMetaLabels">Labels pending</span>
+                        </div>
+                    </div>
+                    <div class="menu-crud-step-nav" aria-label="Super category form sections">
+                        <button type="button" class="menu-crud-step-btn is-active" data-form-id="superCatForm" data-section-target="identity" onclick="activateMenuCrudSection('superCatForm','identity')"><span class="menu-crud-step-label">Identity</span><span class="menu-crud-step-status">Missing</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="superCatForm" data-section-target="labels" onclick="activateMenuCrudSection('superCatForm','labels')"><span class="menu-crud-step-label">Labels</span><span class="menu-crud-step-status">Needs AI</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="superCatForm" data-section-target="structure" onclick="activateMenuCrudSection('superCatForm','structure')"><span class="menu-crud-step-label">Structure</span><span class="menu-crud-step-status">Missing</span></button>
+                    </div>
+                </div>
+                <section class="menu-form-block is-active" data-menu-section="identity">
+                    <div class="menu-form-split">
+                        <div>
+                            <div class="menu-form-block-header">
+                                <span class="menu-form-block-kicker">Step 1</span>
+                                <h4 class="menu-form-block-title">Top-level group identity</h4>
+                                <p class="menu-form-block-copy">Set the fallback name, schedule, and summary customers should understand before any translations are generated.</p>
+                            </div>
+                            <div class="form-grid form-grid-name-emoji">
+                                <div class="form-group">
+                                    <label>Fallback Name</label>
+                                    <input type="text" id="scName" placeholder="e.g. Breakfast" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Fallback Icon</label>
+                                    <div class="super-icon-picker">
+                                        <div class="super-icon-preview" id="superIconPreview" aria-live="polite">
+                                            <span class="super-icon-preview-glyph" id="superIconPreviewGlyph">🍽️</span>
+                                            <div class="super-icon-preview-copy">
+                                                <p class="super-icon-preview-title" id="superIconPreviewTitle">Selected fallback icon</p>
+                                                <p class="super-icon-preview-note" id="superIconPreviewNote">Quick, lightweight, and consistent across tables and backups.</p>
+                                            </div>
+                                        </div>
+                                        <div id="superCategoryIconPicker" class="super-icon-picker-grid" role="listbox" aria-label="Super category icon presets" tabindex="-1"></div>
+                                        <details class="admin-disclosure admin-quiet-disclosure super-icon-manual">
+                                            <summary>
+                                                <span>
+                                                    <span>Manual icon entry</span>
+                                                    <span class="admin-disclosure-copy">Only use this if the quick picks do not fit your menu.</span>
+                                                </span>
+                                            </summary>
+                                            <div class="admin-disclosure-body">
+                                                <div class="form-group">
+                                                    <label for="scEmoji">Custom fallback icon</label>
+                                                    <input type="text" id="scEmoji" placeholder="🍽️" maxlength="6" />
+                                                </div>
+                                            </div>
+                                        </details>
+                                        <p class="super-icon-helper">For top-level groups, a simple icon works better than an AI image. Use category images when you want the richer visual treatment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Fallback Description</label>
+                                <input type="text" id="scDesc" placeholder="e.g. Morning dishes, bakery, eggs, and coffee" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Time Slot (Optional Display)</label>
+                                <input type="text" id="scTime" placeholder="e.g. 07:00 - 12:00" />
+                            </div>
+                        </div>
+                        <aside class="menu-form-side-panel">
+                            <h5>Structure notes</h5>
+                            <p>Super-categories are the first decision customers make. Keep the fallback identity broad, clear, and stable over time.</p>
+                            <ul>
+                                <li>Use meal or browsing themes, not a single dish type.</li>
+                                <li>The time slot is optional and purely visual.</li>
+                                <li>The fallback icon should stay simple. Use category images when you want a richer visual treatment.</li>
+                            </ul>
+                        </aside>
+                    </div>
+                </section>
+                <section class="menu-form-block" data-menu-section="labels">
                     <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Super Category</span>
-                        <h4 class="menu-form-block-title">Top-level menu group</h4>
-                        <p class="menu-form-block-copy">This is the first layer customers open before they reach categories. Set the fallback identity and translated labels here.</p>
+                        <span class="menu-form-block-kicker">Step 2</span>
+                        <h4 class="menu-form-block-title">Customer labels</h4>
+                        <p class="menu-form-block-copy">Generate multilingual names and descriptions from the fallback copy, then review them only when you need nuance.</p>
                     </div>
-                    <div class="form-grid form-grid-name-emoji">
-                        <div class="form-group">
-                            <label>Fallback Name</label>
-                            <input type="text" id="scName" placeholder="e.g. Breakfast" required />
+                    <div class="translation-summary-card">
+                        <div class="translation-summary-header">
+                            <div>
+                                <h5>Customer labels</h5>
+                                <p>Generate multilingual names and descriptions from the fallback copy, then review them only when you need nuance.</p>
+                            </div>
+                            <span class="translation-inline-note" id="superTranslationSummaryNote">No translations yet</span>
                         </div>
-                        <div class="form-group">
-                            <label>Emoji</label>
-                            <input type="text" id="scEmoji" placeholder="☕" required />
+                        <div id="superTranslationStatusRow" class="translation-status-row"></div>
+                        <div id="superTranslationAiNote" class="translation-ai-note" hidden></div>
+                        <div class="translation-summary-actions">
+                            <button type="button" id="superTranslationGenerateBtn" class="secondary-btn" onclick="generateEntityTranslations('supercategory')">Generate with AI</button>
+                            <button type="button" class="secondary-btn" onclick="toggleTranslationEditor('supercategory')">Review manually</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Fallback Description</label>
-                        <input type="text" id="scDesc" placeholder="e.g. Paninis, Sandwichs Froids & Salades" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Time Slot (Optional Display)</label>
-                        <input type="text" id="scTime" placeholder="e.g. 07:00 - 12:00" />
-                    </div>
-                    <details class="admin-disclosure">
+                    <details id="superTranslationDisclosure" class="admin-disclosure menu-translation-manual">
                         <summary>
                             <span>
                                 <span>Translations</span>
@@ -7043,19 +9146,43 @@
                         </div>
                     </details>
                 </section>
-                <section class="menu-form-block">
-                    <div class="menu-form-block-header">
-                        <span class="menu-form-block-kicker">Structure</span>
-                        <h4 class="menu-form-block-title">Included categories</h4>
-                        <p class="menu-form-block-copy">Choose which child categories appear inside this super category.</p>
-                    </div>
-                    <div class="form-group">
-                        <label>Included Categories</label>
-                        <div id="scCatsList" class="chip-select-list">
-                            <!-- Checkboxes will be rendered here -->
+                <section class="menu-form-block" data-menu-section="structure">
+                    <div class="menu-form-split">
+                        <div>
+                            <div class="menu-form-block-header">
+                                <span class="menu-form-block-kicker">Step 3</span>
+                                <h4 class="menu-form-block-title">Included categories</h4>
+                                <p class="menu-form-block-copy">Choose which child categories belong inside this super category. This controls the second level of public menu browsing.</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Included Categories</label>
+                                <div id="scCatsList" class="chip-select-list">
+                                    <!-- Checkboxes will be rendered here -->
+                                </div>
+                            </div>
                         </div>
+                        <aside class="menu-form-side-panel">
+                            <h5>Selection guidance</h5>
+                            <p>Keep the group tight and intuitive. Each category should feel like it naturally belongs with the others inside the same customer journey.</p>
+                            <ul>
+                                <li>Pick only the categories customers expect together.</li>
+                                <li>Reorganizing later will not delete dishes.</li>
+                                <li>Step status turns ready once at least one category is linked.</li>
+                            </ul>
+                        </aside>
                     </div>
                 </section>
+                <div class="menu-crud-nav-footer" aria-live="polite">
+                    <div class="menu-crud-nav-copy">
+                        <span class="menu-crud-nav-kicker">Guided flow</span>
+                        <strong id="superCatFormNavTitle">Identity</strong>
+                        <span id="superCatFormNavHint">Step 1 of 3 · 0 steps ready</span>
+                    </div>
+                    <div class="menu-crud-nav-actions">
+                        <button type="button" id="superCatFormPrevBtn" class="secondary-btn menu-crud-nav-btn" onclick="stepMenuCrudSection('superCatForm', -1)">Previous</button>
+                        <button type="button" id="superCatFormNextBtn" class="secondary-btn menu-crud-nav-btn is-primary" onclick="stepMenuCrudSection('superCatForm', 1)">Next step</button>
+                    </div>
+                </div>
                 <div class="modal-form-actions">
                     <button type="submit" class="primary-btn">Save</button>
                     <button type="button" class="primary-btn secondary-btn" onclick="closeMenuCrudModal()">Cancel</button>
@@ -7172,53 +9299,91 @@
                 <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow">Importer</div>
                     <h4>AI Import Studio</h4>
-                    <p>Upload menu files, generate a draft, review it, then publish only what you trust.</p>
+                    <p>Upload a menu, create a draft, review the result, then publish only what you trust.</p>
                     <p class="muted-copy">Imports affect menu data only. Branding, landing, and gallery stay untouched.</p>
                     <div class="form-group">
                         <label for="importStudioMenuFiles">Menu Images / PDF</label>
                         <input type="file" id="importStudioMenuFiles" accept="image/*,.pdf,application/pdf" multiple />
                     </div>
                     <div class="tool-actions">
-                        <button type="button" class="primary-btn btn-auto" onclick="generateImporterDraft()">Generate Menu Draft</button>
-                        <button type="button" class="brand-secondary-btn" onclick="copyImporterDraftJson()">Copy Draft JSON</button>
+                        <button type="button" class="primary-btn btn-auto" onclick="generateImporterDraft()">Create Draft</button>
+                        <button type="button" id="copyImporterDraftJsonBtn" class="brand-secondary-btn" onclick="copyImporterDraftJson()">Copy JSON</button>
                     </div>
                     <div id="importStudioStatusCard" class="importer-status-card" hidden aria-live="polite">
                         <div class="importer-status-head">
                             <span id="importStudioStatusBadge" class="importer-status-badge">Importer busy</span>
                             <span id="importStudioStatusMeta" class="importer-status-meta">Preparing…</span>
                         </div>
-                        <h5 id="importStudioStatusTitle" class="importer-status-title">Preparing your menu import</h5>
-                        <p id="importStudioStatusCopy" class="importer-status-copy">Keep this page open while the importer extracts and structures the menu.</p>
+                        <h5 id="importStudioStatusTitle" class="importer-status-title">Preparing your import</h5>
+                        <p id="importStudioStatusCopy" class="importer-status-copy">Keep this page open while the draft is prepared.</p>
                         <div class="importer-status-bar"><span id="importStudioStatusFill"></span></div>
+                        <div id="importStudioStageTimeline" class="importer-stage-timeline"></div>
                     </div>
-                    <div id="importStudioReviewGrid" class="importer-review-grid"></div>
-                    <div class="importer-apply-panel">
-                        <h5>Publish Scope</h5>
-                        <p>Choose what this draft replaces.</p>
-                        <div class="importer-scope-grid">
-                            <label class="importer-scope-option">
-                                <input type="radio" name="importApplyScope" value="menu_only" checked />
-                                <div>
-                                    <strong>Menu only</strong>
-                                    <span>Dishes, prices, descriptions, and translations only.</span>
+                    <div class="importer-review-shell">
+                        <div class="importer-review-main">
+                            <section id="importStudioReviewSummary" class="importer-review-summary" hidden>
+                                <div class="importer-review-summary-top">
+                                    <div>
+                                        <span class="tool-card-eyebrow importer-review-eyebrow">Draft Review</span>
+                                        <h5 id="importStudioReviewTitle" class="importer-review-title">Review the draft</h5>
+                                        <p id="importStudioReviewNarrative" class="importer-review-narrative">The draft is ready. Confirm the structure, language, and publish scope before it goes live.</p>
+                                    </div>
+                                    <div id="importStudioConfidenceRow" class="importer-confidence-row"></div>
                                 </div>
-                            </label>
-                            <label class="importer-scope-option">
-                                <input type="radio" name="importApplyScope" value="menu_structure" />
-                                <div>
-                                    <strong>Menu + structure</strong>
-                                    <span>Dishes plus imported categories and super-categories.</span>
+                            </section>
+
+                            <div id="importStudioReviewGrid" class="importer-review-grid"></div>
+                            <div id="importStudioIssueGrid" class="importer-issue-grid"></div>
+
+                            <div class="importer-apply-panel">
+                                <div class="importer-panel-head">
+                                    <div>
+                                        <h5>Publish scope</h5>
+                                        <p>Choose how much of this reviewed draft should replace the live menu.</p>
+                                    </div>
                                 </div>
-                            </label>
+                                <div class="importer-scope-grid">
+                                    <label class="importer-scope-option">
+                                        <input type="radio" name="importApplyScope" value="menu_only" checked />
+                                        <div>
+                                            <strong>Menu data only</strong>
+                                            <span>Dishes, prices, descriptions, and translations only.</span>
+                                        </div>
+                                    </label>
+                                    <label class="importer-scope-option">
+                                        <input type="radio" name="importApplyScope" value="menu_structure" />
+                                        <div>
+                                            <strong>Menu + structure</strong>
+                                            <span>Dishes plus imported categories and super-categories.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="tool-actions">
+                                    <button type="button" id="applyImporterMenuOnlyBtn" class="primary-btn btn-auto" onclick="applyImporterDraft('menu_only')">Publish Menu</button>
+                                    <button type="button" id="applyImporterStructureBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_structure')">Publish Structure</button>
+                                </div>
+                                <div id="importStudioApplyNote" class="importer-apply-note"></div>
+                            </div>
                         </div>
-                        <div class="tool-actions">
-                            <button type="button" id="applyImporterMenuOnlyBtn" class="primary-btn btn-auto" onclick="applyImporterDraft('menu_only')">Publish Menu</button>
-                            <button type="button" id="applyImporterStructureBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_structure')">Publish Menu + Structure</button>
-                        </div>
-                        <div id="importStudioApplyNote" class="importer-apply-note"></div>
+
+                        <aside class="importer-review-side">
+                            <section id="importStudioImpactPanel" class="importer-impact-panel"></section>
+
+                            <details class="admin-disclosure importer-advanced-panel">
+                                <summary>Review notes</summary>
+                                <div class="admin-disclosure-body">
+                                    <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft yet. Upload menu files and create one."></textarea>
+                                </div>
+                            </details>
+
+                            <details class="admin-disclosure importer-advanced-panel">
+                                <summary>Raw draft JSON</summary>
+                                <div class="admin-disclosure-body">
+                                    <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Raw draft JSON appears here before publishing."></textarea>
+                                </div>
+                            </details>
+                        </aside>
                     </div>
-                    <textarea id="importStudioSummaryOutput" class="summary-output" readonly placeholder="No draft yet. Upload menu files and generate one."></textarea>
-                    <textarea id="importStudioJsonOutput" class="summary-output" readonly placeholder="Draft JSON appears here before publishing."></textarea>
                 </div>
             </div>
         </div>
@@ -7259,12 +9424,19 @@
 
                 <div class="security-side">
                     <div class="security-side-card">
-                        <h4 data-i18n="admin.security.what_happens_on_save">What happens on save</h4>
-                        <ul class="security-rule-list">
-                            <li><span class="security-rule-dot"></span><span data-i18n="admin.security.save_rule_1">Older admin sessions are closed automatically after credentials change.</span></li>
-                            <li><span class="security-rule-dot"></span><span data-i18n="admin.security.save_rule_2">If the instance still relies on env credentials, saving here creates the local persisted auth file for this restaurant.</span></li>
-                            <li><span class="security-rule-dot"></span><span data-i18n="admin.security.save_rule_3">Credential changes are stored at the configured persisted auth path, not only inside the running container.</span></li>
-                        </ul>
+                        <details class="admin-disclosure admin-quiet-disclosure">
+                            <summary>
+                                <span data-i18n="admin.security.what_happens_on_save">What happens on save</span>
+                                <span class="admin-disclosure-copy">Optional operational notes about credential updates.</span>
+                            </summary>
+                            <div class="admin-disclosure-body">
+                                <ul class="security-rule-list">
+                                    <li><span class="security-rule-dot"></span><span data-i18n="admin.security.save_rule_1">Older admin sessions are closed automatically after credentials change.</span></li>
+                                    <li><span class="security-rule-dot"></span><span data-i18n="admin.security.save_rule_2">If the instance still relies on env credentials, saving here creates the local persisted auth file for this restaurant.</span></li>
+                                    <li><span class="security-rule-dot"></span><span data-i18n="admin.security.save_rule_3">Credential changes are stored at the configured persisted auth path, not only inside the running container.</span></li>
+                                </ul>
+                            </div>
+                        </details>
                     </div>
                     <div class="security-side-card">
                         <h4 data-i18n="admin.security.handoff_policy">Handoff policy</h4>

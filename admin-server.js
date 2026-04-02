@@ -640,6 +640,35 @@ const IMPORTER_TRANSLATION_COMPLETION_FORMAT = {
   }
 };
 
+const MENU_ENTITY_TRANSLATION_SYSTEM_PROMPT = [
+  "You generate customer-facing restaurant menu translations.",
+  "Return only JSON that follows the schema exactly.",
+  "Generate natural French, English, and Arabic labels from the fallback source text.",
+  "Keep the tone appetizing, concise, and professional for a restaurant menu.",
+  "Do not invent ingredients, dish styles, or menu structure that are not supported by the input.",
+  "Use context like category, super-category, and sample items only to improve terminology and tone.",
+  "If the fallback description is empty, keep translated descriptions empty.",
+  "If a phrase is ambiguous, choose the safest natural wording and mention the ambiguity in warnings."
+].join("\n");
+
+const MENU_ENTITY_TRANSLATION_FORMAT = {
+  type: "json_schema",
+  name: "menu_entity_translation",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["translations", "warnings"],
+    properties: {
+      translations: IMPORTER_TRANSLATIONS_SCHEMA,
+      warnings: {
+        type: "array",
+        items: { type: "string" }
+      }
+    }
+  }
+};
+
 function guessMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === ".png") return "image/png";
@@ -2311,6 +2340,105 @@ function buildCategoryImagePrompt(input) {
   ].filter(Boolean).join(" ");
 }
 
+function buildMenuEntityTranslationInput(input) {
+  const entityType = asImporterString(input?.entityType).toLowerCase();
+  const fallbackName = asImporterString(input?.fallbackName);
+  const fallbackDesc = asImporterString(input?.fallbackDesc);
+  const existingTranslations = fillTranslationSet(input?.existingTranslations, fallbackName, fallbackDesc);
+
+  return {
+    entityType: ["item", "category", "supercategory"].includes(entityType) ? entityType : "item",
+    fallbackName,
+    fallbackDesc,
+    categoryName: asImporterString(input?.categoryName),
+    superCategoryName: asImporterString(input?.superCategoryName),
+    sampleItems: Array.isArray(input?.sampleItems)
+      ? input.sampleItems.map((value) => asImporterString(value)).filter(Boolean).slice(0, 6)
+      : [],
+    includedCategories: Array.isArray(input?.includedCategories)
+      ? input.includedCategories.map((value) => asImporterString(value)).filter(Boolean).slice(0, 12)
+      : [],
+    existingTranslations
+  };
+}
+
+async function generateMenuEntityTranslations(input) {
+  if (!process.env.OPENAI_API_KEY) {
+    const error = new Error("openai_not_configured");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const entityInput = buildMenuEntityTranslationInput(input);
+  if (!entityInput.fallbackName) {
+    const error = new Error("fallback_name_required");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: OPENAI_IMPORT_MODEL,
+      instructions: MENU_ENTITY_TRANSLATION_SYSTEM_PROMPT,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: JSON.stringify(entityInput)
+            }
+          ]
+        }
+      ],
+      text: {
+        format: MENU_ENTITY_TRANSLATION_FORMAT
+      },
+      store: false,
+      temperature: 0.2,
+      max_output_tokens: 1200
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || "openai_menu_entity_translation_failed";
+    const error = new Error(message);
+    error.statusCode = response.status || 502;
+    throw error;
+  }
+
+  let parsed = extractStructuredParsedOutput(payload);
+  if (!parsed) {
+    const rawText = extractResponseText(payload);
+    if (!rawText) {
+      const error = new Error(payload?.status === "incomplete" ? "incomplete_translation_response" : "empty_translation_response");
+      error.statusCode = 502;
+      throw error;
+    }
+
+    try {
+      parsed = parseModelJsonText(rawText);
+    } catch (_error) {
+      const error = new Error("invalid_translation_json_from_openai");
+      error.statusCode = 502;
+      throw error;
+    }
+  }
+
+  return {
+    translations: fillTranslationSet(parsed?.translations, entityInput.fallbackName, entityInput.fallbackDesc),
+    warnings: Array.isArray(parsed?.warnings)
+      ? parsed.warnings.map((value) => asImporterString(value)).filter(Boolean)
+      : []
+  };
+}
+
 async function generateMenuItemMediaImage(input) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error("openai_not_configured");
@@ -3769,6 +3897,20 @@ app.post("/api/media/generate-category-image", requireAuth, requireAiMediaTools,
     res.status(error.statusCode || 500).json({
       ok: false,
       error: error.message || "category_media_generation_failed"
+    });
+  }
+});
+
+app.post("/api/ai/translate-menu-entity", requireAuth, requireAiMediaTools, requireNoActiveImporterJob, async (req, res) => {
+  try {
+    const payload = req.body && typeof req.body === "object" ? req.body : {};
+    const result = await generateMenuEntityTranslations(payload);
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    console.error("MENU ENTITY TRANSLATION ERROR:", error);
+    res.status(error.statusCode || 500).json({
+      ok: false,
+      error: error.message || "menu_entity_translation_failed"
     });
   }
 });
