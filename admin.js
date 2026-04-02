@@ -26,6 +26,7 @@ let activeImporterPollHandle = 0;
 let deferredAdminInstallPrompt = null;
 let adminSaveLoopPromise = null;
 let adminSaveRequested = false;
+let adminHelpToggleIdCounter = 0;
 const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
 const ADMIN_IMPORTER_ACTIVE_JOB_KEY = 'restaurant_admin_importer_active_job';
 const IMPORTER_JOB_POLL_MAX_FAILURES = 6;
@@ -118,6 +119,114 @@ const SUPER_CATEGORY_ICON_RULES = Object.freeze([
 ]);
 let adminActionDialogResolver = null;
 let superCategoryIconManuallyChosen = false;
+const ADMIN_HELP_TOGGLE_RULES = Object.freeze([
+    {
+        hostSelector: '.menu-builder-heading',
+        anchorSelector: 'h3',
+        helpSelector: '#menuBuilderCopy',
+        label: 'Menu builder help'
+    },
+    {
+        hostSelector: '.menu-crud-form-intro',
+        anchorSelector: '.menu-crud-form-intro-shell',
+        helpSelector: '.menu-crud-form-intro-copy',
+        label: 'Form guidance'
+    },
+    {
+        hostSelector: '.menu-form-block',
+        anchorSelector: '.menu-form-block-header',
+        helpSelector: '.menu-form-block-copy, .menu-form-side-panel',
+        label: 'Section guidance'
+    },
+    {
+        hostSelector: '.translation-summary-card',
+        anchorSelector: '.translation-summary-header',
+        helpSelector: '.translation-summary-header p, .translation-summary-note',
+        label: 'Translation guidance'
+    },
+    {
+        hostSelector: '.info-hero-header',
+        anchorSelector: '.info-hero-copy',
+        helpSelector: '.info-hero-copy p',
+        label: 'Info overview help'
+    },
+    {
+        hostSelector: '.owner-subsection-heading',
+        helpSelector: 'p',
+        label: 'Section help'
+    },
+    {
+        hostSelector: '.section-divider',
+        helpSelector: '.section-divider-copy',
+        label: 'Section help'
+    },
+    {
+        hostSelector: '.branding-overview-card',
+        anchorSelector: '.branding-overview-copy',
+        helpSelector: '.branding-overview-copy p',
+        label: 'Branding overview help'
+    },
+    {
+        hostSelector: '.brand-asset-card',
+        anchorSelector: 'h4',
+        helpSelector: 'p',
+        label: 'Media help'
+    },
+    {
+        hostSelector: '#wifi',
+        anchorSelector: 'h3',
+        helpSelector: ':scope > p[data-i18n="admin.wifi.subtitle"]',
+        label: 'Network help'
+    },
+    {
+        hostSelector: '#branding',
+        anchorSelector: 'h3',
+        helpSelector: ':scope > p[data-i18n="admin.branding.subtitle"]',
+        label: 'Branding help'
+    },
+    {
+        hostSelector: '#landing',
+        anchorSelector: 'h3',
+        helpSelector: ':scope > p[data-i18n="admin.landing.subtitle"]',
+        label: 'Homepage help'
+    },
+    {
+        hostSelector: '#hours',
+        anchorSelector: 'h3',
+        helpSelector: ':scope > p',
+        label: 'Hours help'
+    },
+    {
+        hostSelector: '#supercategories',
+        anchorSelector: 'h3',
+        helpSelector: ':scope > p',
+        label: 'Super category help'
+    },
+    {
+        hostSelector: '#data-tools .tool-card--accent',
+        anchorSelector: 'h4',
+        helpSelector: ':scope > p, .muted-copy',
+        label: 'Import help'
+    },
+    {
+        hostSelector: '#security',
+        anchorSelector: 'h3',
+        helpSelector: ':scope > p.copy-muted',
+        label: 'Security help'
+    },
+    {
+        hostSelector: '.image-modal-dropzone',
+        anchorSelector: '.image-modal-label',
+        helpSelector: '.image-modal-helper',
+        label: 'Image manager help'
+    },
+    {
+        hostSelector: '.super-icon-picker',
+        anchorSelector: '.super-icon-preview',
+        helpSelector: '.super-icon-helper',
+        label: 'Icon picker help'
+    }
+]);
 
 function getSuperCategoryIconPresetMeta(icon = '') {
     const normalized = String(icon || '').trim();
@@ -1664,6 +1773,83 @@ function setTextIfPresent(id, value) {
     if (el) el.textContent = value;
 }
 
+function getAdminHelpDisplayValue(element) {
+    if (!element) return 'block';
+    if (element.classList.contains('menu-form-side-panel')) return 'grid';
+    if (element.tagName === 'UL') return 'grid';
+    if (element.tagName === 'SPAN') return 'inline';
+    return 'block';
+}
+
+function ensureAdminHelpNodeId(element) {
+    if (!element.id) {
+        adminHelpToggleIdCounter += 1;
+        element.id = `adminHelpNode${adminHelpToggleIdCounter}`;
+    }
+    return element.id;
+}
+
+function setAdminHelpNodeVisibility(element, visible) {
+    if (!element) return;
+    if (!element.dataset.adminHelpDisplay) {
+        element.dataset.adminHelpDisplay = getAdminHelpDisplayValue(element);
+    }
+    if (visible) {
+        element.hidden = false;
+        element.setAttribute('aria-hidden', 'false');
+        element.style.setProperty('display', element.dataset.adminHelpDisplay, 'important');
+        return;
+    }
+    element.hidden = true;
+    element.setAttribute('aria-hidden', 'true');
+    element.style.setProperty('display', 'none', 'important');
+}
+
+function initializeAdminHelpToggles() {
+    document.querySelectorAll('.info-save-note, .branding-save-note').forEach((node) => {
+        setAdminHelpNodeVisibility(node, false);
+    });
+
+    ADMIN_HELP_TOGGLE_RULES.forEach((rule) => {
+        document.querySelectorAll(rule.hostSelector).forEach((host) => {
+            const helpNodes = Array.from(host.querySelectorAll(rule.helpSelector)).filter((node) => {
+                return node && String(node.textContent || '').trim();
+            });
+            if (!helpNodes.length) return;
+
+            const anchor = rule.anchorSelector ? host.querySelector(rule.anchorSelector) : host;
+            if (!anchor) return;
+
+            anchor.classList.add('admin-help-host', 'has-admin-help');
+            let toggle = anchor.querySelector('[data-admin-help-toggle="true"]');
+
+            if (!toggle) {
+                toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'admin-help-toggle';
+                toggle.dataset.adminHelpToggle = 'true';
+                toggle.textContent = '?';
+                toggle.title = rule.label || 'Show guidance';
+                toggle.setAttribute('aria-label', rule.label || 'Show guidance');
+                toggle.setAttribute('aria-expanded', 'false');
+                anchor.appendChild(toggle);
+            }
+
+            toggle.setAttribute('aria-controls', helpNodes.map((node) => ensureAdminHelpNodeId(node)).join(' '));
+            helpNodes.forEach((node) => setAdminHelpNodeVisibility(node, false));
+
+            if (toggle.dataset.adminHelpBound === 'true') return;
+            toggle.dataset.adminHelpBound = 'true';
+            toggle.addEventListener('click', () => {
+                const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                const nextVisible = !expanded;
+                toggle.setAttribute('aria-expanded', nextVisible ? 'true' : 'false');
+                helpNodes.forEach((node) => setAdminHelpNodeVisibility(node, nextVisible));
+            });
+        });
+    });
+}
+
 function getFilledTranslationCount(translations) {
     const normalized = normalizeEntityTranslations(translations);
     return ['fr', 'en', 'ar'].reduce((total, lang) => total + (normalized[lang].name ? 1 : 0), 0);
@@ -1966,6 +2152,7 @@ function focusMenuCrudField(formId, sectionId, fieldId) {
 function setMenuCrudPrimaryButtonState(formId, state) {
     const form = document.getElementById(formId);
     const button = form?.querySelector('.modal-form-actions button[type="submit"]');
+    const cancelButton = form?.querySelector('.menu-crud-cancel-btn');
     if (!button) return;
 
     if (!button.dataset.defaultLabel) {
@@ -1975,17 +2162,20 @@ function setMenuCrudPrimaryButtonState(formId, state) {
     if (state === 'saving') {
         button.disabled = true;
         button.textContent = 'Saving...';
+        if (cancelButton) cancelButton.disabled = true;
         return;
     }
 
     if (state === 'saved') {
         button.disabled = false;
         button.textContent = 'Saved';
+        if (cancelButton) cancelButton.disabled = false;
         return;
     }
 
     button.disabled = false;
     button.textContent = button.dataset.defaultLabel;
+    if (cancelButton) cancelButton.disabled = false;
 }
 
 function initializeMenuCrudFormEnhancements(form) {
@@ -3535,6 +3725,7 @@ function refreshUI() {
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
     }
+    initializeAdminHelpToggles();
     updateAdminInstallUi();
 }
 
@@ -5205,6 +5396,7 @@ function renderImporterDraftOutputs(draft) {
         if (applyMenuOnlyBtn) applyMenuOnlyBtn.disabled = true;
         if (applyStructureBtn) applyStructureBtn.disabled = true;
         if (copyBtn) copyBtn.disabled = true;
+        initializeAdminHelpToggles();
         return;
     }
 
@@ -5293,6 +5485,7 @@ function renderImporterDraftOutputs(draft) {
             applyNoteEl.style.display = 'block';
         }
     }
+    initializeAdminHelpToggles();
 }
 
 function getImporterReviewReport(draft) {
