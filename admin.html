@@ -7758,7 +7758,7 @@
             flex-wrap: nowrap;
             overflow-x: auto;
             gap: 8px;
-            padding-bottom: 2px;
+            padding: 2px 0 2px;
             scrollbar-width: none;
         }
 
@@ -7783,8 +7783,8 @@
 
         .menu-crud-nav-footer {
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
+            justify-content: flex-start;
+            gap: 10px;
             padding: 0 2px;
             border: none;
             border-radius: 0;
@@ -7794,6 +7794,7 @@
 
         .menu-crud-nav-copy {
             gap: 2px;
+            padding-inline: 2px;
         }
 
         .menu-crud-progress-back {
@@ -7819,11 +7820,12 @@
         .menu-crud-footer-stack {
             gap: 8px;
             padding: 12px 0 4px;
+            margin-top: auto;
         }
 
         .menu-crud-primary-actions {
             display: grid;
-            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.18fr);
+            grid-template-columns: minmax(0, 0.78fr) minmax(0, 0.92fr) minmax(0, 1.2fr);
             gap: 10px;
         }
 
@@ -7852,6 +7854,9 @@
         }
 
         #menuCrudModalBody > form {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
             gap: 12px;
         }
 
@@ -7927,7 +7932,7 @@
             }
 
             .menu-crud-primary-actions {
-                grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+                grid-template-columns: minmax(0, 0.76fr) minmax(0, 0.9fr) minmax(0, 1.16fr);
                 gap: 8px;
             }
 
@@ -7951,6 +7956,7 @@
             }
 
             #menuCrudModalBody > form {
+                min-height: calc(100% - 2px);
                 gap: 10px;
             }
 
@@ -8379,13 +8385,11 @@
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
                         <strong id="foodFormNavTitle">Core</strong>
-                        <span id="foodFormNavHint">Step 1 of 6 · 0 steps ready</span>
-                    </div>
-                    <div class="menu-crud-nav-actions">
-                        <button type="button" id="foodFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('foodForm', -1)">Previous</button>
+                        <span id="foodFormNavHint">Step 1 of 6 · 0 sections ready</span>
                     </div>
                 </div>
                 <div class="modal-form-actions menu-crud-primary-actions">
+                    <button type="button" id="foodFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('foodForm', -1)">Previous</button>
                     <button type="button" class="secondary-btn menu-crud-cancel-btn" onclick="closeMenuCrudModal()">Cancel</button>
                     <button type="button" id="foodFormPrimaryBtn" class="primary-btn menu-crud-save-btn menu-crud-primary-action" data-save-label="Save item" onclick="handleMenuCrudPrimaryAction('foodForm')">Continue</button>
                 </div>
@@ -8729,13 +8733,11 @@
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
                         <strong id="catFormNavTitle">Identity</strong>
-                        <span id="catFormNavHint">Step 1 of 3 · 0 steps ready</span>
-                    </div>
-                    <div class="menu-crud-nav-actions">
-                        <button type="button" id="catFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('catForm', -1)">Previous</button>
+                        <span id="catFormNavHint">Step 1 of 3 · 0 sections ready</span>
                     </div>
                 </div>
                 <div class="modal-form-actions menu-crud-primary-actions">
+                    <button type="button" id="catFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('catForm', -1)">Previous</button>
                     <button type="button" class="secondary-btn menu-crud-cancel-btn" onclick="closeMenuCrudModal()">Cancel</button>
                     <button type="button" id="catFormPrimaryBtn" class="primary-btn menu-crud-save-btn menu-crud-primary-action" data-save-label="Save category" onclick="handleMenuCrudPrimaryAction('catForm')">Continue</button>
                 </div>
@@ -9569,13 +9571,11 @@
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
                         <strong id="superCatFormNavTitle">Identity</strong>
-                        <span id="superCatFormNavHint">Step 1 of 3 · 0 steps ready</span>
-                    </div>
-                    <div class="menu-crud-nav-actions">
-                        <button type="button" id="superCatFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('superCatForm', -1)">Previous</button>
+                        <span id="superCatFormNavHint">Step 1 of 3 · 0 sections ready</span>
                     </div>
                 </div>
                 <div class="modal-form-actions menu-crud-primary-actions">
+                    <button type="button" id="superCatFormPrevBtn" class="menu-crud-progress-back" onclick="stepMenuCrudSection('superCatForm', -1)">Previous</button>
                     <button type="button" class="secondary-btn menu-crud-cancel-btn" onclick="closeMenuCrudModal()">Cancel</button>
                     <button type="button" id="superCatFormPrimaryBtn" class="primary-btn menu-crud-save-btn menu-crud-primary-action" data-save-label="Save group" onclick="handleMenuCrudPrimaryAction('superCatForm')">Continue</button>
                 </div>
