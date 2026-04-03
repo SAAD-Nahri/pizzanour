@@ -1565,6 +1565,7 @@ function setSuperCategoryTranslationFields(input, fallbackName = '', fallbackDes
 function resetCategoryFormState() {
     const form = document.getElementById('catForm');
     if (form) form.reset();
+    setMenuCrudValidationState('catForm', {});
     setMenuTranslationWarnings('category');
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = '';
@@ -1685,6 +1686,7 @@ function bindSuperCategoryIconControls() {
 function resetSuperCategoryFormState() {
     const form = document.getElementById('superCatForm');
     if (form) form.reset();
+    setMenuCrudValidationState('superCatForm', {});
     setMenuTranslationWarnings('supercategory');
     const editingIdInput = document.getElementById('scEditingId');
     if (editingIdInput) editingIdInput.value = '';
@@ -1748,6 +1750,12 @@ const menuTranslationWarnings = {
     item: [],
     category: [],
     supercategory: []
+};
+
+const menuCrudValidationState = {
+    foodForm: null,
+    catForm: null,
+    superCatForm: null
 };
 
 function getMenuCrudSections(form) {
@@ -2123,12 +2131,27 @@ window.handleMenuCrudPrimaryAction = function (formId) {
     const mode = button?.dataset.mode || 'next';
 
     if (mode === 'save') {
+        setMenuCrudValidationState(formId, {});
         if (typeof form.requestSubmit === 'function') {
             form.requestSubmit();
         } else {
             form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
         }
         return;
+    }
+
+    if (mode === 'missing') {
+        const sections = getMenuCrudSections(form);
+        const firstMissing = sections.find((section) => getMenuCrudSectionStatus(formId, section.dataset.menuSection) === 'missing');
+        if (firstMissing) {
+            const missingSectionId = firstMissing.dataset.menuSection;
+            const label = getMenuCrudSectionLabel(formId, missingSectionId);
+            const message = `Complete the ${label.toLowerCase()} section before saving.`;
+            setMenuCrudValidationState(formId, { message, sectionId: missingSectionId });
+            showToast(message);
+            activateMenuCrudSection(formId, missingSectionId);
+            return;
+        }
     }
 
     stepMenuCrudSection(formId, 1);
@@ -2157,7 +2180,66 @@ function refreshMenuCrudFormUx(target) {
         const selectedCount = Array.from(document.querySelectorAll('.sc-cat-check:checked')).length;
         setMenuCrudMetaText('superCatFormMetaState', selectedCount > 0 ? `${selectedCount} categories linked` : 'Structure draft');
     }
+    renderMenuCrudValidationState(form.id);
     syncMenuCrudFooter(form);
+}
+
+function setMenuCrudValidationMessage(formId, message = '') {
+    const note = document.getElementById(`${formId}ValidationNote`);
+    if (!note) return;
+    const nextMessage = String(message || '').trim();
+    if (!nextMessage) {
+        note.hidden = true;
+        note.innerHTML = '';
+        return;
+    }
+    note.hidden = false;
+    note.innerHTML = `<strong>Needs attention</strong><span>${escapeHtml(nextMessage)}</span>`;
+}
+
+function clearMenuCrudFieldErrors(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+        form.querySelectorAll('.field-invalid').forEach((field) => {
+            field.classList.remove('field-invalid');
+            field.removeAttribute('aria-invalid');
+        });
+        form.querySelectorAll('.form-group.has-error').forEach((group) => group.classList.remove('has-error'));
+    }
+    document.querySelectorAll(`.menu-crud-step-btn[data-form-id="${formId}"]`).forEach((button) => {
+        button.classList.remove('has-error');
+    });
+}
+
+function renderMenuCrudValidationState(formId) {
+    clearMenuCrudFieldErrors(formId);
+    const state = menuCrudValidationState[formId];
+    if (!state?.message) return;
+    if (state.sectionId) {
+        const stepButton = document.querySelector(`.menu-crud-step-btn[data-form-id="${formId}"][data-section-target="${state.sectionId}"]`);
+        stepButton?.classList.add('has-error');
+    }
+    if (state.fieldId) {
+        const field = document.getElementById(state.fieldId);
+        if (field) {
+            field.classList.add('field-invalid');
+            field.setAttribute('aria-invalid', 'true');
+            field.closest('.form-group')?.classList.add('has-error');
+        }
+    }
+}
+
+function setMenuCrudValidationState(formId, { message = '', sectionId = '', fieldId = '' } = {}) {
+    const nextMessage = String(message || '').trim();
+    if (!nextMessage) {
+        menuCrudValidationState[formId] = null;
+        setMenuCrudValidationMessage(formId, '');
+        clearMenuCrudFieldErrors(formId);
+        return;
+    }
+    menuCrudValidationState[formId] = { message: nextMessage, sectionId, fieldId };
+    setMenuCrudValidationMessage(formId, nextMessage);
+    renderMenuCrudValidationState(formId);
 }
 
 function focusMenuCrudField(formId, sectionId, fieldId) {
@@ -2203,8 +2285,14 @@ function setMenuCrudPrimaryButtonState(formId, state) {
 function initializeMenuCrudFormEnhancements(form) {
     if (!form) return;
     if (!form.dataset.menuUxBound) {
-        form.addEventListener('input', () => refreshMenuCrudFormUx(form));
-        form.addEventListener('change', () => refreshMenuCrudFormUx(form));
+        form.addEventListener('input', () => {
+            setMenuCrudValidationState(form.id, {});
+            refreshMenuCrudFormUx(form);
+        });
+        form.addEventListener('change', () => {
+            setMenuCrudValidationState(form.id, {});
+            refreshMenuCrudFormUx(form);
+        });
         form.dataset.menuUxBound = 'true';
     }
     const defaultSection = MENU_CRUD_FORM_DEFAULT_SECTIONS[form.id];
@@ -3452,6 +3540,7 @@ function openMenuCrudModal(type, title) {
     footerHost.dataset.formId = formId;
     footerHost.appendChild(footer);
     titleEl.textContent = title;
+    setMenuCrudValidationState(formId, {});
     initializeMenuCrudFormEnhancements(form);
     document.documentElement.classList.add('menu-crud-open');
     document.body.classList.add('menu-crud-open');
@@ -4126,6 +4215,7 @@ function editItem(id) {
 function resetFoodForm() {
     editingItemId = null;
     document.getElementById('foodForm').reset();
+    setMenuCrudValidationState('foodForm', {});
     setMenuTranslationWarnings('item');
     setMenuItemTranslationFields();
     document.getElementById('itemFeatured').checked = false;
@@ -4149,6 +4239,7 @@ function initForms() {
     // --- Shared save logic, can be called directly without a form submit event ---
     window.commitFormItem = async function () {
         setMenuCrudPrimaryButtonState('foodForm', 'saving');
+        setMenuCrudValidationState('foodForm', {});
         const fileInput = document.getElementById('itemFile');
         const urlInput = document.getElementById('itemImg').value;
 
@@ -4216,30 +4307,35 @@ function initForms() {
 
         if (!name) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            setMenuCrudValidationState('foodForm', { message: 'Add the dish name in Core.', sectionId: 'core', fieldId: 'itemName' });
             showToast('Item name is required.');
             focusMenuCrudField('foodForm', 'core', 'itemName');
             return;
         }
         if (!cat) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            setMenuCrudValidationState('foodForm', { message: 'Choose the category in Core.', sectionId: 'core', fieldId: 'itemCat' });
             showToast('Choose a category for this dish.');
             focusMenuCrudField('foodForm', 'core', 'itemCat');
             return;
         }
         if (!desc) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            setMenuCrudValidationState('foodForm', { message: 'Add the fallback description in Core.', sectionId: 'core', fieldId: 'itemDesc' });
             showToast('Add a fallback description for this dish.');
             focusMenuCrudField('foodForm', 'core', 'itemDesc');
             return;
         }
         if (hasSizes && !Object.values(sizes || {}).some((value) => Number(value) > 0)) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            setMenuCrudValidationState('foodForm', { message: 'Add at least one size price in Pricing.', sectionId: 'pricing', fieldId: 'itemPriceSmall' });
             showToast('Add at least one size price.');
             focusMenuCrudField('foodForm', 'pricing', 'itemPriceSmall');
             return;
         }
         if (!hasSizes && !(Number(price) > 0)) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            setMenuCrudValidationState('foodForm', { message: 'Add the dish price in Pricing.', sectionId: 'pricing', fieldId: 'itemPrice' });
             showToast('Add a price before saving this dish.');
             focusMenuCrudField('foodForm', 'pricing', 'itemPrice');
             return;
@@ -4289,18 +4385,21 @@ function initForms() {
     document.getElementById('catForm').onsubmit = async (e) => {
         e.preventDefault();
         setMenuCrudPrimaryButtonState('catForm', 'saving');
+        setMenuCrudValidationState('catForm', {});
         const editingKeyInput = document.getElementById('catEditingKey');
         const previousKey = editingKeyInput ? editingKeyInput.value.trim() : '';
         const categoryName = document.getElementById('catName').value.trim();
         const selectedSuperCategoryId = document.getElementById('catSuperCategory')?.value?.trim() || '';
         if (!categoryName) {
             setMenuCrudPrimaryButtonState('catForm', 'idle');
+            setMenuCrudValidationState('catForm', { message: 'Add the category name in Identity.', sectionId: 'identity', fieldId: 'catName' });
             showToast('Category name is required.');
             focusMenuCrudField('catForm', 'identity', 'catName');
             return;
         }
         if (!selectedSuperCategoryId) {
             setMenuCrudPrimaryButtonState('catForm', 'idle');
+            setMenuCrudValidationState('catForm', { message: 'Choose the parent super category in Identity.', sectionId: 'identity', fieldId: 'catSuperCategory' });
             showToast('Please choose a super category.');
             focusMenuCrudField('catForm', 'identity', 'catSuperCategory');
             return;
@@ -4321,6 +4420,7 @@ function initForms() {
             } catch (error) {
                 console.error('Category image upload failed:', error);
                 setMenuCrudPrimaryButtonState('catForm', 'idle');
+                setMenuCrudValidationState('catForm', { message: 'The category image upload failed. Try again or save without it.', sectionId: 'visual', fieldId: 'catImageUpload' });
                 showToast('Category image upload failed.');
                 return;
             }
@@ -4343,6 +4443,7 @@ function initForms() {
         const selectedSuperCategory = (restaurantConfig.superCategories || []).find((sc) => sc.id === selectedSuperCategoryId);
         if (!selectedSuperCategory) {
             setMenuCrudPrimaryButtonState('catForm', 'idle');
+            setMenuCrudValidationState('catForm', { message: 'The selected super category is no longer available.', sectionId: 'identity', fieldId: 'catSuperCategory' });
             showToast('Selected super category was not found.');
             return;
         }
@@ -4492,6 +4593,7 @@ function initForms() {
     document.getElementById('superCatForm').onsubmit = async (e) => {
         e.preventDefault();
         setMenuCrudPrimaryButtonState('superCatForm', 'saving');
+        setMenuCrudValidationState('superCatForm', {});
         const editingIdInput = document.getElementById('scEditingId');
         const editingId = editingIdInput ? editingIdInput.value.trim() : '';
         const selectedCats = Array.from(document.querySelectorAll('.sc-cat-check:checked')).map(cb => cb.value);
@@ -4503,14 +4605,23 @@ function initForms() {
 
         if (!name) {
             setMenuCrudPrimaryButtonState('superCatForm', 'idle');
+            setMenuCrudValidationState('superCatForm', { message: 'Add the group name in Identity.', sectionId: 'identity', fieldId: 'scName' });
             showToast('Super category name is required.');
             focusMenuCrudField('superCatForm', 'identity', 'scName');
             return;
         }
         if (!desc) {
             setMenuCrudPrimaryButtonState('superCatForm', 'idle');
+            setMenuCrudValidationState('superCatForm', { message: 'Add the fallback description in Identity.', sectionId: 'identity', fieldId: 'scDesc' });
             showToast('Add a fallback description for this group.');
             focusMenuCrudField('superCatForm', 'identity', 'scDesc');
+            return;
+        }
+        if (!selectedCats.length) {
+            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
+            setMenuCrudValidationState('superCatForm', { message: 'Select at least one category in Structure.', sectionId: 'structure' });
+            showToast('Select at least one included category.');
+            activateMenuCrudSection('superCatForm', 'structure');
             return;
         }
 

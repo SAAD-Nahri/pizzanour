@@ -2423,6 +2423,41 @@
             border-top: 1px solid rgba(232, 216, 197, 0.72);
         }
 
+        .menu-crud-validation-note {
+            display: grid;
+            gap: 4px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(226, 27, 27, 0.16);
+            background: linear-gradient(180deg, rgba(255, 246, 246, 0.98), rgba(255, 240, 240, 0.94));
+            color: #9f1239;
+            font-size: 0.84rem;
+            line-height: 1.45;
+            box-shadow: 0 10px 22px rgba(226, 27, 27, 0.08);
+        }
+
+        .menu-crud-validation-note strong {
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .menu-crud-step-btn.has-error {
+            border-color: rgba(226, 27, 27, 0.32);
+            background: linear-gradient(180deg, rgba(255, 246, 246, 0.98), rgba(255, 238, 238, 0.94));
+            box-shadow: 0 12px 24px rgba(226, 27, 27, 0.1);
+        }
+
+        .menu-crud-modal-card .form-group.has-error label {
+            color: #b42318;
+        }
+
+        .menu-crud-modal-card .field-invalid {
+            border-color: rgba(226, 27, 27, 0.38) !important;
+            background: rgba(255, 249, 249, 0.98) !important;
+            box-shadow: 0 0 0 4px rgba(226, 27, 27, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+        }
+
         .menu-crud-cancel-btn {
             order: 0;
         }
@@ -8109,10 +8144,13 @@
             }
 
             .menu-builder-actions {
-                display: grid;
-                grid-template-columns: 56px minmax(0, 1fr);
+                display: flex;
                 gap: 8px;
+                align-items: center;
+                justify-content: flex-start;
                 width: 100%;
+                flex-wrap: nowrap;
+                overflow: hidden;
             }
 
             .menu-builder-actions.menu-builder-actions--single {
@@ -8123,7 +8161,21 @@
 
             .menu-builder-actions .primary-btn,
             .menu-builder-actions .brand-secondary-btn {
-                width: 100%;
+                width: auto;
+                min-width: 0;
+            }
+
+            #menuBuilderBackBtn {
+                flex: 0 0 56px;
+                width: 56px;
+                min-width: 56px;
+                padding-inline: 0;
+            }
+
+            .menu-builder-actions:not(.menu-builder-actions--single) #menuBuilderAddBtn {
+                flex: 0 1 188px;
+                width: auto !important;
+                max-width: calc(100% - 72px);
             }
 
             .menu-builder-actions.menu-builder-actions--single #menuBuilderAddBtn {
@@ -8219,6 +8271,11 @@
 
             .menu-crud-footer-stack {
                 gap: 6px;
+            }
+
+            .menu-crud-validation-note {
+                padding: 11px 12px;
+                font-size: 0.8rem;
             }
 
             .menu-crud-modal-card {
@@ -8678,6 +8735,7 @@
                     </div>
                 </section>
                 <div id="foodFormFooter" class="menu-crud-footer-stack">
+                <div id="foodFormValidationNote" class="menu-crud-validation-note" hidden aria-live="polite"></div>
                 <div class="menu-crud-nav-footer" aria-live="polite">
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
@@ -9026,6 +9084,7 @@
                     </details>
                 </section>
                 <div id="catFormFooter" class="menu-crud-footer-stack">
+                <div id="catFormValidationNote" class="menu-crud-validation-note" hidden aria-live="polite"></div>
                 <div class="menu-crud-nav-footer" aria-live="polite">
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
@@ -9864,6 +9923,7 @@
                     </div>
                 </section>
                 <div id="superCatFormFooter" class="menu-crud-footer-stack">
+                <div id="superCatFormValidationNote" class="menu-crud-validation-note" hidden aria-live="polite"></div>
                 <div class="menu-crud-nav-footer" aria-live="polite">
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
