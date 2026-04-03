@@ -2452,6 +2452,16 @@
             color: #b42318;
         }
 
+        .menu-crud-form-shell label[data-required="true"]::after,
+        .menu-crud-modal-card label[data-required="true"]::after {
+            content: '*';
+            display: inline-block;
+            margin-inline-start: 0.32rem;
+            color: #e11d48;
+            font-weight: 800;
+            line-height: 1;
+        }
+
         .menu-crud-modal-card .field-invalid {
             border-color: rgba(226, 27, 27, 0.38) !important;
             background: rgba(255, 249, 249, 0.98) !important;
@@ -8173,16 +8183,17 @@
             }
 
             .menu-builder-actions:not(.menu-builder-actions--single) #menuBuilderAddBtn {
-                flex: 0 1 188px;
-                width: auto !important;
+                flex: 0 0 auto;
+                width: clamp(124px, 40vw, 164px) !important;
                 max-width: calc(100% - 72px);
+                min-width: 124px;
             }
 
             .menu-builder-actions.menu-builder-actions--single #menuBuilderAddBtn {
                 display: flex;
                 width: auto !important;
                 min-width: 0;
-                max-width: min(100%, 240px);
+                max-width: min(100%, 188px);
                 flex: 0 1 auto;
                 grid-column: auto;
                 white-space: nowrap;
@@ -9905,7 +9916,7 @@
                                 <p class="menu-form-block-copy">Choose the categories inside this group.</p>
                             </div>
                             <div class="form-group">
-                                <label>Included Categories</label>
+                                <label id="scCatsListLabel" data-required="true">Included Categories</label>
                                 <div id="scCatsList" class="chip-select-list">
                                     <!-- Checkboxes will be rendered here -->
                                 </div>
