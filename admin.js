@@ -211,7 +211,7 @@ const ADMIN_HELP_TOGGLE_RULES = Object.freeze([
     {
         hostSelector: '#security',
         anchorSelector: 'h3',
-        helpSelector: ':scope > p.copy-muted',
+        helpSelector: ':scope > p.copy-muted, .security-help, .info-save-note',
         label: 'Security help'
     },
     {
@@ -223,7 +223,7 @@ const ADMIN_HELP_TOGGLE_RULES = Object.freeze([
     {
         hostSelector: '.super-icon-picker',
         anchorSelector: '.super-icon-preview',
-        helpSelector: '.super-icon-helper',
+        helpSelector: '.super-icon-helper, .super-icon-preview-note',
         label: 'Icon picker help'
     }
 ]);
@@ -1806,7 +1806,7 @@ function setAdminHelpNodeVisibility(element, visible) {
 }
 
 function initializeAdminHelpToggles() {
-    document.querySelectorAll('.info-save-note, .branding-save-note').forEach((node) => {
+    document.querySelectorAll('.info-save-note, .branding-save-note, .security-help, .super-icon-preview-note').forEach((node) => {
         setAdminHelpNodeVisibility(node, false);
     });
 
@@ -3196,7 +3196,7 @@ function renderMenuBuilder() {
         addLabel = 'Add Super Category';
         emptyText = 'No super categories yet. Add one to structure the menu.';
         title.textContent = 'Super Categories';
-        copy.textContent = 'These are the first groups customers open before they see categories.';
+        copy.textContent = 'Create the first menu level.';
     } else if (currentMenuWorkspaceStep === 'categories') {
         const superCategory = getMenuBuilderCurrentSuperCategory();
         rows = getMenuBuilderCurrentCategories();
@@ -3204,7 +3204,7 @@ function renderMenuBuilder() {
         addLabel = 'Add Category';
         emptyText = 'This super category does not have categories yet.';
         title.textContent = superCategory ? `${superCategory.name} / Categories` : 'Categories';
-        copy.textContent = 'Click a category to open its items. Add or edit categories from this table only.';
+        copy.textContent = 'Organize the sections inside this group.';
         if (superCategory) breadcrumbParts.push(superCategory.name);
     } else {
         const superCategory = getMenuBuilderCurrentSuperCategory();
@@ -3216,7 +3216,7 @@ function renderMenuBuilder() {
         addLabel = 'Add Item';
         emptyText = 'No items in this category yet.';
         title.textContent = `${categoryLabel} / Items`;
-        copy.textContent = 'Add or edit products for the selected category. Product forms only open when needed.';
+        copy.textContent = 'Add dishes for this category.';
         if (superCategory) breadcrumbParts.push(superCategory.name);
         if (menuBuilderSelectedCategoryKey) breadcrumbParts.push(categoryLabel);
     }

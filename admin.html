@@ -2434,8 +2434,8 @@
 
         .menu-form-block {
             display: grid;
-            gap: 12px;
-            padding: 16px;
+            gap: 14px;
+            padding: 18px;
             border-radius: 22px;
             border: 1px solid rgba(232, 216, 197, 0.92);
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 249, 241, 0.94) 100%);
@@ -2445,8 +2445,8 @@
 
         .menu-form-block-header {
             display: grid;
-            gap: 4px;
-            padding-bottom: 4px;
+            gap: 6px;
+            padding-bottom: 6px;
             border-bottom: none;
         }
 
@@ -2468,7 +2468,7 @@
 
         .menu-form-block-title {
             margin: 0;
-            font-size: 0.98rem;
+            font-size: 1.04rem;
             font-weight: 800;
             letter-spacing: -0.02em;
             line-height: 1.2;
@@ -2477,8 +2477,8 @@
         .menu-form-block-copy {
             margin: 0;
             color: var(--text2);
-            font-size: 0.78rem;
-            line-height: 1.4;
+            font-size: 0.8rem;
+            line-height: 1.45;
             max-width: 52ch;
         }
 
@@ -3497,7 +3497,7 @@
         }
 
         .menu-crud-modal-card .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .menu-crud-modal-card label {
@@ -3518,6 +3518,16 @@
             background: #fffdf9;
             border-color: #eadfce;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .menu-crud-modal-card input:focus,
+        .menu-crud-modal-card select:focus,
+        .menu-crud-modal-card textarea:focus {
+            border-color: rgba(255, 141, 8, 0.44);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(255, 141, 8, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+            outline: none;
         }
 
         .menu-crud-modal-card textarea {
@@ -3887,7 +3897,8 @@
         .menu-crud-form-intro-copy,
         .menu-form-block-copy,
         .translation-summary-header p,
-        .translation-summary-note {
+        .translation-summary-note,
+        .super-icon-preview-note {
             display: block;
             color: var(--text2);
             font-size: 0.82rem;
@@ -4084,7 +4095,7 @@
 
         .menu-crud-form-shell.has-step-nav {
             display: grid;
-            gap: 18px;
+            gap: 16px;
         }
 
         .menu-crud-form-intro {
@@ -4097,11 +4108,13 @@
                 radial-gradient(circle at top right, rgba(255, 141, 8, 0.1), transparent 30%),
                 linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 238, 0.94));
             box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+            overflow: hidden;
         }
 
         .menu-crud-form-intro-shell {
             display: grid;
             gap: 10px;
+            align-content: start;
         }
 
         .menu-crud-form-intro-kicker,
@@ -4140,6 +4153,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+            margin-top: 2px;
         }
 
         .menu-crud-form-meta-pill {
@@ -4159,17 +4173,24 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
             gap: 10px;
+            padding: 6px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.54);
+            border: 1px solid rgba(232, 216, 197, 0.72);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
         }
 
         .menu-crud-step-btn {
             display: grid;
             gap: 4px;
+            min-height: 64px;
             padding: 12px 14px;
             text-align: left;
-            border-radius: 18px;
+            align-content: center;
+            border-radius: 16px;
             border: 1px solid rgba(232, 216, 197, 0.92);
-            background: rgba(255, 255, 255, 0.72);
-            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
             cursor: pointer;
             transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
         }
@@ -4186,6 +4207,11 @@
             background: linear-gradient(180deg, rgba(255, 246, 234, 0.98), rgba(255, 236, 211, 0.92));
             border-color: rgba(255, 141, 8, 0.34);
             box-shadow: 0 16px 32px rgba(255, 141, 8, 0.12);
+        }
+
+        .menu-crud-step-btn[data-status="ready"] {
+            border-color: rgba(106, 206, 153, 0.42);
+            background: linear-gradient(180deg, rgba(248, 255, 251, 0.98), rgba(240, 253, 244, 0.94));
         }
 
         .menu-crud-step-btn[data-status="ready"] .menu-crud-step-status {
@@ -6387,6 +6413,10 @@
                 gap: 14px;
             }
 
+            .menu-crud-form-shell.has-step-nav {
+                gap: 14px;
+            }
+
             .form-grid-2,
             .inline-check-grid {
                 grid-template-columns: 1fr;
@@ -6404,6 +6434,7 @@
             .menu-crud-form-intro {
                 padding: 16px;
                 border-radius: 20px;
+                gap: 12px;
             }
 
             .menu-crud-form-intro-shell {
@@ -6428,8 +6459,9 @@
 
             .menu-crud-step-btn {
                 flex: 0 0 auto;
-                min-width: 0;
-                padding: 9px 12px;
+                min-width: 122px;
+                min-height: 56px;
+                padding: 10px 12px;
             }
 
             .menu-form-split {
@@ -6445,7 +6477,7 @@
             .menu-crud-nav-footer {
                 flex-direction: column;
                 align-items: stretch;
-                padding: 16px;
+                padding: 2px 2px 0;
                 border-radius: 18px;
             }
 
@@ -7977,6 +8009,7 @@
             display: grid;
             grid-template-columns: minmax(0, 0.78fr) minmax(0, 0.92fr) minmax(0, 1.2fr);
             gap: 10px;
+            align-items: stretch;
         }
 
         .menu-crud-primary-actions .primary-btn,
@@ -8080,6 +8113,27 @@
                 padding-inline: 18px;
             }
 
+            .dish-extras-builder > .btn-auto,
+            .image-modal-url-row > .btn-auto,
+            .image-modal-ai-tools > .secondary-btn,
+            .category-image-actions > .secondary-btn,
+            #brandingGallerySaveBtn,
+            .tool-card .btn-auto {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+
+            .dish-extras-builder,
+            .category-image-actions,
+            .image-modal-ai-tools {
+                align-items: stretch;
+            }
+
+            .image-modal-file-trigger {
+                width: 100%;
+            }
+
             #menuBuilderBackBtn.menu-icon-btn {
                 font-size: 0;
             }
@@ -8167,6 +8221,14 @@
             .menu-crud-modal-card .menu-form-block {
                 padding: 15px;
                 border-radius: 18px;
+            }
+
+            .menu-form-block-header {
+                gap: 5px;
+            }
+
+            .menu-crud-modal-card .form-group {
+                margin-bottom: 12px;
             }
 
             .menu-crud-modal-card input,
@@ -8285,7 +8347,7 @@
                             <span class="menu-builder-kicker">Menu Builder</span>
                             <div id="menuBuilderBreadcrumbs" class="menu-builder-breadcrumbs"></div>
                             <h3 id="menuBuilderTitle" style="margin:0;">Super Categories</h3>
-                            <p id="menuBuilderCopy" class="copy-muted" style="margin:0;">Build the menu structure, then fill each section with dishes.</p>
+                            <p id="menuBuilderCopy" class="copy-muted" style="margin:0;">Set the structure, then add dishes.</p>
                         </div>
                     <div class="menu-builder-actions">
                         <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="&#8592;" onclick="goBackMenuBuilder()">Back</button>
@@ -8347,7 +8409,7 @@
                     <div class="menu-crud-form-intro-shell">
                         <span class="menu-crud-form-intro-kicker">Dish editor</span>
                         <h4 id="menuItemEditorTitle" class="menu-crud-form-intro-title" data-i18n="admin.menu.title">Add Item</h4>
-                        <p class="menu-crud-form-intro-copy"><strong>Start with core details</strong>, then step through pricing, extras, media, and finish with labels.</p>
+                        <p class="menu-crud-form-intro-copy"><strong>Fill the essentials first</strong>, then continue step by step.</p>
                         <div class="menu-crud-form-meta">
                             <span class="menu-crud-form-meta-pill" id="foodFormMetaState">New dish draft</span>
                             <span class="menu-crud-form-meta-pill" id="foodFormMetaPricing">Pricing pending</span>
@@ -8369,7 +8431,7 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 1</span>
                                 <h4 class="menu-form-block-title">Fallback identity</h4>
-                                <p class="menu-form-block-copy"><strong>Name, category, and fallback description</strong> power every other step.</p>
+                                <p class="menu-form-block-copy"><strong>Name, category, description.</strong></p>
                             </div>
                             <div class="form-grid form-grid-2">
                                 <div class="form-group">
@@ -8407,7 +8469,7 @@
                         <div class="translation-summary-header">
                             <div>
                                 <h5>Translation coverage</h5>
-                                <p>Use AI to draft customer-facing labels from the fallback dish name and description, then refine them only when needed.</p>
+                                <p>Use AI to draft the three languages.</p>
                             </div>
                             <span class="translation-inline-note" id="itemTranslationSummaryNote">No translations yet</span>
                         </div>
@@ -8417,7 +8479,7 @@
                             <button type="button" id="itemTranslationGenerateBtn" class="secondary-btn" onclick="generateEntityTranslations('item')">Generate translations</button>
                             <button type="button" class="secondary-btn" onclick="toggleTranslationEditor('item')">Open manual fields</button>
                         </div>
-                        <p class="translation-summary-note">Translations stay editable before you save.</p>
+                        <p class="translation-summary-note">You can edit them before saving.</p>
                     </div>
                     <details id="itemTranslationDisclosure" class="admin-disclosure menu-translation-manual">
                         <summary>
@@ -8457,7 +8519,7 @@
                     <div class="menu-form-block-header">
                         <span class="menu-form-block-kicker">Step 2</span>
                         <h4 class="menu-form-block-title">Price structure</h4>
-                        <p class="menu-form-block-copy">Use one price or enable sizes for S/M/L.</p>
+                        <p class="menu-form-block-copy">Choose one price or sizes.</p>
                     </div>
                     <div class="inline-check-grid">
                         <div class="form-group inline-check">
@@ -8489,7 +8551,7 @@
                     <div class="menu-form-block-header">
                         <span class="menu-form-block-kicker">Step 3</span>
                         <h4 class="menu-form-block-title">Optional paid add-ons</h4>
-                        <p class="menu-form-block-copy">Add paid extras like sauce or cheese. Guests see these as checkboxes.</p>
+                        <p class="menu-form-block-copy">Add optional paid extras.</p>
                     </div>
                     <div class="dish-extras-builder">
                         <div id="itemExtrasList" class="dish-extra-list"></div>
@@ -8500,7 +8562,7 @@
                     <div class="menu-form-block-header">
                         <span class="menu-form-block-kicker">Step 4</span>
                         <h4 class="menu-form-block-title">Availability & media</h4>
-                        <p class="menu-form-block-copy">Advanced options for ingredients, flags, and images.</p>
+                        <p class="menu-form-block-copy">Availability, ingredients, and images.</p>
                     </div>
                     <details class="admin-disclosure">
                         <summary>
@@ -8766,13 +8828,13 @@
                             <input type="file" id="modalImgCapture" accept="image/*" capture="environment" onchange="handleModalImageUpload(this)" />
                         </label>
                     </div>
-                    <p class="image-modal-helper">Upload one or more images, or paste an existing image URL below.</p>
+                    <p class="image-modal-helper">Upload images or paste a URL.</p>
                     <div class="image-modal-url-row">
                         <input type="text" id="modalImgUrl" placeholder="https://..." />
                         <button class="primary-btn btn-auto" type="button" onclick="addModalImageUrl()">Add URL</button>
                     </div>
                     <div id="modalAiImageTools" class="image-modal-ai-tools" style="display:none;">
-                        <p class="image-modal-helper">Generate a realistic dish image from the item name and description.</p>
+                        <p class="image-modal-helper">Generate a dish image from the item details.</p>
                         <button type="button" id="modalGenerateImageBtn" class="secondary-btn" onclick="generateModalImageWithAI()">Generate with AI</button>
                     </div>
                     <div id="modalImageProgress" class="image-modal-progress" hidden aria-live="polite">
@@ -8796,7 +8858,7 @@
                     <div class="menu-crud-form-intro-shell">
                         <span class="menu-crud-form-intro-kicker">Category editor</span>
                         <h4 class="menu-crud-form-intro-title">Create a customer-facing menu section</h4>
-                        <p class="menu-crud-form-intro-copy"><strong>Start with the fallback key</strong>, then set the visual and labels.</p>
+                        <p class="menu-crud-form-intro-copy"><strong>Set the fallback key first</strong>, then the visual and labels.</p>
                         <div class="menu-crud-form-meta">
                             <span class="menu-crud-form-meta-pill" id="catFormMetaState">Category draft</span>
                             <span class="menu-crud-form-meta-pill" id="catFormMetaVisual">Image optional</span>
@@ -8815,7 +8877,7 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 1</span>
                                 <h4 class="menu-form-block-title">Category identity</h4>
-                                <p class="menu-form-block-copy">Set the fallback key and connect the super category first.</p>
+                                <p class="menu-form-block-copy">Set the key and link the group.</p>
                             </div>
                             <div>
                                 <div class="form-group">
@@ -8847,7 +8909,7 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 2</span>
                                 <h4 class="menu-form-block-title">Visual identity</h4>
-                                <p class="menu-form-block-copy">One image becomes the category backdrop in the menu.</p>
+                                <p class="menu-form-block-copy">This image becomes the category backdrop.</p>
                             </div>
                             <div class="category-image-field">
                                 <div id="catImagePreview" class="category-image-preview">
@@ -8894,7 +8956,7 @@
                         <div class="translation-summary-header">
                             <div>
                                 <h5>Customer labels</h5>
-                                <p>Draft multilingual category names from the fallback label after the category structure and image are settled.</p>
+                                <p>Use AI to draft the three labels.</p>
                             </div>
                             <span class="translation-inline-note" id="catTranslationSummaryNote">No translations yet</span>
                         </div>
@@ -9634,7 +9696,7 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 1</span>
                                 <h4 class="menu-form-block-title">Top-level group identity</h4>
-                                <p class="menu-form-block-copy">Set fallback name and summary first.</p>
+                                <p class="menu-form-block-copy">Set the name and summary first.</p>
                             </div>
                             <div class="form-grid form-grid-name-emoji">
                                 <div class="form-group">
@@ -9648,7 +9710,7 @@
                                             <span class="super-icon-preview-glyph" id="superIconPreviewGlyph">🍽️</span>
                                             <div class="super-icon-preview-copy">
                                                 <p class="super-icon-preview-title" id="superIconPreviewTitle">Selected fallback icon</p>
-                                                <p class="super-icon-preview-note" id="superIconPreviewNote">Quick, lightweight, and consistent across tables and backups.</p>
+                                                <p class="super-icon-preview-note" id="superIconPreviewNote">Simple and easy to reuse.</p>
                                             </div>
                                         </div>
                                         <div id="superCategoryIconPicker" class="super-icon-picker-grid" role="listbox" aria-label="Super category icon presets" tabindex="-1"></div>
@@ -9666,7 +9728,7 @@
                                                 </div>
                                             </div>
                                         </details>
-                                        <p class="super-icon-helper">For top-level groups, a simple icon works better than an AI image. Use category images when you want the richer visual treatment.</p>
+                                        <p class="super-icon-helper">Use simple icons here. Save richer visuals for categories.</p>
                                     </div>
                                 </div>
                             </div>
@@ -9694,13 +9756,13 @@
                     <div class="menu-form-block-header">
                         <span class="menu-form-block-kicker">Step 2</span>
                         <h4 class="menu-form-block-title">Customer labels</h4>
-                        <p class="menu-form-block-copy">Generate labels, then review only when needed.</p>
+                                <p class="menu-form-block-copy">Generate labels, then review only if needed.</p>
                     </div>
                     <div class="translation-summary-card">
                         <div class="translation-summary-header">
                             <div>
                                 <h5>Customer labels</h5>
-                                <p>Generate multilingual names and descriptions from the fallback copy, then review them only when you need nuance.</p>
+                                <p>Use AI to draft the three labels.</p>
                             </div>
                             <span class="translation-inline-note" id="superTranslationSummaryNote">No translations yet</span>
                         </div>
@@ -9751,7 +9813,7 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 3</span>
                                 <h4 class="menu-form-block-title">Included categories</h4>
-                                <p class="menu-form-block-copy">Choose which categories appear inside this group.</p>
+                                <p class="menu-form-block-copy">Choose the categories inside this group.</p>
                             </div>
                             <div class="form-group">
                                 <label>Included Categories</label>
