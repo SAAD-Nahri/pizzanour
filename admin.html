@@ -2945,6 +2945,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+            max-width: 100%;
+            min-width: 0;
         }
 
         .chip-select-option input {
@@ -2952,6 +2954,13 @@
             height: 16px;
             margin: 0 !important;
             accent-color: var(--primary);
+            flex: 0 0 auto;
+        }
+
+        .chip-select-option span,
+        .chip-select-option strong {
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .chip-select-option:hover {
@@ -6229,6 +6238,10 @@
                 -webkit-overflow-scrolling: touch;
             }
 
+            .menu-builder-table-wrap {
+                overflow-x: hidden;
+            }
+
             table {
                 min-width: 600px;
             }
@@ -6707,6 +6720,8 @@
                 margin-bottom: 10px;
                 content-visibility: auto;
                 contain-intrinsic-size: 160px;
+                box-sizing: border-box;
+                overflow: hidden;
             }
 
             #menuBuilderTable td {
@@ -6755,6 +6770,7 @@
 
             .menu-builder-entry {
                 gap: 10px;
+                min-width: 0;
             }
 
             .menu-builder-entry-emoji {
@@ -6767,6 +6783,7 @@
 
             .menu-builder-entry-copy strong {
                 font-size: 0.98rem;
+                overflow-wrap: anywhere;
             }
 
             .menu-builder-entry-pills {
@@ -6825,6 +6842,7 @@
                 border-radius: 16px;
                 background: rgba(255, 249, 241, 0.88);
                 border: 1px solid rgba(232, 216, 197, 0.9);
+                min-width: 0;
             }
 
             #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"],
@@ -6836,6 +6854,7 @@
             #menuBuilderTable[data-step="categories"] td[data-label="Actions"] .menu-builder-item-actions {
                 width: 100%;
                 justify-content: flex-start;
+                min-width: 0;
             }
 
             #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"] .menu-builder-action-rail,
@@ -6844,6 +6863,7 @@
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
                 width: 100%;
+                min-width: 0;
             }
 
             #menuBuilderTable[data-step="supercategories"] td[data-label="Actions"] .menu-builder-action-rail .action-btn,
