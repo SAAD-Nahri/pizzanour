@@ -731,6 +731,8 @@
             gap: 16px;
             width: min(100%, 1120px);
             margin-inline: auto;
+            min-width: 0;
+            max-width: 100%;
         }
 
         html.menu-crud-open,
@@ -746,6 +748,9 @@
             border: 1px solid rgba(232, 216, 197, 0.92);
             background: linear-gradient(180deg, rgba(255, 253, 248, 0.98) 0%, rgba(255, 248, 239, 0.94) 100%);
             box-shadow: 0 22px 48px rgba(75, 47, 24, 0.08);
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: clip;
         }
 
         .section > form,
@@ -763,6 +768,8 @@
             align-items: end;
             gap: 20px;
             flex-wrap: wrap;
+            min-width: 0;
+            max-width: 100%;
         }
 
         #menuBuilderTitle {
@@ -783,6 +790,7 @@
             display: grid;
             gap: 8px;
             max-width: 640px;
+            min-width: 0;
         }
 
         .menu-builder-kicker {
@@ -6426,8 +6434,8 @@
                 position: sticky;
                 top: calc(env(safe-area-inset-top, 0px) + 72px);
                 z-index: 5;
-                margin: -4px -4px 10px;
-                padding: 6px 4px 10px;
+                margin: 0 0 10px;
+                padding: 6px 0 10px;
                 background: linear-gradient(180deg, rgba(245, 247, 250, 0.98) 0%, rgba(245, 247, 250, 0.88) 75%, rgba(245, 247, 250, 0) 100%);
                 backdrop-filter: blur(10px);
                 flex-direction: column;
@@ -6582,6 +6590,7 @@
             .menu-builder-heading {
                 gap: 6px;
                 max-width: none;
+                width: 100%;
             }
 
             .menu-builder-kicker {
@@ -7905,6 +7914,8 @@
         .menu-builder-heading.admin-help-host {
             position: relative;
             padding-right: 42px;
+            min-width: 0;
+            max-width: 100%;
         }
 
         .menu-builder-overview {
@@ -8178,12 +8189,18 @@
                 width: 100%;
                 flex-wrap: nowrap;
                 overflow: hidden;
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
             }
 
             .menu-builder-actions.menu-builder-actions--single {
                 display: flex;
                 grid-template-columns: none;
                 justify-content: flex-start;
+                width: auto;
+                max-width: 100%;
+                align-self: flex-start;
             }
 
             .menu-builder-actions .primary-btn,
@@ -8260,6 +8277,7 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                max-width: 100%;
             }
 
             #menuBuilderAddBtn::before { display: none; }
