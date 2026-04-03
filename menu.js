@@ -1434,7 +1434,7 @@ function renderSuperCatSheet() {
                 <span class="super-cat-row-emoji">${sc.emoji}</span>
                 <div class="super-cat-row-info">
                     <div class="super-cat-row-name">${window.getLocalizedSuperCategoryName(sc, sc.name)}</div>
-                    <div class="super-cat-row-desc">${window.getLocalizedSuperCategoryDescription(sc, sc.desc)}</div>
+                    <div class="super-cat-row-desc">${window.getLocalizedSuperCategoryDescription(sc, '')}</div>
                 </div>
             </div>
             <span class="super-cat-row-arrow">&rsaquo;</span>

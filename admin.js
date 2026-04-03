@@ -1552,13 +1552,11 @@ function populateCategorySuperCategoryOptions(selectedId = '') {
     select.value = currentValue;
 }
 
-function setSuperCategoryTranslationFields(input, fallbackName = '', fallbackDesc = '') {
+function setSuperCategoryTranslationFields(input, fallbackName = '') {
     const translations = normalizeEntityTranslations(input);
     ['fr', 'en', 'ar'].forEach((lang) => {
         const nameInput = document.getElementById(`scName${lang.charAt(0).toUpperCase()}${lang.slice(1)}`);
-        const descInput = document.getElementById(`scDesc${lang.charAt(0).toUpperCase()}${lang.slice(1)}`);
         if (nameInput) nameInput.value = translations[lang].name || (lang === 'fr' ? fallbackName : '');
-        if (descInput) descInput.value = translations[lang].desc || (lang === 'fr' ? fallbackDesc : '');
     });
 }
 
@@ -1658,8 +1656,7 @@ function setSuperCategoryIcon(value, markTouched = true) {
 function maybeSuggestSuperCategoryIcon() {
     if (superCategoryIconManuallyChosen) return;
     const name = document.getElementById('scName')?.value?.trim() || '';
-    const desc = document.getElementById('scDesc')?.value?.trim() || '';
-    setSuperCategoryIcon(suggestSuperCategoryIcon(name, desc), false);
+    setSuperCategoryIcon(suggestSuperCategoryIcon(name, ''), false);
 }
 
 function bindSuperCategoryIconControls() {
@@ -1674,7 +1671,7 @@ function bindSuperCategoryIconControls() {
         });
     }
 
-    ['scName', 'scDesc'].forEach((id) => {
+    ['scName'].forEach((id) => {
         const field = document.getElementById(id);
         if (field && !field.dataset.iconSuggestBound) {
             field.dataset.iconSuggestBound = 'true';
@@ -1700,17 +1697,37 @@ function resetSuperCategoryFormState() {
     refreshMenuCrudFormUx('superCatForm');
 }
 
-function buildSuperCategoryTranslations(name, desc) {
+function buildSuperCategoryTranslations(name) {
     const next = normalizeEntityTranslations();
     ['fr', 'en', 'ar'].forEach((lang) => {
         const nameInput = document.getElementById(`scName${lang.charAt(0).toUpperCase()}${lang.slice(1)}`);
-        const descInput = document.getElementById(`scDesc${lang.charAt(0).toUpperCase()}${lang.slice(1)}`);
         next[lang].name = nameInput ? nameInput.value.trim() : '';
-        next[lang].desc = descInput ? descInput.value.trim() : '';
+        next[lang].desc = '';
     });
     if (!next.fr.name && name) next.fr.name = name;
-    if (!next.fr.desc && desc) next.fr.desc = desc;
     return next;
+}
+
+function sanitizeSuperCategoryForStorage(entry = {}) {
+    const group = entry && typeof entry === 'object' ? entry : {};
+    const translations = normalizeEntityTranslations(group.translations);
+    return {
+        ...group,
+        name: typeof group.name === 'string' ? group.name.trim() : '',
+        emoji: normalizeSuperCategoryIconValue(group.emoji || ''),
+        time: typeof group.time === 'string' ? group.time.trim() : '',
+        cats: Array.isArray(group.cats) ? [...new Set(group.cats.filter(Boolean).map((value) => String(value).trim()).filter(Boolean))] : [],
+        translations: {
+            fr: { name: translations.fr.name || '', desc: '' },
+            en: { name: translations.en.name || '', desc: '' },
+            ar: { name: translations.ar.name || '', desc: '' }
+        }
+    };
+}
+
+function getAdminSuperCategorySummary(entry) {
+    const categories = Array.isArray(entry?.cats) ? entry.cats : [];
+    return formatMenuBuilderCategoryPreview(categories, 3);
 }
 
 const MENU_CRUD_FORM_DEFAULT_SECTIONS = {
@@ -1933,8 +1950,7 @@ function refreshTranslationSummary(entityType) {
         translations = buildCategoryTranslations(baseName);
     } else if (entityType === 'supercategory') {
         const name = document.getElementById('scName')?.value?.trim() || '';
-        const desc = document.getElementById('scDesc')?.value?.trim() || '';
-        translations = buildSuperCategoryTranslations(name, desc);
+        translations = buildSuperCategoryTranslations(name);
     }
 
     const filledCount = getFilledTranslationCount(translations);
@@ -1962,7 +1978,7 @@ function refreshTranslationSummary(entityType) {
     if (entityType === 'supercategory') {
         setMenuCrudMetaText(
             'superCatFormMetaLabels',
-            filledCount === 3 ? 'Labels ready' : filledCount > 0 ? `${filledCount}/3 labels ready` : 'Labels pending'
+            filledCount === 3 ? 'Labels ready' : filledCount > 0 ? `${filledCount}/3 labels ready` : 'Labels optional'
         );
     }
 }
@@ -2065,13 +2081,12 @@ function getMenuCrudSectionStatus(formId, sectionId) {
 
     if (formId === 'superCatForm') {
         const name = document.getElementById('scName')?.value?.trim() || '';
-        const desc = document.getElementById('scDesc')?.value?.trim() || '';
-        if (sectionId === 'identity') return name && desc ? 'ready' : 'missing';
+        if (sectionId === 'identity') return name ? 'ready' : 'missing';
         if (sectionId === 'labels') {
-            return getFilledTranslationCount(buildSuperCategoryTranslations(name, desc)) === 3 ? 'ready' : 'missing';
+            return getFilledTranslationCount(buildSuperCategoryTranslations(name)) === 3 ? 'ready' : 'optional';
         }
         if (sectionId === 'structure') {
-            return Array.from(document.querySelectorAll('.sc-cat-check:checked')).length > 0 ? 'ready' : 'missing';
+            return Array.from(document.querySelectorAll('.sc-cat-check:checked')).length > 0 ? 'ready' : 'optional';
         }
     }
 
@@ -2140,16 +2155,11 @@ function getMenuCrudMissingTarget(formId, sectionId) {
 
     if (formId === 'superCatForm') {
         const name = document.getElementById('scName')?.value?.trim() || '';
-        const desc = document.getElementById('scDesc')?.value?.trim() || '';
         if (sectionId === 'identity') {
             if (!name) return { message: 'Add the group name in Identity.', fieldId: 'scName' };
-            if (!desc) return { message: 'Add the fallback description in Identity.', fieldId: 'scDesc' };
         }
         if (sectionId === 'labels') {
             return { message: 'Generate or enter the missing labels in Labels.', fieldId: 'superTranslationGenerateBtn' };
-        }
-        if (sectionId === 'structure') {
-            return { message: 'Select at least one category in Structure.', fieldId: 'scCatsList' };
         }
     }
 
@@ -2257,7 +2267,7 @@ function refreshMenuCrudFormUx(target) {
     } else if (form.id === 'superCatForm') {
         refreshTranslationSummary('supercategory');
         const selectedCount = Array.from(document.querySelectorAll('.sc-cat-check:checked')).length;
-        setMenuCrudMetaText('superCatFormMetaState', selectedCount > 0 ? `${selectedCount} categories linked` : 'Structure draft');
+        setMenuCrudMetaText('superCatFormMetaState', selectedCount > 0 ? `${selectedCount} categories linked` : 'No categories linked yet');
     }
     renderMenuCrudValidationState(form.id);
     syncMenuCrudFooter(form);
@@ -2505,8 +2515,8 @@ window.generateEntityTranslations = async function (entityType) {
         payload = {
             entityType: 'supercategory',
             fallbackName,
-            fallbackDesc: document.getElementById('scDesc')?.value?.trim() || '',
-            existingTranslations: buildSuperCategoryTranslations(fallbackName, document.getElementById('scDesc')?.value?.trim() || ''),
+            fallbackDesc: '',
+            existingTranslations: buildSuperCategoryTranslations(fallbackName),
             includedCategories: Array.from(document.querySelectorAll('.sc-cat-check:checked')).map((entry) => entry.value)
         };
         title = 'Generating group translations';
@@ -2544,7 +2554,7 @@ window.generateEntityTranslations = async function (entityType) {
         } else if (entityType === 'category') {
             setCategoryTranslationFieldsFromTranslations(data.translations, document.getElementById('catName')?.value?.trim() || '');
         } else {
-            setSuperCategoryTranslationFields(data.translations, document.getElementById('scName')?.value?.trim() || '', document.getElementById('scDesc')?.value?.trim() || '');
+            setSuperCategoryTranslationFields(data.translations, document.getElementById('scName')?.value?.trim() || '');
         }
 
         setMenuTranslationWarnings(entityType, data.warnings || []);
@@ -3445,7 +3455,7 @@ function renderMenuBuilder() {
         tbody.innerHTML = rows.map((entry) => {
             const inlineId = toInlineJsString(entry.id);
             const categoriesCount = Array.isArray(entry.cats) ? entry.cats.length : 0;
-            const categoryNames = formatMenuBuilderCategoryPreview(entry.cats, 2);
+            const categoryNames = getAdminSuperCategorySummary(entry);
             const dishesCount = getMenuBuilderItemsForCategories(entry.cats || []).length;
             return `
                 <tr onclick='openMenuBuilderRow(${inlineId})'>
@@ -3454,7 +3464,7 @@ function renderMenuBuilder() {
                             <span class="menu-builder-entry-emoji">${escapeHtml(entry.emoji || ADMIN_ICON.bullet)}</span>
                             <div class="menu-builder-entry-copy">
                                 <strong>${escapeHtml(entry.name || 'Super Category')}</strong>
-                                ${entry.desc ? `<div class="menu-builder-row-copy">${escapeHtml(entry.desc)}</div>` : ''}
+                                ${categoryNames ? `<div class="menu-builder-row-copy">${escapeHtml(categoryNames)}</div>` : ''}
                                 <div class="menu-builder-entry-pills">
                                     ${entry.time ? `<span class="menu-builder-entry-pill">${escapeHtml(entry.time)}</span>` : ''}
                                     <span class="menu-builder-entry-pill ${entry.isVirtual ? 'is-attention' : 'is-ready'}">${entry.isVirtual ? 'Needs structure' : 'Structure ready'}</span>
@@ -4689,9 +4699,8 @@ function initForms() {
         const selectedCats = Array.from(document.querySelectorAll('.sc-cat-check:checked')).map(cb => cb.value);
         const name = document.getElementById('scName').value.trim();
         let emoji = normalizeSuperCategoryIconValue(document.getElementById('scEmoji').value);
-        const desc = document.getElementById('scDesc').value.trim();
         const time = document.getElementById('scTime').value;
-        const translations = buildSuperCategoryTranslations(name, desc);
+        const translations = buildSuperCategoryTranslations(name);
 
         if (!name) {
             setMenuCrudPrimaryButtonState('superCatForm', 'idle');
@@ -4700,30 +4709,15 @@ function initForms() {
             focusMenuCrudField('superCatForm', 'identity', 'scName');
             return;
         }
-        if (!desc) {
-            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
-            setMenuCrudValidationState('superCatForm', { message: 'Add the fallback description in Identity.', sectionId: 'identity', fieldId: 'scDesc' });
-            showToast('Add a fallback description for this group.');
-            focusMenuCrudField('superCatForm', 'identity', 'scDesc');
-            return;
-        }
-        if (!selectedCats.length) {
-            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
-            setMenuCrudValidationState('superCatForm', { message: 'Select at least one category in Structure.', sectionId: 'structure', fieldId: 'scCatsList' });
-            showToast('Select at least one included category.');
-            focusMenuCrudField('superCatForm', 'structure', 'scCatsList');
-            return;
-        }
-
         if (!emoji) {
-            emoji = suggestSuperCategoryIcon(name, desc);
+            emoji = suggestSuperCategoryIcon(name, '');
             setSuperCategoryIcon(emoji, false);
         }
 
         const id = editingId || name.toLowerCase().replace(/\s+/g, '_');
         const existingIdx = restaurantConfig.superCategories.findIndex(sc => sc.id === id);
 
-        const newSC = { id, name, emoji, desc, time, cats: selectedCats, translations };
+        const newSC = { id, name, emoji, time, cats: selectedCats, translations };
 
         if (existingIdx !== -1) {
             restaurantConfig.superCategories[existingIdx] = newSC;
@@ -5530,7 +5524,7 @@ function renderSuperCatTable() {
             <tr>
             <td>${sc.emoji}</td>
             <td><strong>${sc.name}</strong><br><small>${sc.time || ''}</small></td>
-            <td>${sc.cats.join(', ')}</td>
+            <td>${getAdminSuperCategorySummary(sc) || 'No categories linked yet'}</td>
             <td>
                 <button class="action-btn" title="Edit super category" aria-label="Edit super category" onclick="editSuperCat('${sc.id}')">${ADMIN_ICON.edit}</button>
                 <button class="action-btn" title="Delete super category" aria-label="Delete super category" onclick="deleteSuperCat('${sc.id}')">${ADMIN_ICON.trash}</button>
@@ -5551,9 +5545,8 @@ function editSuperCat(id) {
     document.getElementById('scName').value = sc.name;
     setSuperCategoryIcon(sc.emoji || DEFAULT_SUPER_CATEGORY_ICON, false);
     superCategoryIconManuallyChosen = true;
-    document.getElementById('scDesc').value = sc.desc;
     document.getElementById('scTime').value = sc.time || '';
-    setSuperCategoryTranslationFields(sc.translations, sc.name, sc.desc);
+    setSuperCategoryTranslationFields(sc.translations, sc.name);
 
     const checks = document.querySelectorAll('.sc-cat-check');
     checks.forEach(cb => cb.checked = sc.cats.includes(cb.value));
@@ -6126,8 +6119,12 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
         promoId: promoIds.length > 0 ? promoIds[0] : null,
         promoIds: promoIds,
         superCategories: applyStructure
-            ? (Array.isArray(imported.superCategories) && imported.superCategories.length ? imported.superCategories : [])
-            : (restaurantConfig.superCategories || []),
+            ? (Array.isArray(imported.superCategories) && imported.superCategories.length
+                ? imported.superCategories.map((entry) => sanitizeSuperCategoryForStorage(entry))
+                : [])
+            : (Array.isArray(restaurantConfig.superCategories)
+                ? restaurantConfig.superCategories.map((entry) => sanitizeSuperCategoryForStorage(entry))
+                : []),
         hours: restaurantConfig._hours || null,
         hoursNote: restaurantConfig._hoursNote || '',
         gallery: restaurantConfig.gallery || [],
@@ -6521,7 +6518,9 @@ async function saveAndRefreshLegacy() {
         contentTranslations: restaurantConfig.contentTranslations || { fr: {}, en: {}, ar: {} },
         promoId: promoIds.length > 0 ? promoIds[0] : null,
         promoIds: promoIds,
-        superCategories: restaurantConfig.superCategories || [],
+        superCategories: Array.isArray(restaurantConfig.superCategories)
+            ? restaurantConfig.superCategories.map((entry) => sanitizeSuperCategoryForStorage(entry))
+            : [],
         hours: restaurantConfig._hours || null,
         hoursNote: restaurantConfig._hoursNote || '',
         gallery: restaurantConfig.gallery || [],
@@ -6788,7 +6787,9 @@ async function performAdminSaveRequest() {
         contentTranslations: restaurantConfig.contentTranslations || { fr: {}, en: {}, ar: {} },
         promoId: promoIds.length > 0 ? promoIds[0] : null,
         promoIds: promoIds,
-        superCategories: restaurantConfig.superCategories || [],
+        superCategories: Array.isArray(restaurantConfig.superCategories)
+            ? restaurantConfig.superCategories.map((entry) => sanitizeSuperCategoryForStorage(entry))
+            : [],
         hours: restaurantConfig._hours || null,
         hoursNote: restaurantConfig._hoursNote || '',
         gallery: restaurantConfig.gallery || [],

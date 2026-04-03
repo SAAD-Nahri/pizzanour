@@ -32,10 +32,16 @@ function cloneStarterTranslationMap(input) {
 
 function cloneStarterSuperCategory(group) {
     const source = group && typeof group === 'object' ? group : {};
+    const { desc: _legacyDesc, ...groupWithoutDesc } = source;
+    const translations = cloneStarterTranslations(source.translations);
+    ['fr', 'en', 'ar'].forEach((lang) => {
+        if (!translations[lang]) translations[lang] = {};
+        translations[lang].desc = '';
+    });
     return {
-        ...source,
+        ...groupWithoutDesc,
         cats: Array.isArray(source.cats) ? [...source.cats] : [],
-        translations: cloneStarterTranslations(source.translations)
+        translations
     };
 }
 
@@ -1304,23 +1310,24 @@ function normalizeCategoryTranslations(input) {
 
 function normalizeSuperCategories(input) {
     const source = Array.isArray(input) ? input : [];
-    return source.map((group) => ({
-        ...(group && typeof group === 'object' ? group : {}),
-        name: repairPossibleMojibake(group?.name || ''),
-        desc: repairPossibleMojibake(group?.desc || ''),
-        cats: Array.isArray(group?.cats) ? group.cats.filter(Boolean).map((value) => repairPossibleMojibake(value)) : [],
-        translations: (() => {
-            const fallback = normalizeEntityTranslations(
-                STARTER_SUPERCATEGORY_TRANSLATION_FALLBACKS[String(group?.id || '').trim()] || {}
-            );
-            const current = normalizeEntityTranslations(group?.translations);
-            ['fr', 'en', 'ar'].forEach((lang) => {
-                if (!current[lang].name && fallback[lang].name) current[lang].name = fallback[lang].name;
-                if (!current[lang].desc && fallback[lang].desc) current[lang].desc = fallback[lang].desc;
-            });
-            return current;
-        })()
-    }));
+    return source.map((group) => {
+        const rawGroup = group && typeof group === 'object' ? group : {};
+        const { desc: _legacyDesc, ...groupWithoutDesc } = rawGroup;
+        const fallback = normalizeEntityTranslations(
+            STARTER_SUPERCATEGORY_TRANSLATION_FALLBACKS[String(group?.id || '').trim()] || {}
+        );
+        const current = normalizeEntityTranslations(group?.translations);
+        ['fr', 'en', 'ar'].forEach((lang) => {
+            if (!current[lang].name && fallback[lang].name) current[lang].name = fallback[lang].name;
+            current[lang].desc = '';
+        });
+        return {
+            ...groupWithoutDesc,
+            name: repairPossibleMojibake(group?.name || ''),
+            cats: Array.isArray(group?.cats) ? group.cats.filter(Boolean).map((value) => repairPossibleMojibake(value)) : [],
+            translations: current
+        };
+    });
 }
 
 window.getEffectiveSuperCategories = function (menuItems, config = window.restaurantConfig) {
@@ -1366,18 +1373,16 @@ window.getEffectiveSuperCategories = function (menuItems, config = window.restau
         const fallbackGroups = missingCategories.map((cat, index) => {
             const translations = normalizeEntityTranslations(categoryTranslations[cat]);
             const fallbackName = translations.fr.name || repairPossibleMojibake(cat);
-            const fallbackDesc = translations.fr.desc || '';
             return {
                 id: `runtime-${canonicalMenuLookupKey(cat) || index + 1}`,
                 name: fallbackName,
-                desc: fallbackDesc,
                 emoji: categoryEmojiMap[cat] || '🍴',
                 time: '',
                 cats: [cat],
                 translations: {
-                    fr: { name: translations.fr.name || fallbackName, desc: translations.fr.desc || fallbackDesc },
-                    en: { name: translations.en.name || fallbackName, desc: translations.en.desc || fallbackDesc },
-                    ar: { name: translations.ar.name || fallbackName, desc: translations.ar.desc || fallbackDesc }
+                    fr: { name: translations.fr.name || fallbackName, desc: '' },
+                    en: { name: translations.en.name || fallbackName, desc: '' },
+                    ar: { name: translations.ar.name || fallbackName, desc: '' }
                 }
             };
         });
@@ -1523,8 +1528,16 @@ window.getLocalizedSuperCategoryName = function (superCategory, fallback = '') {
     return window.getLocalizedSuperCategoryField(superCategory, 'name', fallback);
 };
 
+window.getSuperCategoryCategorySummary = function (superCategory, fallback = '') {
+    const categories = Array.isArray(superCategory?.cats) ? superCategory.cats : [];
+    const localized = categories
+        .map((categoryKey) => window.getLocalizedCategoryName(categoryKey, categoryKey))
+        .filter(Boolean);
+    return localized.length ? localized.join(' · ') : fallback;
+};
+
 window.getLocalizedSuperCategoryDescription = function (superCategory, fallback = '') {
-    return window.getLocalizedSuperCategoryField(superCategory, 'desc', fallback);
+    return window.getSuperCategoryCategorySummary(superCategory, fallback);
 };
 
 window.getLocalizedMenuName = function (item) {

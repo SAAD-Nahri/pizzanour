@@ -2720,6 +2720,7 @@
         .super-icon-picker {
             display: grid;
             gap: 12px;
+            min-width: 0;
         }
 
         .super-icon-preview {
@@ -2772,6 +2773,7 @@
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
+            min-width: 0;
         }
 
         .super-icon-picker-btn {
@@ -2815,6 +2817,7 @@
             line-height: 1.3;
             text-align: center;
             color: var(--text2);
+            word-break: break-word;
         }
 
         .super-icon-helper {
@@ -2826,6 +2829,20 @@
 
         .super-icon-manual .admin-disclosure-copy {
             max-width: none;
+        }
+
+        #superCatForm,
+        #superCatForm .menu-form-block,
+        #superCatForm .menu-form-split,
+        #superCatForm .menu-form-side-panel,
+        #superCatForm .form-grid-name-emoji,
+        #superCatForm .translation-grid,
+        #superCatForm .chip-select-list,
+        #superCatForm .super-icon-picker,
+        #superCatForm .super-icon-picker-grid {
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: clip;
         }
 
         .category-image-field {
@@ -7310,7 +7327,7 @@
             }
 
             .super-icon-picker-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .menu-crud-form-intro {
@@ -8187,6 +8204,10 @@
                 width: clamp(124px, 40vw, 164px) !important;
                 max-width: calc(100% - 72px);
                 min-width: 124px;
+            }
+
+            #superCatForm .form-grid-name-emoji {
+                grid-template-columns: minmax(0, 1fr) !important;
             }
 
             .menu-builder-actions.menu-builder-actions--single #menuBuilderAddBtn {
@@ -9781,13 +9802,13 @@
                         <p class="menu-crud-form-intro-copy"><strong>Set the fallback identity first</strong>, then labels and linked categories.</p>
                         <div class="menu-crud-form-meta">
                             <span class="menu-crud-form-meta-pill" id="superCatFormMetaState">Structure draft</span>
-                            <span class="menu-crud-form-meta-pill" id="superCatFormMetaLabels">Labels pending</span>
+                            <span class="menu-crud-form-meta-pill" id="superCatFormMetaLabels">Labels optional</span>
                         </div>
                     </div>
                     <div class="menu-crud-step-nav" aria-label="Super category form sections">
                         <button type="button" class="menu-crud-step-btn is-active" data-form-id="superCatForm" data-section-target="identity" onclick="activateMenuCrudSection('superCatForm','identity')"><span class="menu-crud-step-label">Identity</span><span class="menu-crud-step-status">Missing</span></button>
-                        <button type="button" class="menu-crud-step-btn" data-form-id="superCatForm" data-section-target="labels" onclick="activateMenuCrudSection('superCatForm','labels')"><span class="menu-crud-step-label">Labels</span><span class="menu-crud-step-status">Needs AI</span></button>
-                        <button type="button" class="menu-crud-step-btn" data-form-id="superCatForm" data-section-target="structure" onclick="activateMenuCrudSection('superCatForm','structure')"><span class="menu-crud-step-label">Structure</span><span class="menu-crud-step-status">Missing</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="superCatForm" data-section-target="labels" onclick="activateMenuCrudSection('superCatForm','labels')"><span class="menu-crud-step-label">Labels</span><span class="menu-crud-step-status">Optional</span></button>
+                        <button type="button" class="menu-crud-step-btn" data-form-id="superCatForm" data-section-target="structure" onclick="activateMenuCrudSection('superCatForm','structure')"><span class="menu-crud-step-label">Structure</span><span class="menu-crud-step-status">Optional</span></button>
                     </div>
                 </div>
                 <section class="menu-form-block is-active" data-menu-section="identity">
@@ -9796,7 +9817,7 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 1</span>
                                 <h4 class="menu-form-block-title">Top-level group identity</h4>
-                                <p class="menu-form-block-copy">Set the name and summary first.</p>
+                                <p class="menu-form-block-copy">Set the name and icon first.</p>
                             </div>
                             <div class="form-grid form-grid-name-emoji">
                                 <div class="form-group">
@@ -9831,10 +9852,6 @@
                                         <p class="super-icon-helper">Use simple icons here. Save richer visuals for categories.</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Fallback Description</label>
-                                <input type="text" id="scDesc" placeholder="e.g. Morning dishes, bakery, eggs, and coffee" required />
                             </div>
                             <div class="form-group">
                                 <label>Time Slot (Optional Display)</label>
@@ -9886,22 +9903,16 @@
                                     <h4>French</h4>
                                     <label for="scNameFr">Name</label>
                                     <input type="text" id="scNameFr" placeholder="Nom en francais" />
-                                    <label for="scDescFr">Description</label>
-                                    <textarea id="scDescFr" rows="3" placeholder="Description en francais"></textarea>
                                 </div>
                                 <div class="translation-card">
                                     <h4>English</h4>
                                     <label for="scNameEn">Name</label>
                                     <input type="text" id="scNameEn" placeholder="Name in English" />
-                                    <label for="scDescEn">Description</label>
-                                    <textarea id="scDescEn" rows="3" placeholder="Description in English"></textarea>
                                 </div>
                                 <div class="translation-card">
                                     <h4>Arabic</h4>
                                     <label for="scNameAr">Name</label>
                                     <input type="text" id="scNameAr" placeholder="Name in Arabic" />
-                                    <label for="scDescAr">Description</label>
-                                    <textarea id="scDescAr" rows="3" placeholder="Description in Arabic"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -9913,10 +9924,10 @@
                             <div class="menu-form-block-header">
                                 <span class="menu-form-block-kicker">Step 3</span>
                                 <h4 class="menu-form-block-title">Included categories</h4>
-                                <p class="menu-form-block-copy">Choose the categories inside this group.</p>
+                                <p class="menu-form-block-copy">Link categories now or leave this empty and organize later.</p>
                             </div>
                             <div class="form-group">
-                                <label id="scCatsListLabel" data-required="true">Included Categories</label>
+                                <label id="scCatsListLabel">Included Categories</label>
                                 <div id="scCatsList" class="chip-select-list">
                                     <!-- Checkboxes will be rendered here -->
                                 </div>
@@ -9928,7 +9939,7 @@
                             <ul>
                                 <li>Pick only the categories customers expect together.</li>
                                 <li>Reorganizing later will not delete dishes.</li>
-                                <li>Step status turns ready once at least one category is linked.</li>
+                                <li>You can save the group first, then come back to organize categories later.</li>
                             </ul>
                         </aside>
                     </div>
