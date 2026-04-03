@@ -1548,7 +1548,8 @@
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
             height: 100%;
-            padding: 0 8px 160px 8px;
+            --menu-crud-footer-space: 140px;
+            padding: 0 8px var(--menu-crud-footer-space) 8px;
         }
 
         #menuCrudModalBody > form {
@@ -7942,6 +7943,7 @@
             box-shadow: 0 -16px 28px rgba(255, 249, 241, 0.6);
             z-index: 3;
             border-top: 1px solid rgba(232, 216, 197, 0.6);
+            margin-bottom: calc(-1 * var(--menu-crud-footer-space));
         }
 
         .menu-crud-primary-actions {
@@ -8109,7 +8111,8 @@
                 gap: 10px;
             }
             #menuCrudModalBody {
-                padding: 0 10px calc(150px + env(safe-area-inset-bottom)) 10px;
+                --menu-crud-footer-space: calc(140px + env(safe-area-inset-bottom));
+                padding: 0 10px var(--menu-crud-footer-space) 10px;
             }
 
             .menu-crud-modal-card .menu-form-block {
