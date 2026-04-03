@@ -2172,8 +2172,9 @@ function focusMenuCrudField(formId, sectionId, fieldId) {
 
 function setMenuCrudPrimaryButtonState(formId, state) {
     const form = document.getElementById(formId);
-    const button = form?.querySelector('.menu-crud-primary-action');
-    const cancelButton = form?.querySelector('.menu-crud-cancel-btn');
+    const button = document.getElementById(`${formId}PrimaryBtn`);
+    const footer = document.getElementById(getMenuCrudFooterId(formId));
+    const cancelButton = footer?.querySelector('.menu-crud-cancel-btn');
     if (!button) return;
 
     if (!button.dataset.defaultLabel) {
@@ -2761,7 +2762,19 @@ function mountNodeIntoHost(nodeId, hostId) {
     }
 }
 
+function getMenuCrudFooterId(formId) {
+    return `${formId}Footer`;
+}
+
+function restoreMenuCrudFooter(formId) {
+    const form = document.getElementById(formId);
+    const footer = document.getElementById(getMenuCrudFooterId(formId));
+    if (!form || !footer || footer.parentElement === form) return;
+    form.appendChild(footer);
+}
+
 function mountMenuCrudForms() {
+    ['superCatForm', 'catForm', 'foodForm'].forEach((formId) => restoreMenuCrudFooter(formId));
     mountNodeIntoHost('superCatForm', 'menuCrudSuperHost');
     mountNodeIntoHost('catForm', 'menuCrudCategoryHost');
     mountNodeIntoHost('foodForm', 'menuCrudItemHost');
@@ -3425,13 +3438,17 @@ function openMenuCrudModal(type, title) {
     mountMenuCrudForms();
     const modal = document.getElementById('menuCrudModal');
     const body = document.getElementById('menuCrudModalBody');
+    const footerHost = document.getElementById('menuCrudModalFooterHost');
     const titleEl = document.getElementById('menuCrudModalTitle');
     const card = modal?.querySelector('.menu-crud-modal-card');
     const formId = type === 'supercategory' ? 'superCatForm' : type === 'category' ? 'catForm' : 'foodForm';
     const form = document.getElementById(formId);
-    if (!modal || !body || !titleEl || !form) return;
+    const footer = document.getElementById(getMenuCrudFooterId(formId));
+    if (!modal || !body || !footerHost || !titleEl || !form || !footer) return;
     body.innerHTML = '';
     body.appendChild(form);
+    footerHost.dataset.formId = formId;
+    footerHost.appendChild(footer);
     titleEl.textContent = title;
     initializeMenuCrudFormEnhancements(form);
     document.documentElement.classList.add('menu-crud-open');
@@ -3480,6 +3497,10 @@ window.closeMenuCrudModal = async function (force = false) {
     document.body.classList.remove('menu-crud-open');
     clearMenuCrudDirtyTracking();
     mountMenuCrudForms();
+    const footerHost = document.getElementById('menuCrudModalFooterHost');
+    if (footerHost) {
+        delete footerHost.dataset.formId;
+    }
 };
 
 const menuCrudDialog = document.getElementById('menuCrudModal');

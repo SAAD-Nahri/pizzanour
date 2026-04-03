@@ -1548,8 +1548,7 @@
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
             height: 100%;
-            --menu-crud-footer-space: 140px;
-            padding: 0 8px var(--menu-crud-footer-space) 8px;
+            padding: 0 8px 12px 8px;
         }
 
         #menuCrudModalBody > form {
@@ -1558,14 +1557,30 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            flex: 1 1 auto;
-            min-height: 100%;
-            height: 100%;
+            flex: 0 0 auto;
+            min-height: auto;
+            height: auto;
         }
 
         #menuCrudModalBody > #catForm,
         #menuCrudModalBody > #superCatForm {
             width: min(100%, 760px);
+        }
+
+        #menuCrudModalFooterHost {
+            flex: 0 0 auto;
+            width: min(100%, 860px);
+            margin-inline: auto;
+            padding: 0 8px 8px;
+        }
+
+        #menuCrudModalFooterHost[data-form-id="catForm"],
+        #menuCrudModalFooterHost[data-form-id="superCatForm"] {
+            width: min(100%, 760px);
+        }
+
+        #menuCrudModalFooterHost:empty {
+            display: none;
         }
 
         .menu-crud-modal-title {
@@ -2395,17 +2410,17 @@
         }
 
         .menu-crud-footer-stack {
-            position: sticky;
-            bottom: 0;
-            z-index: 4;
+            position: relative;
+            z-index: 1;
             display: grid;
             gap: 10px;
-            width: min(100%, 860px);
-            margin: 2px auto 0;
-            padding: 14px 0 4px;
-            background: linear-gradient(180deg, rgba(255, 251, 244, 0) 0%, rgba(255, 251, 244, 0.92) 28%, rgba(255, 249, 241, 0.99) 100%);
+            width: 100%;
+            margin: 0;
+            padding: 12px 0 0;
+            background: linear-gradient(180deg, rgba(255, 251, 244, 0.72) 0%, rgba(255, 249, 241, 0.98) 100%);
             backdrop-filter: blur(16px);
-            box-shadow: 0 -18px 28px rgba(255, 249, 241, 0.72);
+            box-shadow: none;
+            border-top: 1px solid rgba(232, 216, 197, 0.72);
         }
 
         .menu-crud-cancel-btn {
@@ -7934,16 +7949,8 @@
 
         .menu-crud-footer-stack {
             gap: 8px;
-            padding: 12px 0 max(12px, env(safe-area-inset-bottom));
-            margin-top: auto;
-            position: sticky;
-            bottom: 0;
+            padding: 12px 0 max(8px, env(safe-area-inset-bottom));
             width: 100%;
-            background: linear-gradient(180deg, rgba(255, 251, 244, 0) 0%, rgba(255, 251, 244, 0.85) 36%, rgba(255, 249, 241, 0.98) 100%);
-            box-shadow: 0 -16px 28px rgba(255, 249, 241, 0.6);
-            z-index: 3;
-            border-top: 1px solid rgba(232, 216, 197, 0.6);
-            margin-bottom: calc(-1 * var(--menu-crud-footer-space));
         }
 
         .menu-crud-primary-actions {
@@ -8106,13 +8113,16 @@
             }
 
             #menuCrudModalBody > form {
-                min-height: calc(100% - 2px);
-                height: 100%;
+                min-height: auto;
+                height: auto;
                 gap: 10px;
             }
             #menuCrudModalBody {
-                --menu-crud-footer-space: calc(140px + env(safe-area-inset-bottom));
-                padding: 0 10px var(--menu-crud-footer-space) 10px;
+                padding: 0 10px 10px 10px;
+            }
+
+            #menuCrudModalFooterHost {
+                padding: 0 10px calc(10px + env(safe-area-inset-bottom)) 10px;
             }
 
             .menu-crud-modal-card .menu-form-block {
@@ -8266,6 +8276,7 @@
                         <h3 id="menuCrudModalTitle" class="menu-crud-modal-title">Edit</h3>
                     </div>
                     <div id="menuCrudModalBody"></div>
+                    <div id="menuCrudModalFooterHost"></div>
                 </div>
             </dialog>
             <p class="menu-workspace-intro" style="display:none;">Keep the entire menu builder in one place. Start with super categories, move to categories, then finish with items.</p>
@@ -8535,7 +8546,7 @@
                         </aside>
                     </div>
                 </section>
-                <div class="menu-crud-footer-stack">
+                <div id="foodFormFooter" class="menu-crud-footer-stack">
                 <div class="menu-crud-nav-footer" aria-live="polite">
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
@@ -8883,7 +8894,7 @@
                         </div>
                     </details>
                 </section>
-                <div class="menu-crud-footer-stack">
+                <div id="catFormFooter" class="menu-crud-footer-stack">
                 <div class="menu-crud-nav-footer" aria-live="polite">
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
@@ -9721,7 +9732,7 @@
                         </aside>
                     </div>
                 </section>
-                <div class="menu-crud-footer-stack">
+                <div id="superCatFormFooter" class="menu-crud-footer-stack">
                 <div class="menu-crud-nav-footer" aria-live="polite">
                     <div class="menu-crud-nav-copy">
                         <span class="menu-crud-nav-kicker">Guided flow</span>
