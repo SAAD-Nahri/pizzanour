@@ -8053,13 +8053,14 @@
                 line-height: 1;
             }
 
-            #menuBuilderAddBtn.menu-icon-btn {
+            #menuBuilderAddBtn {
                 font-size: 0.92rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-            #menuBuilderAddBtn.menu-icon-btn::before {
-                display: none;
-            }
+            #menuBuilderAddBtn::before { display: none; }
 
             .menu-builder-overview {
                 padding: 14px;
@@ -8250,7 +8251,7 @@
                         </div>
                     <div class="menu-builder-actions">
                         <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="&#8592;" onclick="goBackMenuBuilder()">Back</button>
-                        <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto menu-icon-btn" data-mobile-icon="+" onclick="openMenuBuilderAdd()">Add</button>
+                        <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto" onclick="openMenuBuilderAdd()">Add</button>
                     </div>
                 </div>
                     <div id="menuBuilderOnboarding" class="menu-builder-onboarding" hidden></div>
