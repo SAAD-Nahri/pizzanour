@@ -6446,20 +6446,16 @@
             }
 
             .menu-crud-step-nav {
-                display: flex;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 8px;
-                overflow-x: auto;
+                overflow: visible;
                 padding: 6px;
-                scrollbar-width: none;
-            }
-
-            .menu-crud-step-nav::-webkit-scrollbar {
-                display: none;
             }
 
             .menu-crud-step-btn {
-                flex: 0 0 auto;
-                min-width: 122px;
+                width: 100%;
+                min-width: 0;
                 min-height: 56px;
                 padding: 10px 12px;
             }
@@ -6467,6 +6463,16 @@
             .menu-form-split {
                 grid-template-columns: 1fr;
                 gap: 14px;
+            }
+
+            .super-icon-preview {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .chip-select-option {
+                min-width: 0;
+                max-width: 100%;
             }
 
             .menu-form-side-panel {
@@ -8083,6 +8089,25 @@
         }
 
         @media (max-width: 768px) {
+            #menuCrudModalBody,
+            #menuCrudModalBody > form,
+            .menu-crud-modal-card,
+            .menu-form-block,
+            .menu-form-split,
+            .menu-form-side-panel,
+            .menu-crud-form-intro,
+            .menu-crud-form-intro-shell,
+            .translation-grid,
+            .translation-card,
+            .chip-select-list,
+            .super-icon-picker,
+            .super-icon-preview,
+            .category-image-field,
+            .dish-extra-row {
+                min-width: 0;
+                max-width: 100%;
+            }
+
             .menu-builder-actions {
                 display: grid;
                 grid-template-columns: 56px minmax(0, 1fr);
@@ -8093,6 +8118,7 @@
             .menu-builder-actions.menu-builder-actions--single {
                 display: flex;
                 grid-template-columns: none;
+                justify-content: flex-start;
             }
 
             .menu-builder-actions .primary-btn,
@@ -8102,14 +8128,14 @@
 
             .menu-builder-actions.menu-builder-actions--single #menuBuilderAddBtn {
                 display: flex;
-                width: 100% !important;
+                width: auto !important;
                 min-width: 0;
-                max-width: none;
-                flex: 1 1 auto;
+                max-width: min(100%, 240px);
+                flex: 0 1 auto;
                 grid-column: auto;
-                white-space: normal;
-                overflow: visible;
-                text-overflow: clip;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 padding-inline: 18px;
             }
 
@@ -8239,6 +8265,10 @@
         }
 
         @media (max-width: 480px) {
+            .menu-crud-step-nav {
+                grid-template-columns: 1fr;
+            }
+
             .menu-builder-heading.admin-help-host {
                 padding-right: 38px;
             }
