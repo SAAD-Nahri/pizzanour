@@ -8057,9 +8057,17 @@
                 width: 100%;
             }
 
+            .menu-builder-actions.menu-builder-actions--single {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
             .menu-builder-actions .primary-btn,
             .menu-builder-actions .brand-secondary-btn {
                 width: 100%;
+            }
+
+            .menu-builder-actions.menu-builder-actions--single #menuBuilderAddBtn {
+                grid-column: 1 / -1;
             }
 
             #menuBuilderBackBtn.menu-icon-btn {

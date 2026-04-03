@@ -3161,7 +3161,8 @@ function renderMenuBuilder() {
     const crumbs = document.getElementById('menuBuilderBreadcrumbs');
     const addBtn = document.getElementById('menuBuilderAddBtn');
     const backBtn = document.getElementById('menuBuilderBackBtn');
-    if (!table || !empty || !title || !copy || !crumbs || !addBtn || !backBtn) return;
+    const actions = document.querySelector('.menu-builder-actions');
+    if (!table || !empty || !title || !copy || !crumbs || !addBtn || !backBtn || !actions) return;
 
     const thead = table.querySelector('thead');
     const tbody = table.querySelector('tbody');
@@ -3224,6 +3225,7 @@ function renderMenuBuilder() {
     table.dataset.step = currentMenuWorkspaceStep;
     addBtn.textContent = addLabel;
     backBtn.style.display = currentMenuWorkspaceStep === 'supercategories' ? 'none' : '';
+    actions.classList.toggle('menu-builder-actions--single', currentMenuWorkspaceStep === 'supercategories');
     thead.innerHTML = `<tr>${columns.map((label) => `<th>${escapeHtml(label)}</th>`).join('')}</tr>`;
     if (overview) {
         renderMenuBuilderOverview();
