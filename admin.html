@@ -8058,7 +8058,8 @@
             }
 
             .menu-builder-actions.menu-builder-actions--single {
-                grid-template-columns: minmax(0, 1fr);
+                display: flex;
+                grid-template-columns: none;
             }
 
             .menu-builder-actions .primary-btn,
@@ -8067,7 +8068,16 @@
             }
 
             .menu-builder-actions.menu-builder-actions--single #menuBuilderAddBtn {
-                grid-column: 1 / -1;
+                display: flex;
+                width: 100% !important;
+                min-width: 0;
+                max-width: none;
+                flex: 1 1 auto;
+                grid-column: auto;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                padding-inline: 18px;
             }
 
             #menuBuilderBackBtn.menu-icon-btn {
