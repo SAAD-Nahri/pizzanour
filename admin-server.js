@@ -18,7 +18,7 @@ const {
   setSessionCookie
 } = require("./server-common");
 const { createThumbnailRequestHandler, ensureThumbnailFile, getThumbnailTargetFileName } = require("./image-thumbnails");
-const { ensureStorage, readData, resetToBundledData, uploadsDir, writeData } = require("./site-store");
+const { ensureStorage, getDataVersion, readData, resetToBundledData, uploadsDir, writeData } = require("./site-store");
 const {
   buildProductRecipeKeyFromMenuItem,
   approveLibraryAsset,
@@ -3778,12 +3778,16 @@ app.post("/api/admin/logout", (req, res) => {
 
 app.get("/api/data", requireAuth, (_req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("X-Data-Version", getDataVersion());
   res.json(readData());
 });
 
 app.post("/api/data", requireAuth, requireNoActiveImporterJob, (req, res) => {
   const saved = writeData(req.body);
-  res.json({ ok: true, data: saved });
+  const savedAt = new Date().toISOString();
+  const dataVersion = getDataVersion();
+  res.setHeader("X-Data-Version", dataVersion);
+  res.json({ ok: true, data: saved, meta: { savedAt, dataVersion } });
 });
 
 app.get("/api/data/export", requireAuth, requireSellerTools, (_req, res) => {
@@ -3798,7 +3802,10 @@ app.post("/api/data/import", requireAuth, requireSellerTools, requireNoActiveImp
   try {
     const payload = req.body?.data && typeof req.body.data === "object" ? req.body.data : req.body;
     const saved = writeData(payload);
-    res.json({ ok: true, data: saved });
+    const savedAt = new Date().toISOString();
+    const dataVersion = getDataVersion();
+    res.setHeader("X-Data-Version", dataVersion);
+    res.json({ ok: true, data: saved, meta: { savedAt, dataVersion } });
   } catch (error) {
     console.error("IMPORT ERROR:", error);
     res.status(400).json({ ok: false, error: "invalid_import_payload" });

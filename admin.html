@@ -369,6 +369,11 @@
             box-shadow: 0 16px 34px rgba(22, 163, 74, 0.22);
         }
 
+        .info-save-btn.is-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 16px 34px rgba(220, 38, 38, 0.18);
+        }
+
         .info-form-actions {
             display: flex;
             align-items: center;
@@ -753,6 +758,11 @@
             overflow-x: clip;
         }
 
+        .menu-builder-stage > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+
         .section > form,
         .section > .hours-form,
         .section > .panel-soft,
@@ -770,6 +780,7 @@
             flex-wrap: wrap;
             min-width: 0;
             max-width: 100%;
+            overflow: hidden;
         }
 
         #menuBuilderTitle {
@@ -847,6 +858,9 @@
             border-radius: 24px;
             padding: 12px;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .menu-builder-table {
@@ -2460,6 +2474,11 @@
             color: #b42318;
         }
 
+        .menu-crud-modal-card .translation-summary-card.has-error {
+            border-color: rgba(226, 27, 27, 0.28);
+            box-shadow: 0 14px 28px rgba(226, 27, 27, 0.08);
+        }
+
         .menu-crud-form-shell label[data-required="true"]::after,
         .menu-crud-modal-card label[data-required="true"]::after {
             content: '*';
@@ -2474,6 +2493,14 @@
             border-color: rgba(226, 27, 27, 0.38) !important;
             background: rgba(255, 249, 249, 0.98) !important;
             box-shadow: 0 0 0 4px rgba(226, 27, 27, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+        }
+
+        .menu-crud-modal-card .form-group-error {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1.45;
+            color: #b42318;
         }
 
         .menu-crud-cancel-btn {
@@ -3920,6 +3947,13 @@
         .login-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 18px 36px rgba(255, 141, 8, 0.3);
+        }
+
+        .login-btn:disabled {
+            cursor: wait;
+            opacity: 0.72;
+            transform: none;
+            box-shadow: 0 10px 24px rgba(255, 141, 8, 0.18);
         }
 
         /* Social link preview */
@@ -6919,6 +6953,8 @@
                 padding: 10px;
                 content-visibility: auto;
                 contain-intrinsic-size: 136px;
+                max-width: 100%;
+                overflow: hidden;
             }
 
             #menuBuilderTable[data-step="supercategories"] td[data-label="Super Category"],
@@ -6991,6 +7027,8 @@
                 padding: 10px;
                 content-visibility: auto;
                 contain-intrinsic-size: 150px;
+                max-width: 100%;
+                overflow: hidden;
             }
 
             #menuBuilderTable[data-step="items"] td[data-label="Item"] {
@@ -7784,6 +7822,34 @@
             font-weight: 600;
         }
 
+        .sidebar-actions .admin-save-status {
+            width: 100%;
+            margin-top: 0;
+            border-radius: 18px;
+            align-items: flex-start;
+        }
+
+        .admin-save-status-copy {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .admin-save-status-copy strong {
+            font-size: 0.84rem;
+            line-height: 1.2;
+        }
+
+        .admin-save-status-copy span,
+        .admin-save-status-copy small {
+            line-height: 1.35;
+        }
+
+        .admin-save-status-copy small {
+            opacity: 0.78;
+            font-size: 0.74rem;
+        }
+
         .admin-save-status-dot {
             width: 10px;
             height: 10px;
@@ -8021,6 +8087,19 @@
             display: none;
         }
 
+        @media (max-width: 768px) {
+            .menu-crud-step-nav {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                overflow: visible;
+                width: 100%;
+            }
+
+            .menu-crud-step-btn {
+                width: 100%;
+            }
+        }
+
         .menu-crud-step-btn {
             display: inline-flex;
             align-items: center;
@@ -8121,6 +8200,7 @@
             max-width: min(960px, 92vw);
             padding: 20px 20px 18px;
             gap: 16px;
+            overflow-x: clip;
         }
 
         .menu-crud-modal-header {
@@ -8133,6 +8213,19 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+        }
+
+        #menuCrudModalBody,
+        #menuCrudModalBody > form,
+        .menu-crud-form-shell,
+        .menu-form-block,
+        .menu-form-split,
+        .menu-form-side-panel,
+        .translation-grid,
+        .dish-extra-row,
+        .menu-crud-step-nav {
+            min-width: 0;
+            max-width: 100%;
         }
 
         .menu-crud-modal-card .menu-form-block {
@@ -8408,7 +8501,7 @@
             <input type="text" id="loginUser" placeholder="Nom d'utilisateur" data-i18n-placeholder="admin.login.username_placeholder" />
             <input type="password" id="loginPass" placeholder="Mot de passe" data-i18n-placeholder="admin.login.password_placeholder" />
             <div class="login-error" id="loginError" style="display:none"></div>
-            <button class="login-btn" onclick="performAdminLogin()" data-i18n="admin.login.button">Se Connecter</button>
+            <button class="login-btn" id="loginBtn" onclick="performAdminLogin()" data-i18n="admin.login.button">Se Connecter</button>
             <div class="admin-install-card" id="adminInstallCard" hidden>
                 <span class="admin-install-label" id="adminInstallLabel">Quick Access</span>
                 <div class="admin-install-title" id="adminInstallTitle">Install the admin app</div>
@@ -8468,6 +8561,7 @@
         <button class="nav-btn" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)">&#127912; Branding</button>
         <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">&#128229; Import</button>
         <div class="sidebar-actions">
+            <div id="adminSaveStatus" class="admin-save-status" aria-live="polite"></div>
             <button class="nav-btn sidebar-install-btn" id="adminSidebarInstallBtn" type="button" onclick="installAdminApp()" hidden>⬇ Install App</button>
             <a href="/" class="nav-btn sidebar-home-link" data-i18n="admin.header.website_home">&larr; Website Home</a>
             <button class="nav-btn sidebar-logout-btn" onclick="adminLogout()" data-i18n="admin.nav.logout">&#128682; D&eacute;connexion</button>
@@ -10502,6 +10596,14 @@
 
         .mobile-header-save.is-error {
             color: #ff9b9b;
+        }
+
+        .mobile-header-save.is-session-expired {
+            color: #ff9b9b;
+        }
+
+        .mobile-header-save.is-importer-busy {
+            color: #ffc14d;
         }
 
         .mobile-header-connection {

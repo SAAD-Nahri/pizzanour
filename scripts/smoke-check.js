@@ -1,3 +1,4 @@
+const fs = require("fs/promises");
 const { spawn } = require("child_process");
 const path = require("path");
 
@@ -5,10 +6,18 @@ const projectRoot = path.resolve(__dirname, "..");
 const websitePort = 3302;
 const adminPort = 3303;
 const startupTimeoutMs = 15000;
+const smokeRuntimeDir = path.join(projectRoot, "output", "smoke-runtime");
+const bundledDataFile = path.join(projectRoot, "data.json");
+const uploadsDir = path.join(projectRoot, "uploads");
+const adminCredentials = {
+  user: "admin",
+  pass: "foody2026"
+};
 
 async function main() {
-  const websiteServer = startServer("website-server.js", websitePort);
-  const adminServer = startServer("admin-server.js", adminPort);
+  const runtime = await prepareSmokeRuntime();
+  const websiteServer = startServer("website-server.js", websitePort, runtime);
+  const adminServer = startServer("admin-server.js", adminPort, runtime);
 
   try {
     await Promise.all([
@@ -17,19 +26,36 @@ async function main() {
     ]);
 
     await runChecks(websitePort, adminPort);
+    await runAuthenticatedAdminRoundTrip(websitePort, adminPort);
     console.log("Smoke checks passed.");
   } finally {
     await Promise.allSettled([stopServer(websiteServer), stopServer(adminServer)]);
+    await fs.rm(smokeRuntimeDir, { recursive: true, force: true });
   }
 }
 
-function startServer(entryFile, port) {
+async function prepareSmokeRuntime() {
+  await fs.rm(smokeRuntimeDir, { recursive: true, force: true });
+  await fs.mkdir(smokeRuntimeDir, { recursive: true });
+  await fs.copyFile(bundledDataFile, path.join(smokeRuntimeDir, "data.json"));
+  return {
+    dataFile: path.join(smokeRuntimeDir, "data.json"),
+    authFile: path.join(smokeRuntimeDir, "auth.json")
+  };
+}
+
+function startServer(entryFile, port, runtime) {
   const child = spawn(process.execPath, [entryFile], {
     cwd: projectRoot,
     env: {
       ...process.env,
       PORT: String(port),
-      COOKIE_SECURE: "false"
+      COOKIE_SECURE: "false",
+      DATA_FILE: runtime.dataFile,
+      AUTH_FILE: runtime.authFile,
+      UPLOADS_DIR: uploadsDir,
+      ADMIN_USER: adminCredentials.user,
+      ADMIN_PASS: adminCredentials.pass
     },
     stdio: ["ignore", "pipe", "pipe"]
   });
@@ -99,6 +125,123 @@ async function runChecks(websitePort, adminPort) {
       throw new Error("Admin /api/data should reject unauthenticated requests.");
     }
   });
+}
+
+async function runAuthenticatedAdminRoundTrip(websitePort, adminPort) {
+  const adminBaseUrl = `http://127.0.0.1:${adminPort}`;
+  const websiteBaseUrl = `http://127.0.0.1:${websitePort}`;
+  const cookie = await loginToAdmin(adminBaseUrl);
+  const original = await getJsonWithHeaders(`${adminBaseUrl}/api/data`, {
+    headers: { Cookie: cookie }
+  });
+  const originalData = JSON.parse(JSON.stringify(original.payload));
+  const originalShortName = String(originalData?.branding?.shortName || "");
+  const marker = `Smoke ${Date.now()}`;
+
+  try {
+    const nextPayload = JSON.parse(JSON.stringify(originalData));
+    nextPayload.branding = {
+      ...(nextPayload.branding || {}),
+      shortName: marker
+    };
+
+    const saveResult = await postJson(`${adminBaseUrl}/api/data`, nextPayload, cookie);
+    if (!saveResult.payload?.ok || saveResult.payload?.data?.branding?.shortName !== marker) {
+      throw new Error("Admin save round-trip did not return the updated normalized branding short name.");
+    }
+    if (!saveResult.payload?.meta?.dataVersion) {
+      throw new Error("Admin save response did not include dataVersion metadata.");
+    }
+
+    const adminReloaded = await getJsonWithHeaders(`${adminBaseUrl}/api/data`, {
+      headers: { Cookie: cookie }
+    });
+    if (adminReloaded.payload?.branding?.shortName !== marker) {
+      throw new Error("Admin reload did not return the freshly saved branding short name.");
+    }
+
+    const menuPayload = await getJsonWithHeaders(`${websiteBaseUrl}/api/menu-data`);
+    const homePayload = await getJsonWithHeaders(`${websiteBaseUrl}/api/home-data`);
+    if (menuPayload.payload?.branding?.shortName !== marker) {
+      throw new Error("Public menu payload did not reflect the admin save.");
+    }
+    if (homePayload.payload?.branding?.shortName !== marker) {
+      throw new Error("Public home payload did not reflect the admin save.");
+    }
+
+    const savedVersion = String(saveResult.payload.meta.dataVersion);
+    const adminVersion = String(adminReloaded.headers.get("x-data-version") || "");
+    const menuVersion = String(menuPayload.headers.get("x-data-version") || "");
+    const homeVersion = String(homePayload.headers.get("x-data-version") || "");
+    if (!adminVersion || !menuVersion || !homeVersion) {
+      throw new Error("One of the admin/public data endpoints did not expose X-Data-Version.");
+    }
+    if (adminVersion !== savedVersion || menuVersion !== savedVersion || homeVersion !== savedVersion) {
+      throw new Error("Admin/public data versions drifted after the save round-trip.");
+    }
+  } finally {
+    const restorePayload = JSON.parse(JSON.stringify(originalData));
+    const restoreResult = await postJson(`${adminBaseUrl}/api/data`, restorePayload, cookie);
+    if (!restoreResult.payload?.ok) {
+      throw new Error("Smoke restore failed after the admin round-trip.");
+    }
+
+    const restoredMenu = await getJsonWithHeaders(`${websiteBaseUrl}/api/menu-data`);
+    const restoredHome = await getJsonWithHeaders(`${websiteBaseUrl}/api/home-data`);
+    if (String(restoredMenu.payload?.branding?.shortName || "") !== originalShortName) {
+      throw new Error("Public menu payload did not restore the original branding short name.");
+    }
+    if (String(restoredHome.payload?.branding?.shortName || "") !== originalShortName) {
+      throw new Error("Public home payload did not restore the original branding short name.");
+    }
+  }
+}
+
+async function loginToAdmin(adminBaseUrl) {
+  const response = await fetch(`${adminBaseUrl}/api/admin/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: adminCredentials.user,
+      password: adminCredentials.pass
+    })
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(`Admin login failed during smoke check: ${payload.error || response.status}`);
+  }
+
+  const cookie = response.headers.get("set-cookie");
+  if (!cookie) {
+    throw new Error("Admin login succeeded but no session cookie was returned.");
+  }
+  return cookie.split(";")[0];
+}
+
+async function getJsonWithHeaders(url, options = {}) {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`Expected success from ${url}, got ${response.status}.`);
+  }
+  const payload = await response.json();
+  return { payload, headers: response.headers };
+}
+
+async function postJson(url, payload, cookie = "") {
+  const headers = { "Content-Type": "application/json" };
+  if (cookie) headers.Cookie = cookie;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload)
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`Expected success from ${url}, got ${response.status}: ${body.error || response.statusText}`);
+  }
+  return { payload: body, headers: response.headers };
 }
 
 async function assertStatus(url, expectedStatus) {

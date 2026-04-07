@@ -18,7 +18,9 @@ let adminCapabilities = {
 let adminSaveState = {
     type: 'idle',
     message: '',
-    updatedAt: null
+    updatedAt: null,
+    savedAt: null,
+    dataVersion: ''
 };
 let importStudioBusy = false;
 let activeImporterJobId = '';
@@ -26,10 +28,27 @@ let activeImporterPollHandle = 0;
 let deferredAdminInstallPrompt = null;
 let adminSaveLoopPromise = null;
 let adminSaveRequested = false;
+let adminLoginInFlight = false;
 let adminHelpToggleIdCounter = 0;
 const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
 const ADMIN_IMPORTER_ACTIVE_JOB_KEY = 'restaurant_admin_importer_active_job';
 const IMPORTER_JOB_POLL_MAX_FAILURES = 6;
+const ADMIN_REQUEST_STATE = Object.freeze({
+    idle: 'idle',
+    saving: 'saving',
+    success: 'success',
+    error: 'error',
+    sessionExpired: 'session-expired',
+    importerBusy: 'importer-busy'
+});
+const ADMIN_REQUEST_FAILURE_CODES = new Set([
+    'unauthorized',
+    'importer_job_in_progress',
+    'too_many_attempts',
+    'network_error',
+    'upload_failed',
+    'refresh_after_save_failed'
+]);
 const ADMIN_PWA_COPY = Object.freeze({
     fr: {
         label: 'Accès rapide',
@@ -891,10 +910,12 @@ function syncAdminMobileSaveBadge() {
         idle: t('admin.save_state.idle_label', 'Ready'),
         saving: t('admin.save_state.saving_label', 'Saving'),
         success: t('admin.save_state.success_label', 'Saved'),
-        error: t('admin.save_state.error_label', 'Attention')
+        error: t('admin.save_state.error_label', 'Attention'),
+        'session-expired': t('admin.save_state.session_expired_label', 'Sign in'),
+        'importer-busy': t('admin.save_state.importer_busy_label', 'Busy')
     };
     const stateType = adminSaveState.type || 'idle';
-    badge.classList.remove('is-idle', 'is-saving', 'is-success', 'is-error');
+    badge.classList.remove('is-idle', 'is-saving', 'is-success', 'is-error', 'is-session-expired', 'is-importer-busy');
     badge.classList.add(`is-${stateType}`);
     badge.textContent = labelMap[stateType] || labelMap.idle;
 }
@@ -2294,6 +2315,8 @@ function clearMenuCrudFieldErrors(formId) {
             field.removeAttribute('aria-invalid');
         });
         form.querySelectorAll('.form-group.has-error').forEach((group) => group.classList.remove('has-error'));
+        form.querySelectorAll('.translation-summary-card.has-error').forEach((card) => card.classList.remove('has-error'));
+        form.querySelectorAll('[data-menu-inline-error="true"]').forEach((node) => node.remove());
     }
     document.querySelectorAll(`.menu-crud-step-btn[data-form-id="${formId}"]`).forEach((button) => {
         button.classList.remove('has-error');
@@ -2313,7 +2336,15 @@ function renderMenuCrudValidationState(formId) {
         if (field) {
             field.classList.add('field-invalid');
             field.setAttribute('aria-invalid', 'true');
-            field.closest('.form-group')?.classList.add('has-error');
+            const group = field.closest('.form-group, .translation-summary-card');
+            group?.classList.add('has-error');
+            if (group) {
+                const errorNode = document.createElement('div');
+                errorNode.className = 'form-group-error';
+                errorNode.dataset.menuInlineError = 'true';
+                errorNode.textContent = state.message;
+                group.appendChild(errorNode);
+            }
         }
     }
 }
@@ -2379,6 +2410,14 @@ function setMenuCrudPrimaryButtonState(formId, state) {
     button.disabled = false;
     if (cancelButton) cancelButton.disabled = false;
     syncMenuCrudFooter(form);
+}
+
+function surfaceMenuCrudSaveFailure(formId, fallbackMessage = '') {
+    const message = String(adminSaveState.message || fallbackMessage || 'The save could not be completed.').trim();
+    setMenuCrudPrimaryButtonState(formId, 'idle');
+    setMenuCrudValidationState(formId, { message });
+    const note = document.getElementById(`${formId}ValidationNote`);
+    note?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function initializeMenuCrudFormEnhancements(form) {
@@ -2545,8 +2584,11 @@ window.generateEntityTranslations = async function (entityType) {
             body: JSON.stringify(payload)
         });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.ok || !data.translations) {
-            throw new Error(data.error || 'AI translation generation failed.');
+        if (!response.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+        if (!data.ok || !data.translations) {
+            throw createAdminRequestError(data.error || 'AI translation generation failed.', data.error || 'ai_translation_generation_failed');
         }
 
         if (entityType === 'item') {
@@ -2568,6 +2610,7 @@ window.generateEntityTranslations = async function (entityType) {
         showToast(data.warnings?.length ? 'Translations generated. Review the wording before saving.' : 'Translations generated.');
     } catch (error) {
         console.error('AI translation generation error:', error);
+        reflectAdminRequestFailure(error);
         const message = getLongTaskConflictMessage(error) || (error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY before using AI translation generation.'
             : error.message);
@@ -2582,60 +2625,201 @@ window.generateEntityTranslations = async function (entityType) {
 };
 
 // Load all data from server API
-async function loadDataFromServer() {
+function createAdminRequestError(message, code = '', extras = {}) {
+    const error = new Error(String(message || 'Request failed.'));
+    error.code = code || '';
+    Object.assign(error, extras || {});
+    return error;
+}
+
+function buildAdminRequestErrorFromResponse(response, payload = {}) {
+    const status = Number(response?.status) || 0;
+    const code = payload?.error || '';
+    const retryAfterSec = Number(payload?.retryAfterSec) || 0;
+    let message = payload?.message || payload?.error || '';
+
+    if (status === 401) {
+        message = t('admin.save_state.session_expired', 'Session expired. Please sign in again.');
+    } else if (status === 409 && code === 'importer_job_in_progress') {
+        message = getLongTaskConflictMessage({ code }) || 'Finish the current import before saving again.';
+    } else if (status === 429 || code === 'too_many_attempts') {
+        message = retryAfterSec > 0
+            ? `Too many attempts. Wait ${retryAfterSec}s and try again.`
+            : 'Too many attempts. Please wait and try again.';
+    } else if (!message) {
+        message = `Request failed (${status || 'network'}).`;
+    }
+
+    return createAdminRequestError(message, code, {
+        status,
+        retryAfterSec,
+        jobId: payload?.jobId || '',
+        stage: payload?.stage || ''
+    });
+}
+
+function cloneAdminDraft(value) {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    return JSON.parse(JSON.stringify(value));
+}
+
+function getAdminRequestFailureState(error) {
+    if (error?.status === 401 || error?.code === 'unauthorized') {
+        return {
+            type: ADMIN_REQUEST_STATE.sessionExpired,
+            message: t('admin.save_state.session_expired', 'Session expired. Please sign in again.')
+        };
+    }
+
+    if (error?.status === 409 || error?.code === 'importer_job_in_progress') {
+        return {
+            type: ADMIN_REQUEST_STATE.importerBusy,
+            message: getLongTaskConflictMessage(error) || 'Finish the current import before saving again.'
+        };
+    }
+
+    if (error?.status === 429 || error?.code === 'too_many_attempts') {
+        return {
+            type: ADMIN_REQUEST_STATE.error,
+            message: error?.retryAfterSec > 0
+                ? `Too many attempts. Wait ${error.retryAfterSec}s and try again.`
+                : 'Too many attempts. Please wait and try again.'
+        };
+    }
+
+    if (error?.code === 'upload_failed') {
+        return {
+            type: ADMIN_REQUEST_STATE.error,
+            message: error?.message || 'The upload failed. Please retry.'
+        };
+    }
+
+    if (error?.code === 'refresh_after_save_failed') {
+        return {
+            type: ADMIN_REQUEST_STATE.error,
+            message: error?.message || 'Saved on the server, but the admin could not refresh the latest data.'
+        };
+    }
+
+    if (error?.name === 'TypeError' || error?.code === 'network_error') {
+        return {
+            type: ADMIN_REQUEST_STATE.error,
+            message: 'Network error. Check the connection and try again.'
+        };
+    }
+
+    return {
+        type: ADMIN_REQUEST_STATE.error,
+        message: error?.message || t('admin.save_state.error_message', 'Save failed.')
+    };
+}
+
+function reflectAdminRequestFailure(error) {
+    if (!error) return;
+    if (!error.status && !ADMIN_REQUEST_FAILURE_CODES.has(error.code)) return;
+    const failure = getAdminRequestFailureState(error);
+    setAdminSaveState(failure.type, failure.message);
+}
+
+function applyAdminServerData(data) {
+    const payload = data && typeof data === 'object' ? data : {};
+
+    menu = Array.isArray(payload.menu) ? payload.menu : [];
+    catEmojis = payload.catEmojis && typeof payload.catEmojis === 'object'
+        ? payload.catEmojis
+        : {};
+    categoryImages = payload.categoryImages && typeof payload.categoryImages === 'object'
+        ? payload.categoryImages
+        : (window.defaultCategoryImages || {});
+    window.categoryImages = categoryImages;
+    categoryTranslations = payload.categoryTranslations && typeof payload.categoryTranslations === 'object'
+        ? payload.categoryTranslations
+        : (window.defaultCategoryTranslations || {});
+
+    if (typeof window.mergeRestaurantConfig === 'function') {
+        window.mergeRestaurantConfig({
+            superCategories: Array.isArray(payload.superCategories) ? payload.superCategories : [],
+            wifi: payload.wifi ? { name: payload.wifi.ssid || '', code: payload.wifi.pass || '' } : (restaurantConfig.wifi || {}),
+            socials: payload.social && typeof payload.social === 'object' ? payload.social : {},
+            guestExperience: payload.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] },
+            sectionVisibility: payload.sectionVisibility || window.defaultConfig?.sectionVisibility || {},
+            sectionOrder: payload.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
+            categoryTranslations: payload.categoryTranslations || {},
+            location: payload.landing?.location || { address: '', url: '' },
+            phone: payload.landing?.phone || '',
+            _hours: Array.isArray(payload.hours) ? payload.hours : null,
+            _hoursNote: typeof payload.hoursNote === 'string' ? payload.hoursNote : '',
+            gallery: Array.isArray(payload.gallery) ? payload.gallery : [],
+            branding: payload.branding || window.defaultBranding || {},
+            contentTranslations: payload.contentTranslations || { fr: {}, en: {}, ar: {} }
+        });
+        restaurantConfig = window.restaurantConfig;
+        categoryTranslations = restaurantConfig.categoryTranslations || categoryTranslations;
+    }
+
+    if (payload.promoId !== undefined) {
+        promoIds = payload.promoId ? [payload.promoId] : [];
+    }
+    if (Array.isArray(payload.promoIds)) {
+        promoIds = payload.promoIds;
+    }
+    window.promoIds = promoIds;
+}
+
+async function fetchAdminDataSnapshot() {
+    let response;
     try {
-        const res = await fetch('/api/data', { credentials: 'include' });
-        if (!res.ok) return false;
-        const data = await res.json();
+        response = await fetch('/api/data', {
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { Accept: 'application/json' }
+        });
+    } catch (error) {
+        throw createAdminRequestError('Network error. Check the connection and try again.', 'network_error', { cause: error });
+    }
 
-        // Populate menu
-        menu = Array.isArray(data.menu) ? data.menu : [];
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw buildAdminRequestErrorFromResponse(response, payload);
+    }
 
-        // Populate categories
-        if (data.catEmojis && Object.keys(data.catEmojis).length > 0) {
-            catEmojis = data.catEmojis;
-        }
-        categoryImages = data.categoryImages && typeof data.categoryImages === 'object'
-            ? data.categoryImages
-            : (window.defaultCategoryImages || {});
-        window.categoryImages = categoryImages;
-        categoryTranslations = data.categoryTranslations && typeof data.categoryTranslations === 'object'
-            ? data.categoryTranslations
-            : (window.defaultCategoryTranslations || {});
+    let data;
+    try {
+        data = await response.json();
+    } catch (error) {
+        throw createAdminRequestError('The server returned unreadable admin data.', 'invalid_admin_json', { cause: error });
+    }
 
-        // Populate config from server data
-        if (typeof window.mergeRestaurantConfig === 'function') {
-            window.mergeRestaurantConfig({
-                superCategories: Array.isArray(data.superCategories) ? data.superCategories : restaurantConfig.superCategories,
-                wifi: data.wifi ? { name: data.wifi.ssid || '', code: data.wifi.pass || '' } : restaurantConfig.wifi,
-                socials: data.social || restaurantConfig.socials,
-                guestExperience: data.guestExperience || restaurantConfig.guestExperience,
-                sectionVisibility: data.sectionVisibility || restaurantConfig.sectionVisibility,
-                sectionOrder: data.sectionOrder || restaurantConfig.sectionOrder,
-                categoryTranslations: data.categoryTranslations || restaurantConfig.categoryTranslations,
-                location: data.landing?.location || restaurantConfig.location,
-                phone: data.landing?.phone || restaurantConfig.phone,
-                _hours: Array.isArray(data.hours) ? data.hours : restaurantConfig._hours,
-                _hoursNote: typeof data.hoursNote === 'string' ? data.hoursNote : restaurantConfig._hoursNote,
-                gallery: Array.isArray(data.gallery) ? data.gallery : restaurantConfig.gallery,
-                branding: data.branding || restaurantConfig.branding,
-                contentTranslations: data.contentTranslations || restaurantConfig.contentTranslations
-            });
-            restaurantConfig = window.restaurantConfig;
-            categoryTranslations = restaurantConfig.categoryTranslations || categoryTranslations;
-        }
-        if (data.promoId !== undefined) {
-            promoIds = data.promoId ? [data.promoId] : [];
-        }
-        if (Array.isArray(data.promoIds)) {
-            promoIds = data.promoIds;
-        }
-        window.promoIds = promoIds; // Sync for shared.js
+    return {
+        data,
+        dataVersion: response.headers.get('x-data-version') || ''
+    };
+}
 
+async function loadDataFromServer({ silent = false } = {}) {
+    try {
+        const snapshot = await fetchAdminDataSnapshot();
+        applyAdminServerData(snapshot.data);
+        if (snapshot.dataVersion) {
+            setAdminSaveState(
+                adminSaveState.type || ADMIN_REQUEST_STATE.idle,
+                adminSaveState.message || t('admin.save_state.idle_message', 'No server save yet in this session.'),
+                {
+                    savedAt: adminSaveState.savedAt,
+                    dataVersion: snapshot.dataVersion
+                }
+            );
+        }
         console.log('[ADMIN] Loaded', menu.length, 'items from server');
         return true;
-    } catch (e) {
-        console.error('[ADMIN] Failed to load data from server:', e);
+    } catch (error) {
+        console.error('[ADMIN] Failed to load data from server:', error);
+        if (!silent) {
+            const failure = getAdminRequestFailureState(error);
+            setAdminSaveState(failure.type, failure.message);
+            showToast(failure.message);
+        }
         return false;
     }
 }
@@ -2737,6 +2921,12 @@ async function checkSession() {
 
 function renderAdminSaveState() {
     const el = document.getElementById('adminSaveStatus');
+    const floatSaveBtn = document.getElementById('floatSaveBtn');
+    if (floatSaveBtn) {
+        const isBusy = adminSaveState.type === ADMIN_REQUEST_STATE.saving;
+        floatSaveBtn.disabled = isBusy;
+        floatSaveBtn.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+    }
     if (!el) {
         syncAdminMobileSaveBadge();
         return;
@@ -2746,28 +2936,43 @@ function renderAdminSaveState() {
         idle: { bg: '#f5f5f5', color: '#555', dot: '#999', label: t('admin.save_state.idle_label', 'Ready') },
         saving: { bg: '#fff6db', color: '#8a5a00', dot: '#f59e0b', label: t('admin.save_state.saving_label', 'Saving') },
         success: { bg: '#e9f9ef', color: '#166534', dot: '#10b981', label: t('admin.save_state.success_label', 'Saved') },
-        error: { bg: '#fdeaea', color: '#991b1b', dot: '#ef4444', label: t('admin.save_state.error_label', 'Attention') }
+        error: { bg: '#fdeaea', color: '#991b1b', dot: '#ef4444', label: t('admin.save_state.error_label', 'Attention') },
+        'session-expired': { bg: '#fdeaea', color: '#991b1b', dot: '#ef4444', label: t('admin.save_state.session_expired_label', 'Sign in') },
+        'importer-busy': { bg: '#fff6db', color: '#8a5a00', dot: '#f59e0b', label: t('admin.save_state.importer_busy_label', 'Busy') }
     };
     const style = palette[adminSaveState.type] || palette.idle;
     const message = adminSaveState.message || t('admin.save_state.idle_message', 'No server save yet in this session.');
-    const timeText = adminSaveState.updatedAt
-        ? new Date(adminSaveState.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const timeValue = adminSaveState.savedAt || adminSaveState.updatedAt;
+    const timeText = timeValue
+        ? new Date(timeValue).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         : '';
+    const metaParts = [];
+    if (timeText) metaParts.push(`Updated ${timeText}`);
+    if (adminSaveState.dataVersion) metaParts.push(`v${String(adminSaveState.dataVersion).slice(0, 8)}`);
+    const safeLabel = escapeHtml(style.label);
+    const safeMessage = escapeHtml(message);
+    const safeMeta = metaParts.map((part) => escapeHtml(part)).join(' · ');
 
     el.style.background = style.bg;
     el.style.color = style.color;
     el.innerHTML = `
         <span class="admin-save-status-dot" style="background:${style.dot};"></span>
-        <span>${style.label}: ${message}${timeText ? ` (${timeText})` : ''}</span>
+        <span class="admin-save-status-copy">
+            <strong>${safeLabel}</strong>
+            <span>${safeMessage}</span>
+            ${safeMeta ? `<small>${safeMeta}</small>` : ''}
+        </span>
     `;
     syncAdminMobileSaveBadge();
 }
 
-function setAdminSaveState(type, message) {
+function setAdminSaveState(type, message, meta = {}) {
     adminSaveState = {
         type,
         message,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        savedAt: meta.savedAt !== undefined ? meta.savedAt : adminSaveState.savedAt,
+        dataVersion: meta.dataVersion !== undefined ? meta.dataVersion : adminSaveState.dataVersion
     };
     renderAdminSaveState();
 }
@@ -3804,56 +4009,19 @@ window.openParameterSection = function (sectionId) {
     showSection(sectionId);
 };
 
-async function performAdminLogin() {
-    console.log('[LOGIN] performAdminLogin triggered');
-    const userEl = document.getElementById('loginUser');
-    const passEl = document.getElementById('loginPass');
-    const errorEl = document.getElementById('loginError');
-
-    if (!userEl || !passEl) {
-        console.error('[LOGIN] Missing login elements!');
-        return;
-    }
-
-    const username = userEl.value.trim();
-    const password = passEl.value;
-
-    console.log('[LOGIN] Attempting login for:', username);
-
-    try {
-        const res = await fetch('/api/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        console.log('[LOGIN] Server response:', data);
-        if (!res.ok || !data.ok) {
-            if (errorEl) {
-                errorEl.textContent = 'Incorrect credentials.';
-                errorEl.style.display = 'block';
-            }
-            return;
-        }
-        showDashboard();
-    } catch (e) {
-        console.error('[LOGIN] Request error:', e);
-        if (errorEl) {
-            errorEl.textContent = 'Server connection error.';
-            errorEl.style.display = 'block';
-        }
-    }
-}
-
 async function showDashboard() {
     document.body.classList.add('is-authenticated');
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminSidebar').style.display = 'flex';
     document.getElementById('adminMain').style.display = 'block';
-    await Promise.all([loadDataFromServer(), loadAdminCapabilities()]);
+    const [loaded] = await Promise.all([loadDataFromServer({ silent: true }), loadAdminCapabilities()]);
     mountOwnerAdminLayout();
     refreshUI();
+    if (!loaded) {
+        const message = 'Could not load the latest server data. Reload and sign in again before editing.';
+        setAdminSaveState(ADMIN_REQUEST_STATE.error, message);
+        showToast(message);
+    }
     initForms();
     const requestedSection = normalizeAdminSectionTarget(getRequestedAdminSection() || getSavedAdminSection());
     if (requestedSection && requestedSection !== 'menu') {
@@ -3968,6 +4136,7 @@ function refreshUI() {
 window.suggestMissingMenuImages = async function () {
     const output = document.getElementById('menuImageSuggestionOutput');
     const menuItems = Array.isArray(menu) ? menu : [];
+    const previousMenu = cloneAdminDraft(menuItems);
     const suggestions = [];
     let assignedCount = 0;
     let alreadyCoveredCount = 0;
@@ -4054,7 +4223,11 @@ window.suggestMissingMenuImages = async function () {
     const saved = await saveAndRefresh();
     if (saved) {
         showToast(t('admin.menu_images.assigned_toast', 'Assigned {count} menu image suggestion(s).', { count: assignedCount }));
+        return;
     }
+    menu = previousMenu || [];
+    renderMenuTable();
+    updateStats();
 };
 
 window.copyMenuImageSuggestionSummary = async function () {
@@ -4331,6 +4504,11 @@ function resetFoodForm() {
 }
 
 function initForms() {
+    ['foodForm', 'catForm', 'superCatForm', 'wifiForm', 'brandingForm', 'landingPageForm', 'securityForm', 'hoursForm', 'galleryForm'].forEach((formId) => {
+        const form = document.getElementById(formId);
+        if (form) form.noValidate = true;
+    });
+
     document.getElementById('foodForm').onsubmit = async (e) => {
         e.preventDefault();
         await commitFormItem();
@@ -4356,7 +4534,11 @@ function initForms() {
                     newUploadedUrls.push(url);
                 } catch (err) {
                     console.error('Image upload failed:', err);
-                    showToast('Image upload failed. Please try again.');
+                    const failure = getAdminRequestFailureState(err);
+                    setAdminSaveState(failure.type, failure.message);
+                    setMenuCrudValidationState('foodForm', { message: failure.message, sectionId: 'media', fieldId: 'itemFile' });
+                    showToast(failure.message);
+                    return false;
                 }
             }
         }
@@ -4385,6 +4567,7 @@ function initForms() {
         const name = document.getElementById('itemName').value.trim();
         const cat = document.getElementById('itemCat').value;
         const desc = document.getElementById('itemDesc').value.trim();
+        const previousMenu = cloneAdminDraft(menu);
         const translations = buildMenuItemTranslations();
         const featured = document.getElementById('itemFeatured').checked;
         const available = document.getElementById('itemAvailable').checked;
@@ -4410,35 +4593,35 @@ function initForms() {
             setMenuCrudValidationState('foodForm', { message: 'Add the dish name in Core.', sectionId: 'core', fieldId: 'itemName' });
             showToast('Item name is required.');
             focusMenuCrudField('foodForm', 'core', 'itemName');
-            return;
+            return false;
         }
         if (!cat) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
             setMenuCrudValidationState('foodForm', { message: 'Choose the category in Core.', sectionId: 'core', fieldId: 'itemCat' });
             showToast('Choose a category for this dish.');
             focusMenuCrudField('foodForm', 'core', 'itemCat');
-            return;
+            return false;
         }
         if (!desc) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
             setMenuCrudValidationState('foodForm', { message: 'Add the fallback description in Core.', sectionId: 'core', fieldId: 'itemDesc' });
             showToast('Add a fallback description for this dish.');
             focusMenuCrudField('foodForm', 'core', 'itemDesc');
-            return;
+            return false;
         }
         if (hasSizes && !Object.values(sizes || {}).some((value) => Number(value) > 0)) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
             setMenuCrudValidationState('foodForm', { message: 'Add at least one size price in Pricing.', sectionId: 'pricing', fieldId: 'itemPriceSmall' });
             showToast('Add at least one size price.');
             focusMenuCrudField('foodForm', 'pricing', 'itemPriceSmall');
-            return;
+            return false;
         }
         if (!hasSizes && !(Number(price) > 0)) {
             setMenuCrudPrimaryButtonState('foodForm', 'idle');
             setMenuCrudValidationState('foodForm', { message: 'Add the dish price in Pricing.', sectionId: 'pricing', fieldId: 'itemPrice' });
             showToast('Add a price before saving this dish.');
             focusMenuCrudField('foodForm', 'pricing', 'itemPrice');
-            return;
+            return false;
         }
 
         if (editingItemId) {
@@ -4477,8 +4660,11 @@ function initForms() {
             showToast(editingItemId ? 'Item updated.' : 'Item added.');
             resetFoodForm();
             closeMenuCrudModal(true);
+            return true;
         } else {
-            setMenuCrudPrimaryButtonState('foodForm', 'idle');
+            menu = previousMenu || [];
+            surfaceMenuCrudSaveFailure('foodForm', 'The dish could not be saved. Review the highlighted step and try again.');
+            return false;
         }
     };
 
@@ -4490,6 +4676,11 @@ function initForms() {
         const previousKey = editingKeyInput ? editingKeyInput.value.trim() : '';
         const categoryName = document.getElementById('catName').value.trim();
         const selectedSuperCategoryId = document.getElementById('catSuperCategory')?.value?.trim() || '';
+        const previousMenu = cloneAdminDraft(menu);
+        const previousCatEmojis = cloneAdminDraft(catEmojis || {});
+        const previousCategoryTranslations = cloneAdminDraft(categoryTranslations || {});
+        const previousCategoryImages = cloneAdminDraft(categoryImages || {});
+        const previousSuperCategories = cloneAdminDraft(restaurantConfig.superCategories || []);
         if (!categoryName) {
             setMenuCrudPrimaryButtonState('catForm', 'idle');
             setMenuCrudValidationState('catForm', { message: 'Add the category name in Identity.', sectionId: 'identity', fieldId: 'catName' });
@@ -4520,10 +4711,20 @@ function initForms() {
             } catch (error) {
                 console.error('Category image upload failed:', error);
                 setMenuCrudPrimaryButtonState('catForm', 'idle');
-                setMenuCrudValidationState('catForm', { message: 'The category image upload failed. Try again or save without it.', sectionId: 'visual', fieldId: 'catImageUpload' });
-                showToast('Category image upload failed.');
+                const failure = getAdminRequestFailureState(error);
+                setAdminSaveState(failure.type, failure.message);
+                setMenuCrudValidationState('catForm', { message: failure.message, sectionId: 'visual', fieldId: 'catImageUpload' });
+                showToast(failure.message);
                 return;
             }
+        }
+
+        const selectedSuperCategory = (restaurantConfig.superCategories || []).find((sc) => sc.id === selectedSuperCategoryId);
+        if (!selectedSuperCategory) {
+            setMenuCrudPrimaryButtonState('catForm', 'idle');
+            setMenuCrudValidationState('catForm', { message: 'The selected super category is no longer available.', sectionId: 'identity', fieldId: 'catSuperCategory' });
+            showToast('Selected super category was not found.');
+            return;
         }
 
         if (previousKey && previousKey !== categoryName) {
@@ -4539,14 +4740,6 @@ function initForms() {
             const currentCats = Array.isArray(sc.cats) ? sc.cats : [];
             sc.cats = currentCats.filter((cat) => cat !== previousKey && cat !== categoryName);
         });
-
-        const selectedSuperCategory = (restaurantConfig.superCategories || []).find((sc) => sc.id === selectedSuperCategoryId);
-        if (!selectedSuperCategory) {
-            setMenuCrudPrimaryButtonState('catForm', 'idle');
-            setMenuCrudValidationState('catForm', { message: 'The selected super category is no longer available.', sectionId: 'identity', fieldId: 'catSuperCategory' });
-            showToast('Selected super category was not found.');
-            return;
-        }
         selectedSuperCategory.cats = Array.isArray(selectedSuperCategory.cats) ? selectedSuperCategory.cats : [];
         if (!selectedSuperCategory.cats.includes(categoryName)) {
             selectedSuperCategory.cats.push(categoryName);
@@ -4565,13 +4758,23 @@ function initForms() {
             closeMenuCrudModal(true);
             showToast(previousKey ? 'Category updated.' : 'Category added.');
         } else {
-            setMenuCrudPrimaryButtonState('catForm', 'idle');
+            menu = previousMenu || [];
+            catEmojis = previousCatEmojis || {};
+            categoryTranslations = previousCategoryTranslations || {};
+            categoryImages = previousCategoryImages || {};
+            restaurantConfig.superCategories = previousSuperCategories || [];
+            if (window.restaurantConfig) {
+                window.restaurantConfig.superCategories = restaurantConfig.superCategories;
+            }
+            window.categoryImages = categoryImages;
+            surfaceMenuCrudSaveFailure('catForm', 'The category could not be saved. Review the highlighted step and try again.');
         }
     };
 
     document.getElementById('wifiForm').onsubmit = async (e) => {
         e.preventDefault();
         const saveButton = e.submitter || document.getElementById('infoWifiSaveBtn');
+        const previousWifi = cloneAdminDraft(restaurantConfig.wifi || {});
         setInfoSaveButtonState(saveButton, 'saving');
         restaurantConfig.wifi.name = document.getElementById('wifiSSID').value;
         restaurantConfig.wifi.code = document.getElementById('wifiPassInput').value;
@@ -4581,13 +4784,18 @@ function initForms() {
             setInfoSaveButtonState(saveButton, 'saved');
             showToast('WiFi updated.');
         } else {
-            setInfoSaveButtonState(saveButton, 'idle');
+            restaurantConfig.wifi = previousWifi || { name: '', code: '' };
+            if (window.restaurantConfig) {
+                window.restaurantConfig.wifi = restaurantConfig.wifi;
+            }
+            setInfoSaveButtonState(saveButton, 'error');
         }
     };
 
     document.getElementById('brandingForm').onsubmit = async (e) => {
         e.preventDefault();
         const brandingDraft = getBrandingDraftFromForm();
+        const previousBranding = cloneAdminDraft(restaurantConfig.branding || {});
 
         if (!isValidAssetUrl(brandingDraft.logoImage)) {
             showToast('Logo image must be an absolute URL or a local /uploads path.');
@@ -4618,13 +4826,32 @@ function initForms() {
             setBrandingSaveButtonsState('saved');
             showToast('Branding saved.');
         } else {
-            setBrandingSaveButtonsState('idle');
+            if (typeof window.mergeRestaurantConfig === 'function') {
+                window.mergeRestaurantConfig({ branding: previousBranding || {} });
+                restaurantConfig = window.restaurantConfig;
+            } else {
+                restaurantConfig.branding = previousBranding || {};
+                if (window.restaurantConfig) {
+                    window.restaurantConfig.branding = restaurantConfig.branding;
+                }
+            }
+            if (typeof window.updateBrandingPreview === 'function') {
+                window.updateBrandingPreview();
+            }
+            setBrandingSaveButtonsState('error');
         }
     };
 
     document.getElementById('landingPageForm').onsubmit = async (e) => {
         e.preventDefault();
         const saveButton = e.submitter || document.getElementById('infoLandingSaveBtn');
+        const previousLocation = cloneAdminDraft(restaurantConfig.location || {});
+        const previousPhone = restaurantConfig.phone || '';
+        const previousSocials = cloneAdminDraft(restaurantConfig.socials || {});
+        const previousGuestExperience = cloneAdminDraft(restaurantConfig.guestExperience || {});
+        const previousSectionVisibility = cloneAdminDraft(restaurantConfig.sectionVisibility || {});
+        const previousSectionOrder = cloneAdminDraft(restaurantConfig.sectionOrder || []);
+        const previousContentTranslations = cloneAdminDraft(restaurantConfig.contentTranslations || {});
         const nextContentTranslations = buildLandingContentTranslations();
         const guestExperience = buildGuestExperienceConfig();
         const sectionVisibility = buildSectionVisibilityConfig();
@@ -4686,7 +4913,23 @@ function initForms() {
             setInfoSaveButtonState(saveButton, 'saved');
             showToast('Public details saved.');
         } else {
-            setInfoSaveButtonState(saveButton, 'idle');
+            restaurantConfig.location = previousLocation || { address: '', url: '' };
+            restaurantConfig.phone = previousPhone;
+            restaurantConfig.socials = previousSocials || {};
+            restaurantConfig.guestExperience = previousGuestExperience || {};
+            restaurantConfig.sectionVisibility = previousSectionVisibility || {};
+            restaurantConfig.sectionOrder = previousSectionOrder || [];
+            restaurantConfig.contentTranslations = previousContentTranslations || { fr: {}, en: {}, ar: {} };
+            if (window.restaurantConfig) {
+                window.restaurantConfig.location = restaurantConfig.location;
+                window.restaurantConfig.phone = restaurantConfig.phone;
+                window.restaurantConfig.socials = restaurantConfig.socials;
+                window.restaurantConfig.guestExperience = restaurantConfig.guestExperience;
+                window.restaurantConfig.sectionVisibility = restaurantConfig.sectionVisibility;
+                window.restaurantConfig.sectionOrder = restaurantConfig.sectionOrder;
+                window.restaurantConfig.contentTranslations = restaurantConfig.contentTranslations;
+            }
+            setInfoSaveButtonState(saveButton, 'error');
         }
     };
 
@@ -4716,6 +4959,7 @@ function initForms() {
 
         const id = editingId || name.toLowerCase().replace(/\s+/g, '_');
         const existingIdx = restaurantConfig.superCategories.findIndex(sc => sc.id === id);
+        const previousSuperCategories = cloneAdminDraft(restaurantConfig.superCategories || []);
 
         const newSC = { id, name, emoji, time, cats: selectedCats, translations };
 
@@ -4732,7 +4976,11 @@ function initForms() {
             closeMenuCrudModal(true);
             showToast(existingIdx !== -1 ? 'Super category updated.' : 'Super category saved.');
         } else {
-            setMenuCrudPrimaryButtonState('superCatForm', 'idle');
+            restaurantConfig.superCategories = previousSuperCategories || [];
+            if (window.restaurantConfig) {
+                window.restaurantConfig.superCategories = restaurantConfig.superCategories;
+            }
+            surfaceMenuCrudSaveFailure('superCatForm', 'The super category could not be saved. Review the highlighted step and try again.');
         }
     };
 }
@@ -4950,7 +5198,7 @@ function setInfoSaveButtonState(button, state) {
         button._saveFeedbackTimer = null;
     }
 
-    button.classList.remove('is-saving', 'is-saved');
+    button.classList.remove('is-saving', 'is-saved', 'is-error');
     button.disabled = false;
 
     if (state === 'saving') {
@@ -4967,6 +5215,16 @@ function setInfoSaveButtonState(button, state) {
             button.classList.remove('is-saved');
             button.textContent = getInfoSaveButtonOriginalLabel(button);
         }, 1600);
+        return;
+    }
+
+    if (state === 'error') {
+        button.classList.add('is-error');
+        button.textContent = t('admin.save_state.retry_label', 'Retry');
+        button._saveFeedbackTimer = setTimeout(() => {
+            button.classList.remove('is-error');
+            button.textContent = getInfoSaveButtonOriginalLabel(button);
+        }, 2200);
         return;
     }
 
@@ -5404,7 +5662,9 @@ window.handleBrandAssetUpload = async function (fieldId, input) {
         showToast('Image uploaded. Save branding to publish it.');
     } catch (error) {
         console.error('Brand asset upload error:', error);
-        showToast('Upload failed. Please try again.');
+        const failure = getAdminRequestFailureState(error);
+        setAdminSaveState(failure.type, failure.message);
+        showToast(failure.message);
     } finally {
         if (input) {
             input.value = '';
@@ -5566,32 +5826,47 @@ async function deleteSuperCat(id) {
         tone: 'danger'
     });
     if (!confirmed) return;
+    const previousSuperCategories = Array.isArray(restaurantConfig.superCategories)
+        ? JSON.parse(JSON.stringify(restaurantConfig.superCategories))
+        : [];
     restaurantConfig.superCategories = restaurantConfig.superCategories.filter(s => s.id !== id);
-    saveAndRefresh();
+    const saved = await saveAndRefresh();
+    if (saved) {
+        showToast('Super category removed.');
+        return;
+    }
+    restaurantConfig.superCategories = previousSuperCategories;
+    if (window.restaurantConfig) {
+        window.restaurantConfig.superCategories = previousSuperCategories;
+    }
+    refreshUI();
 }
 
 async function uploadImageToServer(file) {
     const formData = new FormData();
     formData.append('image', file, file.name);
 
-    const response = await fetch('/api/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-    });
+    let response;
+    try {
+        response = await fetch('/api/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+        });
+    } catch (error) {
+        throw createAdminRequestError('Network error while uploading. Check the connection and retry.', 'network_error', { cause: error });
+    }
 
     if (!response.ok) {
-        if (response.status === 401) {
-            await showAdminNotice({
-                kicker: 'Session expired',
-                title: 'Please sign in again',
-                copy: 'Your admin session expired while uploading an image. Sign in again and retry the upload.',
-                confirmLabel: 'Reload now'
-            });
-            location.reload();
-            return;
+        const payload = await response.json().catch(() => ({}));
+        const requestError = buildAdminRequestErrorFromResponse(response, payload);
+        requestError.code = requestError.code || 'upload_failed';
+        if (!requestError.message || requestError.message === payload?.error) {
+            requestError.message = response.status === 401
+                ? 'Session expired while uploading. Reload and sign in again.'
+                : payload?.error || `Upload failed: ${response.statusText || response.status}`;
         }
-        throw new Error('Upload failed: ' + response.statusText);
+        throw requestError;
     }
 
     const data = await response.json();
@@ -5601,7 +5876,7 @@ async function uploadImageToServer(file) {
     if (data.urls && data.urls.length > 0) {
         return data.urls[0];
     }
-    throw new Error('No URL returned from server');
+    throw createAdminRequestError('No upload URL was returned from the server.', 'upload_failed');
 }
 
 
@@ -5933,8 +6208,11 @@ async function pollImporterDraftJob(jobId) {
                     cache: 'no-store'
                 });
                 const data = await response.json().catch(() => ({}));
-                if (!response.ok || !data.ok || !data.job) {
-                    throw new Error(data.error || 'Importer progress is unavailable.');
+                if (!response.ok) {
+                    throw buildAdminRequestErrorFromResponse(response, data);
+                }
+                if (!data.ok || !data.job) {
+                    throw createAdminRequestError(data.error || 'Importer progress is unavailable.', data.error || 'importer_progress_unavailable');
                 }
 
                 failureCount = 0;
@@ -6246,11 +6524,14 @@ window.generateImporterDraft = async function () {
             return;
         }
 
-        if (!response.ok || !data.ok || !data.jobId) {
-            const error = new Error(data.error || 'Importer draft failed.');
-            error.jobId = data.jobId || '';
-            error.stage = data.stage || '';
-            throw error;
+        if (!response.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+        if (!data.ok || !data.jobId) {
+            throw createAdminRequestError(data.error || 'Importer draft failed.', data.error || 'importer_draft_failed', {
+                jobId: data.jobId || '',
+                stage: data.stage || ''
+            });
         }
 
         const result = await pollImporterDraftJob(data.jobId);
@@ -6279,6 +6560,7 @@ window.generateImporterDraft = async function () {
         clearActiveImporterPollHandle();
         activeImporterJobId = '';
         console.error('Importer draft error:', error);
+        reflectAdminRequestFailure(error);
         const message = error?.code === 'importer_poll_lost'
             ? 'The importer connection was lost. The job may still be running.'
             : error?.message === 'openai_not_configured'
@@ -6355,6 +6637,12 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
             meta: scope === 'menu_structure' ? 'Menu + structure' : 'Menu only',
             hint: 'Please wait while the current restaurant data is updated.'
         });
+        setAdminSaveState(
+            ADMIN_REQUEST_STATE.saving,
+            scope === 'menu_structure'
+                ? 'Publishing the reviewed menu and structure to the server...'
+                : 'Publishing the reviewed menu to the server...'
+        );
         const payload = buildImporterApplyPayload(lastImporterDraft, scope);
         const response = await fetch('/api/data/import', {
             method: 'POST',
@@ -6364,12 +6652,25 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         });
         const data = await response.json().catch(() => ({}));
 
-        if (!response.ok || !data.ok) {
-            throw new Error(data.error || 'Draft apply failed.');
+        if (!response.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+        if (!data.ok) {
+            throw createAdminRequestError(data.error || 'Draft apply failed.', data.error || 'draft_apply_failed');
         }
 
-        await loadDataFromServer();
+        await loadDataFromServer({ silent: true });
         refreshUI();
+        setAdminSaveState(
+            ADMIN_REQUEST_STATE.success,
+            scope === 'menu_structure'
+                ? 'The reviewed menu and structure are saved on the server.'
+                : 'The reviewed menu is saved on the server.',
+            {
+                savedAt: data?.meta?.savedAt || new Date().toISOString(),
+                dataVersion: data?.meta?.dataVersion || adminSaveState.dataVersion
+            }
+        );
         applyImportStudioProgress({
             status: 'succeeded',
             stageKey: 'publish',
@@ -6385,6 +6686,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         showToast(scope === 'menu_structure' ? 'Menu and structure published.' : 'Menu items published.');
     } catch (error) {
         console.error('Apply importer draft error:', error);
+        reflectAdminRequestFailure(error);
         applyImportStudioProgress({
             status: 'failed',
             stageKey: 'publish',
@@ -6431,27 +6733,47 @@ async function deleteItem(id) {
         tone: 'danger'
     });
     if (!confirmed) return;
+    const previousMenu = JSON.parse(JSON.stringify(menu));
+    const previousPromoIds = [...promoIds];
     menu = menu.filter(m => m.id != id);
     promoIds = promoIds.filter(pid => pid != id);
-    saveAndRefresh();
+    window.promoIds = promoIds;
+    const saved = await saveAndRefresh();
+    if (saved) {
+        showToast('Dish removed.');
+        return;
+    }
+    menu = previousMenu;
+    promoIds = previousPromoIds;
+    window.promoIds = promoIds;
+    refreshUI();
 }
 function hasPromoId(id) {
     return promoIds.some((pid) => String(pid) === String(id));
 }
-function togglePromo(id) {
+async function togglePromo(id) {
+    const previousPromoIds = [...promoIds];
     if (hasPromoId(id)) {
         promoIds = promoIds.filter(pid => String(pid) !== String(id));
     } else {
         promoIds.push(id);
     }
     window.promoIds = promoIds; // Sync for shared.js
-    saveAndRefresh();
+    const saved = await saveAndRefresh();
+    if (saved) return;
+    promoIds = previousPromoIds;
+    window.promoIds = promoIds;
+    refreshUI();
 }
-function toggleFeatured(id) {
+async function toggleFeatured(id) {
     const item = menu.find(m => m.id == id);
     if (item) {
+        const previousFeatured = Boolean(item.featured);
         item.featured = !item.featured;
-        saveAndRefresh();
+        const saved = await saveAndRefresh();
+        if (saved) return;
+        item.featured = previousFeatured;
+        refreshUI();
     }
 }
 
@@ -6461,101 +6783,47 @@ window.toggleFeatured = toggleFeatured;
 async function forceSaveChangesLegacy() {
     try {
         // If user is currently editing a food item, commit those changes first
+        let saved = false;
         if (editingItemId && typeof window.commitFormItem === 'function') {
-            await window.commitFormItem();
+            saved = await window.commitFormItem();
         } else {
-            await saveAndRefresh();
-            showToast('All changes saved.');
+            saved = await saveAndRefresh();
+            if (saved) {
+                showToast('All changes saved.');
+            }
+        }
+
+        if (!saved) {
+            return;
         }
 
         // Visual feedback on float button
         const btn = document.getElementById('floatSaveBtn');
         if (btn) {
             btn.classList.add('saved');
-            btn.innerHTML = '<span style="font-size:1.3rem;">✓</span><span>Saved</span>';
+            btn.innerHTML = getFloatingSaveButtonMarkup(true);
             setTimeout(() => {
                 btn.classList.remove('saved');
-                btn.innerHTML = '<span style="font-size:1.3rem;">💾</span><span>Save</span>';
+                btn.innerHTML = getFloatingSaveButtonMarkup(false);
             }, 2500);
         }
     } catch (e) {
         console.error('Save Error:', e);
+        const failure = getAdminRequestFailureState(e);
+        setAdminSaveState(failure.type, failure.message, {
+            savedAt: e?.savedAt !== undefined ? e.savedAt : adminSaveState.savedAt,
+            dataVersion: e?.dataVersion !== undefined ? e.dataVersion : adminSaveState.dataVersion
+        });
         await showAdminNotice({
             kicker: 'Save failed',
             title: 'The changes could not be saved',
-            copy: e.message || 'A server error blocked this save.',
+            copy: failure.message || 'A server error blocked this save.',
             confirmLabel: 'OK'
         });
     }
 }
 async function saveAndRefreshLegacy() {
-    setAdminSaveState('saving', t('admin.save_state.saving_message', 'Saving changes to the server...'));
-    // Strip base64 images before sending to server
-    const cleanMenu = menu.map(item => {
-        const imgs = item.images || (item.img ? [item.img] : []);
-        const urlOnly = imgs.filter(img => !img.startsWith('data:'));
-        const safePrimaryImage = (typeof item.img === 'string' && !item.img.startsWith('data:')) ? item.img : '';
-        return {
-            ...item,
-            translations: normalizeMenuItemTranslations(item.translations),
-            images: urlOnly,
-            img: urlOnly[0] || safePrimaryImage
-        };
-    });
-
-    // Build payload matching server data structure
-    const payload = {
-        menu: cleanMenu,
-        catEmojis: catEmojis,
-        categoryImages: categoryImages,
-        categoryTranslations: categoryTranslations,
-        wifi: { ssid: restaurantConfig.wifi?.name || '', pass: restaurantConfig.wifi?.code || '' },
-        social: restaurantConfig.socials || {},
-        guestExperience: restaurantConfig.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] },
-        sectionVisibility: restaurantConfig.sectionVisibility || window.defaultConfig?.sectionVisibility || {},
-        sectionOrder: restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
-        branding: restaurantConfig.branding || window.defaultBranding || {},
-        contentTranslations: restaurantConfig.contentTranslations || { fr: {}, en: {}, ar: {} },
-        promoId: promoIds.length > 0 ? promoIds[0] : null,
-        promoIds: promoIds,
-        superCategories: Array.isArray(restaurantConfig.superCategories)
-            ? restaurantConfig.superCategories.map((entry) => sanitizeSuperCategoryForStorage(entry))
-            : [],
-        hours: restaurantConfig._hours || null,
-        hoursNote: restaurantConfig._hoursNote || '',
-        gallery: restaurantConfig.gallery || [],
-        landing: {
-            location: restaurantConfig.location,
-            phone: restaurantConfig.phone
-        }
-    };
-
-    try {
-        const res = await fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-            if (res.status === 401) {
-                await showAdminNotice({
-                    kicker: 'Session expired',
-                    title: 'Please sign in again',
-                    copy: 'Your admin session expired before this save completed.',
-                    confirmLabel: 'Reload now'
-                });
-                location.reload();
-                return;
-            }
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || 'Server save failed');
-        }
-        refreshUI();
-    } catch (e) {
-        console.error('Save Error:', e);
-        showToast('Save error: ' + e.message);
-    }
+    return saveAndRefresh();
 }
 
 async function loadSecurityStatus() {
@@ -6611,6 +6879,23 @@ async function loadSecurityStatus() {
     }
 }
 
+function setAdminLoginPendingState(active) {
+    adminLoginInFlight = Boolean(active);
+    const button = document.getElementById('loginBtn');
+    const userEl = document.getElementById('loginUser');
+    const passEl = document.getElementById('loginPass');
+    if (button) {
+        button.disabled = adminLoginInFlight;
+        button.setAttribute('aria-busy', adminLoginInFlight ? 'true' : 'false');
+        button.textContent = adminLoginInFlight
+            ? t('admin.save_state.saving_label', 'Saving')
+            : t('admin.login.button', 'Se Connecter');
+    }
+    [userEl, passEl].forEach((field) => {
+        if (field) field.disabled = adminLoginInFlight;
+    });
+}
+
 async function performAdminLogin() {
     console.log('[LOGIN] performAdminLogin triggered');
     const userEl = document.getElementById('loginUser');
@@ -6624,10 +6909,16 @@ async function performAdminLogin() {
 
     const username = userEl.value.trim();
     const password = passEl.value;
+    if (adminLoginInFlight) return;
 
     console.log('[LOGIN] Attempting login for:', username);
 
     try {
+        setAdminLoginPendingState(true);
+        if (errorEl) {
+            errorEl.textContent = '';
+            errorEl.style.display = 'none';
+        }
         const res = await fetch('/api/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -6659,6 +6950,8 @@ async function performAdminLogin() {
             errorEl.textContent = t('admin.login.server_connection_error', 'Server connection error');
             errorEl.style.display = 'block';
         }
+    } finally {
+        setAdminLoginPendingState(false);
     }
 }
 
@@ -6695,24 +6988,45 @@ function initSecurityForm() {
                 body: JSON.stringify({ newUsername, newPassword, confirmPassword })
             });
 
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
 
-            if (res.ok && data.ok) {
+            if (!res.ok) {
+                throw buildAdminRequestErrorFromResponse(res, data);
+            }
+
+            if (data.ok) {
                 adminAuth.user = data.user || newUsername;
                 setInfoSaveButtonState(saveButton, 'saved');
+                setAdminSaveState(
+                    ADMIN_REQUEST_STATE.success,
+                    data.message || t('admin.security.credentials_updated', 'Credentials updated successfully.'),
+                    {
+                        savedAt: new Date().toISOString(),
+                        dataVersion: adminSaveState.dataVersion
+                    }
+                );
                 showToast(data.message || t('admin.security.credentials_updated', 'Credentials updated successfully.'));
                 document.getElementById('adminNewPass').value = '';
                 document.getElementById('adminConfirmPass').value = '';
                 loadSecurityStatus();
                 renderInfoWorkspaceSummary();
             } else {
-                setInfoSaveButtonState(saveButton, 'idle');
-                showToast(data.error || t('admin.security.credentials_update_failed', 'Unable to update credentials.'));
+                const failure = getAdminRequestFailureState(
+                    createAdminRequestError(
+                        data.error || t('admin.security.credentials_update_failed', 'Unable to update credentials.'),
+                        data.error || 'credentials_update_failed'
+                    )
+                );
+                setAdminSaveState(failure.type, failure.message);
+                setInfoSaveButtonState(saveButton, 'error');
+                showToast(failure.message);
             }
         } catch (err) {
             console.error('Credentials update error:', err);
-            setInfoSaveButtonState(saveButton, 'idle');
-            showToast(t('admin.login.server_connection_error', 'Server connection error.'));
+            const failure = getAdminRequestFailureState(err);
+            setAdminSaveState(failure.type, failure.message);
+            setInfoSaveButtonState(saveButton, 'error');
+            showToast(failure.message || t('admin.login.server_connection_error', 'Server connection error.'));
         }
     };
 
@@ -6731,8 +7045,7 @@ async function forceSaveChanges() {
         let saved = false;
 
         if (editingItemId && typeof window.commitFormItem === 'function') {
-            await window.commitFormItem();
-            saved = true;
+            saved = await window.commitFormItem();
         } else {
             saved = await saveAndRefresh();
             if (saved) {
@@ -6755,8 +7068,12 @@ async function forceSaveChanges() {
         }
     } catch (e) {
         console.error('Save Error:', e);
-        setAdminSaveState('error', e.message || 'Save failed.');
-        showToast('Save failed: ' + e.message);
+        const failure = getAdminRequestFailureState(e);
+        setAdminSaveState(failure.type, failure.message, {
+            savedAt: e?.savedAt !== undefined ? e.savedAt : adminSaveState.savedAt,
+            dataVersion: e?.dataVersion !== undefined ? e.dataVersion : adminSaveState.dataVersion
+        });
+        showToast(`${t('admin.save_state.error_prefix', 'Save failed')}: ${failure.message}`);
     }
 }
 
@@ -6799,30 +7116,51 @@ async function performAdminSaveRequest() {
         }
     };
 
-    const res = await fetch('/api/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-        if (res.status === 401) {
-            setAdminSaveState('error', t('admin.save_state.session_expired', 'Session expired. Please sign in again.'));
-            showToast(t('admin.save_state.session_expired', 'Session expired. Please sign in again.'));
-            location.reload();
-            return false;
-        }
-
-        const err = await res.json().catch(() => ({}));
-        const error = new Error(err.error || 'Server save failed');
-        error.code = err.error || '';
-        error.jobId = err.jobId || '';
-        throw error;
+    let res;
+    try {
+        res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        throw createAdminRequestError('Network error. Check the connection and try again.', 'network_error', { cause: error });
     }
 
-    refreshUI();
-    return true;
+    const payloadResult = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        throw buildAdminRequestErrorFromResponse(res, payloadResult);
+    }
+
+    const saveMeta = {
+        savedAt: payloadResult?.meta?.savedAt || new Date().toISOString(),
+        dataVersion: payloadResult?.meta?.dataVersion || ''
+    };
+
+    try {
+        const snapshot = await fetchAdminDataSnapshot();
+        applyAdminServerData(snapshot.data);
+        refreshUI();
+        return {
+            ok: true,
+            meta: {
+                savedAt: saveMeta.savedAt,
+                dataVersion: snapshot.dataVersion || saveMeta.dataVersion || ''
+            }
+        };
+    } catch (error) {
+        throw createAdminRequestError(
+            'Saved on the server, but the admin could not refresh the latest data. Reload to confirm the current state.',
+            'refresh_after_save_failed',
+            {
+                cause: error,
+                savedOnServer: true,
+                savedAt: saveMeta.savedAt,
+                dataVersion: saveMeta.dataVersion
+            }
+        );
+    }
 }
 
 async function saveAndRefresh() {
@@ -6835,6 +7173,7 @@ async function saveAndRefresh() {
 
     adminSaveLoopPromise = (async () => {
         let saved = false;
+        let latestSaveMeta = null;
         try {
             while (adminSaveRequested) {
                 adminSaveRequested = false;
@@ -6844,17 +7183,29 @@ async function saveAndRefresh() {
                         ? t('admin.save_state.saving_more_message', 'Saving your latest changes...')
                         : t('admin.save_state.saving_message', 'Saving changes to the server...')
                 );
-                saved = await performAdminSaveRequest();
+                const result = await performAdminSaveRequest();
+                saved = Boolean(result?.ok);
+                if (result?.meta) {
+                    latestSaveMeta = result.meta;
+                }
             }
 
             if (saved) {
-                setAdminSaveState('success', t('admin.save_state.success_message', 'All current changes are saved on the server.'));
+                setAdminSaveState(
+                    'success',
+                    t('admin.save_state.success_message', 'All current changes are saved on the server.'),
+                    latestSaveMeta || {}
+                );
             }
             return saved;
         } catch (e) {
             console.error('Save Error:', e);
-            const message = getLongTaskConflictMessage(e) || e.message || t('admin.save_state.error_message', 'Save failed.');
-            setAdminSaveState('error', message);
+            const failure = getAdminRequestFailureState(e);
+            const message = failure.message || t('admin.save_state.error_message', 'Save failed.');
+            setAdminSaveState(failure.type, message, {
+                savedAt: e?.savedAt !== undefined ? e.savedAt : adminSaveState.savedAt,
+                dataVersion: e?.dataVersion !== undefined ? e.dataVersion : adminSaveState.dataVersion
+            });
             showToast(`${t('admin.save_state.error_prefix', 'Save failed')}: ${message}`);
             return false;
         } finally {
@@ -6983,6 +7334,13 @@ async function deleteCat(cat) {
         tone: 'danger'
     });
     if (!confirmed) return;
+    const previousMenu = JSON.parse(JSON.stringify(menu));
+    const previousCatEmojis = { ...catEmojis };
+    const previousCategoryTranslations = JSON.parse(JSON.stringify(categoryTranslations || {}));
+    const previousCategoryImages = { ...(categoryImages || {}) };
+    const previousSuperCategories = Array.isArray(restaurantConfig.superCategories)
+        ? JSON.parse(JSON.stringify(restaurantConfig.superCategories))
+        : [];
     (restaurantConfig.superCategories || []).forEach((sc) => {
         if (Array.isArray(sc.cats)) {
             sc.cats = sc.cats.filter((entry) => entry !== cat);
@@ -6992,7 +7350,21 @@ async function deleteCat(cat) {
     delete categoryTranslations[cat];
     delete categoryImages[cat];
     window.categoryImages = categoryImages;
-    saveAndRefresh();
+    const saved = await saveAndRefresh();
+    if (saved) {
+        showToast('Category removed.');
+        return;
+    }
+    menu = previousMenu;
+    catEmojis = previousCatEmojis;
+    categoryTranslations = previousCategoryTranslations;
+    categoryImages = previousCategoryImages;
+    window.categoryImages = categoryImages;
+    restaurantConfig.superCategories = previousSuperCategories;
+    if (window.restaurantConfig) {
+        window.restaurantConfig.superCategories = previousSuperCategories;
+    }
+    refreshUI();
 }
 function initWifiForm() {
     const fields = {
@@ -7100,6 +7472,8 @@ async function handleModalImageUpload(input) {
     if (!item) return;
 
     if (!item.images) item.images = item.img ? [item.img] : [];
+    const previousImages = Array.isArray(item.images) ? [...item.images] : [];
+    const previousImg = item.img || '';
 
     try {
         for (let index = 0; index < input.files.length; index += 1) {
@@ -7117,12 +7491,23 @@ async function handleModalImageUpload(input) {
         if (item.images.length > 0) item.img = item.images[0];
 
         input.value = '';
-        await saveAndRefresh();
-        renderModalImages();
-        showToast(input.id === 'modalImgCapture' ? 'Photo added.' : 'Images added.');
+        const saved = await saveAndRefresh();
+        if (saved) {
+            renderModalImages();
+            showToast(input.id === 'modalImgCapture' ? 'Photo added.' : 'Images added.');
+        } else {
+            item.images = previousImages;
+            item.img = previousImg;
+            renderModalImages();
+        }
     } catch (err) {
         console.error('Modal upload failed:', err);
-        showToast('Upload failed.');
+        item.images = previousImages;
+        item.img = previousImg;
+        const failure = getAdminRequestFailureState(err);
+        setAdminSaveState(failure.type, failure.message);
+        showToast(failure.message);
+        renderModalImages();
     } finally {
         input.value = '';
         setImageModalProgress(false);
@@ -7149,36 +7534,52 @@ function syncCategoryImageAiControls() {
     setCategoryImageProgress(false);
 }
 
-function addModalImageUrl() {
+async function addModalImageUrl() {
     const url = document.getElementById('modalImgUrl').value.trim();
     if (!url) return;
     const item = menu.find(m => m.id == currentEditingId);
     if (!item) return;
 
     if (!item.images) item.images = item.img ? [item.img] : [];
+    const previousImages = Array.isArray(item.images) ? [...item.images] : [];
+    const previousImg = item.img || '';
     item.images.push(url);
 
     // SYNC: Keep main img updated
     if (item.images.length > 0) item.img = item.images[0];
 
     document.getElementById('modalImgUrl').value = '';
-    saveAndRefresh();
+    const saved = await saveAndRefresh();
+    if (saved) {
+        renderModalImages();
+        showToast('Image added from URL.');
+        return;
+    }
+    item.images = previousImages;
+    item.img = previousImg;
     renderModalImages();
-    showToast('Image added from URL.');
 }
 
-function deleteModalImage(index) {
+async function deleteModalImage(index) {
     const item = menu.find(m => m.id == currentEditingId);
     if (!item || !item.images) return;
 
+    const previousImages = [...item.images];
+    const previousImg = item.img || '';
     item.images.splice(index, 1);
 
     // SYNC: Keep main img updated after deletion
     item.img = item.images.length > 0 ? item.images[0] : '';
 
-    saveAndRefresh();
+    const saved = await saveAndRefresh();
+    if (saved) {
+        renderModalImages();
+        showToast('Image removed.');
+        return;
+    }
+    item.images = previousImages;
+    item.img = previousImg;
     renderModalImages();
-    showToast('Image removed.');
 }
 
 window.generateModalImageWithAI = async function () {
@@ -7194,6 +7595,8 @@ window.generateModalImageWithAI = async function () {
         showToast('Item name is required before generating an image.');
         return;
     }
+    const previousImages = Array.isArray(item.images) ? [...item.images] : [];
+    const previousImg = item.img || '';
 
     const originalLabel = buttonEl.textContent;
     buttonEl.disabled = true;
@@ -7224,8 +7627,11 @@ window.generateModalImageWithAI = async function () {
             })
         });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.ok || !data.url) {
-            throw new Error(data.error || 'AI image generation failed.');
+        if (!response.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+        if (!data.ok || !data.url) {
+            throw createAdminRequestError(data.error || 'AI image generation failed.', data.error || 'ai_image_generation_failed');
         }
 
         if (!item.images) item.images = item.img ? [item.img] : [];
@@ -7236,9 +7642,17 @@ window.generateModalImageWithAI = async function () {
         if (saved) {
             renderModalImages();
             showToast('AI image generated and added to the item.');
+            return;
         }
+        item.images = previousImages;
+        item.img = previousImg;
+        renderModalImages();
     } catch (error) {
         console.error('Menu item AI image generation error:', error);
+        reflectAdminRequestFailure(error);
+        item.images = previousImages;
+        item.img = previousImg;
+        renderModalImages();
         const message = getLongTaskConflictMessage(error) || (error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY before using AI image generation.'
             : /verify organization|verified to use the model/i.test(error?.message || '')
@@ -7293,8 +7707,11 @@ window.generateCategoryImageWithAI = async function () {
             })
         });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.ok || !data.url) {
-            throw new Error(data.error || 'AI category image generation failed.');
+        if (!response.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+        if (!data.ok || !data.url) {
+            throw createAdminRequestError(data.error || 'AI category image generation failed.', data.error || 'ai_category_image_generation_failed');
         }
 
         imageInput.value = data.url;
@@ -7302,6 +7719,7 @@ window.generateCategoryImageWithAI = async function () {
         showToast('AI image generated for the category.');
     } catch (error) {
         console.error('Category AI image generation error:', error);
+        reflectAdminRequestFailure(error);
         const message = getLongTaskConflictMessage(error) || (error?.message === 'openai_not_configured'
             ? 'Set OPENAI_API_KEY before using AI image generation.'
             : /verify organization|verified to use the model/i.test(error?.message || '')
@@ -7361,6 +7779,8 @@ function initHoursForm() {
             e.preventDefault();
             const saveButton = e.submitter || document.getElementById('infoHoursSaveBtn');
             setInfoSaveButtonState(saveButton, 'saving');
+            const previousHours = cloneAdminDraft(restaurantConfig._hours || []);
+            const previousHoursNote = restaurantConfig._hoursNote || '';
             const updatedHours = window.defaultHours.map((def, i) => {
                 const key = HOUR_KEYS[i];
                 const openEl = document.getElementById(`h_${key}_open`);
@@ -7384,7 +7804,13 @@ function initHoursForm() {
                 setInfoSaveButtonState(saveButton, 'saved');
                 showToast('Hours updated.');
             } else {
-                setInfoSaveButtonState(saveButton, 'idle');
+                restaurantConfig._hours = previousHours || [];
+                restaurantConfig._hoursNote = previousHoursNote;
+                if (window.restaurantConfig) {
+                    window.restaurantConfig._hours = restaurantConfig._hours;
+                    window.restaurantConfig._hoursNote = restaurantConfig._hoursNote;
+                }
+                setInfoSaveButtonState(saveButton, 'error');
             }
         };
     }
@@ -7435,8 +7861,10 @@ function initGalleryForm() {
                     nextGallery.push(url);
                 } catch (err) {
                     console.error('Gallery upload failed:', err);
-                    showToast('Gallery upload failed.');
-                    setGallerySaveButtonState('idle');
+                    const failure = getAdminRequestFailureState(err);
+                    setAdminSaveState(failure.type, failure.message);
+                    showToast(failure.message);
+                    setGallerySaveButtonState('error');
                     return;
                 }
             }
@@ -7452,7 +7880,7 @@ function initGalleryForm() {
         } else {
             restaurantConfig.gallery = previousGallery;
             renderGalleryAdmin();
-            setGallerySaveButtonState('idle');
+            setGallerySaveButtonState('error');
         }
     };
 }
