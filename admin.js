@@ -30,6 +30,7 @@ let adminSaveLoopPromise = null;
 let adminSaveRequested = false;
 let adminLoginInFlight = false;
 let adminHelpToggleIdCounter = 0;
+let categoryImageDraftValue = '';
 const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
 const ADMIN_IMPORTER_ACTIVE_JOB_KEY = 'restaurant_admin_importer_active_job';
 const IMPORTER_JOB_POLL_MAX_FAILURES = 6;
@@ -109,6 +110,13 @@ const ADMIN_ICON = Object.freeze({
     camera: String.fromCodePoint(0x1F4F7)
 });
 const DEFAULT_SUPER_CATEGORY_ICON = '🍽️';
+const BRAND_ASSET_FIELD_IDS = Object.freeze([
+    'brandHeroImage',
+    'brandHeroSlide2',
+    'brandHeroSlide3',
+    'brandLogoImage'
+]);
+let brandAssetDraftState = {};
 const SUPER_CATEGORY_ICON_PRESETS = Object.freeze([
     { icon: '🍽️', label: 'General' },
     { icon: '🍳', label: 'Breakfast' },
@@ -1586,6 +1594,7 @@ function resetCategoryFormState() {
     if (form) form.reset();
     setMenuCrudValidationState('catForm', {});
     setMenuTranslationWarnings('category');
+    setCategoryImageDraftValue('');
     const editingKeyInput = document.getElementById('catEditingKey');
     if (editingKeyInput) editingKeyInput.value = '';
     populateCategorySuperCategoryOptions(menuBuilderSelectedSuperCategoryId || '');
@@ -1599,14 +1608,21 @@ function normalizeCategoryImagePath(value) {
     return typeof value === 'string' ? value.trim() : '';
 }
 
+function setCategoryImageDraftValue(value = '') {
+    categoryImageDraftValue = normalizeCategoryImagePath(value);
+}
+
+function getCategoryImageDraftValue() {
+    return normalizeCategoryImagePath(categoryImageDraftValue);
+}
+
 function updateCategoryImagePreview() {
     const previewShell = document.getElementById('catImagePreview');
     const previewImg = document.getElementById('catImagePreviewImg');
     const previewFallback = document.getElementById('catImagePreviewFallback');
-    const input = document.getElementById('catImage');
     if (!previewShell || !previewImg || !previewFallback) return;
 
-    const nextImage = normalizeCategoryImagePath(input ? input.value : '');
+    const nextImage = getCategoryImageDraftValue();
     if (nextImage) {
         previewShell.classList.add('has-image');
         previewImg.style.display = '';
@@ -1628,14 +1644,7 @@ function updateCategoryImagePreview() {
 }
 
 function bindCategoryImageFormEvents() {
-    const imageInput = document.getElementById('catImage');
     const uploadInput = document.getElementById('catImageUpload');
-
-    if (imageInput && !imageInput.dataset.boundPreview) {
-        imageInput.dataset.boundPreview = 'true';
-        imageInput.addEventListener('input', updateCategoryImagePreview);
-        imageInput.addEventListener('change', updateCategoryImagePreview);
-    }
 
     if (uploadInput && !uploadInput.dataset.boundPreview) {
         uploadInput.dataset.boundPreview = 'true';
@@ -2086,8 +2095,8 @@ function getMenuCrudSectionStatus(formId, sectionId) {
         const superCategory = document.getElementById('catSuperCategory')?.value?.trim() || '';
         if (sectionId === 'identity') return name && superCategory ? 'ready' : 'missing';
         if (sectionId === 'visual') {
-            const hasImage = Boolean(String(document.getElementById('catImage')?.value || '').trim())
-                || Boolean(document.getElementById('catImageUpload')?.files?.length);
+        const hasImage = Boolean(getCategoryImageDraftValue())
+            || Boolean(document.getElementById('catImageUpload')?.files?.length);
             return hasImage ? 'ready' : 'optional';
         }
         if (sectionId === 'labels') {
@@ -2276,7 +2285,7 @@ function refreshMenuCrudFormUx(target) {
         }
     } else if (form.id === 'catForm') {
         refreshTranslationSummary('category');
-        const hasImage = Boolean(String(document.getElementById('catImage')?.value || '').trim())
+        const hasImage = Boolean(getCategoryImageDraftValue())
             || Boolean(document.getElementById('catImageUpload')?.files?.length);
         setMenuCrudMetaText('catFormMetaState', document.getElementById('catEditingKey')?.value ? 'Editing category' : 'Category draft');
         setMenuCrudMetaText('catFormMetaVisual', hasImage ? 'Image ready' : 'Image optional');
@@ -4678,14 +4687,13 @@ function initForms() {
             || catEmojis?.[previousKey]
             || ADMIN_ICON.bullet;
         const nextTranslations = buildCategoryTranslations(categoryName);
-        const categoryImageInput = document.getElementById('catImage');
         const categoryImageUpload = document.getElementById('catImageUpload');
-        let nextImage = normalizeCategoryImagePath(categoryImageInput ? categoryImageInput.value : '');
+        let nextImage = getCategoryImageDraftValue();
 
         if (categoryImageUpload && categoryImageUpload.files && categoryImageUpload.files[0]) {
             try {
                 nextImage = await uploadImageToServer(categoryImageUpload.files[0]);
-                if (categoryImageInput) categoryImageInput.value = nextImage;
+                setCategoryImageDraftValue(nextImage);
             } catch (error) {
                 console.error('Category image upload failed:', error);
                 setMenuCrudPrimaryButtonState('catForm', 'idle');
@@ -5304,11 +5312,7 @@ const BRANDING_PREVIEW_INPUT_IDS = [
     'brandTextColor',
     'brandTextMuted',
     'brandMenuBackground',
-    'brandMenuSurface',
-    'brandHeroImage',
-    'brandHeroSlide2',
-    'brandHeroSlide3',
-    'brandLogoImage'
+    'brandMenuSurface'
 ];
 
 function normalizePreviewColor(value, fallback) {
@@ -5343,20 +5347,29 @@ function isLikelyPhoneNumber(value) {
     return /^[+\d][\d\s\-()/.]{5,}$/.test(raw);
 }
 
+function createBrandAssetDraftState() {
+    return BRAND_ASSET_FIELD_IDS.reduce((acc, fieldId) => {
+        acc[fieldId] = { value: '', state: 'inherit' };
+        return acc;
+    }, {});
+}
+
+brandAssetDraftState = createBrandAssetDraftState();
+
 function setBrandAssetFieldValue(id, value, state) {
-    const element = document.getElementById(id);
-    if (!element) return;
+    if (!BRAND_ASSET_FIELD_IDS.includes(id)) return;
     const nextValue = typeof value === 'string' ? value.trim() : '';
-    element.value = nextValue;
-    element.dataset.assetState = state || (nextValue ? 'set' : 'inherit');
+    brandAssetDraftState[id] = {
+        value: nextValue,
+        state: state || (nextValue ? 'set' : 'inherit')
+    };
 }
 
 function getBrandAssetFieldValue(id, fallback = '') {
-    const element = document.getElementById(id);
-    if (!element) return fallback;
-    if (element.dataset.assetState === 'cleared') return '';
-    const value = element.value.trim();
-    return value || fallback;
+    if (!BRAND_ASSET_FIELD_IDS.includes(id)) return fallback;
+    const entry = brandAssetDraftState[id] || { value: '', state: 'inherit' };
+    if (entry.state === 'cleared') return '';
+    return (entry.value || '').trim() || fallback;
 }
 
 function getBrandingDraftFromForm() {
@@ -5451,9 +5464,7 @@ function applyBrandPresetToForm(presetId) {
         })
         .filter(Boolean);
     const applyHeroField = (fieldId, nextValue) => {
-        const input = document.getElementById(fieldId);
-        if (!input) return;
-        const currentValue = input.value.trim();
+        const currentValue = getBrandAssetFieldValue(fieldId, '');
         if (!currentValue || knownPresetHeroes.includes(currentValue)) {
             setBrandAssetFieldValue(fieldId, nextValue || '', nextValue ? 'set' : 'inherit');
         }
@@ -5613,9 +5624,7 @@ window.updateBrandingPreview = function () {
 };
 
 window.clearBrandAsset = function (fieldId) {
-    const target = document.getElementById(fieldId);
-    if (!target) return;
-
+    if (!BRAND_ASSET_FIELD_IDS.includes(fieldId)) return;
     setBrandAssetFieldValue(fieldId, '', 'cleared');
 
     if (fieldId === 'brandLogoImage') {
@@ -5642,6 +5651,7 @@ window.clearBrandAsset = function (fieldId) {
 };
 
 window.handleBrandAssetUpload = async function (fieldId, input) {
+    if (!BRAND_ASSET_FIELD_IDS.includes(fieldId)) return;
     const file = input && input.files && input.files[0];
     if (!file) return;
 
@@ -5736,14 +5746,15 @@ function initBrandingForm() {
         brandLogoImage: branding.logoImage || ''
     };
 
+    brandAssetDraftState = createBrandAssetDraftState();
     Object.entries(fields).forEach(([id, value]) => {
+        if (BRAND_ASSET_FIELD_IDS.includes(id)) {
+            setBrandAssetFieldValue(id, value, value ? 'set' : 'inherit');
+            return;
+        }
         const element = document.getElementById(id);
         if (element) {
-            if (id === 'brandHeroImage' || id === 'brandHeroSlide2' || id === 'brandHeroSlide3' || id === 'brandLogoImage') {
-                setBrandAssetFieldValue(id, value, value ? 'set' : 'inherit');
-            } else {
-                element.value = value;
-            }
+            element.value = value;
         }
     });
 
@@ -7298,8 +7309,7 @@ function editCat(cat) {
     const catNameInput = document.getElementById('catName');
     if (catNameInput) catNameInput.value = cat;
     populateCategorySuperCategoryOptions(getAssignedSuperCategoryIdForCategory(cat));
-    const catImageInput = document.getElementById('catImage');
-    if (catImageInput) catImageInput.value = categoryImages?.[cat] || '';
+    setCategoryImageDraftValue(categoryImages?.[cat] || '');
     const catImageUpload = document.getElementById('catImageUpload');
     if (catImageUpload) catImageUpload.value = '';
     setCategoryTranslationFields(cat);
@@ -7644,8 +7654,7 @@ window.generateCategoryImageWithAI = async function () {
     const categoryName = document.getElementById('catName')?.value?.trim();
     const selectedSuperCategoryId = document.getElementById('catSuperCategory')?.value?.trim() || '';
     const selectedSuperCategory = (restaurantConfig.superCategories || []).find((sc) => sc.id === selectedSuperCategoryId);
-    const imageInput = document.getElementById('catImage');
-    if (!categoryName || !imageInput) {
+    if (!categoryName) {
         showToast('Category name is required before generating an image.');
         return;
     }
@@ -7682,7 +7691,7 @@ window.generateCategoryImageWithAI = async function () {
             throw createAdminRequestError(data.error || 'AI category image generation failed.', data.error || 'ai_category_image_generation_failed');
         }
 
-        imageInput.value = data.url;
+        setCategoryImageDraftValue(data.url);
         updateCategoryImagePreview();
         showToast('AI image generated for the category.');
     } catch (error) {

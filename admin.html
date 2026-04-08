@@ -2451,6 +2451,10 @@
             box-shadow: 0 10px 22px rgba(226, 27, 27, 0.08);
         }
 
+        .menu-crud-validation-note[hidden] {
+            display: none !important;
+        }
+
         .menu-crud-validation-note strong {
             font-size: 0.78rem;
             letter-spacing: 0.04em;
@@ -9107,7 +9111,6 @@
                                     <span id="catImagePreviewFallback">Image</span>
                                 </div>
                                 <div class="category-image-controls">
-                                    <input type="hidden" id="catImage" />
                                     <div class="category-image-upload">
                                         <label for="catImageUpload">Upload category image</label>
                                         <input type="file" id="catImageUpload" accept="image/*" />
@@ -9392,12 +9395,6 @@
                                     <div class="owner-subsection-heading">
                                         <h4>Logo & hero media</h4>
                                         <p>Keep the media set disciplined. Upload the logo and homepage visuals here, then clear any slot you do not want to use.</p>
-                                    </div>
-                                    <div hidden aria-hidden="true">
-                                        <input type="hidden" id="brandLogoImage" />
-                                        <input type="hidden" id="brandHeroImage" />
-                                        <input type="hidden" id="brandHeroSlide2" />
-                                        <input type="hidden" id="brandHeroSlide3" />
                                     </div>
                                     <div class="branding-media-grid">
                                         <div class="brand-asset-card">
