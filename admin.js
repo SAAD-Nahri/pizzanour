@@ -2014,16 +2014,12 @@ function refreshFoodFormReview() {
     const priceLarge = Number.parseFloat(document.getElementById('itemPriceLarge')?.value || '0') || 0;
     const extras = typeof collectItemExtrasFromEditor === 'function' ? collectItemExtrasFromEditor() : [];
     const images = (() => {
-        const urls = String(document.getElementById('itemImg')?.value || '')
-            .split(/\n/)
-            .map((value) => value.trim())
-            .filter(Boolean);
         const files = document.getElementById('itemFile')?.files?.length || 0;
         if (editingItemId) {
             const existing = Array.isArray(window._editingImages) ? window._editingImages.filter(Boolean).length : 0;
-            return Math.max(existing, urls.length) + files;
+            return existing + files;
         }
-        return urls.length + files;
+        return files;
     })();
     const translationCount = getFilledTranslationCount(buildMenuItemTranslations());
     const available = document.getElementById('itemAvailable')?.checked !== false;
@@ -2073,8 +2069,7 @@ function getMenuCrudSectionStatus(formId, sectionId) {
             return extrasCount > 0 ? 'ready' : 'optional';
         }
         if (sectionId === 'media') {
-            const hasImages = Boolean(String(document.getElementById('itemImg')?.value || '').trim())
-                || Boolean(document.getElementById('itemFile')?.files?.length)
+            const hasImages = Boolean(document.getElementById('itemFile')?.files?.length)
                 || Boolean(Array.isArray(window._editingImages) && window._editingImages.length);
             return hasImages ? 'ready' : 'optional';
         }
@@ -4472,11 +4467,6 @@ function editItem(id) {
     const existingImages = item.images && item.images.length > 0 ? item.images : (item.img ? [item.img] : []);
     window._editingImages = [...existingImages];
 
-    // Show only URL images in the text field (base64 is too long to show)
-    const urlImages = existingImages.filter(img => !img.startsWith('data:'));
-    const imgInput = document.getElementById('itemImg');
-    if (imgInput) imgInput.value = urlImages.join(', ');
-
     // Change form title and button
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = `Edit Item - ${getAdminItemDisplayName(item)}`;
@@ -4497,6 +4487,7 @@ function resetFoodForm() {
     if (availableCb) availableCb.checked = true;
     toggleSizesUI();
     renderItemExtrasEditor([]);
+    window._editingImages = [];
     const itemEditorTitle = document.getElementById('menuItemEditorTitle');
     if (itemEditorTitle) itemEditorTitle.textContent = 'Add Item';
     document.querySelector('#foodForm .primary-btn').textContent = 'Save';
@@ -4519,10 +4510,6 @@ function initForms() {
         setMenuCrudPrimaryButtonState('foodForm', 'saving');
         setMenuCrudValidationState('foodForm', {});
         const fileInput = document.getElementById('itemFile');
-        const urlInput = document.getElementById('itemImg').value;
-
-        // Parse URL images â€” split by NEWLINE only
-        let urlImages = urlInput.split(/\n/).map(s => s.trim()).filter(s => s.length > 0 && !s.startsWith('data:'));
 
         // Upload new files to server (stored on disk, returned as /uploads/... URL)
         let newUploadedUrls = [];
@@ -4544,23 +4531,14 @@ function initForms() {
         }
 
         // Build final images array:
-        // - URL images from text field + newly uploaded server URLs
-        // - Keep existing images if nothing new is provided
+        // - Keep existing saved images while editing
+        // - Append any newly uploaded files
         let finalImages;
         if (editingItemId) {
             const existingImages = window._editingImages || [];
-            if (newUploadedUrls.length > 0) {
-                // New uploads provided â€” use URL list + new server images
-                finalImages = [...urlImages, ...newUploadedUrls];
-            } else if (urlImages.length > 0) {
-                // URL field was updated â€” use those (no new uploads)
-                finalImages = [...urlImages];
-            } else {
-                // Nothing changed â€” keep all existing images
-                finalImages = [...existingImages];
-            }
+            finalImages = [...existingImages, ...newUploadedUrls];
         } else {
-            finalImages = [...urlImages, ...newUploadedUrls];
+            finalImages = [...newUploadedUrls];
         }
 
         const ingredients = document.getElementById('itemIngredients').value.split(',').map(s => s.trim()).filter(s => s.length > 0);
@@ -4798,17 +4776,17 @@ function initForms() {
         const previousBranding = cloneAdminDraft(restaurantConfig.branding || {});
 
         if (!isValidAssetUrl(brandingDraft.logoImage)) {
-            showToast('Logo image must be an absolute URL or a local /uploads path.');
+            showToast('Upload a logo image before saving.');
             return;
         }
 
         if (!isValidAssetUrl(brandingDraft.heroImage)) {
-            showToast('Hero image must be an absolute URL or a local /uploads path.');
+            showToast('Upload a hero image before saving.');
             return;
         }
 
         if ((brandingDraft.heroSlides || []).some((value) => value && !isValidAssetUrl(value))) {
-            showToast('Each hero slide image must be an absolute URL or a local /uploads path.');
+            showToast('Remove or replace any invalid hero slide image before saving.');
             return;
         }
 
@@ -5365,6 +5343,22 @@ function isLikelyPhoneNumber(value) {
     return /^[+\d][\d\s\-()/.]{5,}$/.test(raw);
 }
 
+function setBrandAssetFieldValue(id, value, state) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    const nextValue = typeof value === 'string' ? value.trim() : '';
+    element.value = nextValue;
+    element.dataset.assetState = state || (nextValue ? 'set' : 'inherit');
+}
+
+function getBrandAssetFieldValue(id, fallback = '') {
+    const element = document.getElementById(id);
+    if (!element) return fallback;
+    if (element.dataset.assetState === 'cleared') return '';
+    const value = element.value.trim();
+    return value || fallback;
+}
+
 function getBrandingDraftFromForm() {
     const defaults = window.defaultBranding || {};
     const selectedPresetId = document.getElementById('brandPresetId')?.value || restaurantConfig.branding?.presetId || defaults.presetId || 'core';
@@ -5394,13 +5388,13 @@ function getBrandingDraftFromForm() {
         textMuted: normalizePreviewColor(getValue('brandTextMuted'), currentBranding.textMuted || defaults.textMuted || '#75655c'),
         menuBackground: normalizePreviewColor(getValue('brandMenuBackground'), currentBranding.menuBackground || defaults.menuBackground || '#111318'),
         menuSurface: normalizePreviewColor(getValue('brandMenuSurface'), currentBranding.menuSurface || defaults.menuSurface || '#1b1f26'),
-        heroImage: getValue('brandHeroImage') || currentBranding.heroImage || defaults.heroImage || '',
+        heroImage: getBrandAssetFieldValue('brandHeroImage', currentBranding.heroImage || defaults.heroImage || ''),
         heroSlides: [
-            getValue('brandHeroImage') || currentBranding.heroImage || defaults.heroImage || '',
-            getValue('brandHeroSlide2') || currentBranding.heroSlides?.[1] || '',
-            getValue('brandHeroSlide3') || currentBranding.heroSlides?.[2] || ''
+            getBrandAssetFieldValue('brandHeroImage', currentBranding.heroImage || defaults.heroImage || ''),
+            getBrandAssetFieldValue('brandHeroSlide2', currentBranding.heroSlides?.[1] || ''),
+            getBrandAssetFieldValue('brandHeroSlide3', currentBranding.heroSlides?.[2] || '')
         ],
-        logoImage: getValue('brandLogoImage')
+        logoImage: getBrandAssetFieldValue('brandLogoImage', currentBranding.logoImage || '')
     };
 }
 
@@ -5448,7 +5442,6 @@ function applyBrandPresetToForm(presetId) {
     assign('brandMenuBackground', preset.menuBackground);
     assign('brandMenuSurface', preset.menuSurface);
 
-    const heroInput = document.getElementById('brandHeroImage');
     const knownPresetHeroes = Object.values(window.brandPresetCatalog || {})
         .flatMap((entry) => {
             const values = [];
@@ -5462,7 +5455,7 @@ function applyBrandPresetToForm(presetId) {
         if (!input) return;
         const currentValue = input.value.trim();
         if (!currentValue || knownPresetHeroes.includes(currentValue)) {
-            input.value = nextValue || '';
+            setBrandAssetFieldValue(fieldId, nextValue || '', nextValue ? 'set' : 'inherit');
         }
     };
 
@@ -5623,7 +5616,7 @@ window.clearBrandAsset = function (fieldId) {
     const target = document.getElementById(fieldId);
     if (!target) return;
 
-    target.value = '';
+    setBrandAssetFieldValue(fieldId, '', 'cleared');
 
     if (fieldId === 'brandLogoImage') {
         const fileInput = document.getElementById('brandLogoFile');
@@ -5654,10 +5647,7 @@ window.handleBrandAssetUpload = async function (fieldId, input) {
 
     try {
         const url = await uploadImageToServer(file);
-        const target = document.getElementById(fieldId);
-        if (target) {
-            target.value = url;
-        }
+        setBrandAssetFieldValue(fieldId, url, 'set');
         window.updateBrandingPreview();
         showToast('Image uploaded. Save branding to publish it.');
     } catch (error) {
@@ -5749,7 +5739,11 @@ function initBrandingForm() {
     Object.entries(fields).forEach(([id, value]) => {
         const element = document.getElementById(id);
         if (element) {
-            element.value = value;
+            if (id === 'brandHeroImage' || id === 'brandHeroSlide2' || id === 'brandHeroSlide3' || id === 'brandLogoImage') {
+                setBrandAssetFieldValue(id, value, value ? 'set' : 'inherit');
+            } else {
+                element.value = value;
+            }
         }
     });
 
@@ -7534,32 +7528,6 @@ function syncCategoryImageAiControls() {
     setCategoryImageProgress(false);
 }
 
-async function addModalImageUrl() {
-    const url = document.getElementById('modalImgUrl').value.trim();
-    if (!url) return;
-    const item = menu.find(m => m.id == currentEditingId);
-    if (!item) return;
-
-    if (!item.images) item.images = item.img ? [item.img] : [];
-    const previousImages = Array.isArray(item.images) ? [...item.images] : [];
-    const previousImg = item.img || '';
-    item.images.push(url);
-
-    // SYNC: Keep main img updated
-    if (item.images.length > 0) item.img = item.images[0];
-
-    document.getElementById('modalImgUrl').value = '';
-    const saved = await saveAndRefresh();
-    if (saved) {
-        renderModalImages();
-        showToast('Image added from URL.');
-        return;
-    }
-    item.images = previousImages;
-    item.img = previousImg;
-    renderModalImages();
-}
-
 async function deleteModalImage(index) {
     const item = menu.find(m => m.id == currentEditingId);
     if (!item || !item.images) return;
@@ -7827,28 +7795,17 @@ function initGalleryForm() {
     form.onsubmit = async (e) => {
         e.preventDefault();
         const fileInput = document.getElementById('galleryFileInput');
-        const urlInput = document.getElementById('galleryUrlInput');
-        if (!fileInput || !urlInput) return;
+        if (!fileInput) return;
 
         if (!restaurantConfig.gallery) restaurantConfig.gallery = [];
         const previousGallery = Array.isArray(restaurantConfig.gallery) ? [...restaurantConfig.gallery] : [];
         const nextGallery = [...previousGallery];
         const saveButton = e.submitter || document.getElementById('brandingGallerySaveBtn');
+        void saveButton;
 
-        if (urlInput.value.trim() && !isValidAssetUrl(urlInput.value.trim())) {
-            showToast('Gallery image must be an absolute URL or a local /uploads path.');
+        if (fileInput.files.length === 0) {
+            showToast('Upload at least one image.');
             return;
-        }
-
-        if (!urlInput.value.trim() && fileInput.files.length === 0) {
-            showToast('Add an image URL or upload at least one image.');
-            return;
-        }
-
-        // Handle URLs
-        if (urlInput.value.trim()) {
-            nextGallery.push(urlInput.value.trim());
-            urlInput.value = '';
         }
 
         // Handle Files

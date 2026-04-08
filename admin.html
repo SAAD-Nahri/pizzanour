@@ -1807,13 +1807,6 @@
             line-height: 1.45;
         }
 
-        .image-modal-url-row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 10px;
-            align-items: center;
-        }
-
         .image-modal-input-actions {
             display: flex;
             flex-wrap: wrap;
@@ -3308,16 +3301,14 @@
         }
 
         .branding-form-grid,
-        .branding-color-grid,
-        .branding-media-url-grid {
+        .branding-color-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
         }
 
         .branding-form-grid .form-group:last-child:nth-child(odd),
-        .branding-color-grid .form-group:last-child:nth-child(odd),
-        .branding-media-url-grid .form-group:last-child:nth-child(odd) {
+        .branding-color-grid .form-group:last-child:nth-child(odd) {
             grid-column: 1 / -1;
         }
 
@@ -3347,8 +3338,7 @@
         }
 
         .branding-form-grid .form-group,
-        .branding-color-grid .form-group,
-        .branding-media-url-grid .form-group {
+        .branding-color-grid .form-group {
             padding: 16px 18px;
             border-radius: 18px;
             border: 1px solid rgba(232, 216, 197, 0.9);
@@ -3358,8 +3348,7 @@
         }
 
         .branding-form-grid .form-group label,
-        .branding-color-grid .form-group label,
-        .branding-media-url-grid .form-group label {
+        .branding-color-grid .form-group label {
             color: #8a6b57;
             font-size: 0.76rem;
             font-weight: 800;
@@ -3368,8 +3357,7 @@
         }
 
         .branding-form-grid input[type="text"],
-        .branding-color-grid input[type="color"],
-        .branding-media-url-grid input[type="text"] {
+        .branding-color-grid input[type="color"] {
             margin-top: 6px;
         }
 
@@ -6785,7 +6773,6 @@
 
             .branding-form-grid,
             .branding-color-grid,
-            .branding-media-url-grid,
             .branding-media-grid,
             .branding-overview-grid,
             .brand-preview-surfaces {
@@ -6793,8 +6780,7 @@
             }
 
             .branding-form-grid .form-group,
-            .branding-color-grid .form-group,
-            .branding-media-url-grid .form-group {
+            .branding-color-grid .form-group {
                 padding: 14px 15px;
             }
 
@@ -7545,10 +7531,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .image-modal-url-row {
-                grid-template-columns: 1fr;
-            }
-
             .image-modal-grid {
                 grid-area: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -8070,9 +8052,8 @@
         }
 
         .menu-crud-step-nav {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
             padding: 6px 8px;
             margin: 0;
@@ -8080,35 +8061,17 @@
             border: 1px solid rgba(232, 216, 197, 0.86);
             background: rgba(255, 255, 255, 0.7);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-            scrollbar-width: none;
-        }
-
-        .menu-crud-step-nav::-webkit-scrollbar {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .menu-crud-step-nav {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                overflow: visible;
-                width: 100%;
-            }
-
-            .menu-crud-step-btn {
-                width: 100%;
-            }
+            width: 100%;
         }
 
         .menu-crud-step-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            flex: 0 0 auto;
-            width: auto;
+            display: grid;
+            align-content: center;
+            gap: 4px;
+            width: 100%;
             min-width: 0;
-            padding: 7px 12px;
-            border-radius: 999px;
+            padding: 9px 11px;
+            border-radius: 14px;
             font-size: 0.78rem;
         }
 
@@ -8280,8 +8243,8 @@
                 align-items: center;
                 justify-content: flex-start;
                 width: 100%;
-                flex-wrap: nowrap;
-                overflow: hidden;
+                flex-wrap: wrap;
+                overflow: clip;
                 min-width: 0;
                 max-width: 100%;
                 box-sizing: border-box;
@@ -8334,7 +8297,6 @@
             }
 
             .dish-extras-builder > .btn-auto,
-            .image-modal-url-row > .btn-auto,
             .image-modal-ai-tools > .secondary-btn,
             .category-image-actions > .secondary-btn,
             #brandingGallerySaveBtn,
@@ -8820,9 +8782,9 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="admin.menu.gallery">Gallery (URLs or Upload)</label>
+                                <label data-i18n="admin.menu.gallery">Gallery uploads</label>
                                 <input type="file" id="itemFile" accept="image/*" multiple class="file-input-spaced" />
-                                <textarea id="itemImg" placeholder="Or paste URLs here (comma separated)..." data-i18n-placeholder="admin.menu.gallery_placeholder" rows="2"></textarea>
+                                <p class="copy-muted">Upload dish photos here. After the first save, use the gallery manager to sort or remove them.</p>
                             </div>
                             <div class="media-action-row">
                                 <button type="button" id="itemOpenGalleryBtn" class="secondary-btn" onclick="openItemImageManagerFromForm()">Save once to manage gallery</button>
@@ -9060,11 +9022,7 @@
                             <input type="file" id="modalImgCapture" accept="image/*" capture="environment" onchange="handleModalImageUpload(this)" />
                         </label>
                     </div>
-                    <p class="image-modal-helper">Upload images or paste a URL.</p>
-                    <div class="image-modal-url-row">
-                        <input type="text" id="modalImgUrl" placeholder="https://..." />
-                        <button class="primary-btn btn-auto" type="button" onclick="addModalImageUrl()">Add URL</button>
-                    </div>
+                    <p class="image-modal-helper">Upload images or take a photo.</p>
                     <div id="modalAiImageTools" class="image-modal-ai-tools" style="display:none;">
                         <p class="image-modal-helper">Generate a dish image from the item details.</p>
                         <button type="button" id="modalGenerateImageBtn" class="secondary-btn" onclick="generateModalImageWithAI()">Generate with AI</button>
@@ -9149,14 +9107,12 @@
                                     <span id="catImagePreviewFallback">Image</span>
                                 </div>
                                 <div class="category-image-controls">
-                                    <div class="form-group">
-                                        <label>Category Image URL / Path</label>
-                                        <input type="text" id="catImage" placeholder="/uploads/category-drinks.webp" />
-                                    </div>
+                                    <input type="hidden" id="catImage" />
                                     <div class="category-image-upload">
                                         <label for="catImageUpload">Upload category image</label>
                                         <input type="file" id="catImageUpload" accept="image/*" />
                                     </div>
+                                    <p class="copy-muted">Upload one atmosphere image for this section, or generate it with AI.</p>
                                     <div class="category-image-actions">
                                         <button type="button" id="catGenerateImageBtn" class="secondary-btn" onclick="generateCategoryImageWithAI()">Generate with AI</button>
                                     </div>
@@ -9435,30 +9391,18 @@
                                 <section class="owner-section-card branding-section-card">
                                     <div class="owner-subsection-heading">
                                         <h4>Logo & hero media</h4>
-                                        <p>Keep the media set disciplined. One strong logo and one strong hero do more than four average uploads.</p>
+                                        <p>Keep the media set disciplined. Upload the logo and homepage visuals here, then clear any slot you do not want to use.</p>
                                     </div>
-                                    <div class="branding-media-url-grid">
-                                        <div class="form-group">
-                                            <label data-i18n="admin.branding.logo_image_url">Logo Image URL</label>
-                                            <input type="text" id="brandLogoImage" placeholder="/uploads/logo.png or https://..." data-i18n-placeholder="admin.branding.logo_image_placeholder" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label data-i18n="admin.branding.hero_image_url">Hero Image URL</label>
-                                            <input type="text" id="brandHeroImage" placeholder="/uploads/cover.jpg or https://..." data-i18n-placeholder="admin.branding.hero_image_placeholder" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label data-i18n="admin.branding.hero_slide_2_url">Hero Slide 2 URL</label>
-                                            <input type="text" id="brandHeroSlide2" placeholder="/uploads/cover-2.jpg or https://..." data-i18n-placeholder="admin.branding.hero_slide_2_placeholder" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label data-i18n="admin.branding.hero_slide_3_url">Hero Slide 3 URL</label>
-                                            <input type="text" id="brandHeroSlide3" placeholder="/uploads/cover-3.jpg or https://..." data-i18n-placeholder="admin.branding.hero_slide_3_placeholder" />
-                                        </div>
+                                    <div hidden aria-hidden="true">
+                                        <input type="hidden" id="brandLogoImage" />
+                                        <input type="hidden" id="brandHeroImage" />
+                                        <input type="hidden" id="brandHeroSlide2" />
+                                        <input type="hidden" id="brandHeroSlide3" />
                                     </div>
                                     <div class="branding-media-grid">
                                         <div class="brand-asset-card">
                                             <h4 data-i18n="admin.branding.logo_upload">Logo Upload</h4>
-                                            <p data-i18n="admin.branding.logo_upload_desc">Use upload for faster delivery, while still keeping the URL field available when needed.</p>
+                                            <p>Upload the main mark used across admin, menu, and install screens.</p>
                                             <div class="brand-asset-tools">
                                                 <input type="file" id="brandLogoFile" accept="image/*"
                                                     onchange="handleBrandAssetUpload('brandLogoImage', this)" />
@@ -9468,7 +9412,7 @@
                                         </div>
                                         <div class="brand-asset-card">
                                             <h4 data-i18n="admin.branding.hero_upload">Hero Upload</h4>
-                                            <p data-i18n="admin.branding.hero_upload_desc">Upload the cover image here and the URL field will be filled automatically.</p>
+                                            <p>Upload the main homepage hero image.</p>
                                             <div class="brand-asset-tools">
                                                 <input type="file" id="brandHeroFile" accept="image/*"
                                                     onchange="handleBrandAssetUpload('brandHeroImage', this)" />
@@ -9478,7 +9422,7 @@
                                         </div>
                                         <div class="brand-asset-card">
                                             <h4 data-i18n="admin.branding.hero_slide_2_upload">Hero Slide 2 Upload</h4>
-                                            <p data-i18n="admin.branding.hero_slide_2_upload_desc">Use a second visual for the homepage slider if the client gives you more than one strong image.</p>
+                                            <p>Use a second strong visual when the homepage slider needs variety.</p>
                                             <div class="brand-asset-tools">
                                                 <input type="file" id="brandHeroSlide2File" accept="image/*"
                                                     onchange="handleBrandAssetUpload('brandHeroSlide2', this)" />
@@ -9488,7 +9432,7 @@
                                         </div>
                                         <div class="brand-asset-card">
                                             <h4 data-i18n="admin.branding.hero_slide_3_upload">Hero Slide 3 Upload</h4>
-                                            <p data-i18n="admin.branding.hero_slide_3_upload_desc">Add a third branded visual so the homepage slider feels fully finished instead of repeated.</p>
+                                            <p>Keep the third slide for a backup angle, not a duplicate of the hero image.</p>
                                             <div class="brand-asset-tools">
                                                 <input type="file" id="brandHeroSlide3File" accept="image/*"
                                                     onchange="handleBrandAssetUpload('brandHeroSlide3', this)" />
@@ -10160,10 +10104,6 @@
                     <label>Upload images</label>
                     <input type="file" id="galleryFileInput" accept="image/*" multiple class="file-input-spaced" />
                 </div>
-                <div class="form-group">
-                    <label>Or add an existing image URL</label>
-                    <input type="text" id="galleryUrlInput" placeholder="https://..." />
-                </div>
                 <button type="submit" id="brandingGallerySaveBtn" class="primary-btn btn-auto" style="padding:10px 30px;">Add to Gallery</button>
             </form>
 
@@ -10740,6 +10680,1486 @@
 
             body.admin-standalone .main {
                 min-height: 100dvh;
+            }
+        }
+
+        /* Mobile-first admin polish pass */
+        @media (max-width: 992px) {
+            :root {
+                --admin-mobile-gutter: 14px;
+                --admin-mobile-card-radius: 24px;
+                --admin-mobile-soft-radius: 20px;
+                --admin-mobile-stack-gap: 14px;
+                --admin-mobile-nav-height: 92px;
+            }
+
+            html,
+            body {
+                overflow-x: clip;
+            }
+
+            body.admin-page,
+            body.admin-standalone {
+                overflow-x: clip;
+            }
+
+            body.admin-standalone .main {
+                padding: 12px var(--admin-mobile-gutter) calc(var(--admin-mobile-nav-height) + 30px + env(safe-area-inset-bottom, 0px));
+                overflow-x: clip;
+            }
+
+            body.admin-standalone .section,
+            body.admin-standalone .owner-section-stack,
+            body.admin-standalone .owner-section-card,
+            body.admin-standalone .owner-section-card > form,
+            body.admin-standalone .owner-section-card > .hours-form,
+            body.admin-standalone .owner-section-card > .security-form,
+            body.admin-standalone .owner-section-card > .panel-soft,
+            body.admin-standalone .menu-builder-shell,
+            body.admin-standalone .menu-builder-stage,
+            body.admin-standalone .menu-builder-header,
+            body.admin-standalone .menu-builder-heading,
+            body.admin-standalone .menu-builder-actions,
+            body.admin-standalone .menu-builder-table-wrap,
+            body.admin-standalone .menu-builder-overview,
+            body.admin-standalone .table-container,
+            body.admin-standalone .branding-workspace-shell,
+            body.admin-standalone .branding-tab-shell,
+            body.admin-standalone .branding-workspace-stack,
+            body.admin-standalone .info-workspace-shell,
+            body.admin-standalone .tool-grid,
+            body.admin-standalone .tool-card,
+            body.admin-standalone .security-layout,
+            body.admin-standalone .security-main,
+            body.admin-standalone .security-side,
+            body.admin-standalone .importer-review-shell,
+            body.admin-standalone .importer-review-main,
+            body.admin-standalone .importer-review-side,
+            body.admin-standalone .menu-crud-modal-card,
+            body.admin-standalone #menuCrudModalBody,
+            body.admin-standalone #menuCrudModalBody > form,
+            body.admin-standalone .menu-crud-form-shell,
+            body.admin-standalone .menu-crud-form-intro,
+            body.admin-standalone .menu-form-block,
+            body.admin-standalone .menu-form-split,
+            body.admin-standalone .translation-grid,
+            body.admin-standalone .translation-card,
+            body.admin-standalone .chip-select-list,
+            body.admin-standalone .dish-extra-row,
+            body.admin-standalone .super-icon-picker,
+            body.admin-standalone .super-icon-preview,
+            body.admin-standalone .category-image-field,
+            body.admin-standalone .image-modal-card,
+            body.admin-standalone .image-modal-dropzone,
+            body.admin-standalone .image-modal-grid {
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            body.admin-standalone .section {
+                padding: 14px;
+                border-radius: 26px;
+                overflow-x: clip;
+            }
+
+            body.admin-standalone .owner-section-stack,
+            body.admin-standalone .info-workspace-shell,
+            body.admin-standalone .branding-workspace-shell,
+            body.admin-standalone .branding-tab-shell,
+            body.admin-standalone .branding-workspace-stack,
+            body.admin-standalone .security-layout,
+            body.admin-standalone .tool-grid,
+            body.admin-standalone .importer-review-shell {
+                gap: var(--admin-mobile-stack-gap);
+            }
+
+            .mobile-header {
+                gap: 10px;
+                padding: calc(12px + env(safe-area-inset-top, 0px)) var(--admin-mobile-gutter) 10px;
+            }
+
+            .mobile-header-copy {
+                gap: 6px;
+            }
+
+            #mobileAdminTitleText {
+                font-size: 1.22rem;
+                letter-spacing: 0.05em;
+            }
+
+            .mobile-header-meta {
+                gap: 6px;
+            }
+
+            .mobile-header-status,
+            .mobile-header-save,
+            .mobile-header-connection {
+                padding: 4px 9px;
+                font-size: 0.61rem;
+                letter-spacing: 0.07em;
+            }
+
+            body.admin-standalone .mobile-header-connection {
+                display: none;
+            }
+
+            .menu-toggle {
+                width: 44px;
+                height: 44px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .mobile-bottom-nav {
+                left: var(--admin-mobile-gutter);
+                right: var(--admin-mobile-gutter);
+                bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+                min-height: 72px;
+                padding: 8px;
+                border-radius: 22px;
+            }
+
+            body.admin-standalone .mobile-bottom-nav-btn {
+                min-height: 56px;
+                gap: 5px;
+                padding: 8px 6px;
+                border-radius: 16px;
+                font-size: 0.68rem;
+            }
+
+            body.admin-standalone .mobile-bottom-nav-icon {
+                font-size: 1rem;
+            }
+
+            body.admin-standalone .sidebar {
+                right: var(--admin-mobile-gutter);
+                top: calc(68px + env(safe-area-inset-top, 0px));
+                bottom: calc(var(--admin-mobile-nav-height) + 16px + env(safe-area-inset-bottom, 0px));
+                width: min(248px, calc(100vw - 28px));
+                max-height: calc(100dvh - 156px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+                padding: 14px;
+                border-radius: 24px;
+                overflow-y: auto;
+                overflow-x: clip;
+            }
+
+            body.admin-standalone .sidebar::after,
+            body.admin-standalone #adminSaveStatus {
+                display: none !important;
+            }
+
+            body.admin-standalone .sidebar-actions .admin-save-status,
+            body.admin-standalone .sidebar-actions > #adminSaveStatus {
+                display: none !important;
+            }
+
+            body.admin-standalone .sidebar-actions {
+                display: grid;
+                gap: 8px;
+                margin-top: 8px;
+                padding-top: 10px;
+            }
+
+            body.admin-standalone .sidebar .nav-btn {
+                min-height: 46px;
+                padding: 12px 14px;
+                border-radius: 16px;
+                font-size: 0.86rem;
+            }
+
+            body.admin-standalone .menu-builder-stage,
+            body.admin-standalone .owner-section-card,
+            body.admin-standalone .info-overview-card,
+            body.admin-standalone .info-primary-card,
+            body.admin-standalone .info-panel-card,
+            body.admin-standalone .branding-overview-card,
+            body.admin-standalone .branding-section-card,
+            body.admin-standalone .branding-tab-card,
+            body.admin-standalone .tool-card,
+            body.admin-standalone .security-form,
+            body.admin-standalone .panel-soft,
+            body.admin-standalone .table-container,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .branding-tab-savebar {
+                padding: 18px;
+                border-radius: var(--admin-mobile-card-radius);
+                box-shadow: 0 14px 30px rgba(75, 47, 24, 0.06);
+            }
+
+            body.admin-standalone .info-overview-card,
+            body.admin-standalone .info-primary-card,
+            body.admin-standalone .info-panel-card,
+            body.admin-standalone .branding-overview-card,
+            body.admin-standalone .branding-section-card,
+            body.admin-standalone .branding-tab-card,
+            body.admin-standalone .tool-card,
+            body.admin-standalone .security-form,
+            body.admin-standalone .panel-soft,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .branding-tab-savebar {
+                background: linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.95));
+                border-color: rgba(232, 216, 197, 0.88);
+                box-shadow: 0 10px 24px rgba(75, 47, 24, 0.05);
+            }
+
+            body.admin-standalone .info-overview-card::before,
+            body.admin-standalone .branding-overview-card::before,
+            body.admin-standalone .tool-card::before {
+                opacity: 0.08;
+            }
+
+            body.admin-standalone .tool-card,
+            body.admin-standalone .importer-review-summary,
+            body.admin-standalone .importer-apply-panel,
+            body.admin-standalone .importer-impact-panel {
+                padding: 15px;
+            }
+
+            body.admin-standalone .menu-builder-header {
+                top: calc(env(safe-area-inset-top, 0px) + 74px);
+                gap: 10px;
+                padding: 0 0 8px;
+                align-items: start;
+                overflow: visible;
+            }
+
+            body.admin-standalone .menu-builder-stage {
+                min-height: calc(100dvh - 196px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+                align-content: start;
+            }
+
+            body.admin-standalone .menu-builder-heading,
+            body.admin-standalone .menu-crud-form-intro-shell,
+            body.admin-standalone .menu-form-block-header,
+            body.admin-standalone .translation-summary-header,
+            body.admin-standalone .owner-subsection-heading,
+            body.admin-standalone .branding-overview-copy,
+            body.admin-standalone .info-hero-copy,
+            body.admin-standalone .brand-asset-card h4,
+            body.admin-standalone .brand-preview-panel h4,
+            body.admin-standalone .tool-card h4 {
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            body.admin-standalone .admin-help-host.has-admin-help {
+                padding-right: 42px;
+            }
+
+            body.admin-standalone .admin-help-toggle {
+                top: 0;
+                right: 0;
+                width: 32px;
+                min-width: 32px;
+                height: 32px;
+            }
+
+            body.admin-standalone #menuBuilderTitle,
+            body.admin-standalone .menu-crud-form-intro-title,
+            body.admin-standalone .menu-form-block-title,
+            body.admin-standalone .tool-card h4,
+            body.admin-standalone .info-hero-copy h3 {
+                overflow-wrap: anywhere;
+            }
+
+            body.admin-standalone #menuBuilderTitle {
+                font-size: clamp(1.45rem, 7vw, 1.9rem);
+            }
+
+            body.admin-standalone #menuBuilderCopy,
+            body.admin-standalone .menu-crud-form-intro-copy,
+            body.admin-standalone .menu-form-block-copy,
+            body.admin-standalone .copy-muted {
+                max-width: 36ch;
+            }
+
+            body.admin-standalone .menu-builder-kicker,
+            body.admin-standalone .menu-crud-form-intro-kicker {
+                min-height: 30px;
+                padding: 0 11px;
+                font-size: 0.69rem;
+            }
+
+            body.admin-standalone .menu-builder-actions {
+                width: 100%;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 8px;
+                flex-wrap: wrap;
+                overflow: clip;
+                padding: 8px;
+                border-radius: 18px;
+                border: 1px solid rgba(232, 216, 197, 0.84);
+                background: rgba(255, 255, 255, 0.9);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+            }
+
+            body.admin-standalone .menu-builder-actions.menu-builder-actions--single {
+                width: auto;
+                max-width: 100%;
+                align-self: flex-start;
+            }
+
+            body.admin-standalone .menu-builder-actions .menu-icon-btn,
+            body.admin-standalone #menuBuilderBackBtn {
+                flex: 0 0 48px;
+                width: 48px;
+                min-width: 48px;
+                height: 48px;
+                padding-inline: 0;
+            }
+
+            body.admin-standalone .menu-builder-actions .primary-btn,
+            body.admin-standalone .menu-builder-actions .brand-secondary-btn {
+                width: auto;
+                min-width: 0;
+                min-height: 48px;
+                padding-inline: 18px;
+            }
+
+            body.admin-standalone .menu-builder-actions #menuBuilderAddBtn {
+                width: auto !important;
+                max-width: min(100%, 198px);
+                min-width: 124px;
+                flex: 0 1 auto;
+            }
+
+            body.admin-standalone .menu-builder-empty {
+                min-height: clamp(240px, calc(100dvh - 320px - env(safe-area-inset-bottom, 0px)), 420px);
+                display: grid;
+                align-content: center;
+                justify-items: start;
+            }
+
+            body.admin-standalone .menu-builder-empty-title,
+            body.admin-standalone .menu-builder-empty-copy {
+                max-width: 26ch;
+            }
+
+            body.admin-standalone .menu-builder-empty-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            body.admin-standalone .menu-builder-empty-actions .primary-btn,
+            body.admin-standalone .menu-builder-empty-actions .brand-secondary-btn {
+                width: 100%;
+                min-width: 0;
+                justify-content: center;
+            }
+
+            body.admin-standalone .menu-builder-table-wrap {
+                padding: 8px;
+                border-radius: 20px;
+            }
+
+            body.admin-standalone .menu-builder-table {
+                border-spacing: 0 8px;
+            }
+
+            body.admin-standalone .menu-builder-table td {
+                padding: 10px;
+            }
+
+            body.admin-standalone .menu-builder-entry-copy strong,
+            body.admin-standalone .menu-builder-item-meta strong {
+                font-size: 0.94rem;
+                line-height: 1.16;
+            }
+
+            body.admin-standalone .menu-builder-row-copy,
+            body.admin-standalone .menu-builder-row-meta,
+            body.admin-standalone .menu-builder-row-note {
+                font-size: 0.77rem;
+            }
+
+            body.admin-standalone .menu-builder-entry-pill,
+            body.admin-standalone .menu-builder-count-pill,
+            body.admin-standalone .menu-builder-stat-note {
+                min-height: 28px;
+                padding-inline: 9px;
+                font-size: 0.68rem;
+            }
+
+            body.admin-standalone .menu-builder-action-rail {
+                width: 100%;
+                gap: 8px;
+                padding: 6px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .menu-builder-item-actions .action-btn,
+            body.admin-standalone .menu-builder-item-actions .menu-builder-toggle {
+                width: 40px;
+                min-width: 40px;
+                height: 40px;
+                border-radius: 12px;
+            }
+
+            body.admin-standalone #menuBuilderTable[data-step="items"] tr {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            body.admin-standalone #menuBuilderTable[data-step="items"] td[data-label="Featured"] {
+                grid-column: 1 / -1;
+            }
+
+            body.admin-standalone .menu-crud-modal-card {
+                width: min(100vw - 10px, 100vw - 10px);
+                max-width: min(100vw - 10px, 100vw - 10px);
+                height: min(94dvh, 94dvh);
+                max-height: min(94dvh, 94dvh);
+                padding: 14px 12px 12px;
+                gap: 12px;
+                border-radius: 26px;
+            }
+
+            body.admin-standalone .menu-crud-modal-header {
+                width: 100%;
+                padding-bottom: 10px;
+            }
+
+            body.admin-standalone #menuCrudModalBody {
+                padding: 0 6px 8px;
+            }
+
+            body.admin-standalone #menuCrudModalBody > form,
+            body.admin-standalone #menuCrudModalFooterHost,
+            body.admin-standalone #menuCrudModalFooterHost[data-form-id="catForm"],
+            body.admin-standalone #menuCrudModalFooterHost[data-form-id="superCatForm"] {
+                width: 100%;
+            }
+
+            body.admin-standalone .menu-crud-form-shell {
+                gap: 12px;
+            }
+
+            body.admin-standalone .menu-crud-form-intro {
+                gap: 10px;
+                padding: 14px;
+                border-radius: 20px;
+                box-shadow: 0 10px 22px rgba(75, 47, 24, 0.05);
+            }
+
+            body.admin-standalone .menu-crud-form-meta {
+                gap: 6px;
+            }
+
+            body.admin-standalone .menu-crud-form-meta-pill {
+                min-height: 28px;
+                padding-inline: 9px;
+                font-size: 0.68rem;
+            }
+
+            body.admin-standalone .menu-crud-step-nav {
+                position: sticky;
+                top: 4px;
+                z-index: 4;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 8px;
+                border-radius: 18px;
+                border: 1px solid rgba(232, 216, 197, 0.92);
+                background: rgba(255, 249, 241, 0.94);
+                box-shadow: 0 10px 22px rgba(75, 47, 24, 0.05);
+                backdrop-filter: blur(14px);
+            }
+
+            body.admin-standalone .parameter-shell {
+                position: sticky;
+                top: calc(env(safe-area-inset-top, 0px) + 74px);
+                z-index: 4;
+                margin: 0 0 12px;
+                padding: 0;
+            }
+
+            body.admin-standalone .parameter-tabs,
+            body.admin-standalone #brandingWorkspaceTabs {
+                position: relative;
+                margin: 0;
+                padding: 8px;
+                border-radius: 18px;
+                border: 1px solid rgba(232, 216, 197, 0.92);
+                background: rgba(255, 251, 245, 0.95);
+                box-shadow: 0 10px 22px rgba(75, 47, 24, 0.05);
+                backdrop-filter: blur(14px);
+            }
+
+            body.admin-standalone .parameter-tab-btn,
+            body.admin-standalone .branding-tab-btn {
+                min-height: 46px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                line-height: 1.25;
+            }
+
+            body.admin-standalone .menu-crud-step-btn {
+                min-height: 54px;
+                padding: 10px 11px;
+                border-radius: 16px;
+                box-shadow: none;
+            }
+
+            body.admin-standalone .menu-crud-step-label {
+                font-size: 0.75rem;
+            }
+
+            body.admin-standalone .menu-crud-step-status {
+                display: block;
+                font-size: 0.62rem;
+            }
+
+            body.admin-standalone .menu-crud-modal-card .menu-form-block {
+                gap: 12px;
+                padding: 15px;
+                border-radius: 19px;
+                box-shadow: none;
+                background: rgba(255, 255, 255, 0.96);
+            }
+
+            body.admin-standalone .menu-form-block-header {
+                gap: 4px;
+            }
+
+            body.admin-standalone .menu-form-side-panel {
+                padding: 12px 13px;
+                gap: 8px;
+                border-radius: 16px;
+                border-style: dashed;
+                background: rgba(255, 252, 247, 0.96);
+                box-shadow: none;
+            }
+
+            body.admin-standalone .translation-summary-card,
+            body.admin-standalone .menu-crud-modal-card .translation-card,
+            body.admin-standalone .menu-crud-modal-card .admin-disclosure,
+            body.admin-standalone .menu-review-card,
+            body.admin-standalone .selection-card,
+            body.admin-standalone .importer-review-summary,
+            body.admin-standalone .importer-apply-panel,
+            body.admin-standalone .importer-impact-panel,
+            body.admin-standalone .importer-advanced-panel {
+                border-radius: 18px;
+                box-shadow: none;
+            }
+
+            body.admin-standalone .menu-crud-modal-card .admin-disclosure summary {
+                min-height: 46px;
+                padding: 12px 14px;
+            }
+
+            body.admin-standalone .menu-crud-modal-card .form-group {
+                display: grid;
+                gap: 6px;
+                margin-bottom: 0;
+            }
+
+            body.admin-standalone .menu-crud-modal-card label {
+                margin-bottom: 0;
+                font-size: 0.72rem;
+            }
+
+            body.admin-standalone .menu-crud-modal-card input,
+            body.admin-standalone .menu-crud-modal-card select,
+            body.admin-standalone .menu-crud-modal-card textarea {
+                min-height: 48px;
+                border-radius: 15px;
+            }
+
+            body.admin-standalone .menu-crud-modal-card textarea {
+                min-height: 108px;
+            }
+
+            body.admin-standalone .form-grid,
+            body.admin-standalone .form-grid-2,
+            body.admin-standalone .inline-check-grid,
+            body.admin-standalone .multi-price-group,
+            body.admin-standalone .form-grid-name-emoji,
+            body.admin-standalone .translation-grid,
+            body.admin-standalone .info-contact-grid,
+            body.admin-standalone .info-social-grid,
+            body.admin-standalone .branding-form-grid,
+            body.admin-standalone .branding-color-grid,
+            body.admin-standalone .branding-media-grid,
+            body.admin-standalone .branding-studio-grid,
+            body.admin-standalone .branding-tab-grid,
+            body.admin-standalone .info-workspace-grid,
+            body.admin-standalone .tool-grid,
+            body.admin-standalone .importer-review-shell,
+            body.admin-standalone .importer-scope-grid,
+            body.admin-standalone .selection-grid,
+            body.admin-standalone .brand-preview-surfaces {
+                grid-template-columns: 1fr !important;
+            }
+
+            body.admin-standalone .dish-extra-row {
+                grid-template-columns: 1fr;
+            }
+
+            body.admin-standalone .dish-extra-row .danger-btn,
+            body.admin-standalone .dish-extra-remove,
+            body.admin-standalone .dish-extras-builder > .btn-auto,
+            body.admin-standalone .tool-actions > .primary-btn,
+            body.admin-standalone .tool-actions > .brand-secondary-btn,
+            body.admin-standalone .brand-asset-tools > .primary-btn,
+            body.admin-standalone .brand-asset-tools > .brand-secondary-btn,
+            body.admin-standalone .image-modal-ai-tools > .secondary-btn,
+            body.admin-standalone .category-image-actions > .secondary-btn,
+            body.admin-standalone .info-form-actions > .info-save-btn,
+            body.admin-standalone .branding-overview-actions > .info-save-btn,
+            body.admin-standalone .branding-save-bar > .info-save-btn,
+            body.admin-standalone .branding-tab-savebar > .info-save-btn,
+            body.admin-standalone #brandingGallerySaveBtn {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+
+            body.admin-standalone .tool-actions,
+            body.admin-standalone .brand-asset-tools,
+            body.admin-standalone .info-hero-actions,
+            body.admin-standalone .info-form-actions,
+            body.admin-standalone .branding-overview-actions,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .branding-tab-savebar {
+                display: grid;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            body.admin-standalone .info-form-actions,
+            body.admin-standalone .branding-overview-actions,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .branding-tab-savebar {
+                padding-top: 12px;
+                border-top: 1px solid rgba(232, 216, 197, 0.7);
+            }
+
+            body.admin-standalone .info-form-actions .info-save-btn,
+            body.admin-standalone .branding-overview-actions .info-save-btn,
+            body.admin-standalone .branding-save-bar .info-save-btn,
+            body.admin-standalone .branding-tab-savebar .info-save-btn {
+                min-height: 48px;
+                border-radius: 16px;
+                box-shadow: 0 12px 24px rgba(255, 141, 8, 0.14);
+            }
+
+            body.admin-standalone .info-hero-header,
+            body.admin-standalone .branding-overview-header,
+            body.admin-standalone .branding-tab-savebar,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .info-hero-actions,
+            body.admin-standalone .tool-actions,
+            body.admin-standalone .image-modal-input-actions {
+                grid-template-columns: 1fr;
+                justify-content: stretch;
+            }
+
+            body.admin-standalone .info-hero-header,
+            body.admin-standalone .branding-overview-header {
+                display: grid;
+                gap: 12px;
+                margin-bottom: 16px;
+                align-items: stretch;
+            }
+
+            body.admin-standalone .info-hero-actions,
+            body.admin-standalone .branding-overview-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            body.admin-standalone .info-summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            body.admin-standalone .info-summary-card,
+            body.admin-standalone .branding-overview-metric,
+            body.admin-standalone .selection-card {
+                min-height: 0;
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            body.admin-standalone .owner-subsection-heading,
+            body.admin-standalone .info-hero-copy,
+            body.admin-standalone .branding-overview-copy {
+                gap: 8px;
+                margin-bottom: 0;
+            }
+
+            body.admin-standalone .info-hero-copy h3,
+            body.admin-standalone .branding-overview-copy h3 {
+                font-size: clamp(1.42rem, 6vw, 1.9rem);
+            }
+
+            body.admin-standalone .branding-overview-grid,
+            body.admin-standalone .branding-overview-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            body.admin-standalone .branding-tab-btn,
+            body.admin-standalone .menu-workspace-btn {
+                min-height: 46px;
+                padding: 10px 12px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .branding-tab-btn strong,
+            body.admin-standalone .menu-workspace-btn strong {
+                font-size: 0.9rem;
+            }
+
+            body.admin-standalone .branding-tab-btn span,
+            body.admin-standalone .menu-workspace-btn span {
+                font-size: 0.76rem;
+            }
+
+            body.admin-standalone .branding-overview-actions,
+            body.admin-standalone .branding-tab-savebar,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .info-form-actions {
+                width: 100%;
+            }
+
+            body.admin-standalone .branding-form-grid .form-group,
+            body.admin-standalone .branding-color-grid .form-group,
+            body.admin-standalone .info-contact-grid .info-group,
+            body.admin-standalone .info-social-grid .info-group {
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            body.admin-standalone .branding-notes-card,
+            body.admin-standalone .security-side-card:last-child {
+                display: none;
+            }
+
+            body.admin-standalone .tool-card h4,
+            body.admin-standalone .importer-review-title,
+            body.admin-standalone .security-side-card h4 {
+                font-size: 1.02rem;
+                line-height: 1.2;
+            }
+
+            body.admin-standalone .tool-card p,
+            body.admin-standalone .importer-review-narrative,
+            body.admin-standalone .importer-status-copy,
+            body.admin-standalone .security-side-card p {
+                font-size: 0.84rem;
+                line-height: 1.5;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                overflow: hidden;
+            }
+
+            body.admin-standalone .tool-card-eyebrow,
+            body.admin-standalone .importer-review-eyebrow {
+                font-size: 0.68rem;
+                padding: 6px 10px;
+            }
+
+            body.admin-standalone .tool-card .form-group {
+                display: grid;
+                gap: 6px;
+                margin-bottom: 0;
+            }
+
+            body.admin-standalone .tool-card .form-group label {
+                font-size: 0.72rem;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: #7d6556;
+            }
+
+            body.admin-standalone .tool-card input[type="file"],
+            body.admin-standalone .tool-card input[type="text"],
+            body.admin-standalone .tool-card textarea {
+                width: 100%;
+                min-height: 48px;
+                padding: 12px 13px;
+                border-radius: 15px;
+                border: 1px solid rgba(232, 216, 197, 0.94);
+                background: rgba(255, 255, 255, 0.95);
+                box-sizing: border-box;
+            }
+
+            body.admin-standalone .tool-card textarea {
+                min-height: 140px;
+            }
+
+            body.admin-standalone .importer-status-head,
+            body.admin-standalone .importer-panel-head,
+            body.admin-standalone .importer-review-summary-top {
+                gap: 10px;
+            }
+
+            body.admin-standalone .importer-scope-option {
+                padding: 13px 14px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .importer-scope-option strong {
+                font-size: 0.94rem;
+            }
+
+            body.admin-standalone .importer-scope-option span {
+                font-size: 0.82rem;
+                line-height: 1.45;
+            }
+
+            body.admin-standalone .importer-review-side {
+                gap: 12px;
+            }
+
+            body.admin-standalone .security-form {
+                padding: 18px;
+            }
+
+            body.admin-standalone .security-side-card {
+                padding: 0;
+            }
+
+            body.admin-standalone .security-status-card {
+                padding: 14px 16px;
+                border-radius: 18px;
+            }
+
+            body.admin-standalone .security-rule-list {
+                gap: 10px;
+            }
+
+            body.admin-standalone .security-rule-list li {
+                font-size: 0.84rem;
+            }
+
+            body.admin-standalone .security-main,
+            body.admin-standalone .security-side {
+                gap: 14px;
+            }
+
+            body.admin-standalone .parameter-tabs {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 8px;
+                overflow: visible;
+                margin: 0 0 10px;
+                padding: 8px;
+            }
+
+            body.admin-standalone .parameter-tab-btn {
+                width: 100%;
+                min-width: 0;
+                white-space: normal;
+                text-align: center;
+                font-size: 0.82rem;
+                padding: 10px 12px;
+            }
+
+            body.admin-standalone .login-screen {
+                padding: calc(20px + env(safe-area-inset-top, 0px)) var(--admin-mobile-gutter) calc(22px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-standalone .login-card {
+                width: min(100%, 420px);
+                padding: 24px 20px;
+                border-radius: 26px;
+                gap: 14px;
+            }
+
+            body.admin-standalone .login-card h1 {
+                font-size: clamp(1.9rem, 10vw, 2.5rem);
+            }
+
+            body.admin-standalone .login-card input,
+            body.admin-standalone .login-btn {
+                min-height: 50px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .admin-install-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body.admin-standalone .main {
+                padding-bottom: calc(var(--admin-mobile-nav-height) + 26px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-standalone .menu-builder-stage,
+            body.admin-standalone .owner-section-card,
+            body.admin-standalone .info-overview-card,
+            body.admin-standalone .info-primary-card,
+            body.admin-standalone .info-panel-card,
+            body.admin-standalone .branding-overview-card,
+            body.admin-standalone .branding-section-card,
+            body.admin-standalone .branding-tab-card,
+            body.admin-standalone .tool-card,
+            body.admin-standalone .security-form,
+            body.admin-standalone .panel-soft,
+            body.admin-standalone .table-container,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .branding-tab-savebar {
+                padding: 16px;
+                border-radius: 22px;
+            }
+
+            body.admin-standalone .parameter-tabs,
+            body.admin-standalone #brandingWorkspaceTabs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 7px;
+                padding: 7px;
+            }
+
+            body.admin-standalone .parameter-tab-btn,
+            body.admin-standalone .branding-tab-btn,
+            body.admin-standalone .menu-workspace-btn {
+                min-height: 44px;
+                padding: 10px 11px;
+                border-radius: 15px;
+            }
+
+            body.admin-standalone .menu-workspace-nav,
+            body.admin-standalone .info-hero-header,
+            body.admin-standalone .branding-overview-header {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            body.admin-standalone .info-hero-actions,
+            body.admin-standalone .branding-overview-actions,
+            body.admin-standalone .tool-actions,
+            body.admin-standalone .brand-asset-tools {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+                justify-content: stretch;
+            }
+
+            body.admin-standalone .info-hero-actions .info-save-btn,
+            body.admin-standalone .branding-overview-actions .info-save-btn,
+            body.admin-standalone .tool-actions > .primary-btn,
+            body.admin-standalone .tool-actions > .brand-secondary-btn,
+            body.admin-standalone .brand-asset-tools > .primary-btn,
+            body.admin-standalone .brand-asset-tools > .brand-secondary-btn {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+
+            body.admin-standalone .info-summary-grid,
+            body.admin-standalone .branding-overview-grid,
+            body.admin-standalone .branding-overview-metrics,
+            body.admin-standalone .branding-tab-grid,
+            body.admin-standalone .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            body.admin-standalone .info-summary-card,
+            body.admin-standalone .branding-overview-metric,
+            body.admin-standalone .selection-card {
+                padding: 15px;
+            }
+
+            body.admin-standalone .info-form-actions,
+            body.admin-standalone .branding-overview-actions,
+            body.admin-standalone .branding-save-bar,
+            body.admin-standalone .branding-tab-savebar {
+                gap: 8px;
+                padding-top: 10px;
+            }
+
+            body.admin-standalone .info-save-note,
+            body.admin-standalone .branding-save-note {
+                width: 100%;
+                justify-content: flex-start;
+                border-radius: 16px;
+                padding: 8px 10px;
+            }
+
+            body.admin-standalone .menu-builder-actions {
+                gap: 6px;
+                padding: 6px;
+                border-radius: 16px;
+            }
+
+            body.admin-standalone .menu-builder-actions .menu-icon-btn,
+            body.admin-standalone #menuBuilderBackBtn {
+                flex: 0 0 44px;
+                width: 44px;
+                min-width: 44px;
+                height: 44px;
+            }
+
+            body.admin-standalone .menu-builder-actions .primary-btn,
+            body.admin-standalone .menu-builder-actions .brand-secondary-btn {
+                min-height: 44px;
+                padding-inline: 16px;
+                border-radius: 14px;
+            }
+
+            body.admin-standalone .menu-builder-actions #menuBuilderAddBtn {
+                max-width: min(100%, 172px);
+                min-width: 112px;
+            }
+
+            body.admin-standalone .menu-builder-empty {
+                min-height: clamp(220px, calc(100dvh - 332px - env(safe-area-inset-bottom, 0px)), 360px);
+                padding: 22px;
+                border-radius: 22px;
+            }
+
+            body.admin-standalone .menu-builder-action-rail {
+                gap: 6px;
+                padding: 5px;
+                border-radius: 14px;
+            }
+
+            body.admin-standalone .menu-builder-item-actions .action-btn,
+            body.admin-standalone .menu-builder-item-actions .menu-builder-toggle {
+                width: 38px;
+                min-width: 38px;
+                height: 38px;
+                border-radius: 11px;
+            }
+
+            body.admin-standalone .menu-crud-modal-card {
+                width: min(100vw - 8px, 100vw - 8px);
+                max-width: min(100vw - 8px, 100vw - 8px);
+                height: min(93dvh, 93dvh);
+                max-height: min(93dvh, 93dvh);
+                padding: 12px 10px 10px;
+            }
+
+            body.admin-standalone .menu-crud-step-nav {
+                top: 0;
+                padding: 6px;
+                gap: 6px;
+            }
+
+            body.admin-standalone .menu-crud-step-btn {
+                min-height: 50px;
+                padding: 8px 10px;
+                border-radius: 15px;
+            }
+
+            body.admin-standalone #menuCrudModalBody {
+                padding: 0 4px 10px;
+            }
+
+            body.admin-standalone #menuCrudModalFooterHost {
+                padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-standalone .menu-crud-footer-stack {
+                gap: 7px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body.admin-standalone {
+                --admin-mobile-gutter: 12px;
+                --admin-mobile-nav-height: 90px;
+            }
+
+            body.admin-standalone .mobile-header-meta {
+                gap: 5px;
+            }
+
+            body.admin-standalone .mobile-header-status,
+            body.admin-standalone .mobile-header-save,
+            body.admin-standalone .mobile-header-connection {
+                padding: 4px 8px;
+                font-size: 0.58rem;
+            }
+
+            body.admin-standalone .mobile-header-save {
+                display: none;
+            }
+
+            body.admin-standalone .menu-builder-stage,
+            body.admin-standalone .owner-section-card,
+            body.admin-standalone .info-overview-card,
+            body.admin-standalone .info-primary-card,
+            body.admin-standalone .info-panel-card,
+            body.admin-standalone .branding-overview-card,
+            body.admin-standalone .branding-section-card,
+            body.admin-standalone .branding-tab-card,
+            body.admin-standalone .tool-card,
+            body.admin-standalone .security-form,
+            body.admin-standalone .panel-soft,
+            body.admin-standalone .table-container {
+                padding: 14px;
+                border-radius: 22px;
+            }
+
+            body.admin-standalone .info-overview-card,
+            body.admin-standalone .branding-overview-card {
+                box-shadow: 0 8px 20px rgba(75, 47, 24, 0.045);
+            }
+
+            body.admin-standalone .info-summary-grid,
+            body.admin-standalone .gallery-grid,
+            body.admin-standalone .branding-overview-grid,
+            body.admin-standalone .branding-overview-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            body.admin-standalone .menu-crud-step-nav {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                padding: 8px;
+            }
+
+            body.admin-standalone .menu-crud-step-btn {
+                min-height: 50px;
+                padding: 9px 10px;
+            }
+
+            body.admin-standalone #menuCrudModalFooterHost {
+                position: sticky;
+                bottom: 0;
+                z-index: 5;
+                margin-top: auto;
+                padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+                background: linear-gradient(180deg, rgba(255, 251, 244, 0) 0%, rgba(255, 251, 244, 0.94) 24%, rgba(255, 249, 241, 0.99) 100%);
+                backdrop-filter: blur(14px);
+            }
+
+            body.admin-standalone .menu-crud-footer-stack {
+                gap: 8px;
+                padding-top: 8px;
+            }
+
+            body.admin-standalone .menu-crud-primary-actions {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            body.admin-standalone .menu-crud-primary-actions .menu-crud-save-btn {
+                grid-column: 1 / -1;
+                min-height: 50px;
+            }
+
+            body.admin-standalone .menu-builder-actions #menuBuilderAddBtn {
+                max-width: min(100%, 184px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            body.admin-page:not(.admin-standalone) {
+                --admin-mobile-gutter: 14px;
+                --admin-mobile-card-radius: 24px;
+                --admin-mobile-nav-height: 92px;
+            }
+
+            body.admin-page:not(.admin-standalone) .main {
+                padding: 12px var(--admin-mobile-gutter) calc(var(--admin-mobile-nav-height) + 30px + env(safe-area-inset-bottom, 0px));
+                overflow-x: clip;
+            }
+
+            body.admin-page:not(.admin-standalone) .section,
+            body.admin-page:not(.admin-standalone) .menu-builder-stage,
+            body.admin-page:not(.admin-standalone) .owner-section-card,
+            body.admin-page:not(.admin-standalone) .info-overview-card,
+            body.admin-page:not(.admin-standalone) .info-primary-card,
+            body.admin-page:not(.admin-standalone) .info-panel-card,
+            body.admin-page:not(.admin-standalone) .branding-overview-card,
+            body.admin-page:not(.admin-standalone) .branding-section-card,
+            body.admin-page:not(.admin-standalone) .branding-tab-card,
+            body.admin-page:not(.admin-standalone) .tool-card,
+            body.admin-page:not(.admin-standalone) .security-form,
+            body.admin-page:not(.admin-standalone) .panel-soft,
+            body.admin-page:not(.admin-standalone) .table-container,
+            body.admin-page:not(.admin-standalone) .branding-save-bar,
+            body.admin-page:not(.admin-standalone) .branding-tab-savebar {
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-x: clip;
+                padding: 18px;
+                border-radius: var(--admin-mobile-card-radius);
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-stage {
+                min-height: calc(100dvh - 196px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+                align-content: start;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-header,
+            body.admin-page:not(.admin-standalone) .info-hero-header,
+            body.admin-page:not(.admin-standalone) .branding-overview-header {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 8px;
+                flex-wrap: wrap;
+                overflow: clip;
+                padding: 8px;
+                border-radius: 18px;
+                border: 1px solid rgba(232, 216, 197, 0.84);
+                background: rgba(255, 255, 255, 0.9);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions .menu-icon-btn,
+            body.admin-page:not(.admin-standalone) #menuBuilderBackBtn {
+                flex: 0 0 48px;
+                width: 48px;
+                min-width: 48px;
+                height: 48px;
+                padding-inline: 0;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions .primary-btn,
+            body.admin-page:not(.admin-standalone) .menu-builder-actions .brand-secondary-btn {
+                width: auto;
+                min-width: 0;
+                min-height: 48px;
+                padding-inline: 18px;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions #menuBuilderAddBtn {
+                width: auto !important;
+                max-width: min(100%, 198px);
+                min-width: 124px;
+                flex: 0 1 auto;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-empty {
+                min-height: clamp(240px, calc(100dvh - 320px - env(safe-area-inset-bottom, 0px)), 420px);
+                display: grid;
+                align-content: center;
+                justify-items: start;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-empty-title,
+            body.admin-page:not(.admin-standalone) .menu-builder-empty-copy {
+                max-width: 26ch;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-empty-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-empty-actions .primary-btn,
+            body.admin-page:not(.admin-standalone) .menu-builder-empty-actions .brand-secondary-btn {
+                width: 100%;
+                min-width: 0;
+                justify-content: center;
+            }
+
+            body.admin-page:not(.admin-standalone) .info-hero-actions,
+            body.admin-page:not(.admin-standalone) .branding-overview-actions,
+            body.admin-page:not(.admin-standalone) .tool-actions,
+            body.admin-page:not(.admin-standalone) .brand-asset-tools,
+            body.admin-page:not(.admin-standalone) .info-form-actions,
+            body.admin-page:not(.admin-standalone) .branding-save-bar,
+            body.admin-page:not(.admin-standalone) .branding-tab-savebar {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                width: 100%;
+                align-items: stretch;
+                justify-content: stretch;
+            }
+
+            body.admin-page:not(.admin-standalone) .info-hero-actions .info-save-btn,
+            body.admin-page:not(.admin-standalone) .branding-overview-actions .info-save-btn,
+            body.admin-page:not(.admin-standalone) .tool-actions > .primary-btn,
+            body.admin-page:not(.admin-standalone) .tool-actions > .brand-secondary-btn,
+            body.admin-page:not(.admin-standalone) .brand-asset-tools > .primary-btn,
+            body.admin-page:not(.admin-standalone) .brand-asset-tools > .brand-secondary-btn,
+            body.admin-page:not(.admin-standalone) .info-form-actions > .info-save-btn,
+            body.admin-page:not(.admin-standalone) .branding-save-bar > .info-save-btn,
+            body.admin-page:not(.admin-standalone) .branding-tab-savebar > .info-save-btn {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+            }
+
+            body.admin-page:not(.admin-standalone) .parameter-tabs,
+            body.admin-page:not(.admin-standalone) #brandingWorkspaceTabs {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 8px;
+                overflow: visible;
+                margin: 0 0 10px;
+                padding: 8px;
+            }
+
+            body.admin-page:not(.admin-standalone) .parameter-tab-btn,
+            body.admin-page:not(.admin-standalone) .branding-tab-btn,
+            body.admin-page:not(.admin-standalone) .menu-workspace-btn {
+                width: 100%;
+                min-width: 0;
+                min-height: 46px;
+                padding: 10px 12px;
+                border-radius: 16px;
+                white-space: normal;
+                text-align: center;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-crud-step-nav {
+                position: sticky;
+                top: 4px;
+                z-index: 4;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                overflow: visible;
+                padding: 8px;
+                border-radius: 18px;
+                border: 1px solid rgba(232, 216, 197, 0.92);
+                background: rgba(255, 249, 241, 0.94);
+                box-shadow: 0 10px 22px rgba(75, 47, 24, 0.05);
+                backdrop-filter: blur(14px);
+            }
+
+            body.admin-page:not(.admin-standalone) #menuCrudModalFooterHost {
+                position: sticky;
+                bottom: 0;
+                z-index: 5;
+                margin-top: auto;
+                padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+                background: linear-gradient(180deg, rgba(255, 251, 244, 0) 0%, rgba(255, 251, 244, 0.94) 24%, rgba(255, 249, 241, 0.99) 100%);
+                backdrop-filter: blur(14px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            body.admin-page:not(.admin-standalone) .main {
+                padding-bottom: calc(var(--admin-mobile-nav-height) + 26px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-stage,
+            body.admin-page:not(.admin-standalone) .owner-section-card,
+            body.admin-page:not(.admin-standalone) .info-overview-card,
+            body.admin-page:not(.admin-standalone) .info-primary-card,
+            body.admin-page:not(.admin-standalone) .info-panel-card,
+            body.admin-page:not(.admin-standalone) .branding-overview-card,
+            body.admin-page:not(.admin-standalone) .branding-section-card,
+            body.admin-page:not(.admin-standalone) .branding-tab-card,
+            body.admin-page:not(.admin-standalone) .tool-card,
+            body.admin-page:not(.admin-standalone) .security-form,
+            body.admin-page:not(.admin-standalone) .panel-soft,
+            body.admin-page:not(.admin-standalone) .table-container,
+            body.admin-page:not(.admin-standalone) .branding-save-bar,
+            body.admin-page:not(.admin-standalone) .branding-tab-savebar {
+                padding: 16px;
+                border-radius: 22px;
+            }
+
+            body.admin-page:not(.admin-standalone) .info-summary-grid,
+            body.admin-page:not(.admin-standalone) .branding-overview-grid,
+            body.admin-page:not(.admin-standalone) .branding-overview-metrics,
+            body.admin-page:not(.admin-standalone) .branding-tab-grid,
+            body.admin-page:not(.admin-standalone) .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions {
+                gap: 6px;
+                padding: 6px;
+                border-radius: 16px;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions .menu-icon-btn,
+            body.admin-page:not(.admin-standalone) #menuBuilderBackBtn {
+                flex: 0 0 44px;
+                width: 44px;
+                min-width: 44px;
+                height: 44px;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions .primary-btn,
+            body.admin-page:not(.admin-standalone) .menu-builder-actions .brand-secondary-btn {
+                min-height: 44px;
+                padding-inline: 16px;
+                border-radius: 14px;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions #menuBuilderAddBtn {
+                max-width: min(100%, 172px);
+                min-width: 112px;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-empty {
+                min-height: clamp(220px, calc(100dvh - 332px - env(safe-area-inset-bottom, 0px)), 360px);
+                padding: 22px;
+                border-radius: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body.admin-page:not(.admin-standalone) {
+                --admin-mobile-gutter: 12px;
+                --admin-mobile-nav-height: 90px;
+            }
+
+            body.admin-page:not(.admin-standalone) .main {
+                padding-bottom: calc(var(--admin-mobile-nav-height) + 22px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-stage,
+            body.admin-page:not(.admin-standalone) .owner-section-card,
+            body.admin-page:not(.admin-standalone) .info-overview-card,
+            body.admin-page:not(.admin-standalone) .info-primary-card,
+            body.admin-page:not(.admin-standalone) .info-panel-card,
+            body.admin-page:not(.admin-standalone) .branding-overview-card,
+            body.admin-page:not(.admin-standalone) .branding-section-card,
+            body.admin-page:not(.admin-standalone) .branding-tab-card,
+            body.admin-page:not(.admin-standalone) .tool-card,
+            body.admin-page:not(.admin-standalone) .security-form,
+            body.admin-page:not(.admin-standalone) .panel-soft,
+            body.admin-page:not(.admin-standalone) .table-container {
+                padding: 14px;
+                border-radius: 22px;
+            }
+
+            body.admin-page:not(.admin-standalone) .info-summary-grid,
+            body.admin-page:not(.admin-standalone) .gallery-grid,
+            body.admin-page:not(.admin-standalone) .branding-overview-grid,
+            body.admin-page:not(.admin-standalone) .branding-overview-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-crud-step-nav {
+                padding: 8px;
+            }
+
+            body.admin-page:not(.admin-standalone) #menuCrudModalFooterHost {
+                padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+            }
+
+            body.admin-page:not(.admin-standalone) .menu-builder-actions #menuBuilderAddBtn {
+                max-width: min(100%, 184px);
             }
         }
     </style>
