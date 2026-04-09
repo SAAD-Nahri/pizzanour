@@ -1,4 +1,4 @@
-﻿let menu = [];
+let menu = [];
 let catEmojis = window.defaultCatEmojis || {};
 let categoryImages = window.defaultCategoryImages || {};
 window.categoryImages = categoryImages;
@@ -6116,8 +6116,8 @@ function getImporterReviewReport(draft) {
         orphanSuperCategoryRefCount,
         blockers,
         warnings,
-        canApplyMenuOnly: menuItems.length > 0 && menuOnlyCategoryMismatchCount === 0 && blockers.length === 0,
-        canApplyMenuStructure: menuItems.length > 0 && categoryKeys.length > 0 && uncategorizedCount === 0 && blockers.length === 0
+        canApplyMenuOnly: menuItems.length > 0,
+        canApplyMenuStructure: menuItems.length > 0
     };
 }
 
@@ -6606,11 +6606,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
     }
 
     const report = lastImporterReviewReport || getImporterReviewReport(lastImporterDraft);
-    if (scope === 'menu_structure' && !report.canApplyMenuStructure) {
-        showToast('Fix the importer blockers before applying category structure.');
-        return;
-    }
-    if (scope === 'menu_only' && !report.canApplyMenuOnly) {
+    if (!report.canApplyMenuOnly || !report.canApplyMenuStructure) {
         showToast('The draft does not contain any menu items to apply.');
         return;
     }

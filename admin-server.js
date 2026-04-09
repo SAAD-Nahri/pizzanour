@@ -298,11 +298,13 @@ const IMPORTER_SOURCE_EXTRACTION_SYSTEM_PROMPT = [
   "You extract raw restaurant menu source text from uploaded menu images or PDFs.",
   "Return page-by-page text only.",
   "Preserve headings, item names, prices, and short descriptions with meaningful line breaks.",
+  "Capture currency symbols, item sizes (e.g., Small/Large), dietary markers (e.g., Vegan/Spicy), and other crucial item modifiers if present.",
   "Preserve visible section headings and subsection headings even when they do not explicitly say category or super-category.",
+  "Ensure distinctly separated dishes are not mistakenly merged into one. Use double line breaks or clear spacing to separate unconnected items.",
   "If names, descriptions, and prices are visually separated, keep the closest related lines together in reading order.",
   "For PDFs, return one page entry per PDF page in order. For single menu images, return one page entry for the visible menu content in that image.",
-  "Keep the original language and wording. Do not translate, summarize, group, or normalize the menu.",
-  "Skip clearly decorative non-menu copy when it is obvious.",
+  "Keep the original language and wording. Handle minor OCR anomalies smoothly. Do not translate, summarize, group, or normalize the menu.",
+  "Skip clearly decorative non-menu copy, page numbers, or background noise when it is obvious.",
   "If a region is unreadable or ambiguous, omit invented text and record the problem in warnings.",
   "Follow the JSON schema exactly."
 ].join("\n");
@@ -311,10 +313,12 @@ const IMPORTER_SOURCE_TEXT_FALLBACK_SYSTEM_PROMPT = [
   "You extract raw restaurant menu text from one uploaded menu image or PDF.",
   "Return plain text only.",
   "Preserve the visible menu reading order as faithfully as possible.",
+  "Capture currency symbols, item sizes, dietary markers, and modifiers if present.",
   "Preserve visible section headings and subsection headings as separate lines when they appear.",
+  "Ensure distinct dishes are separated by clear line breaks so they do not blend together.",
   "Keep item names, prices, and short descriptions together when they clearly belong together.",
   "Do not translate, summarize, explain, or output JSON.",
-  "Skip obvious decorative marketing copy when it is clearly not part of the menu.",
+  "Skip obvious decorative marketing copy, page numbers, or background noise when it is clearly not part of the menu.",
   "If some text is unreadable, omit it instead of inventing content."
 ].join("\n");
 
