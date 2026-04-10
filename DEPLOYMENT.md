@@ -38,8 +38,8 @@ If the admin subdomain DNS record is not created yet, deploy the admin first on 
 
 Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.example) or the prepared target file [`coolify.matsco.env.example`](./coolify.matsco.env.example):
 
-- `WEBSITE_PORT=3002`
-- `ADMIN_PORT=3102`
+- `WEBSITE_PORT=3015`
+- `ADMIN_PORT=3115`
 - `PRODUCT_DOMAIN=<public-domain>`
 - `ADMIN_DOMAIN=<admin-domain>`
 - `ADMIN_USER=<admin-username>`

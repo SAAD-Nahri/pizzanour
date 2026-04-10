@@ -34,8 +34,8 @@ function Get-EnvValue {
     return $line.Matches[0].Groups[1].Value
 }
 
-$websitePort = Get-EnvValue -Key "WEBSITE_PORT" -DefaultValue "3002"
-$adminPort = Get-EnvValue -Key "ADMIN_PORT" -DefaultValue "3102"
+$websitePort = Get-EnvValue -Key "WEBSITE_PORT" -DefaultValue "3015"
+$adminPort = Get-EnvValue -Key "ADMIN_PORT" -DefaultValue "3115"
 
 Push-Location $root
 try {

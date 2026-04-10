@@ -115,8 +115,8 @@ ADMIN_USER=admin ADMIN_PASS=change-me-now npm run start:admin
 
 Default local URLs:
 
-- website: `http://localhost:3002`
-- admin: `http://localhost:3102/admin`
+- website: `http://localhost:3015`
+- admin: `http://localhost:3115/admin`
 
 ## Validation Commands
 

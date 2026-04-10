@@ -9,21 +9,21 @@ services:
     command: node website-server.js
     environment:
       - NODE_ENV=production
-      - PORT=${WEBSITE_PORT:-3002}
+      - PORT=${WEBSITE_PORT:-3015}
       - DATA_FILE=/app/data/data.json
       - UPLOADS_DIR=/app/uploads
     ports:
-      - "127.0.0.1:${WEBSITE_PORT:-3002}:${WEBSITE_PORT:-3002}"
+      - "127.0.0.1:${WEBSITE_PORT:-3015}:${WEBSITE_PORT:-3015}"
     volumes:
       - app_data:/app/data
       - app_uploads:/app/uploads
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${WEBSITE_PORT:-3002}/health"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${WEBSITE_PORT:-3015}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5s
-    # In Coolify, assign this service domain as: https://restaurant.example.com:3002
+    # In Coolify, assign this service domain as: https://restaurant.example.com:3015
 
   admin:
     build:
@@ -35,7 +35,7 @@ services:
     command: node admin-server.js
     environment:
       - NODE_ENV=production
-      - PORT=${ADMIN_PORT:-3102}
+      - PORT=${ADMIN_PORT:-3115}
       - DATA_FILE=/app/data/data.json
       - UPLOADS_DIR=/app/uploads
       - AUTH_FILE=/app/data/auth.json
@@ -43,17 +43,17 @@ services:
       - ADMIN_PASS=${ADMIN_PASS:-change-me-now}
       - COOKIE_SECURE=${COOKIE_SECURE:-true}
     ports:
-      - "127.0.0.1:${ADMIN_PORT:-3102}:${ADMIN_PORT:-3102}"
+      - "127.0.0.1:${ADMIN_PORT:-3115}:${ADMIN_PORT:-3115}"
     volumes:
       - app_data:/app/data
       - app_uploads:/app/uploads
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${ADMIN_PORT:-3102}/health"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:${ADMIN_PORT:-3115}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5s
-    # In Coolify, assign this service domain as: https://admin.restaurant.example.com:3102
+    # In Coolify, assign this service domain as: https://admin.restaurant.example.com:3115
 
 volumes:
   app_data:

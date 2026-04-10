@@ -12,7 +12,7 @@ const { createThumbnailRequestHandler, getUploadThumbnailPublicUrl, warmUploadTh
 const { ensureStorage, getDataVersion, readData, uploadsDir } = require("./site-store");
 
 const app = express();
-const port = parsePort(process.env.PORT, 3002);
+const port = parsePort(process.env.PORT, 3015);
 const publicBuildDir = path.join(__dirname, "public-build");
 const PUBLIC_BUILD_FILES = new Set([
   "/home-shell.css",
