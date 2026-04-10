@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Menu JS - 3-Tier Navigation
  * Landing â†’ Super Category â†’ Sub Category â†’ Items
  */
@@ -1155,7 +1155,18 @@ function renderLandingSocialLinks() {
     const container = document.getElementById('menuLandingSocialLinks');
     if (!container) return;
 
-    const links = [`<a href="index.html" class="social-icon-link" aria-label="${t('landing_home_title', 'Home')}">&#127968;</a>`];
+    const SVG_ICONS = {
+        home: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>',
+        facebook: '<svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-1.1 0-2 .9-2 2v1h3l-1 3h-2v6.8C18.56 20.87 22 16.84 22 12z"/></svg>',
+        instagram: '<svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>',
+        whatsapp: '<svg viewBox="0 0 24 24"><path d="M16.75 13.96c.25.13 4.12 2.04 4.6 2.05.16.01.39.04.53.15.11.09.28.31.28.6 0 .5-.19 1.4-1.29 2.09-.85.52-1.72.63-2.14.63h-.03c-.24 0-1.07-.1-2.9-.6-2.5-1.19-5.11-3.6-6.72-5.4C7.43 11.66 6 9.87 6 7.83c0-.62.19-1.39.73-2 .57-.65 1.23-.74 1.57-.74.19 0 .39 0 .55.01.27.02.48.06.66.5.18.42.74 1.83.81 1.98.07.15.12.33.02.52-.09.18-.15.3-.29.46-.14.16-.29.35-.41.48-.13.14-.28.27-.12.55.15.28.68 1.15 1.45 1.84.99.89 1.85 1.16 2.12 1.3.28.13.44.11.6-.07.16-.18.69-.8 .88-1.07.18-.27.36-.23.63-.09M12 2C6.48 2 2 6.48 2 12c0 1.95.56 3.76 1.5 5.3L2 22l4.82-1.42A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>',
+        tiktok: '<svg viewBox="0 0 24 24"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>',
+        map: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>',
+        phone: '<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>',
+        wifi: '<svg viewBox="0 0 24 24"><path d="M1 9l2 2c5-5 13-5 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>'
+    };
+
+    const links = [`<a href="index.html" class="social-icon-link" aria-label="${t('landing_home_title', 'Home')}">${SVG_ICONS.home}</a>`];
     const socials = { ...(window.restaurantConfig?.socials || {}) };
     socials.facebook = window.getSafeExternalUrl(socials.facebook);
     socials.instagram = window.getSafeExternalUrl(socials.instagram);
@@ -1163,16 +1174,33 @@ function renderLandingSocialLinks() {
     socials.whatsapp = window.getWhatsAppNumber();
 
     if (socials.facebook) {
-        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link" aria-label="${t('social_facebook', 'Facebook')}">&#128216;</a>`);
+        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link" aria-label="${t('social_facebook', 'Facebook')}">${SVG_ICONS.facebook}</a>`);
     }
     if (socials.instagram) {
-        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link" aria-label="${t('social_instagram', 'Instagram')}">&#128247;</a>`);
+        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link" aria-label="${t('social_instagram', 'Instagram')}">${SVG_ICONS.instagram}</a>`);
     }
     if (socials.tiktok) {
-        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link" aria-label="${t('social_tiktok', 'TikTok')}">&#127925;</a>`);
+        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link" aria-label="${t('social_tiktok', 'TikTok')}">${SVG_ICONS.tiktok}</a>`);
     }
     if (socials.whatsapp) {
-        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link" aria-label="${t('social_whatsapp', 'WhatsApp')}">&#128222;</a>`);
+        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link" aria-label="${t('social_whatsapp', 'WhatsApp')}">${SVG_ICONS.whatsapp}</a>`);
+    }
+
+    const config = window.restaurantConfig;
+    const locationConfig = config.location || {};
+    const mapUrl = window.getSafeExternalUrl(locationConfig.url);
+    const phoneHref = window.getSafePhoneHref(config.phone);
+    const wifiConfig = config.wifi || {};
+    const hasWifi = Boolean(wifiConfig.name && wifiConfig.code);
+
+    if (mapUrl && locationConfig.address) {
+        links.push(`<a href="${mapUrl}" target="_blank" class="social-icon-link" aria-label="Carte">${SVG_ICONS.map}</a>`);
+    }
+    if (phoneHref && config.phone) {
+        links.push(`<a href="${phoneHref}" class="social-icon-link" aria-label="Appeler">${SVG_ICONS.phone}</a>`);
+    }
+    if (hasWifi) {
+        links.push(`<a href="#" onclick="openWiFiModal(); return false;" class="social-icon-link" aria-label="WiFi">${SVG_ICONS.wifi}</a>`);
     }
 
     container.classList.toggle('social-links-minimal', links.length === 1);

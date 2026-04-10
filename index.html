@@ -5,18 +5,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="images/hero-default.svg" />
-  <title>Restaurant – Commandez en ligne</title>
+  <title>Pizzeria Nour – Commandez en ligne à Tanger</title>
   <meta name="description"
-    content="Commandez en ligne, découvrez le menu du restaurant et contactez facilement l'établissement." />
+    content="Commandez en ligne, découvrez le menu de Pizzeria Nour à Tanger et contactez facilement l'établissement." />
   <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap"
     rel="stylesheet" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="home-shell.css" />
   <link rel="preload" as="style" href="style.css" onload="this.onload=null;this.rel='stylesheet'" />
   <link rel="stylesheet" href="home-polish.css" />
+  <link rel="stylesheet" href="laruche.css" />
   <noscript><link rel="stylesheet" href="style.css" /></noscript>
   <noscript><link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap"
     rel="stylesheet" /></noscript>
 </head>
 
@@ -26,8 +27,8 @@
   <div class="top-bar">
     <div class="top-bar-inner">
       <div class="top-contact">
-        <span id="topPhoneDisplay">📞 05393-007 07</span>
-        <span id="topAddressDisplay"></span>
+        <span id="topPhoneDisplay">📞 05 39 32 15 79</span>
+        <span id="topAddressDisplay">Rue Figuig, Tanger</span>
       </div>
     </div>
   </div>
@@ -35,7 +36,7 @@
   <!-- HEADER -->
   <header class="header" id="header">
     <div class="header-inner">
-      <div class="logo"><span id="brandLogoIconHeader">🍽️</span> <span id="brandNameHeader">Restaurant</span></div>
+      <div class="logo"><span id="brandLogoIconHeader">🍕</span> <span id="brandNameHeader">Pizzeria Nour</span></div>
       <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="headerNav">
         <span></span>
         <span></span>
@@ -88,7 +89,7 @@
         <p class="slide-sub" data-i18n="hero_sub1">Une table pour</p>
         <h1 class="slide-title" data-i18n="hero_title1">SAVEURS <span>AUTHENTIQUES</span></h1>
       </div>
-      <div class="slide-img"><img id="heroSlideImage1" src="images/hero-default.svg" alt="Restaurant hero preview" width="960" height="960" decoding="async" fetchpriority="high" /></div>
+      <div class="slide-img"><img id="heroSlideImage1" src="images/hero-default.svg" alt="Pizzeria Nour hero preview" width="960" height="960" decoding="async" fetchpriority="high" /></div>
     </div>
     <div class="slide" id="slide2">
       <div class="slide-content">
@@ -153,7 +154,7 @@
           <div class="about-signature">
             <p class="sig-welcome" data-i18n="about_welcome">Bienvenue, revenez nous voir !</p>
             <p class="sig-thanks" data-i18n="about_thanks">Merci,</p>
-            <p class="sig-name" id="aboutSignatureText">— L'équipe du restaurant 🍽️</p>
+            <p class="sig-name" id="aboutSignatureText">— L'équipe de Pizzeria Nour 🍕</p>
           </div>
         </div>
         <div class="about-visual">
@@ -307,11 +308,11 @@
   <!-- FOOTER -->
   <footer class="footer" id="footer">
     <div class="footer-inner">
-      <div class="footer-brand"><span id="footerBrandIcon">🍽️</span> <strong id="footerBrandName">Restaurant</strong></div>
-      <p id="footerAddressText"></p>
+      <div class="footer-brand"><span id="footerBrandIcon">🍕</span> <strong id="footerBrandName">Pizzeria Nour</strong></div>
+      <p id="footerAddressText">Rue Figuig, Tanger</p>
       <p id="footerNoteText" data-i18n="footer_note">Cuisine sincère, service chaleureux et accueil de proximité.</p>
       <div class="footer-social" id="footerSocial"></div>
-      <p class="footer-copy" id="footerCopyText">© 2026 Restaurant — Tous droits réservés.</p>
+      <p class="footer-copy" id="footerCopyText">© 2026 Pizzeria Nour — Tous droits réservés.</p>
       <div style="margin-top:20px; font-size: 0.7rem; opacity: 0.5;">
         <a href="admin.html" style="color:#fff; text-decoration:none;" data-i18n="admin_panel_link">Admin Panel</a>
       </div>
@@ -386,6 +387,29 @@
       if (!e.target.closest('#langDropdown')) {
         document.getElementById('langOptions')?.classList.remove('open');
       }
+    });
+
+    // Elegant Scroll Reveals aligned with La Ruche
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll(".section-reveal").forEach(el => observer.observe(el));
+
+      // Header sticky transition
+      const header = document.getElementById('header');
+      window.addEventListener('scroll', () => {
+        if(window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      });
     });
   </script>
 </body>
