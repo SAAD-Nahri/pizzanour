@@ -298,14 +298,13 @@
 
         #menuNavigationView[data-mode='items'] .menu-content-area.is-category-backed {
             background:
-                linear-gradient(180deg, rgba(255, 252, 247, 0.74) 0%, rgba(255, 248, 239, 0.62) 16%, rgba(255, 242, 229, 0.54) 42%, rgba(255, 252, 247, 0.90) 100%),
-                radial-gradient(circle at top right, rgba(255, 174, 88, 0.22), transparent 34%),
-                radial-gradient(circle at 12% 24%, rgba(255, 255, 255, 0.18), transparent 28%),
+                linear-gradient(180deg, rgba(16, 18, 24, 0.85) 0%, rgba(16, 18, 24, 0.4) 30%, rgba(16, 18, 24, 0.4) 70%, rgba(16, 18, 24, 0.95) 100%),
+                radial-gradient(circle at top right, rgba(255, 174, 88, 0.15), transparent 34%),
                 var(--menu-category-backdrop-image);
-            background-size: auto, auto, auto, cover;
-            background-position: center, top right, left top, center;
+            background-size: auto, auto, cover;
+            background-position: center, top right, center top;
             background-repeat: no-repeat;
-            background-blend-mode: normal, screen, screen, normal;
+            background-attachment: scroll, scroll, fixed;
         }
 
         #menuNavigationView[data-mode='items'] .menu-content-area.is-category-backed::after {
@@ -1911,12 +1910,12 @@
 
             #menuNavigationView[data-mode='items'] .menu-content-area.is-category-backed {
                 background:
-                    linear-gradient(180deg, rgba(255, 252, 247, 0.78) 0%, rgba(255, 246, 235, 0.60) 20%, rgba(255, 242, 229, 0.52) 42%, rgba(255, 252, 247, 0.92) 100%),
-                    radial-gradient(circle at top right, rgba(255, 174, 88, 0.20), transparent 38%),
+                    linear-gradient(180deg, rgba(16, 18, 24, 0.85) 0%, rgba(16, 18, 24, 0.3) 25%, rgba(16, 18, 24, 0.3) 75%, rgba(16, 18, 24, 0.95) 100%),
                     var(--menu-category-backdrop-image);
-                background-size: auto, auto, cover;
-                background-position: center, top right, center;
+                background-size: auto, cover;
+                background-position: center, center top;
                 background-repeat: no-repeat;
+                background-attachment: scroll, fixed;
             }
 
             .cat-nav-wrapper {
