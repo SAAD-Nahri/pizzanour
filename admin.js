@@ -993,12 +993,14 @@ const CONTENT_EDITOR_LANGUAGES = ['fr', 'en', 'ar'];
 const LANDING_CONTENT_FIELDS = [
     { key: 'hero_sub1', label: 'Hero Slide 1 - Eyebrow', type: 'text', hint: 'Short introduction line above the main title.' },
     { key: 'hero_title1', label: 'Hero Slide 1 - Title', type: 'text', hint: 'Main highlighted title. You can keep <span>...</span> for the accent word.' },
+    { key: 'hero_desc1', label: 'Hero Slide 1 - Description', type: 'textarea', hint: 'Short supporting sentence for the first slide.' },
     { key: 'hero_sub2', label: 'Hero Slide 2 - Eyebrow', type: 'text', hint: 'Short introduction line above the main title.' },
     { key: 'hero_title2', label: 'Hero Slide 2 - Title', type: 'text', hint: 'Main highlighted title. You can keep <span>...</span> for the accent word.' },
     { key: 'hero_desc2', label: 'Hero Slide 2 - Description', type: 'textarea', hint: 'Short supporting sentence for the second slide.' },
     { key: 'hero_sub3', label: 'Hero Slide 3 - Eyebrow', type: 'text', hint: 'Short introduction line above the main title.' },
     { key: 'hero_title3', label: 'Hero Slide 3 - Title', type: 'text', hint: 'Main highlighted title. You can keep <span>...</span> for the accent word.' },
     { key: 'hero_desc3', label: 'Hero Slide 3 - Description', type: 'textarea', hint: 'Short supporting sentence for the third slide.' },
+    { key: 'hero_cta', label: 'Hero - CTA Label', type: 'text', hint: 'Primary call-to-action label used on the hero slides.' },
     { key: 'about_p1', label: 'About - Paragraph 1', type: 'textarea', hint: 'Opening paragraph for your restaurant story.' },
     { key: 'about_p2', label: 'About - Paragraph 2', type: 'textarea', hint: 'Details about quality, style, or philosophy.' },
     { key: 'about_p3', label: 'About - Paragraph 3', type: 'textarea', hint: 'Closing paragraph and promise to customers.' },
@@ -1011,6 +1013,7 @@ const LANDING_CONTENT_FIELDS = [
     { key: 'event_party', label: 'Events - Private Party Title', type: 'text', hint: 'Title for the fourth event/service card.' },
     { key: 'event_party_desc', label: 'Events - Private Party Description', type: 'textarea', hint: 'Description for the fourth event/service card.' },
     { key: 'events_cta_text', label: 'Events - CTA Text', type: 'textarea', hint: 'Closing sentence before the contact button.' },
+    { key: 'events_cta_btn', label: 'Events - CTA Button', type: 'text', hint: 'Button label shown under the events section.' },
     { key: 'footer_note', label: 'Footer - Note', type: 'textarea', hint: 'Small footer sentence that reinforces the restaurant identity.' },
     { key: 'footer_rights', label: 'Footer - Rights Text', type: 'text', hint: 'Short legal/footer rights sentence shown after the year and restaurant name.' }
 ];
@@ -3734,8 +3737,8 @@ function renderMenuBuilder() {
                     </td>
                     <td data-label="Actions">
                         <div class="menu-builder-item-actions menu-builder-action-rail">
-                            <button type="button" class="action-btn" title="Edit category image" aria-label="Edit category image" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.image}</button>
-                            <button type="button" class="action-btn" title="Edit category" aria-label="Edit category" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey})'>${ADMIN_ICON.edit}</button>
+                            <button type="button" class="action-btn" title="Edit category image" aria-label="Edit category image" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey}, "visual")'>${ADMIN_ICON.image}</button>
+                            <button type="button" class="action-btn" title="Edit category" aria-label="Edit category" onclick='event.stopPropagation(); openMenuBuilderEdit("category", ${inlineKey}, "labels")'>${ADMIN_ICON.edit}</button>
                             <button type="button" class="action-btn" title="Delete category" aria-label="Delete category" onclick='event.stopPropagation(); deleteCat(${inlineKey})'>${ADMIN_ICON.trash}</button>
                         </div>
                     </td>
@@ -3938,13 +3941,13 @@ window.openMenuBuilderAdd = function () {
     openMenuCrudModal('item', 'Add Item');
 };
 
-window.openMenuBuilderEdit = function (type, id) {
+window.openMenuBuilderEdit = function (type, id, sectionId = null) {
     if (type === 'supercategory') {
         editSuperCat(id);
         return;
     }
     if (type === 'category') {
-        editCat(id);
+        editCat(id, sectionId);
         return;
     }
     editItem(id);
@@ -7291,10 +7294,10 @@ function renderCatTable() {
         const media = image
             ? `<span class="menu-builder-entry-thumb"><img src="${escapeHtml(image)}" alt="${escapeHtml(cat)}" loading="lazy" decoding="async"></span>`
             : `${catEmojis[cat]}`;
-        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" title="Edit category image" aria-label="Edit category image" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.image}</button><button class="action-btn" title="Edit category" aria-label="Edit category" onclick="editCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.edit}</button><button class="action-btn" title="Delete category" aria-label="Delete category" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
+        return `<tr><td>${media}</td><td><strong>${cat}</strong></td><td>${menu.filter(m => m.cat === cat).length} items</td><td><button class="action-btn" title="Edit category image" aria-label="Edit category image" onclick="editCat('${cat.replace(/'/g, "\\'")}', 'visual')">${ADMIN_ICON.image}</button><button class="action-btn" title="Edit category" aria-label="Edit category" onclick="editCat('${cat.replace(/'/g, "\\'")}', 'labels')">${ADMIN_ICON.edit}</button><button class="action-btn" title="Delete category" aria-label="Delete category" onclick="deleteCat('${cat.replace(/'/g, "\\'")}')">${ADMIN_ICON.trash}</button></td></tr>`;
     }).join('');
 }
-function editCat(cat) {
+function editCat(cat, sectionId = null) {
     setMenuTranslationWarnings('category');
     currentMenuWorkspaceStep = 'categories';
     menuBuilderSelectedCategoryKey = cat;
@@ -7312,6 +7315,9 @@ function editCat(cat) {
     updateCategoryImagePreview();
     syncCategoryImageAiControls();
     refreshMenuCrudFormUx('catForm');
+    if (sectionId && typeof window.activateMenuCrudSection === 'function') {
+        setTimeout(() => window.activateMenuCrudSection('catForm', sectionId, false), 0);
+    }
     startMenuCrudDirtyTracking(document.getElementById('catForm'));
 }
 async function deleteCat(cat) {

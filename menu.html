@@ -15,7 +15,7 @@
 </head>
 
 
-<body class="menu-page">
+<body class="menu-page" data-homepage-polish="v2">
 
     <div class="mobile-wrapper is-landing">
 
@@ -39,36 +39,38 @@
                 </div>
                 <div class="top-nav-right">
                     <button id="cartNavBtnLanding" class="nav-icon-btn nav-cart-btn" onclick="openDrawer()" style="display:none;"
-                        data-i18n-title="confirm_cart_label" data-i18n-aria-label="confirm_cart_label" title="Cart" aria-label="Cart">
+                        data-i18n-title="confirm_cart_label" data-i18n-aria-label="confirm_cart_label" title="Panier" aria-label="Panier">
                         &#128722; <span id="cartBadgeLanding" class="cart-badge">0</span>
                     </button>
-                    <button class="nav-icon-btn" onclick="openGameModal()" data-i18n-title="game_title" data-i18n-aria-label="game_title" title="Game" aria-label="Game">
+                    <button class="nav-icon-btn" onclick="openGameModal()" data-i18n-title="game_title" data-i18n-aria-label="game_title" title="Jeu" aria-label="Jeu">
                         &#127918;
                     </button>
-                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" data-i18n-aria-label="history_button_title" title="History" aria-label="History">
+                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" data-i18n-aria-label="history_button_title" title="Historique" aria-label="Historique">
                         &#128339; <span id="histBadgeLanding" class="history-badge">0</span>
                     </button>
-                    <a href="index.html" class="nav-icon-btn close-btn">&times;</a>
+                    <a href="index.html" class="nav-icon-btn close-btn"
+                        data-i18n-title="landing_home_title" data-i18n-aria-label="landing_home_title"
+                        title="Accueil" aria-label="Accueil">&times;</a>
                 </div>
             </nav>
 
             <!-- Hero Image -->
-            <div class="landing-hero">
-                <img src="images/hero-default.svg" alt="Restaurant" class="landing-hero-img" id="landingHeroImage" width="1440" height="900" decoding="async" fetchpriority="high">
-                <div class="landing-hero-overlay"></div>
+            <div class="landing-hero h-[-webkit-fill-available] min-h-[440px] max-h-[60vh] relative overflow-hidden">
+                <img src="images/hero-premium-menu.png" alt="Image principale du restaurant" data-i18n-alt="image_alt_hero" class="landing-hero-img w-full h-full object-cover" id="landingHeroImage" width="1440" height="900" decoding="async" fetchpriority="high">
+                <div class="landing-hero-overlay absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80"></div>
             </div>
 
             <!-- Logo Overlap -->
             <div class="landing-logo-wrap menu-reveal-observe">
                 <div class="landing-logo-circle">
-                    <img src="" alt="Restaurant Logo" class="landing-logo-img" id="landingLogoImage" width="256" height="256" style="display:none;" decoding="async" fetchpriority="high">
-                    <div class="landing-logo-fallback" id="landingLogoFallback">R</div>
+                    <img src="" alt="Logo du restaurant" data-i18n-alt="image_alt_logo" class="landing-logo-img" id="landingLogoImage" width="256" height="256" style="display:none;" decoding="async" fetchpriority="high">
+                    <div class="landing-logo-fallback" id="landingLogoFallback">🍕</div>
                 </div>
             </div>
 
             <!-- Restaurant Info -->
             <div class="landing-body">
-                <h1 class="landing-rest-name menu-reveal-observe" id="landingRestaurantName">Restaurant</h1>
+                <h1 class="landing-rest-name menu-reveal-observe" id="landingRestaurantName">Pizzeria Nour</h1>
                 <div id="statusBadge" class="status-badge landing-status menu-reveal-observe">
                     <span class="dot"></span> <span id="statusText" data-i18n="status_loading">Chargement...</span>
                 </div>
@@ -81,28 +83,28 @@
                 <div id="featuredLanding" class="featured-section menu-reveal-observe" style="display:none;"></div>
 
                 <!-- Info Rows -->
-                <div class="info-section">
-                    <div class="info-row is-actionable menu-reveal-observe" data-i18n-title="landing_map_title" title="Voir sur la carte">
-                        <span class="info-icon">&#128205;</span>
-                        <span class="info-text" id="landingLocation"></span>
+                <div class="info-section grid grid-cols-2 gap-3 mb-8 px-4">
+                    <div class="info-row is-actionable group flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300" data-i18n-title="landing_map_title" title="Voir sur la carte">
+                        <span class="info-icon text-2xl mb-1 group-hover:scale-110 transition-transform">📍</span>
+                        <span class="info-text text-[0.7rem] uppercase font-bold tracking-wider opacity-60" id="landingLocation"></span>
                     </div>
-                    <div class="info-row is-actionable menu-reveal-observe" data-i18n-title="landing_call_title" title="Appeler">
-                        <span class="info-icon">&#128222;</span>
-                        <span class="info-text" id="landingPhone"></span>
+                    <div class="info-row is-actionable group flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300" data-i18n-title="landing_call_title" title="Appeler">
+                        <span class="info-icon text-2xl mb-1 group-hover:scale-110 transition-transform">📞</span>
+                        <span class="info-text text-[0.7rem] uppercase font-bold tracking-wider opacity-60" id="landingPhone"></span>
                     </div>
-                    <div class="info-row is-actionable menu-reveal-observe" data-i18n-title="landing_social_title" title="Nos reseaux sociaux">
-                        <span class="info-icon">&#128247;</span>
-                        <span class="info-text" id="landingSocial"></span>
+                    <div class="info-row is-actionable group flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300" data-i18n-title="landing_social_title" title="Nos reseaux sociaux">
+                        <span class="info-icon text-2xl mb-1 group-hover:scale-110 transition-transform">📸</span>
+                        <span class="info-text text-[0.7rem] uppercase font-bold tracking-wider opacity-60" id="landingSocial"></span>
                     </div>
-                    <div class="info-row is-actionable menu-reveal-observe" data-i18n-title="landing_wifi_title" title="Code WiFi">
-                        <span class="info-icon">&#128246;</span>
-                        <span class="info-text" id="landingWifi"></span>
+                    <div class="info-row is-actionable group flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300" data-i18n-title="landing_wifi_title" title="Code WiFi">
+                        <span class="info-icon text-2xl mb-1 group-hover:scale-110 transition-transform">📶</span>
+                        <span class="info-text text-[0.7rem] uppercase font-bold tracking-wider opacity-60" id="landingWifi"></span>
                     </div>
                 </div>
 
                 <!-- Social Links -->
                 <div class="social-links social-links-minimal menu-reveal-observe" id="menuLandingSocialLinks">
-                    <a href="index.html" class="social-icon-link" data-i18n-aria-label="landing_home_title" aria-label="Home">&#127968;</a>
+                    <a href="index.html" class="social-icon-link" data-i18n-title="landing_home_title" data-i18n-aria-label="landing_home_title" title="Accueil" aria-label="Accueil">&#127968;</a>
                 </div>
             </div>
         </div>
@@ -114,27 +116,28 @@
             <nav class="top-nav-bar menu-nav-bar">
                 <div class="top-nav-left">
                     <button id="menuBackBtn" class="nav-icon-btn" onclick="menuGoBack()"
+                        data-i18n-title="nav_back" data-i18n-aria-label="nav_back" title="Retour" aria-label="Retour"
                         style="display:none;">&larr;</button>
                     <div class="nav-breadcrumb" id="navBreadcrumb"></div>
                 </div>
                 <div class="top-nav-right">
                     <button id="cartNavBtnMenu" class="nav-icon-btn nav-cart-btn" onclick="openDrawer()" style="display:none;"
-                        data-i18n-title="confirm_cart_label" data-i18n-aria-label="confirm_cart_label" title="Cart" aria-label="Cart">
+                        data-i18n-title="confirm_cart_label" data-i18n-aria-label="confirm_cart_label" title="Panier" aria-label="Panier">
                         &#128722; <span id="cartBadgeMenu" class="cart-badge">0</span>
                     </button>
-                    <button class="nav-icon-btn" onclick="openGameModal()" data-i18n-title="game_title" data-i18n-aria-label="game_title" title="Game" aria-label="Game">
+                    <button class="nav-icon-btn" onclick="openGameModal()" data-i18n-title="game_title" data-i18n-aria-label="game_title" title="Jeu" aria-label="Jeu">
                         &#127918;
                     </button>
-                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" data-i18n-aria-label="history_button_title" title="History" aria-label="History">
+                    <button class="nav-icon-btn" onclick="openHistory()" data-i18n-title="history_button_title" data-i18n-aria-label="history_button_title" title="Historique" aria-label="Historique">
                         &#128339; <span id="histBadgeMenu" class="history-badge">0</span>
                     </button>
-                    <button class="nav-icon-btn" onclick="showLanding()">&times;</button>
+                    <button class="nav-icon-btn" onclick="showLanding()" data-i18n-title="landing_home_title" data-i18n-aria-label="landing_home_title" title="Accueil" aria-label="Accueil">&times;</button>
                 </div>
             </nav>
 
             <!-- Hero banner in menu -->
             <div class="menu-nav-hero">
-                <img src="images/hero-default.svg" alt="" class="menu-nav-hero-img" id="menuHeroImage" width="1440" height="900" decoding="async" fetchpriority="low">
+                <img src="images/hero-default.svg" alt="Image principale du restaurant" data-i18n-alt="image_alt_hero" class="menu-nav-hero-img" id="menuHeroImage" width="1440" height="900" decoding="async" fetchpriority="low">
                 <div class="menu-nav-hero-overlay"></div>
                 <div class="menu-nav-hero-title menu-reveal-observe" id="menuNavTitle" data-i18n="nav_menu">Menu</div>
             </div>
@@ -169,7 +172,7 @@
     <!-- SUPER CATEGORY BOTTOM SHEET -->
     <div id="superCatOverlay" class="overlay" onclick="closeSuperCatSheet()"></div>
     <div id="superCatSheet" class="super-cat-sheet">
-        <button class="super-sheet-close" onclick="closeSuperCatSheet()" data-i18n-aria-label="modal_close" aria-label="Close">&times;</button>
+        <button class="super-sheet-close" onclick="closeSuperCatSheet()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="Fermer" aria-label="Fermer">&times;</button>
         <h2 class="super-sheet-title" data-i18n="menu_select_title">S&eacute;lectionner un Menu</h2>
         <div id="superCatList">
             <!-- Injected by JS -->

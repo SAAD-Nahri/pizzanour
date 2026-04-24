@@ -1,7 +1,7 @@
-// WhatsApp management moved to socialLinks (Persistence Layer)
+﻿// WhatsApp management moved to socialLinks (Persistence Layer)
 // const WHATSAPP_NUMBER = '212626081745';
 
-// Default Data — Full Menu from Restaurant Board
+// Default Data â€” Full Menu from Restaurant Board
 // Data and Translations are now loaded from shared.js
 
 
@@ -60,6 +60,8 @@ let homepageMenuWarmArmed = false;
 let homepageMenuWarmStarted = false;
 let eventBookingScriptPromise = null;
 let homepageExtrasScriptPromise = null;
+let homepageLanguageRefreshInProgress = false;
+let homepageApplyingDeferredTranslations = false;
 
 function shouldUseStoredMenuSnapshot() {
     const host = String(window.location?.hostname || '').trim().toLowerCase();
@@ -112,6 +114,33 @@ function t(key, fallback, vars) {
         return window.getTranslation(key, fallback);
     }
     return fallback;
+}
+
+function refreshHomepageLanguageSensitiveUI() {
+    if (homepageLanguageRefreshInProgress || homepageApplyingDeferredTranslations) return;
+
+    renderLocationCritical();
+    if (homepageDeferredSectionsReady) {
+        homepageLanguageRefreshInProgress = true;
+        try {
+            renderDeferredHomepageSections();
+        } finally {
+            homepageLanguageRefreshInProgress = false;
+        }
+    }
+    if (typeof window.__eventBookingRefresh === 'function') {
+        window.__eventBookingRefresh();
+    }
+}
+
+const baseHomepageSetLang = typeof window.setLang === 'function'
+    ? window.setLang.bind(window)
+    : null;
+if (baseHomepageSetLang) {
+    window.setLang = function setHomepageLang(lang, btn) {
+        baseHomepageSetLang(lang, btn);
+        refreshHomepageLanguageSensitiveUI();
+    };
 }
 
 function escapeHtml(value) {
@@ -556,7 +585,7 @@ function syncHomepageHeaderState() {
     document.body.classList.toggle('home-header-scrolled', scrolled);
 }
 
-// ═══════════════════════ DYNAMIC HOURS ═══════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DYNAMIC HOURS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function ensureHomepageExtrasScript() {
     if (window.__homepageExtrasReady) {
         return Promise.resolve();
@@ -607,7 +636,12 @@ function renderDeferredHomepageSections() {
                 window.__homepageRenderDeferredSections();
             }
             if (typeof window.setLang === 'function') {
-                window.setLang(window.currentLang || document.documentElement.lang || 'fr');
+                homepageApplyingDeferredTranslations = true;
+                try {
+                    window.setLang(window.currentLang || document.documentElement.lang || 'fr');
+                } finally {
+                    homepageApplyingDeferredTranslations = false;
+                }
             }
             homepageDeferredSectionsReady = true;
             cleanupDeferredHomepageSectionIntent();
@@ -626,13 +660,13 @@ function renderLocationCritical() {
 
     if (topAddressText) {
         topAddressText.textContent = window.restaurantConfig?.location?.address
-            ? `📍 ${window.restaurantConfig.location.address}`
+            ? `ðŸ“ ${window.restaurantConfig.location.address}`
             : '';
     }
 
     if (topPhoneText) {
         topPhoneText.textContent = window.restaurantConfig?.phone
-            ? `📞 ${window.restaurantConfig.phone}`
+            ? `ðŸ“ž ${window.restaurantConfig.phone}`
             : '';
     }
 
@@ -682,7 +716,7 @@ window.openGalleryLightbox = function openGalleryLightbox(src) {
 };
 
 window.openSocialModal = function openSocialModal() {
-    ensureHomepageExtrasScript()
+    renderDeferredHomepageSections()
         .then(() => {
             if (typeof window.__homepageOpenSocialModal === 'function') {
                 window.__homepageOpenSocialModal();
@@ -700,7 +734,7 @@ window.closeSocialModal = function closeSocialModal() {
 };
 
 window.openWifiModal = function openWifiModal() {
-    ensureHomepageExtrasScript()
+    renderDeferredHomepageSections()
         .then(() => {
             if (typeof window.__homepageOpenWifiModal === 'function') {
                 window.__homepageOpenWifiModal();
@@ -757,16 +791,30 @@ function renderHomepageFeatured() {
 
 // SLIDER
 function startSlider() {
-    if (window.matchMedia('(max-width: 768px)').matches) {
-        goSlide(0);
+    const slides = document.querySelectorAll('.hero-v3-slide');
+    if (!slides.length) return;
+    goSlide(0);
+    if (slides.length <= 1 || window.matchMedia('(max-width: 768px)').matches) {
         return;
     }
-    setInterval(() => { goSlide((currentSlide + 1) % 3); }, 5000);
+    setInterval(() => { goSlide((currentSlide + 1) % slides.length); }, 5000);
 }
 function goSlide(n) {
-    currentSlide = n;
-    document.querySelectorAll('.slide').forEach((s, i) => s.classList.toggle('slide-active', i === n));
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('dot-active', i === n));
+    const slides = Array.from(document.querySelectorAll('.hero-v3-slide'));
+    const dots = Array.from(document.querySelectorAll('.dot'));
+    if (!slides.length) return;
+    const nextIndex = ((Number(n) || 0) % slides.length + slides.length) % slides.length;
+    currentSlide = nextIndex;
+    slides.forEach((slide, i) => {
+        const isActive = i === nextIndex;
+        slide.classList.toggle('hero-v3-active', isActive);
+        slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+    });
+    dots.forEach((dot, i) => {
+        const isActive = i === nextIndex;
+        dot.classList.toggle('dot-active', isActive);
+        dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+    });
 }
 
 // TOAST
@@ -787,23 +835,8 @@ function toggleMobileMenu() {
 
 // Language and Translations are now managed by shared.js
 
-// WIFI MODAL
-function openWifiModal() {
-    document.getElementById('wifiOverlay').classList.add('open');
-    document.getElementById('wifiModal').classList.add('open');
-}
+// WiFi modal is lazy-loaded with homepage extras.
 
-function closeWifiModal() {
-    document.getElementById('wifiOverlay').classList.remove('open');
-    document.getElementById('wifiModal').classList.remove('open');
-}
-
-function copyWifi() {
-    const pass = document.getElementById('wifiPass').textContent;
-    navigator.clipboard.writeText(pass).then(() => {
-        showToast(t('wifi_password_copied', 'Mot de passe copié !'));
-    });
-}
 
 // Event booking is lazy-loaded to keep homepage boot lighter.
 window.openEventModal = async function openEventModal(type) {
@@ -833,3 +866,4 @@ window.sendEventWA = async function sendEventWA() {
         console.error('Failed to load event booking flow:', error);
     }
 };
+

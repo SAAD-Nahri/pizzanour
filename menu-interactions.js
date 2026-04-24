@@ -70,14 +70,38 @@
         return htmlLang.slice(0, 2) || 'fr';
     }
 
-    function getDishUiCopy(key) {
+    function getUiLocale() {
         const lang = getUiLang();
-        const copy = {
-            size_title: { fr: 'Choisissez une taille', en: 'Choose a size', ar: 'اختر الحجم' },
-            extras_title: { fr: 'Ajoutez des extras', en: 'Add extras', ar: 'أضف إضافات' },
-            included_label: { fr: 'Inclus', en: 'Included', ar: 'مشمول' }
+        if (lang === 'ar') return 'ar-MA';
+        if (lang === 'en') return 'en-US';
+        return 'fr-MA';
+    }
+
+    function formatUiDate(date) {
+        return date.toLocaleDateString(getUiLocale());
+    }
+
+    function formatUiTime(date) {
+        return date.toLocaleTimeString(getUiLocale(), { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getServiceTypeLabel(serviceType, fallback = '') {
+        const labels = {
+            onsite: t('service_onsite', 'Sur place'),
+            takeaway: t('service_takeaway', 'Takeaway'),
+            delivery: t('service_delivery', 'Livraison')
         };
-        return copy[key]?.[lang] || copy[key]?.fr || '';
+        return labels[serviceType] || fallback;
+    }
+
+    function getDishUiCopy(key) {
+        const copyKeys = {
+            size_title: ['dish_size_title', 'Choisissez une taille'],
+            extras_title: ['dish_extras_title', 'Ajoutez des extras'],
+            included_label: ['dish_included_label', 'Inclus']
+        };
+        const [translationKey, fallback] = copyKeys[key] || ['', ''];
+        return translationKey ? t(translationKey, fallback) : '';
     }
 
     function formatSelectedExtrasSummary(extras) {
@@ -140,8 +164,10 @@
     let interactionDomReady = false;
     let currentDishImages = [];
     let currentDishImageIdx = 0;
+    let currentGallerySourceItems = [];
     let orderPromptResolver = null;
     let lastOrderPromptFocus = null;
+    let currentOrderPromptState = null;
 
     function buildGalleryEntries(items) {
         return (Array.isArray(items) ? items : []).flatMap((entry) => {
@@ -183,11 +209,11 @@
         const template = document.createElement('template');
         template.innerHTML = `
             <div id="dishPage" class="dish-page">
-                <button class="dish-page-close" onclick="closeDishPage()" aria-label="${t('modal_close', 'Close')}">&times;</button>
+                <button class="dish-page-close" onclick="closeDishPage()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
                 <div class="dish-page-header">
-                    <button id="dishPagePrev" class="dish-page-media-nav dish-page-media-prev" type="button" onclick="prevDishImage()" aria-label="${t('gallery_prev', 'Previous image')}">&#10094;</button>
+                    <button id="dishPagePrev" class="dish-page-media-nav dish-page-media-prev" type="button" onclick="prevDishImage()" data-i18n-title="gallery_prev" data-i18n-aria-label="gallery_prev" title="${t('gallery_prev', 'Previous image')}" aria-label="${t('gallery_prev', 'Previous image')}">&#10094;</button>
                     <img id="dishPageImg" src="" alt="" class="dish-page-img" width="1200" height="900" decoding="async">
-                    <button id="dishPageNext" class="dish-page-media-nav dish-page-media-next" type="button" onclick="nextDishImage()" aria-label="${t('gallery_next', 'Next image')}">&#10095;</button>
+                    <button id="dishPageNext" class="dish-page-media-nav dish-page-media-next" type="button" onclick="nextDishImage()" data-i18n-title="gallery_next" data-i18n-aria-label="gallery_next" title="${t('gallery_next', 'Next image')}" aria-label="${t('gallery_next', 'Next image')}">&#10095;</button>
                     <div id="dishPageCount" class="dish-page-media-count"></div>
                 </div>
                 <div class="dish-page-body">
@@ -198,7 +224,7 @@
                     <div id="dishPageConfig" class="dish-page-config"></div>
                     <div id="dishPageLoveContainer" class="dish-page-love-row"></div>
                     <div class="dish-page-footer">
-                        <button id="dishPageAddBtn" class="dish-add-btn">${t('add_to_cart', 'AJOUTER AU PANIER')}</button>
+                        <button id="dishPageAddBtn" class="dish-add-btn" data-i18n="add_to_cart">${t('add_to_cart', 'AJOUTER AU PANIER')}</button>
                     </div>
                 </div>
             </div>
@@ -206,11 +232,11 @@
             <div id="historyOverlay" class="history-overlay" onclick="closeHistory()">
                 <div class="history-modal" onclick="event.stopPropagation()">
                     <div class="history-header">
-                        <h2>${t('history_title', 'Historique')}</h2>
-                        <button onclick="closeHistory()" class="history-close-btn" aria-label="${t('modal_close', 'Close')}">&times;</button>
+                        <h2 data-i18n="history_title">${t('history_title', 'Historique')}</h2>
+                        <button onclick="closeHistory()" class="history-close-btn" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
                     </div>
                     <div id="historyContent">
-                        <p class="history-empty">${t('history_empty', 'Aucune commande recente.')}</p>
+                        <p class="history-empty" data-i18n="history_empty">${t('history_empty', 'Aucune commande recente.')}</p>
                     </div>
                 </div>
             </div>
@@ -227,11 +253,11 @@
             </div>
 
             <div id="galleryOverlay" class="gallery-overlay" onclick="closeGallery()">
-                <button class="gallery-close" onclick="closeGallery()">&times;</button>
+                <button class="gallery-close" onclick="closeGallery()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
                 <div class="gallery-container" onclick="event.stopPropagation()">
-                    <button class="gallery-nav gallery-prev" onclick="prevGalleryImage()">&#10094;</button>
-                    <img id="galleryImg" src="" alt="Gallery Image" width="1200" height="900" decoding="async">
-                    <button class="gallery-nav gallery-next" onclick="nextGalleryImage()">&#10095;</button>
+                    <button class="gallery-nav gallery-prev" onclick="prevGalleryImage()" data-i18n-title="gallery_prev" data-i18n-aria-label="gallery_prev" title="${t('gallery_prev', 'Previous image')}" aria-label="${t('gallery_prev', 'Previous image')}">&#10094;</button>
+                    <img id="galleryImg" src="" alt="${t('image_alt_gallery', 'Gallery image')}" data-i18n-alt="image_alt_gallery" width="1200" height="900" decoding="async">
+                    <button class="gallery-nav gallery-next" onclick="nextGalleryImage()" data-i18n-title="gallery_next" data-i18n-aria-label="gallery_next" title="${t('gallery_next', 'Next image')}" aria-label="${t('gallery_next', 'Next image')}">&#10095;</button>
                 </div>
                 <div class="gallery-info" onclick="event.stopPropagation()">
                     <div id="galleryTitle" class="gallery-title"></div>
@@ -262,6 +288,7 @@
         const overlay = document.getElementById('orderPromptOverlay');
         const resolver = orderPromptResolver;
         orderPromptResolver = null;
+        currentOrderPromptState = null;
         if (overlay) {
             overlay.classList.remove('open');
         }
@@ -274,6 +301,52 @@
             lastOrderPromptFocus = null;
         }
         resolver?.(confirmed);
+    }
+
+    function resolvePromptValue(value) {
+        return typeof value === 'function' ? value() : value;
+    }
+
+    function refreshOrderPromptCopy() {
+        const overlay = document.getElementById('orderPromptOverlay');
+        if (!overlay?.classList.contains('open') || !currentOrderPromptState) return;
+
+        const card = document.getElementById('orderPromptCard');
+        const iconEl = document.getElementById('orderPromptIcon');
+        const eyebrowEl = document.getElementById('orderPromptEyebrow');
+        const titleEl = document.getElementById('orderPromptTitle');
+        const copyEl = document.getElementById('orderPromptCopy');
+        const noteEl = document.getElementById('orderPromptNote');
+        const cancelBtn = document.getElementById('orderPromptCancel');
+        const confirmBtn = document.getElementById('orderPromptConfirm');
+        if (!card || !iconEl || !eyebrowEl || !titleEl || !copyEl || !noteEl || !cancelBtn || !confirmBtn) return;
+
+        const icon = resolvePromptValue(currentOrderPromptState.icon);
+        const eyebrow = resolvePromptValue(currentOrderPromptState.eyebrow);
+        const title = resolvePromptValue(currentOrderPromptState.title);
+        const text = resolvePromptValue(currentOrderPromptState.text);
+        const note = resolvePromptValue(currentOrderPromptState.note);
+        const confirmLabel = resolvePromptValue(currentOrderPromptState.confirmLabel);
+        const cancelLabel = resolvePromptValue(currentOrderPromptState.cancelLabel);
+        const isNotice = currentOrderPromptState.mode === 'notice';
+
+        iconEl.textContent = icon || MENU_UI_ICONS.sparkle || '!';
+        eyebrowEl.textContent = String(eyebrow || '').trim();
+        titleEl.textContent = String(title || '').trim();
+        copyEl.textContent = String(text || '').trim();
+        noteEl.textContent = String(note || '').trim();
+
+        eyebrowEl.hidden = !eyebrowEl.textContent;
+        titleEl.hidden = !titleEl.textContent;
+        copyEl.hidden = !copyEl.textContent;
+        noteEl.hidden = !noteEl.textContent;
+
+        cancelBtn.textContent = String(cancelLabel || t('action_cancel', 'Annuler')).trim();
+        confirmBtn.textContent = String(confirmLabel || (isNotice ? t('action_continue', 'Continuer') : t('action_confirm', 'Confirmer'))).trim();
+        cancelBtn.hidden = isNotice;
+
+        card.classList.toggle('is-danger', Boolean(currentOrderPromptState.danger));
+        card.classList.toggle('is-notice', isNotice);
     }
 
     function openOrderPrompt({
@@ -306,29 +379,14 @@
         orderPromptResolver = null;
         lastOrderPromptFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-        iconEl.textContent = icon || MENU_UI_ICONS.sparkle || '!';
-        eyebrowEl.textContent = String(eyebrow || '').trim();
-        titleEl.textContent = String(title || '').trim();
-        copyEl.textContent = String(text || '').trim();
-        noteEl.textContent = String(note || '').trim();
-
-        eyebrowEl.hidden = !eyebrowEl.textContent;
-        titleEl.hidden = !titleEl.textContent;
-        copyEl.hidden = !copyEl.textContent;
-        noteEl.hidden = !noteEl.textContent;
-
-        const isNotice = mode === 'notice';
-        cancelBtn.textContent = String(cancelLabel || t('action_cancel', 'Annuler')).trim();
-        confirmBtn.textContent = String(confirmLabel || (isNotice ? t('action_continue', 'Continuer') : t('action_confirm', 'Confirmer'))).trim();
-        cancelBtn.hidden = isNotice;
-
-        card.classList.toggle('is-danger', Boolean(danger));
-        card.classList.toggle('is-notice', isNotice);
+        currentOrderPromptState = { mode, icon, eyebrow, title, text, note, confirmLabel, cancelLabel, danger };
+        refreshOrderPromptCopy();
         overlay.classList.add('open');
 
         return new Promise((resolve) => {
             orderPromptResolver = resolve;
             queueMicrotask(() => {
+                const isNotice = currentOrderPromptState?.mode === 'notice';
                 (isNotice ? confirmBtn : cancelBtn).focus();
             });
         });
@@ -380,13 +438,13 @@
 
     async function confirmClearCart() {
         const confirmed = await showOrderConfirm({
-            icon: MENU_UI_ICONS.cart || MENU_UI_ICONS.plate,
-            eyebrow: t('confirm_cart_label', 'Mon panier'),
-            title: t('cart_clear_title', 'Vider le panier ?'),
-            text: t('cart_clear_text', 'Cette commande en cours sera supprimée de cet appareil.'),
-            note: t('cart_clear_note', 'Les plats pourront toujours être ajoutés à nouveau depuis la carte.'),
-            confirmLabel: t('cart_clear_confirm_action', 'Vider le panier'),
-            cancelLabel: t('action_keep', 'Garder')
+            icon: () => MENU_UI_ICONS.cart || MENU_UI_ICONS.plate,
+            eyebrow: () => t('confirm_cart_label', 'Mon panier'),
+            title: () => t('cart_clear_title', 'Vider le panier ?'),
+            text: () => t('cart_clear_text', 'Cette commande en cours sera supprimée de cet appareil.'),
+            note: () => t('cart_clear_note', 'Les plats pourront toujours être ajoutés à nouveau depuis la carte.'),
+            confirmLabel: () => t('cart_clear_confirm_action', 'Vider le panier'),
+            cancelLabel: () => t('action_keep', 'Garder')
         });
         if (!confirmed) return;
         setCart([]);
@@ -565,10 +623,16 @@
         page.__syncDishImage = syncDishImage;
         syncDishImage();
 
-        nameEl.textContent = window.getLocalizedMenuName(item);
-        renderDishConfigurator();
-        syncDishPricing();
-        descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.'));
+        const refreshDishPageCopy = () => {
+            nameEl.textContent = window.getLocalizedMenuName(item);
+            imgEl.alt = nameEl.textContent || t('image_alt_menu_item', 'Menu item');
+            renderDishConfigurator();
+            syncDishPricing();
+            descEl.textContent = window.getLocalizedMenuDescription(item, t('dish_default_desc', 'A carefully prepared dish made with our best ingredients.'));
+        };
+
+        page.__refreshDishPageCopy = refreshDishPageCopy;
+        refreshDishPageCopy();
         addBtn.onclick = () => {
             window.addToCart(item.id, {
                 size: selectedSize,
@@ -622,6 +686,7 @@
 
     function openGallery(items, startIndex = 0) {
         ensureMenuInteractionDom();
+        currentGallerySourceItems = Array.isArray(items) ? items : [];
         galleryItems = buildGalleryEntries(items);
         if (!galleryItems.length) return;
 
@@ -637,7 +702,20 @@
         ensureMenuInteractionDom();
         const overlay = document.getElementById('galleryOverlay');
         if (overlay) overlay.style.display = 'none';
+        currentGallerySourceItems = [];
         document.body.style.overflow = '';
+    }
+
+    function refreshGalleryCopy() {
+        const overlay = document.getElementById('galleryOverlay');
+        if (!overlay || overlay.style.display !== 'flex' || !currentGallerySourceItems.length) return;
+        galleryItems = buildGalleryEntries(currentGallerySourceItems);
+        if (!galleryItems.length) {
+            closeGallery();
+            return;
+        }
+        currentGalleryIdx = Math.max(0, Math.min(currentGalleryIdx, galleryItems.length - 1));
+        updateGalleryView();
     }
 
     function updateGalleryView() {
@@ -659,6 +737,7 @@
             },
             displayValue: 'block'
         });
+        img.alt = entry.title || t('image_alt_gallery', 'Gallery image');
         title.textContent = entry.title || '';
         count.textContent = `${currentGalleryIdx + 1} / ${galleryItems.length}`;
     }
@@ -732,7 +811,7 @@
                 <div class="cart-drawer-header">
                     <div class="cart-drawer-title">${restaurantName}</div>
                     <div class="cart-drawer-meta">
-                        <button onclick="window.confirmClearCart()" class="cart-drawer-clear" aria-label="${t('cart_clear', 'Vider')}" title="${t('cart_clear', 'Vider')}">${t('cart_clear', 'Vider')}</button>
+                        <button onclick="window.confirmClearCart()" class="cart-drawer-clear" data-i18n="cart_clear" data-i18n-aria-label="cart_clear" data-i18n-title="cart_clear" aria-label="${t('cart_clear', 'Vider')}" title="${t('cart_clear', 'Vider')}">${t('cart_clear', 'Vider')}</button>
                         <div class="cart-drawer-count">${t('cart_items_count', '{count} item(s)', { count: cart.length })}</div>
                     </div>
                 </div>
@@ -744,7 +823,7 @@
                                     ${window.getLocalizedMenuName(item)} ${item.selectedSize ? `<span class="cart-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}
                                 </div>
                                 ${item.selectedExtras?.length ? `<div class="cart-item-extras">${formatSelectedExtrasSummary(item.selectedExtras)}</div>` : ''}
-                                <div class="cart-item-price">${(item.price * item.qty).toFixed(2)} MAD</div>
+                                <div class="cart-item-price">${formatMoney(item.price * item.qty)}</div>
                             </div>
                             <div class="cart-item-controls">
                                 <button onclick="removeFromCart('${item.cartId}')" class="cart-qty-btn is-minus">-</button>
@@ -764,17 +843,17 @@
                 </div>
                 ${serviceType === 'delivery' ? `
                 <div class="cart-delivery-block">
-                    <label class="cart-delivery-label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
-                    <textarea id="deliveryAddress" rows="2" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${window.currentDeliveryAddress || ''}</textarea>
+                    <label class="cart-delivery-label" data-i18n="cart_delivery_label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
+                    <textarea id="deliveryAddress" rows="2" data-i18n-placeholder="cart_delivery_placeholder" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${window.currentDeliveryAddress || ''}</textarea>
                     <div id="deliveryAddressHint" class="cart-delivery-hint${window.deliveryAddressNeedsAttention ? ' is-warning' : ''}">${window.deliveryAddressNeedsAttention ? t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.') : t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.')}</div>
                 </div>
                 ` : ''}
                 <div class="cart-total-card">
                     <div class="cart-total-row">
-                        <span>${t('cart_total_label', 'Total')}</span><span>${total.toFixed(2)} MAD</span>
+                        <span data-i18n="cart_total_label">${t('cart_total_label', 'Total')}</span><span>${formatMoney(total)}</span>
                     </div>
                 </div>
-                <button onclick="generateTicket()" class="cart-confirm-btn">${t('cart_confirm_order', 'CONFIRMER MA COMMANDE')}</button>
+                <button onclick="generateTicket()" class="cart-confirm-btn" data-i18n="cart_confirm_order">${t('cart_confirm_order', 'CONFIRMER MA COMMANDE')}</button>
             </div>
         `;
 
@@ -816,20 +895,20 @@
             : history.map((ticketHtml, index) => `
                 <div class="history-ticket history-ticket-wrap">
                     ${renderHistoryTicketCard(ticketHtml)}
-                    <button onclick="deleteHistoryItem(${index})" class="history-delete-btn" title="${t('history_delete_title', 'Supprimer')}" aria-label="${t('history_delete_title', 'Supprimer')}">${MENU_UI_ICONS.trash}</button>
+                    <button onclick="deleteHistoryItem(${index})" class="history-delete-btn" data-i18n-title="history_delete_title" data-i18n-aria-label="history_delete_title" title="${t('history_delete_title', 'Supprimer')}" aria-label="${t('history_delete_title', 'Supprimer')}">${MENU_UI_ICONS.trash}</button>
                 </div>
             `).join('');
     }
 
     async function deleteHistoryItem(index) {
         const confirmed = await showOrderConfirm({
-            icon: MENU_UI_ICONS.trash,
-            eyebrow: t('history_title', 'Historique'),
-            title: t('history_delete_title_confirm', 'Supprimer ce ticket ?'),
-            text: t('history_delete_confirm', "Supprimer ce ticket de l'historique ?"),
-            note: t('history_delete_note', "Cette suppression n'affecte que cet appareil."),
-            confirmLabel: t('history_delete_action', 'Supprimer'),
-            cancelLabel: t('action_keep', 'Garder'),
+            icon: () => MENU_UI_ICONS.trash,
+            eyebrow: () => t('history_title', 'Historique'),
+            title: () => t('history_delete_title_confirm', 'Supprimer ce ticket ?'),
+            text: () => t('history_delete_confirm', "Supprimer ce ticket de l'historique ?"),
+            note: () => t('history_delete_note', "Cette suppression n'affecte que cet appareil."),
+            confirmLabel: () => t('history_delete_action', 'Supprimer'),
+            cancelLabel: () => t('action_keep', 'Garder'),
             danger: true
         });
         if (!confirmed) return;
@@ -912,6 +991,7 @@
             legacy: false,
             orderNo: typeof entry.orderNo === 'string' ? entry.orderNo.trim() : String(entry.orderNo || '').trim(),
             createdAt: typeof entry.createdAt === 'string' ? entry.createdAt : '',
+            serviceType: typeof entry.serviceType === 'string' ? entry.serviceType.trim() : '',
             serviceLabel: typeof entry.serviceLabel === 'string' ? entry.serviceLabel.trim() : '',
             total: Number.isFinite(Number(entry.total)) ? Number(entry.total) : null,
             currency: typeof entry.currency === 'string' && entry.currency.trim() ? entry.currency.trim() : 'MAD',
@@ -929,8 +1009,8 @@
             };
         }
         return {
-            date: date.toLocaleDateString(),
-            time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            date: formatUiDate(date),
+            time: formatUiTime(date)
         };
     }
 
@@ -959,6 +1039,8 @@
             `;
         }).join('');
 
+        const localizedServiceLabel = getServiceTypeLabel(normalized.serviceType, normalized.serviceLabel || t('service_onsite', 'Sur place'));
+
         return `
             <div class="history-ticket-card${normalized.legacy ? ' is-legacy' : ''}">
                 <div class="history-ticket-top">
@@ -966,7 +1048,7 @@
                         <div class="history-ticket-label">${t('ticket_number_prefix', 'TICKET')}</div>
                         <div class="history-ticket-number">#${escapeHistoryHtml(normalized.orderNo || '----')}</div>
                     </div>
-                    <div class="history-ticket-status">${escapeHistoryHtml(normalized.serviceLabel || t('service_onsite', 'Sur place'))}</div>
+                    <div class="history-ticket-status">${escapeHistoryHtml(localizedServiceLabel)}</div>
                 </div>
                 <div class="history-ticket-meta">
                     <div class="history-ticket-meta-row">
@@ -1004,12 +1086,12 @@
         if (serviceType === 'delivery' && (!window.currentDeliveryAddress || window.currentDeliveryAddress.trim() === '')) {
             setDeliveryAddressAttention();
             showOrderNotice({
-                icon: MENU_UI_ICONS.address,
-                eyebrow: t('service_delivery', 'Livraison'),
-                title: t('ticket_delivery_required_title', 'Adresse requise'),
-                text: t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.'),
-                note: t('ticket_delivery_required_note', 'Ajoutez une adresse claire avant de confirmer la commande.'),
-                confirmLabel: t('action_continue', 'Continuer')
+                icon: () => MENU_UI_ICONS.address,
+                eyebrow: () => t('service_delivery', 'Livraison'),
+                title: () => t('ticket_delivery_required_title', 'Adresse requise'),
+                text: () => t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.'),
+                note: () => t('ticket_delivery_required_note', 'Ajoutez une adresse claire avant de confirmer la commande.'),
+                confirmLabel: () => t('action_continue', 'Continuer')
             }).then(() => {
                 focusDeliveryAddressField();
             });
@@ -1026,23 +1108,18 @@
         const restaurantName = typeof window.getRestaurantDisplayName === 'function' ? window.getRestaurantDisplayName() : 'Restaurant';
         const restaurantAddress = typeof window.getRestaurantAddress === 'function' ? window.getRestaurantAddress() : '';
 
-        const serviceLabels = {
-            onsite: t('service_onsite', 'Sur place'),
-            takeaway: t('service_takeaway', 'Takeaway'),
-            delivery: t('service_delivery', 'Livraison')
-        };
-        const serviceLabel = serviceLabels[serviceType];
+        const serviceLabel = getServiceTypeLabel(serviceType, t('service_onsite', 'Sur place'));
 
         ticketContent.innerHTML = `
             <div class="ticket-content">
-                <button onclick="closeAllModals()" class="ticket-close-btn">&times;</button>
+                <button onclick="closeAllModals()" class="ticket-close-btn" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
                 <div class="ticket-brand">
                     <div class="ticket-brand-name">${restaurantName}</div>
                     <div class="ticket-brand-address">${restaurantAddress}</div>
                 </div>
                 <div class="ticket-summary">
                     <div class="ticket-number">${t('ticket_number_prefix', 'TICKET')} #${orderNo}</div>
-                    <div class="ticket-datetime">${now.toLocaleDateString()} - ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div class="ticket-datetime">${formatUiDate(now)} - ${formatUiTime(now)}</div>
                     <div class="ticket-service">${t('ticket_type_label', 'Type')}: ${serviceLabel}</div>
                     ${serviceType === 'delivery' ? `<div class="ticket-delivery-address">${MENU_UI_ICONS.address} ${window.currentDeliveryAddress}</div>` : ''}
                 </div>
@@ -1053,12 +1130,12 @@
                                 <div><strong class="ticket-item-qty">${item.qty} &times;</strong> ${window.getLocalizedMenuName(item)}${item.selectedSize ? ` <span class="ticket-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}</div>
                                 ${item.selectedExtras?.length ? `<div class="ticket-item-extras">${item.selectedExtras.map((extra) => extra.name).join(' • ')}</div>` : ''}
                             </div>
-                            <div class="ticket-item-price">${(item.price * item.qty).toFixed(0)} <span class="ticket-item-currency">dhs</span></div>
+                            <div class="ticket-item-price">${formatMoney(item.price * item.qty)}</div>
                         </div>
                     `).join('')}
                 </div>
                 <div class="ticket-total-wrap">
-                    <div class="ticket-total-box">${t('ticket_total_prefix', 'TOTAL :')} ${total.toFixed(0)} dhs</div>
+                    <div class="ticket-total-box"><span data-i18n="ticket_total_prefix">${t('ticket_total_prefix', 'TOTAL :')}</span> ${formatMoney(total)}</div>
                 </div>
                 ${serviceType === 'delivery' ? `
                     <div class="ticket-actions-grid">
@@ -1085,6 +1162,7 @@
         saveToHistory({
             orderNo: String(orderNo),
             createdAt: now.toISOString(),
+            serviceType,
             serviceLabel,
             total,
             currency: 'MAD',
@@ -1108,9 +1186,11 @@
     function finalizeOrderSilent(orderNo, total, serviceLabel, btn) {
         const now = new Date();
         const cart = getCart();
+        const serviceType = getServiceType();
         saveToHistory({
             orderNo: String(orderNo),
             createdAt: now.toISOString(),
+            serviceType,
             serviceLabel,
             total,
             currency: 'MAD',
@@ -1149,20 +1229,20 @@
             const extrasLabel = item.selectedExtras?.length
                 ? ` + ${item.selectedExtras.map((extra) => extra.name).join(', ')}`
                 : '';
-            waText += `${item.qty}x ${window.getLocalizedMenuName(item)}${sizeLabel}${extrasLabel} - ${(item.price * item.qty).toFixed(0)} dhs\n`;
+            waText += `${item.qty}x ${window.getLocalizedMenuName(item)}${sizeLabel}${extrasLabel} - ${formatMoney(item.price * item.qty)}\n`;
         });
         waText += `---------------------------\n`;
-        waText += `*${t('wa_total_label', 'TOTAL')}: ${total.toFixed(0)} dhs*\n`;
+        waText += `*${t('wa_total_label', 'TOTAL')}: ${formatMoney(total)}*\n`;
 
         const phone = window.getWhatsAppNumber();
         if (!phone) {
             showOrderNotice({
-                icon: MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
-                eyebrow: t('social_whatsapp', 'WhatsApp'),
-                title: t('wa_missing_title', 'WhatsApp indisponible'),
-                text: t('social_empty', 'No links configured yet.'),
-                note: t('wa_missing_note', 'Ajoutez un numéro WhatsApp dans les paramètres du restaurant pour activer cette action.'),
-                confirmLabel: t('action_ok', 'Compris')
+                icon: () => MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
+                eyebrow: () => t('social_whatsapp', 'WhatsApp'),
+                title: () => t('wa_missing_title', 'WhatsApp indisponible'),
+                text: () => t('social_empty', 'No links configured yet.'),
+                note: () => t('wa_missing_note', 'Ajoutez un numéro WhatsApp dans les paramètres du restaurant pour activer cette action.'),
+                confirmLabel: () => t('action_ok', 'Compris')
             });
             return;
         }
@@ -1170,12 +1250,12 @@
         const opened = window.openSafeExternalUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
         if (!opened) {
             showOrderNotice({
-                icon: MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
-                eyebrow: t('social_whatsapp', 'WhatsApp'),
-                title: t('wa_popup_blocked_title', 'Autorisez l’ouverture de WhatsApp'),
-                text: t('wa_popup_blocked_text', 'Votre navigateur a bloqué l’ouverture de WhatsApp pour cette commande.'),
-                note: t('wa_popup_blocked_note', 'Autorisez les popups pour ce site puis réessayez depuis le ticket.'),
-                confirmLabel: t('action_ok', 'Compris')
+                icon: () => MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
+                eyebrow: () => t('social_whatsapp', 'WhatsApp'),
+                title: () => t('wa_popup_blocked_title', 'Autorisez l’ouverture de WhatsApp'),
+                text: () => t('wa_popup_blocked_text', 'Votre navigateur a bloqué l’ouverture de WhatsApp pour cette commande.'),
+                note: () => t('wa_popup_blocked_note', 'Autorisez les popups pour ce site puis réessayez depuis le ticket.'),
+                confirmLabel: () => t('action_ok', 'Compris')
             });
             return;
         }
@@ -1207,6 +1287,7 @@
     window.openGallery = openGallery;
     window.closeGallery = closeGallery;
     window.updateGalleryView = updateGalleryView;
+    window.refreshGalleryCopy = refreshGalleryCopy;
     window.nextGalleryImage = nextGalleryImage;
     window.prevGalleryImage = prevGalleryImage;
     window.openDrawer = openDrawer;
@@ -1218,6 +1299,7 @@
     window.deleteHistoryItem = deleteHistoryItem;
     window.saveToHistory = saveToHistory;
     window.resolveOrderPrompt = resolveOrderPrompt;
+    window.refreshOrderPrompt = refreshOrderPromptCopy;
     window.confirmClearCart = confirmClearCart;
     window.handleDeliveryAddressInput = handleDeliveryAddressInput;
     window.generateTicket = generateTicket;

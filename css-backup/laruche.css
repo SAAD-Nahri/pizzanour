@@ -56,7 +56,30 @@ body {
 
 .top-bar { display: none !important; }
 
-
+/* Hero Slider Enhancements */
+.hero-slider { height: 100vh !important; border-bottom: none !important; }
+.slide::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.2)) !important;
+  z-index: 1;
+}
+.slide-content { z-index: 10; position: relative; max-width: 800px; padding-left: 5% !important;}
+.slide-sub { 
+  font-family: var(--font-accent) !important;
+  font-size: 3.5rem !important;
+  color: var(--primary) !important;
+  font-weight: 700;
+  margin-bottom: -15px !important;
+}
+.slide-title {
+  font-size: clamp(3rem, 6vw, 5rem) !important;
+  text-transform: uppercase;
+  color: #fff !important;
+  font-weight: 800;
+  line-height: 1.1 !important;
+  letter-spacing: 2px;
+}
+.slide-title span { color: var(--primary) !important; }
 
 /* Buttons */
 .hero-menu-cta, .event-reserve-btn {
@@ -174,11 +197,12 @@ body {
 
 /* Mobile nav overwrite */
 @media (max-width: 768px) {
-
+  .slide-sub { font-size: 2.5rem !important; }
+  .slide-title { font-size: 3rem !important; }
   .header { padding: 15px 20px !important; background: rgba(0,0,0,0.5) !important;}
   .header.scrolled { padding: 15px 20px !important; }
   .about-text { text-align: center; }
-
+  .hero-menu-cta-wrap { bottom: 10%; }
 }
 
 /* Menu Page Overrides */

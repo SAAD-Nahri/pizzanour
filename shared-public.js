@@ -97,11 +97,11 @@ const STARTER_SUPERCATEGORY_TRANSLATION_FALLBACKS = {};
 
 window.defaultBranding = {
     "presetId": "core",
-    "restaurantName": "Restaurant",
-    "shortName": "Restaurant",
-    "tagline": "Local cuisine, warm service, and a polished online presence.",
-    "logoMark": "🍽️",
-    "primaryColor": "#E21B1B",
+    "restaurantName": "Pizzeria Nour",
+    "shortName": "Nour",
+    "tagline": "Saveurs authentiques depuis Tanger.",
+    "logoMark": "🍕",
+    "primaryColor": "#ff5722",
     "secondaryColor": "#FF8D08",
     "accentColor": "#FFD700",
     "surfaceColor": "#FFF8F0",
@@ -363,10 +363,10 @@ function normalizeSectionOrder(input) {
 window.defaultConfig = {
     "name": "Restaurant",
     "location": {
-        "address": "",
+        "address": "Rue Figuig, Tanger",
         "url": ""
     },
-    "phone": "",
+    "phone": "05 39 32 15 79",
     "socials": {
         "instagram": "",
         "facebook": "",
@@ -381,9 +381,9 @@ window.defaultConfig = {
         "code": ""
     },
     "gallery": [
-        "images/gallery-default-room.svg",
-        "images/gallery-default-plating.svg",
-        "images/gallery-default-table.svg"
+        "images/gallery_pizza.png",
+        "images/gallery_pasta.png",
+        "images/gallery_interior.png"
     ],
     "guestExperience": {
         "paymentMethods": ["cash", "tpe"],
@@ -415,7 +415,7 @@ window.defaultConfig = {
         wifi: { ...window.defaultConfig.wifi },
         categoryTranslations: cloneStarterTranslationMap(window.defaultCategoryTranslations),
         superCategories: [...window.defaultSuperCategories],
-        gallery: [],
+        gallery: [...(window.defaultConfig.gallery || [])],
         guestExperience: normalizeGuestExperience(window.defaultConfig.guestExperience),
         sectionVisibility: normalizeSectionVisibility(window.defaultConfig.sectionVisibility),
         sectionOrder: normalizeSectionOrder(window.defaultConfig.sectionOrder),
@@ -665,14 +665,17 @@ window.getRestaurantAddress = function () {
 window.getLocalizedMenuField = function (item, field, fallback = '') {
     if (!item || typeof item !== 'object') return fallback;
     const lang = window.currentLang || document.documentElement.lang || 'fr';
-    const translated = item.translations?.[lang]?.[field];
+    const translated = item.translations?.[lang]?.[field]
+        || item.translations?.fr?.[field]
+        || item.translations?.en?.[field]
+        || item.translations?.ar?.[field];
     if (typeof translated === 'string' && translated.trim()) {
-        return translated.trim();
+        return repairPossibleMojibake(translated.trim());
     }
 
     const baseValue = item[field];
     if (typeof baseValue === 'string' && baseValue.trim()) {
-        return baseValue.trim();
+        return repairPossibleMojibake(baseValue.trim());
     }
 
     return fallback;
@@ -686,7 +689,10 @@ window.getLocalizedCategoryName = function (categoryKey, fallback = '') {
     const aliasKey = Object.keys(categoryMap).find((key) => canonicalMenuLookupKey(key) === canonicalKey);
     const translations = direct || (aliasKey ? categoryMap[aliasKey] : undefined);
     const lang = window.currentLang || document.documentElement.lang || 'fr';
-    const translated = translations?.[lang]?.name;
+    const translated = translations?.[lang]?.name
+        || translations?.fr?.name
+        || translations?.en?.name
+        || translations?.ar?.name;
 
     if (typeof translated === 'string' && translated.trim()) {
         return repairPossibleMojibake(translated.trim());
@@ -700,7 +706,10 @@ window.getLocalizedCategoryName = function (categoryKey, fallback = '') {
 window.getLocalizedSuperCategoryField = function (superCategory, field, fallback = '') {
     if (!superCategory || typeof superCategory !== 'object') return fallback;
     const lang = window.currentLang || document.documentElement.lang || 'fr';
-    const translated = superCategory.translations?.[lang]?.[field];
+    const translated = superCategory.translations?.[lang]?.[field]
+        || superCategory.translations?.fr?.[field]
+        || superCategory.translations?.en?.[field]
+        || superCategory.translations?.ar?.[field];
 
     if (typeof translated === 'string' && translated.trim()) {
         return repairPossibleMojibake(translated.trim());
@@ -723,7 +732,7 @@ window.getSuperCategoryCategorySummary = function (superCategory, fallback = '')
     const localized = categories
         .map((categoryKey) => window.getLocalizedCategoryName(categoryKey, categoryKey))
         .filter(Boolean);
-    return localized.length ? localized.join(' · ') : fallback;
+    return localized.length ? localized.join(' / ') : fallback;
 };
 
 window.getLocalizedSuperCategoryDescription = function (superCategory, fallback = '') {
@@ -864,6 +873,15 @@ window.getWhatsAppNumber = function () {
     return String(rawValue).replace(/\D/g, '');
 };
 
+function escapePublicHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 window.applyBranding = function () {
     if (!window.restaurantConfig) return;
 
@@ -939,14 +957,11 @@ window.applyBranding = function () {
 
     const signature = document.getElementById('aboutSignatureText');
     if (signature) {
-        const lang = document.documentElement.lang || 'fr';
-        if (lang === 'en') {
-            signature.textContent = `- The ${branding.shortName} team ${branding.logoMark}`;
-        } else if (lang === 'ar') {
-            signature.textContent = `${branding.logoMark} فريق ${branding.shortName}`;
-        } else {
-            signature.textContent = `- L'équipe ${branding.shortName} ${branding.logoMark}`;
-        }
+        signature.textContent = window.formatTranslation(
+            'about_signature_named',
+            "- L'équipe {name} {mark}",
+            { name: branding.shortName, mark: branding.logoMark }
+        );
     }
 
     const aboutTagline = document.getElementById('aboutTaglineText');
@@ -962,27 +977,14 @@ window.applyBranding = function () {
 
     const aboutTitle = document.getElementById('aboutTitleHeading');
     if (aboutTitle) {
-        if (lang === 'en') {
-            aboutTitle.innerHTML = `About <span>${branding.shortName}</span>`;
-        } else if (lang === 'ar') {
-            aboutTitle.innerHTML = `<span>${branding.shortName}</span> من نحن`;
-        } else {
-            aboutTitle.innerHTML = `À Propos de <span>${branding.shortName}</span>`;
-        }
-    }
-
-    const footerCopy = document.getElementById('footerCopyText');
-    if (aboutTitle) {
-        aboutTitle.innerHTML = window.getTranslation(
-            'about_title',
-            lang === 'en'
-                ? 'About <span>Our Place</span>'
-                : lang === 'ar'
-                    ? 'عن <span>مطعمنا</span>'
-                    : 'À Propos de <span>Notre Table</span>'
+        aboutTitle.innerHTML = window.formatTranslation(
+            'about_title_named',
+            'À Propos de <span>{name}</span>',
+            { name: escapePublicHtml(branding.shortName) }
         );
     }
 
+    const footerCopy = document.getElementById('footerCopyText');
     if (footerCopy) {
         const rights = window.getTranslation(
             'footer_rights',
@@ -997,29 +999,28 @@ window.applyBranding = function () {
 
     const galleryTag = document.getElementById('galleryTaglineText');
     if (galleryTag) {
-        if (lang === 'en') {
-            galleryTag.textContent = `${branding.shortName} Moments`;
-        } else if (lang === 'ar') {
-            galleryTag.textContent = `لحظات ${branding.shortName}`;
-        } else {
-            galleryTag.textContent = `Moments ${branding.shortName}`;
-        }
+        galleryTag.textContent = window.formatTranslation(
+            'gallery_tag_named',
+            'Moments {name}',
+            { name: branding.shortName }
+        );
     }
 
     document.querySelectorAll('.featured-header-label').forEach((element) => {
-        if (lang === 'en') {
-            element.textContent = `${branding.shortName} Selection`;
-        } else if (lang === 'ar') {
-            element.textContent = `مختارات ${branding.shortName}`;
-        } else {
-            element.textContent = `Sélection ${branding.shortName}`;
-        }
+        element.textContent = window.formatTranslation(
+            'featured_label_named',
+            'Sélection {name}',
+            { name: branding.shortName }
+        );
     });
 
     const heroImageIds = ['landingHeroImage', 'menuHeroImage'];
     heroImageIds.forEach((id) => {
         const image = document.getElementById(id);
         if (image && branding.heroImage) {
+            // If the image already has my premium hero, don't overwrite it with a potentially broken server path
+            if (image.getAttribute('src')?.includes('hero-premium')) return;
+            
             window.setSafeImageSource(image, displayHeroImage, {
                 fallbackSrc: window.defaultBranding.heroImage,
                 onMissing: () => {
@@ -1057,14 +1058,22 @@ window.applyBranding = function () {
     const logoFallback = document.getElementById('landingLogoFallback');
     const logoPreviewFactory = branding.logoImage
         ? () => [{
-            name: `${branding.shortName || branding.restaurantName || 'Restaurant'} Logo`,
+            name: window.formatTranslation(
+                'image_alt_logo_named',
+                '{name} logo',
+                { name: branding.shortName || branding.restaurantName || 'Restaurant' }
+            ),
             img: branding.logoImage,
             images: [branding.logoImage]
         }]
         : null;
     if (logoImage) {
         if (branding.logoImage) {
-            logoImage.alt = `${branding.shortName} Logo`;
+            logoImage.alt = window.formatTranslation(
+                'image_alt_logo_named',
+                '{name} logo',
+                { name: branding.shortName || branding.restaurantName || 'Restaurant' }
+            );
             window.setSafeImageSource(logoImage, branding.logoImage, {
                 onMissing: () => {
                     logoImage.removeAttribute('src');
@@ -1087,7 +1096,7 @@ window.applyBranding = function () {
             logoImage.style.display = 'none';
             window.bindPublicMediaPreview(logoImage, null);
             if (logoFallback) {
-                logoFallback.textContent = window.getRestaurantInitials();
+                logoFallback.textContent = branding.logoMark || window.getRestaurantInitials();
                 logoFallback.style.display = 'flex';
                 window.bindPublicMediaPreview(logoFallback, null);
             }
@@ -1119,12 +1128,7 @@ window.applyBranding = function () {
 
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-        const lang = document.documentElement.lang || 'fr';
-        const suffix = lang === 'en'
-            ? 'Order online.'
-            : lang === 'ar'
-                ? 'اطلب عبر الإنترنت.'
-                : 'Commandez en ligne.';
+        const suffix = window.getTranslation('meta_order_suffix', 'Commandez en ligne.');
         metaDescription.setAttribute('content', `${branding.shortName} – ${branding.tagline}. ${suffix}`);
     }
 };
@@ -1226,11 +1230,11 @@ window.translations = {
         status_open: 'Ouvert', status_closed: 'Fermé', status_loading: 'Chargement...',
         nav_home: 'Accueil', nav_menu: 'Menu', nav_about: 'À Propos', nav_events: 'Événements', nav_gallery: 'Galerie',
         nav_contact: 'Contact', nav_hours: 'Horaires', nav_order: 'COMMANDER', nav_directions: 'ITINÉRAIRE',
-        hero_sub1: 'À table pour', hero_title1: 'SAVEURS <span>MAISON</span>', hero_cta: 'VOIR LA CARTE',
+        hero_sub1: 'L\'Excellence Quotidienne', hero_title1: 'SAVEURS <span>AUTHENTIQUES</span>', hero_desc1: 'Des recettes maison, généreuses et préparées chaque jour avec passion.', hero_cta: 'VOIR LA CARTE',
         hero_sub2: 'Découvrez', hero_title2: 'PLATS <span>SIGNATURE</span>', hero_desc2: 'Recettes maison pour tous',
         hero_sub3: 'Préparé', hero_title3: 'FRAIS <span>DU JOUR</span>', hero_desc3: 'Sur place ou livraison',
         see_order: 'Voir ma commande',
-        about_tag: 'Notre Histoire', about_title: 'À Propos de <span>Notre Table</span>',
+        about_tag: 'Notre Histoire', about_title: 'À Propos de <span>Pizzeria Nour</span>',
         about_tagline: 'Cuisine sincère, service attentionné et identité locale',
         about_p1: "Notre histoire commence avec une idée simple : proposer une table accueillante, lisible et régulière pour les repas du quotidien comme pour les moments à partager.",
         about_p2: 'Nous privilégions des ingrédients frais, une cuisine soignée et une ambiance qui donne envie de revenir avec confiance.',
@@ -1251,11 +1255,12 @@ window.translations = {
         pf_payment_cash: 'Espèces', pf_payment_tpe: 'TPE',
         pf_facility_wifi: 'WiFi', pf_facility_accessible: 'Accessible', pf_facility_parking: 'Parking',
         pf_facility_terrace: 'Terrasse', pf_facility_family: 'Espace famille',
+        hours_note_default: '🔥 Ouvert tous les jours ! Livraison disponible.',
         gallery_tag: 'Ambiance & Assiettes', gallery_title: 'Notre <span>Galerie</span>',
         contact_tag: 'Venez Manger', contact_title: 'Contactez-<span>Nous</span>',
         footer_note: 'Cuisine maison, service chaleureux et accueil de proximité.',
         footer_rights: 'Tous droits réservés.',
-        contact_address_title: 'Adresse', contact_phone_title: 'Téléphone',
+        contact_address_title: 'Adresse', contact_phone_title: 'Téléphone', contact_today_title: 'Aujourd\'hui',
         side_menu: 'MENU', side_wifi: 'CODE WIFI', side_insta: 'INSTAGRAM',
         social_title: 'Suivez-nous',
         side_social: 'SOCIAL',
@@ -1269,6 +1274,7 @@ window.translations = {
         wifi_default_code_help: 'Demandez le mot de passe',
         wifi_connect_title: 'Connexion WiFi',
         wifi_network_label: 'Réseau',
+        wifi_copy_password: 'Copier le mot de passe',
         modal_close: 'FERMER',
         event_booking_subtitle: 'Parlez-nous de votre projet',
         featured_label: 'Sélection Signature',
@@ -1293,7 +1299,7 @@ window.translations = {
         ticket_footer: 'Veuillez présenter ce ticket à la caisse.',
         social_instagram: 'Instagram', social_facebook: 'Facebook', social_tiktok: 'TikTok', social_tripadvisor: 'TripAdvisor', social_whatsapp: 'WhatsApp',
         history_button_title: 'Historique', history_title: 'Historique', history_empty: 'Aucune commande récente.', history_delete_title: 'Supprimer', history_delete_confirm: 'Supprimer ce ticket de l\'historique ?',
-        landing_map_title: 'Voir sur la carte', landing_call_title: 'Appeler', landing_social_title: 'Nos réseaux sociaux', landing_wifi_title: 'Code WiFi', landing_reviews_title: 'Avis Google', landing_home_title: 'Accueil',
+        landing_map_title: 'Voir sur la carte', landing_call_title: 'Appeler', landing_social_title: 'Nos réseaux sociaux', landing_wifi_title: 'Code WiFi', landing_reviews_title: 'Avis Google', landing_home_title: 'Accueil', nav_back: 'Retour',
         game_rule_1: 'Attendez votre tour puis ouvrez une case.', game_rule_2: 'Essayez d\'éviter le signe X.', game_rule_3: 'Si vous trouvez le X, vous payez l\'addition.',
         game_players_label: 'Nombre de joueurs', game_start_button: 'COMMENCER', game_board_subtitle: 'Celui qui trouve le X paie l\'addition !', game_loss_text: 'Joueur {player}, vous avez trouvé le signe X.', game_loss_title: 'Payez l\'addition !',
         promo_empty: '🔥 Découvrez nos promos du jour bientôt !', promo_offer_badge: 'OFFRE', promo_small_badge: 'PROMO', promo_add_short: 'AJOUTER',
@@ -1310,7 +1316,7 @@ window.translations = {
         status_open: 'Open', status_closed: 'Closed', status_loading: 'Loading...',
         nav_home: 'Home', nav_menu: 'Menu', nav_about: 'About Us', nav_events: 'Events', nav_gallery: 'Gallery',
         nav_contact: 'Contact Us', nav_hours: 'Hours', nav_order: 'ORDER ONLINE', nav_directions: 'GET DIRECTIONS',
-        hero_sub1: 'A table for', hero_title1: 'AUTHENTIC <span>FLAVOR</span>', hero_cta: 'VIEW MENU',
+        hero_sub1: 'Everyday Excellence', hero_title1: 'AUTHENTIC <span>FLAVOR</span>', hero_desc1: 'Generous home-made recipes, prepared every day with passion.', hero_cta: 'VIEW MENU',
         hero_sub2: 'Discover our', hero_title2: 'SIGNATURE <span>DISHES</span>', hero_desc2: 'House-made recipes for every appetite',
         hero_sub3: 'Prepared', hero_title3: 'FRESH <span>DAILY</span>', hero_desc3: 'Dine in, takeaway, or delivery',
         see_order: 'See my order',
@@ -1335,11 +1341,12 @@ window.translations = {
         pf_payment_cash: 'Cash', pf_payment_tpe: 'Card / TPE',
         pf_facility_wifi: 'WiFi', pf_facility_accessible: 'Accessible', pf_facility_parking: 'Parking',
         pf_facility_terrace: 'Terrace', pf_facility_family: 'Family space',
+        hours_note_default: '🔥 Open every day! Delivery available.',
         gallery_tag: 'Atmosphere & Plates', gallery_title: 'Our <span>Gallery</span>',
         contact_tag: 'Come eat', contact_title: 'Contact <span>Us</span>',
         footer_note: 'House-made cuisine, warm service, and a welcoming local address.',
         footer_rights: 'All rights reserved.',
-        contact_address_title: 'Address', contact_phone_title: 'Phone',
+        contact_address_title: 'Address', contact_phone_title: 'Phone', contact_today_title: 'Today',
         side_menu: 'MENU', side_wifi: 'WIFI CODE', side_insta: 'INSTAGRAM',
         social_title: 'Follow Us',
         side_social: 'SOCIAL',
@@ -1353,6 +1360,7 @@ window.translations = {
         wifi_default_code_help: 'Ask the team',
         wifi_connect_title: 'Connect to WiFi',
         wifi_network_label: 'Network',
+        wifi_copy_password: 'Copy password',
         modal_close: 'CLOSE',
         "event_booking_subtitle": "Share your details with us",
         "featured_label": "Signature Selection",
@@ -1377,7 +1385,7 @@ window.translations = {
         ticket_footer: 'Please show this ticket at the counter.',
         social_instagram: 'Instagram', social_facebook: 'Facebook', social_tiktok: 'TikTok', social_tripadvisor: 'TripAdvisor', social_whatsapp: 'WhatsApp',
         history_button_title: 'History', history_title: 'History', history_empty: 'No recent orders.', history_delete_title: 'Delete', history_delete_confirm: 'Delete this ticket from history?',
-        landing_map_title: 'View on map', landing_call_title: 'Call', landing_social_title: 'Our social media', landing_wifi_title: 'WiFi code', landing_reviews_title: 'Google Reviews', landing_home_title: 'Home',
+        landing_map_title: 'View on map', landing_call_title: 'Call', landing_social_title: 'Our social media', landing_wifi_title: 'WiFi code', landing_reviews_title: 'Google Reviews', landing_home_title: 'Home', nav_back: 'Back',
         game_rule_1: 'Wait for your turn and open a box.', game_rule_2: 'Try to avoid finding the X sign.', game_rule_3: 'If you find the X, pay the check.',
         game_players_label: 'Number of Players', game_start_button: 'START GAME', game_board_subtitle: 'The one who finds the X pays the check!', game_loss_text: 'Player {player}, you found the X sign.', game_loss_title: 'Pay the check!',
         promo_empty: '🔥 Discover our daily promos soon!', promo_offer_badge: 'OFFER', promo_small_badge: 'PROMO', promo_add_short: 'ADD',
@@ -1394,7 +1402,7 @@ window.translations = {
         status_open: 'مفتوح', status_closed: 'مغلق', status_loading: 'جاري التحميل...',
         nav_home: 'الرئيسية', nav_menu: 'القائمة', nav_about: 'من نحن', nav_events: 'الفعاليات', nav_gallery: 'المعرض',
         nav_contact: 'اتصل بنا', nav_hours: 'أوقات العمل', nav_order: 'اطلب الآن', nav_directions: 'الاتجاهات',
-        hero_sub1: 'اكتشف', hero_title1: 'نكهات <span>أصيلة</span>', hero_cta: 'عرض القائمة',
+        hero_sub1: 'اكتشف', hero_title1: 'نكهات <span>أصيلة</span>', hero_desc1: 'وصفات منزلية سخية، تُحضَّر كل يوم بشغف.', hero_cta: 'عرض القائمة',
         hero_sub2: 'جرّب', hero_title2: 'أطباقنا <span>المميزة</span>', hero_desc2: 'وصفات طازجة تناسب كل الأذواق',
         hero_sub3: 'يُحضَّر', hero_title3: 'طازج <span>كل يوم</span>', hero_desc3: 'داخل المطعم أو سفري أو توصيل',
         see_order: 'عرض طلبي',
@@ -1419,11 +1427,12 @@ window.translations = {
         pf_payment_cash: 'نقداً', pf_payment_tpe: 'جهاز الأداء الإلكتروني',
         pf_facility_wifi: 'واي فاي', pf_facility_accessible: 'ولوج سهل', pf_facility_parking: 'موقف سيارات',
         pf_facility_terrace: 'تراس', pf_facility_family: 'فضاء عائلي',
+        hours_note_default: '🔥 مفتوح كل يوم ! خدمة التوصيل متوفرة.',
         gallery_tag: 'الأجواء والأطباق', gallery_title: '<span>معرضنا</span>',
         contact_tag: 'تعال كُل', contact_title: 'اتصل <span>بنا</span>',
         footer_note: 'مأكولات منزلية وخدمة دافئة واستقبال يليق بالضيوف.',
         footer_rights: 'جميع الحقوق محفوظة.',
-        contact_address_title: 'العنوان', contact_phone_title: 'الهاتف',
+        contact_address_title: 'العنوان', contact_phone_title: 'الهاتف', contact_today_title: 'اليوم',
         side_menu: 'القائمة', side_wifi: 'كود الواي فاي', side_insta: 'إنستغرام',
         social_title: 'تابعنا',
         side_social: 'تواصل',
@@ -1437,6 +1446,7 @@ window.translations = {
         wifi_default_code_help: 'اطلب كلمة المرور',
         wifi_connect_title: 'الاتصال بالواي فاي',
         wifi_network_label: 'الشبكة',
+        wifi_copy_password: 'نسخ كلمة المرور',
         modal_close: 'إغلاق',
         "event_booking_subtitle": "شاركنا تفاصيلك",
         "featured_label": "مختارات مميزة",
@@ -1461,7 +1471,7 @@ window.translations = {
         ticket_footer: 'يرجى تقديم هذه التذكرة عند الكاشير.',
         social_instagram: 'Instagram', social_facebook: 'Facebook', social_tiktok: 'TikTok', social_tripadvisor: 'TripAdvisor', social_whatsapp: 'WhatsApp',
         history_button_title: 'السجل', history_title: 'السجل', history_empty: 'لا توجد طلبات أخيرة.', history_delete_title: 'حذف', history_delete_confirm: 'هل تريد حذف هذه التذكرة من السجل؟',
-        landing_map_title: 'عرض على الخريطة', landing_call_title: 'اتصال', landing_social_title: 'حساباتنا الاجتماعية', landing_wifi_title: 'رمز الواي فاي', landing_reviews_title: 'تقييمات جوجل', landing_home_title: 'الرئيسية',
+        landing_map_title: 'عرض على الخريطة', landing_call_title: 'اتصال', landing_social_title: 'حساباتنا الاجتماعية', landing_wifi_title: 'رمز الواي فاي', landing_reviews_title: 'تقييمات جوجل', landing_home_title: 'الرئيسية', nav_back: 'رجوع',
         game_rule_1: 'انتظر دورك ثم افتح صندوقاً.', game_rule_2: 'حاول تجنب اكتشاف علامة X.', game_rule_3: 'إذا وجدت علامة X فأنت من سيدفع الفاتورة.',
         game_players_label: 'عدد اللاعبين', game_start_button: 'ابدأ اللعبة', game_board_subtitle: 'من يجد علامة X هو من سيدفع الفاتورة!', game_loss_text: 'اللاعب {player}، لقد وجدت علامة X.', game_loss_title: 'ادفع الفاتورة!',
         promo_empty: '🔥 اكتشف عروضنا اليومية قريباً!', promo_offer_badge: 'عرض', promo_small_badge: 'برومو', promo_add_short: 'أضف',
@@ -1492,6 +1502,135 @@ Object.assign(window.translations.ar, {
     wa_popup_blocked_title: 'اسمح بفتح واتساب',
     wa_popup_blocked_text: 'قام المتصفح بحظر فتح واتساب لهذه الطلبية.',
     wa_popup_blocked_note: 'اسمح بالنوافذ المنبثقة لهذا الموقع ثم أعد المحاولة من التذكرة.'
+});
+
+Object.assign(window.translations.fr, {
+    gallery_prev: 'Image précédente',
+    gallery_next: 'Image suivante',
+    cart_empty_title: 'Votre panier est vide',
+    cart_empty_text: 'Ajoutez quelques plats pour commencer votre commande.',
+    cart_empty_action: 'Continuer',
+    history_empty_title: 'Aucune commande récente',
+    history_empty_text: 'Vos tickets validés apparaîtront ici pour être retrouvés rapidement.',
+    history_empty_action: 'Retour au menu',
+    menu_loading_title: 'La carte arrive',
+    menu_loading_text: 'Nous préparons les plats et les catégories de cette table.',
+    menu_loading_error_title: 'Impossible de charger la carte',
+    menu_loading_error_text: 'Vérifiez la connexion puis réessayez dans un instant.',
+    menu_empty_refresh: 'Actualiser',
+    menu_empty_title: 'La carte se prépare',
+    menu_empty_text: 'Les plats apparaîtront ici dès qu’ils seront publiés.',
+    menu_sheet_empty_title: 'Aucune section disponible',
+    menu_sheet_empty_text: 'La carte revient très bientôt.',
+    menu_category_waiting_title: 'Cette section arrive bientôt',
+    menu_category_waiting_text: 'Les plats de cette section seront visibles dès qu’ils seront ajoutés.',
+    menu_category_empty_title: 'Aucun plat disponible',
+    menu_category_empty_text: 'Cette catégorie sera bientôt garnie de nouvelles suggestions.'
+});
+
+Object.assign(window.translations.en, {
+    gallery_prev: 'Previous image',
+    gallery_next: 'Next image',
+    cart_empty_title: 'Your cart is empty',
+    cart_empty_text: 'Add a few dishes to start your order.',
+    cart_empty_action: 'Continue',
+    history_empty_title: 'No recent orders',
+    history_empty_text: 'Your validated tickets will appear here so you can find them quickly.',
+    history_empty_action: 'Back to menu',
+    menu_loading_title: 'The menu is loading',
+    menu_loading_text: 'We are preparing the dishes and categories for this table.',
+    menu_loading_error_title: 'Unable to load the menu',
+    menu_loading_error_text: 'Check the connection, then try again in a moment.',
+    menu_empty_refresh: 'Refresh',
+    menu_empty_title: 'The menu is being prepared',
+    menu_empty_text: 'Dishes will appear here as soon as they are published.',
+    menu_sheet_empty_title: 'No sections available',
+    menu_sheet_empty_text: 'The menu will be back very soon.',
+    menu_category_waiting_title: 'This section is coming soon',
+    menu_category_waiting_text: 'Dishes in this section will appear as soon as they are added.',
+    menu_category_empty_title: 'No dishes available',
+    menu_category_empty_text: 'This category will soon be filled with new suggestions.'
+});
+
+Object.assign(window.translations.ar, {
+    gallery_prev: 'الصورة السابقة',
+    gallery_next: 'الصورة التالية',
+    cart_empty_title: 'سلتك فارغة',
+    cart_empty_text: 'أضف بعض الأطباق لبدء طلبك.',
+    cart_empty_action: 'متابعة',
+    history_empty_title: 'لا توجد طلبات حديثة',
+    history_empty_text: 'ستظهر التذاكر المؤكدة هنا لتتمكن من الرجوع إليها بسرعة.',
+    history_empty_action: 'العودة إلى القائمة',
+    menu_loading_title: 'جاري تحميل القائمة',
+    menu_loading_text: 'نقوم بتحضير الأطباق والأقسام لهذه الطاولة.',
+    menu_loading_error_title: 'تعذر تحميل القائمة',
+    menu_loading_error_text: 'تحقق من الاتصال ثم أعد المحاولة بعد لحظات.',
+    menu_empty_refresh: 'تحديث',
+    menu_empty_title: 'القائمة قيد التحضير',
+    menu_empty_text: 'ستظهر الأطباق هنا بمجرد نشرها.',
+    menu_sheet_empty_title: 'لا توجد أقسام متاحة',
+    menu_sheet_empty_text: 'ستعود القائمة قريباً جداً.',
+    menu_category_waiting_title: 'هذا القسم سيصل قريباً',
+    menu_category_waiting_text: 'ستظهر أطباق هذا القسم بمجرد إضافتها.',
+    menu_category_empty_title: 'لا توجد أطباق متاحة',
+    menu_category_empty_text: 'سيتم ملء هذه الفئة قريباً باقتراحات جديدة.'
+});
+
+Object.assign(window.translations.fr, {
+    game_logo_who: 'QUI',
+    game_logo_pays: 'PAIE ?',
+    game_how_to_play: 'Comment jouer ?',
+    image_alt_logo: 'Logo du restaurant',
+    image_alt_gallery: 'Photo de galerie',
+    image_alt_wifi_qr: 'Code QR WiFi',
+    image_alt_hero: 'Image principale du restaurant',
+    about_signature_named: "- L'équipe {name} {mark}",
+    about_title_named: 'À Propos de <span>{name}</span>',
+    gallery_tag_named: 'Moments {name}',
+    featured_label_named: 'Sélection {name}',
+    meta_order_suffix: 'Commandez en ligne.',
+    image_alt_logo_named: 'Logo de {name}',
+    dish_size_title: 'Choisissez une taille',
+    dish_extras_title: 'Ajoutez des extras',
+    dish_included_label: 'Inclus'
+});
+
+Object.assign(window.translations.en, {
+    game_logo_who: 'WHO',
+    game_logo_pays: 'PAYS?',
+    game_how_to_play: 'How to play?',
+    image_alt_logo: 'Restaurant logo',
+    image_alt_gallery: 'Gallery image',
+    image_alt_wifi_qr: 'WiFi QR code',
+    image_alt_hero: 'Restaurant hero image',
+    about_signature_named: '- The {name} team {mark}',
+    about_title_named: 'About <span>{name}</span>',
+    gallery_tag_named: '{name} Moments',
+    featured_label_named: '{name} Selection',
+    meta_order_suffix: 'Order online.',
+    image_alt_logo_named: '{name} logo',
+    dish_size_title: 'Choose a size',
+    dish_extras_title: 'Add extras',
+    dish_included_label: 'Included'
+});
+
+Object.assign(window.translations.ar, {
+    game_logo_who: 'من',
+    game_logo_pays: 'يدفع؟',
+    game_how_to_play: 'كيف تلعب؟',
+    image_alt_logo: 'شعار المطعم',
+    image_alt_gallery: 'صورة من المعرض',
+    image_alt_wifi_qr: 'رمز QR للواي فاي',
+    image_alt_hero: 'الصورة الرئيسية للمطعم',
+    about_signature_named: '{mark} فريق {name}',
+    about_title_named: 'عن <span>{name}</span>',
+    gallery_tag_named: 'لحظات {name}',
+    featured_label_named: 'مختارات {name}',
+    meta_order_suffix: 'اطلب عبر الإنترنت.',
+    image_alt_logo_named: 'شعار {name}',
+    dish_size_title: 'اختر الحجم',
+    dish_extras_title: 'أضف إضافات',
+    dish_included_label: 'مشمول'
 });
 
 // --- PROMO & DISCOUNT HELPERS ---
@@ -1528,13 +1667,14 @@ window.getItemPrice = function (item, sizeKey) {
 window.currentLang = 'fr';
 
 window.setLang = function (lang, btn) {
-    window.currentLang = lang;
+    const nextLang = ['fr', 'en', 'ar'].includes(lang) ? lang : 'fr';
+    window.currentLang = nextLang;
 
     // Update Dropdown Display
     const displayEl = document.getElementById('currentLangDisplay');
     if (displayEl) {
         const labels = { 'fr': 'FR', 'en': 'EN', 'ar': 'AR' };
-        displayEl.textContent = labels[lang] || lang.toUpperCase();
+        displayEl.textContent = labels[nextLang] || nextLang.toUpperCase();
     }
 
     // Close dropdown
@@ -1542,20 +1682,20 @@ window.setLang = function (lang, btn) {
     if (opts) opts.classList.remove('open');
 
     // Update active state for buttons if they exist
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active-lang'));
+    document.querySelectorAll('.lang-btn, .lang-opt').forEach(b => b.classList.remove('active-lang'));
     if (btn) btn.classList.add('active-lang');
 
-    const dict = window.getLocaleDictionary(lang);
+    const dict = window.getLocaleDictionary(nextLang);
     if (!dict) return;
 
     // Set RTL for Arabic
     const html = document.getElementById('htmlRoot') || document.documentElement;
-    if (lang === 'ar') {
+    if (nextLang === 'ar') {
         html.setAttribute('dir', 'rtl');
         html.setAttribute('lang', 'ar');
     } else {
         html.setAttribute('dir', 'ltr');
-        html.setAttribute('lang', lang);
+        html.setAttribute('lang', nextLang);
     }
 
     // Update all translatable elements
@@ -1591,12 +1731,25 @@ window.setLang = function (lang, btn) {
         }
     });
 
+    document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+        const key = el.getAttribute('data-i18n-alt');
+        if (dict[key]) {
+            el.setAttribute('alt', dict[key]);
+        }
+    });
+
     // Update status based on language
     window.updateStatus();
     window.applyBranding();
+    if (typeof window.__eventBookingRefresh === 'function') {
+        window.__eventBookingRefresh();
+    }
+    if (typeof window.__gameRefresh === 'function') {
+        window.__gameRefresh();
+    }
 
     // Save preference
-    window.setStoredLanguage(lang);
+    window.setStoredLanguage(nextLang);
 };
 
 window.updateStatus = function () {
@@ -1622,7 +1775,9 @@ window.updateStatus = function () {
         textEl.textContent = isOpen ? 'Ouvert' : 'Fermé';
     }
     if (textEl) {
-        const dict = window.translations?.[window.currentLang] || {};
+        const dict = typeof window.getLocaleDictionary === 'function'
+            ? window.getLocaleDictionary(window.currentLang)
+            : (window.translations?.[window.currentLang] || {});
         textEl.textContent = isOpen
             ? (dict.status_open || 'Ouvert')
             : (dict.status_closed || 'Ferme');

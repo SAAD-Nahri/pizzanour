@@ -231,7 +231,11 @@ function sanitizeSuperCategories(input) {
   return source
     .map((entry, index) => {
       const item = entry && typeof entry === "object" ? entry : {};
-      const name = asString(item.name, 160).trim();
+      const translations = sanitizeEntityTranslations(item.translations);
+      const name = asString(item.name, 160).trim()
+        || translations.fr.name
+        || translations.en.name
+        || translations.ar.name;
       const id = asString(item.id, 120).trim() || `super-category-${index + 1}`;
 
       return {
@@ -245,7 +249,7 @@ function sanitizeSuperCategories(input) {
             .filter((value) => typeof value === "string" && value.trim())
             .map((value) => value.trim().slice(0, 120))
           : [],
-        translations: sanitizeEntityTranslations(item.translations)
+        translations
       };
     })
     .filter((entry) => entry.name);

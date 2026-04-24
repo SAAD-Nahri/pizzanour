@@ -33,19 +33,43 @@ function renderHours() {
     const hours = Array.isArray(window.restaurantConfig?._hours) && window.restaurantConfig._hours.length > 0
         ? window.restaurantConfig._hours
         : window.defaultHours;
-    const note = typeof window.restaurantConfig?._hoursNote === 'string'
-        ? window.restaurantConfig._hoursNote
-        : (window.defaultHoursNote || '');
+    const isDefaultNote = !window.restaurantConfig?._hoursNote;
+    const note = isDefaultNote
+        ? tx('hours_note_default', window.defaultHoursNote || '')
+        : (window.restaurantConfig._hoursNote || '');
 
-    grid.innerHTML = hours.map(h => `
+    grid.innerHTML = hours.map(h => {
+        const dayKey = typeof h.i18n === 'string' && h.i18n.trim() ? h.i18n.trim() : '';
+        const dayLabel = dayKey ? tx(dayKey, h.day) : h.day;
+        const dayI18nAttr = dayKey ? ` data-i18n="${dayKey}"` : '';
+        return `
         <div class="hours-row${h.highlight ? ' highlight-row' : ''}">
-            <span class="hours-day" data-i18n="${h.i18n}">${h.day}</span>
+            <span class="hours-day"${dayI18nAttr}>${dayLabel}</span>
             <span class="hours-dash"></span>
             <span class="hours-time">${h.open} – ${h.close}</span>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
-    if (noteEl) noteEl.textContent = note;
+    if (noteEl) {
+        if (isDefaultNote && window.defaultHoursNote) {
+            noteEl.setAttribute('data-i18n', 'hours_note_default');
+        } else {
+            noteEl.removeAttribute('data-i18n');
+        }
+        noteEl.innerHTML = note;
+    }
+
+    // Today's hours for contact section
+    const contactTodayHours = document.getElementById('contactTodayHours');
+    if (contactTodayHours) {
+        const todayIndex = new Date().getDay();
+        const mondayFirstIndex = todayIndex === 0 ? 6 : todayIndex - 1;
+        const todayData = hours[mondayFirstIndex] || hours[0];
+        if (todayData) {
+            contactTodayHours.textContent = `${todayData.open} – ${todayData.close}`;
+        }
+    }
 }
 
 function updateWifiUI() {
@@ -110,32 +134,37 @@ function renderSocialLinks() {
     const tripAdvisorUrl = window.getSafeExternalUrl(socialLinks.tripadvisor);
 
     if (instagramUrl) {
-        modalItems += `<a href="${instagramUrl}" target="_blank" class="social-link-item instagram"><span>📸</span> ${tx('social_instagram', 'Instagram')}</a>`;
-        footerIcons += `<a href="${instagramUrl}" target="_blank" class="footer-social-icon">📸</a>`;
-        contactButtons += `<a href="${instagramUrl}" target="_blank" class="social-btn">📸 ${tx('social_instagram', 'Instagram')}</a>`;
+        const label = tx('social_instagram', 'Instagram');
+        modalItems += `<a href="${instagramUrl}" target="_blank" class="social-link-item instagram" aria-label="${label}" title="${label}"><span>📸</span> ${label}</a>`;
+        footerIcons += `<a href="${instagramUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">📸</a>`;
+        contactButtons += `<a href="${instagramUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">📸 ${label}</a>`;
     }
     if (facebookUrl) {
-        modalItems += `<a href="${facebookUrl}" target="_blank" class="social-link-item facebook"><span>📘</span> ${tx('social_facebook', 'Facebook')}</a>`;
-        footerIcons += `<a href="${facebookUrl}" target="_blank" class="footer-social-icon">📘</a>`;
-        contactButtons += `<a href="${facebookUrl}" target="_blank" class="social-btn">📘 ${tx('social_facebook', 'Facebook')}</a>`;
+        const label = tx('social_facebook', 'Facebook');
+        modalItems += `<a href="${facebookUrl}" target="_blank" class="social-link-item facebook" aria-label="${label}" title="${label}"><span>📘</span> ${label}</a>`;
+        footerIcons += `<a href="${facebookUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">📘</a>`;
+        contactButtons += `<a href="${facebookUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">📘 ${label}</a>`;
     }
     if (tiktokUrl) {
-        modalItems += `<a href="${tiktokUrl}" target="_blank" class="social-link-item tiktok"><span>🎵</span> ${tx('social_tiktok', 'TikTok')}</a>`;
-        footerIcons += `<a href="${tiktokUrl}" target="_blank" class="footer-social-icon">🎵</a>`;
-        contactButtons += `<a href="${tiktokUrl}" target="_blank" class="social-btn">🎵 ${tx('social_tiktok', 'TikTok')}</a>`;
+        const label = tx('social_tiktok', 'TikTok');
+        modalItems += `<a href="${tiktokUrl}" target="_blank" class="social-link-item tiktok" aria-label="${label}" title="${label}"><span>🎵</span> ${label}</a>`;
+        footerIcons += `<a href="${tiktokUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">🎵</a>`;
+        contactButtons += `<a href="${tiktokUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">🎵 ${label}</a>`;
     }
     if (tripAdvisorUrl) {
-        modalItems += `<a href="${tripAdvisorUrl}" target="_blank" class="social-link-item"><span>⭐</span> ${tx('social_tripadvisor', 'TripAdvisor')}</a>`;
-        footerIcons += `<a href="${tripAdvisorUrl}" target="_blank" class="footer-social-icon">⭐</a>`;
-        contactButtons += `<a href="${tripAdvisorUrl}" target="_blank" class="social-btn">⭐ ${tx('social_tripadvisor', 'TripAdvisor')}</a>`;
+        const label = tx('social_tripadvisor', 'TripAdvisor');
+        modalItems += `<a href="${tripAdvisorUrl}" target="_blank" class="social-link-item" aria-label="${label}" title="${label}"><span>⭐</span> ${label}</a>`;
+        footerIcons += `<a href="${tripAdvisorUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">⭐</a>`;
+        contactButtons += `<a href="${tripAdvisorUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">⭐ ${label}</a>`;
     }
     const waNumber = typeof window.getWhatsAppNumber === 'function'
         ? window.getWhatsAppNumber()
         : String(socialLinks.whatsapp || '').replace(/\D/g, '');
     if (waNumber) {
-        modalItems += `<a href="https://wa.me/${waNumber}" target="_blank" class="social-link-item whatsapp"><span>📞</span> ${tx('social_whatsapp', 'WhatsApp')}</a>`;
-        footerIcons += `<a href="https://wa.me/${waNumber}" target="_blank" class="footer-social-icon">📞</a>`;
-        contactButtons += `<a href="https://wa.me/${waNumber}" target="_blank" class="social-btn">📞 ${tx('social_whatsapp', 'WhatsApp')}</a>`;
+        const label = tx('social_whatsapp', 'WhatsApp');
+        modalItems += `<a href="https://wa.me/${waNumber}" target="_blank" class="social-link-item whatsapp" aria-label="${label}" title="${label}"><span>📞</span> ${label}</a>`;
+        footerIcons += `<a href="https://wa.me/${waNumber}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">📞</a>`;
+        contactButtons += `<a href="https://wa.me/${waNumber}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">📞 ${label}</a>`;
     }
 
     const emptyText = typeof window.getTranslation === 'function'
@@ -187,7 +216,7 @@ function renderGallery() {
 
     grid.innerHTML = images.map(img => `
         <div class="gallery-item" onclick="openGalleryLightbox('${img}')">
-            <img src="${img}" alt="Gallery Image" width="640" height="640" loading="lazy" decoding="async" fetchpriority="low" />
+            <img src="${img}" alt="${tx('image_alt_gallery', 'Gallery image')}" width="640" height="640" loading="lazy" decoding="async" fetchpriority="low" />
         </div>
     `).join('');
     grid.querySelectorAll('img').forEach((imgEl) => {
@@ -211,12 +240,37 @@ function renderLocation() {
     const contactPhoneLink = document.getElementById('contactPhoneLink');
     const directionsLink = document.getElementById('directionsLink');
     const reviewsLink = document.getElementById('reviewsLink');
+    const footerTagline = document.getElementById('footerTaglineText');
+    const footerName = document.getElementById('brandNameFooter');
+    const footerLogo = document.getElementById('brandLogoIconFooter');
+    const locationConfig = window.restaurantConfig?.location && typeof window.restaurantConfig.location === 'object'
+        ? window.restaurantConfig.location
+        : {};
+    const locationAddress = typeof locationConfig.address === 'string'
+        ? locationConfig.address.trim()
+        : '';
 
-    if (window.restaurantConfig?.location) {
-        if (addressText) addressText.textContent = window.restaurantConfig.location.address;
-        if (footerAddressText) footerAddressText.textContent = window.restaurantConfig.location.address;
-        if (topAddressText) topAddressText.textContent = `📍 ${window.restaurantConfig.location.address}`;
-        const mapUrl = window.getSafeExternalUrl(window.restaurantConfig.location.url);
+    if (footerTagline) {
+        const translatedFooterNote = typeof window.getTranslation === 'function'
+            ? window.getTranslation('footer_note', '')
+            : '';
+        const brandingTagline = typeof window.restaurantConfig?.branding?.tagline === 'string'
+            ? window.restaurantConfig.branding.tagline.trim()
+            : '';
+        footerTagline.textContent = translatedFooterNote || brandingTagline;
+    }
+    if (footerName && window.restaurantConfig?.branding?.restaurantName) {
+        footerName.textContent = window.restaurantConfig.branding.restaurantName;
+    }
+    if (footerLogo && window.restaurantConfig?.branding?.logoMark) {
+        footerLogo.textContent = window.restaurantConfig.branding.logoMark;
+    }
+
+    if (locationAddress) {
+        if (addressText) addressText.textContent = locationAddress;
+        if (footerAddressText) footerAddressText.textContent = locationAddress;
+        if (topAddressText) topAddressText.textContent = `📍 ${locationAddress}`;
+        const mapUrl = window.getSafeExternalUrl(locationConfig.url);
         if (addressCard && mapUrl) {
             addressCard.onclick = () => {
                 window.openSafeExternalUrl(mapUrl, '_blank');
@@ -240,9 +294,11 @@ function renderLocation() {
             reviewsLink.removeAttribute('href');
             reviewsLink.classList.add('is-disabled');
         }
-    } else if (addressCard) {
-        addressCard.onclick = null;
-        addressCard.classList.remove('is-actionable');
+    } else {
+        if (addressCard) {
+            addressCard.onclick = null;
+            addressCard.classList.remove('is-actionable');
+        }
         if (addressText) {
             addressText.textContent = typeof window.getTranslation === 'function'
                 ? window.getTranslation('landing_address_placeholder', 'Restaurant address')
@@ -250,6 +306,10 @@ function renderLocation() {
         }
         if (footerAddressText) footerAddressText.textContent = '';
         if (topAddressText) topAddressText.textContent = '';
+        if (directionsLink) {
+            directionsLink.removeAttribute('href');
+            directionsLink.classList.add('is-disabled');
+        }
         if (reviewsLink) {
             reviewsLink.removeAttribute('href');
             reviewsLink.classList.add('is-disabled');
@@ -438,6 +498,7 @@ window.__homepageRenderDeferredSections = function __homepageRenderDeferredSecti
     renderSocialLinks();
     renderHours();
     renderGallery();
+    renderLocation();
     renderPaymentFacilities();
     renderSectionLayout();
     updateWifiUI();

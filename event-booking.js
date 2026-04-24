@@ -1,6 +1,50 @@
 let eventModalStylesheetPromise = null;
 let currentEventType = '';
 
+const EVENT_TYPE_META = {
+    birthday: { icon: '🎂', labelKey: 'event_birthday' },
+    family: { icon: '👨‍👩‍👧‍👦', labelKey: 'event_family' },
+    corporate: { icon: '🏢', labelKey: 'event_corporate' },
+    party: { icon: '🎉', labelKey: 'event_party' }
+};
+
+function getEventTypeMeta(type = currentEventType) {
+    const aliases = {
+        Anniversaire: 'birthday',
+        birthday: 'birthday',
+        Réunion: 'family',
+        'Réunion Familiale': 'family',
+        family: 'family',
+        Business: 'corporate',
+        'Événement Corporate': 'corporate',
+        corporate: 'corporate',
+        Romantique: 'party',
+        'Fête Privée': 'party',
+        party: 'party'
+    };
+    const normalizedType = aliases[type] || type;
+    return EVENT_TYPE_META[normalizedType] || { icon: '📅', labelKey: '' };
+}
+
+function getLocalizedEventType(type = currentEventType) {
+    const meta = getEventTypeMeta(type);
+    return meta.labelKey && typeof window.getTranslation === 'function'
+        ? window.getTranslation(meta.labelKey, type)
+        : type;
+}
+
+function refreshEventBookingCopy() {
+    const title = document.getElementById('eventBookingTitle');
+    const icon = document.getElementById('eventBookingIcon');
+    const localizedType = getLocalizedEventType();
+    if (title && currentEventType) {
+        title.textContent = window.formatTranslation('event_booking_title_prefix', `Réserver : ${localizedType}`, { type: localizedType });
+    }
+    if (icon) {
+        icon.textContent = getEventTypeMeta().icon;
+    }
+}
+
 function ensureEventModalStylesheet() {
     if (document.getElementById('eventModalStylesheet')) {
         return Promise.resolve();
@@ -22,12 +66,19 @@ function ensureEventModalStylesheet() {
     return eventModalStylesheetPromise;
 }
 
+function notifyEventBookingIssue(message, focusTarget = null) {
+    if (typeof window.showToast === 'function') {
+        window.showToast(message);
+    } else {
+        alert(message);
+    }
+    focusTarget?.focus?.();
+}
+
 window.__eventBookingOpen = async function __eventBookingOpen(type) {
     currentEventType = type;
     const overlay = document.getElementById('eventBookingOverlay');
     const modal = document.getElementById('eventBookingModal');
-    const title = document.getElementById('eventBookingTitle');
-    const icon = document.getElementById('eventBookingIcon');
 
     if (!modal || !overlay) return;
 
@@ -42,19 +93,7 @@ window.__eventBookingOpen = async function __eventBookingOpen(type) {
     if (nameInput) nameInput.value = '';
     if (phoneInput) phoneInput.value = '';
 
-    if (title) {
-        title.textContent = window.formatTranslation('event_booking_title_prefix', `Reserver : ${type}`, { type });
-    }
-
-    const icons = {
-        Anniversaire: '🎂',
-        'Réunion Familiale': '👨‍👩‍👧‍👦',
-        'Événement Corporate': '🏢',
-        'Fête Privée': '🎉'
-    };
-    if (icon) {
-        icon.textContent = icons[type] || '📅';
-    }
+    refreshEventBookingCopy();
 
     overlay.classList.add('open');
     modal.classList.add('open');
@@ -74,13 +113,17 @@ window.__eventBookingSend = function __eventBookingSend() {
     const phone = phoneInput?.value.trim() || '';
 
     if (!name) {
-        alert(window.formatTranslation('event_booking_name_required', 'Veuillez entrer votre nom.'));
-        nameInput?.focus();
+        notifyEventBookingIssue(
+            window.formatTranslation('event_booking_name_required', 'Veuillez entrer votre nom.'),
+            nameInput
+        );
         return;
     }
     if (!phone) {
-        alert(window.formatTranslation('event_booking_phone_required', 'Veuillez entrer votre numéro de téléphone.'));
-        phoneInput?.focus();
+        notifyEventBookingIssue(
+            window.formatTranslation('event_booking_phone_required', 'Veuillez entrer votre numéro de téléphone.'),
+            phoneInput
+        );
         return;
     }
 
@@ -88,7 +131,7 @@ window.__eventBookingSend = function __eventBookingSend() {
         ? window.getWhatsAppNumber()
         : String(window.defaultConfig?.socials?.whatsapp || '').replace(/\D/g, '');
     if (!waNum) {
-        alert(window.getTranslation('social_empty', 'Aucun lien configuré.'));
+        notifyEventBookingIssue(window.getTranslation('social_empty', 'Aucun lien configuré.'));
         return;
     }
 
@@ -96,13 +139,20 @@ window.__eventBookingSend = function __eventBookingSend() {
         ? window.getRestaurantShortName()
         : 'Restaurant';
     let msg = `✨ *${window.formatTranslation('wa_event_title', 'RÉSERVATION ÉVÉNEMENT – {restaurant}', { restaurant: restaurantName.toUpperCase() })}*\n━━━━━━━━━━━━━━━━\n`;
-    msg += `🏢 *${window.formatTranslation('ticket_type_label', 'Type')}:* ${currentEventType}\n`;
+    msg += `🏢 *${window.formatTranslation('ticket_type_label', 'Type')}:* ${getLocalizedEventType()}\n`;
     msg += `👤 *${window.formatTranslation('wa_client_label', 'Client')}:* ${name}\n`;
     msg += `📱 *${window.formatTranslation('wa_phone_label', 'Tél')}:* ${phone}\n`;
     msg += `━━━━━━━━━━━━━━━━\n\n🙏 ${window.formatTranslation('wa_contact_confirm', 'Merci de me contacter pour confirmer les détails !')}`;
 
-    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    const opened = typeof window.openSafeExternalUrl === 'function'
+        ? window.openSafeExternalUrl(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
+        : window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    if (!opened) {
+        notifyEventBookingIssue(window.getTranslation('wa_popup_blocked_text', 'Votre navigateur a bloqué l’ouverture de WhatsApp pour cette commande.'));
+        return;
+    }
     window.__eventBookingClose();
 };
 
 window.__eventBookingReady = true;
+window.__eventBookingRefresh = refreshEventBookingCopy;

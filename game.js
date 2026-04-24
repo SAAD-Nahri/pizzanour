@@ -9,6 +9,7 @@ let trapIndex = -1;
 let revealedCount = 0;
 let gameActive = false;
 let gameStylesheetPromise = null;
+let currentLoser = null;
 
 function getVersionedPublicAsset(pathname) {
     const version = typeof window.__PUBLIC_BUILD_VERSION === 'string' ? window.__PUBLIC_BUILD_VERSION.trim() : '';
@@ -58,42 +59,42 @@ function ensureGameModalShell() {
     document.body.insertAdjacentHTML('beforeend', `
         <div id="gameOverlay" class="overlay" onclick="closeGameModal()"></div>
         <div class="game-modal" id="gameModal">
-            <button class="game-close" onclick="closeGameModal()">${gameText('modal_close', 'CLOSE') === 'إغلاق' ? '✕' : '✕'}</button>
+            <button class="game-close" onclick="closeGameModal()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${gameText('modal_close', 'CLOSE')}" aria-label="${gameText('modal_close', 'CLOSE')}">×</button>
             <div class="game-logo">
                 <div class="game-logo-mark">
-                    <span class="game-logo-who">${gameText('game_logo_who', 'WHO')}</span><br>
-                    <span class="game-logo-pays">${gameText('game_logo_pays', 'PAYS?')}</span>
+                    <span class="game-logo-who" data-i18n="game_logo_who">${gameText('game_logo_who', 'WHO')}</span><br>
+                    <span class="game-logo-pays" data-i18n="game_logo_pays">${gameText('game_logo_pays', 'PAYS?')}</span>
                 </div>
             </div>
             <div id="gameStartScreen" class="game-start-container">
-                <div class="game-subtitle game-subtitle-light">${gameText('game_board_subtitle', 'The one who finds the X, pays the check!')}</div>
+                <div class="game-subtitle game-subtitle-light" data-i18n="game_board_subtitle">${gameText('game_board_subtitle', 'The one who finds the X, pays the check!')}</div>
                 <div class="gs-how gs-how-light">
-                    <h3>${gameText('game_how_to_play', 'How to play?')}</h3>
+                    <h3 data-i18n="game_how_to_play">${gameText('game_how_to_play', 'How to play?')}</h3>
                     <ul>
-                        <li><div class="gs-how-num">1</div><span>${gameText('game_rule_1', 'Wait for your turn and open a box.')}</span></li>
-                        <li><div class="gs-how-num">2</div><span>${gameText('game_rule_2', 'Try to avoid finding the X sign.')}</span></li>
-                        <li><div class="gs-how-num">3</div><span>${gameText('game_rule_3', 'If you find the X, pay the check.')}</span></li>
+                        <li><div class="gs-how-num">1</div><span data-i18n="game_rule_1">${gameText('game_rule_1', 'Wait for your turn and open a box.')}</span></li>
+                        <li><div class="gs-how-num">2</div><span data-i18n="game_rule_2">${gameText('game_rule_2', 'Try to avoid finding the X sign.')}</span></li>
+                        <li><div class="gs-how-num">3</div><span data-i18n="game_rule_3">${gameText('game_rule_3', 'If you find the X, pay the check.')}</span></li>
                     </ul>
                 </div>
                 <div class="gs-slider-wrap gs-slider-light">
-                    <h4>${gameText('game_players_label', 'Number of Players')}</h4>
+                    <h4 data-i18n="game_players_label">${gameText('game_players_label', 'Number of Players')}</h4>
                     <div class="game-slider-stage">
                         <input type="range" id="playerSlider" class="game-slider" min="2" max="8" value="4" oninput="updatePlayerSlider(this.value)">
                         <div id="playerSliderVal" class="player-slider-val">4</div>
                     </div>
                 </div>
-                <button class="gs-btn" onclick="startGame()">${gameText('game_start_button', 'START GAME')}</button>
+                <button class="gs-btn" onclick="startGame()" data-i18n="game_start_button">${gameText('game_start_button', 'START GAME')}</button>
             </div>
             <div id="gameBoardScreen" class="game-board-container" style="display:none;">
-                <div class="game-subtitle game-subtitle-board">${gameText('game_board_subtitle', 'The one who finds the X, pays the check!')}</div>
+                <div class="game-subtitle game-subtitle-board" data-i18n="game_board_subtitle">${gameText('game_board_subtitle', 'The one who finds the X, pays the check!')}</div>
                 <div class="player-indicators" id="gamePlayerIndicators"></div>
                 <div class="game-grid" id="gameBoardGrid"></div>
                 <div class="loss-popup" id="gameLossPopup" style="display:none;">
                     <div class="loss-card">
-                        <div class="loss-close" onclick="closeGameModal()">✕</div>
+                        <div class="loss-close" onclick="closeGameModal()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${gameText('modal_close', 'CLOSE')}" aria-label="${gameText('modal_close', 'CLOSE')}">×</div>
                         <div class="loss-emoji">❌</div>
                         <p id="loserText" class="loss-copy">${gameText('game_loss_text', `Player X, you've found the X sign.`, { player: 'X' })}</p>
-                        <h2 class="loss-title">${gameText('game_loss_title', 'Pay the check!')}</h2>
+                        <h2 class="loss-title" data-i18n="game_loss_title">${gameText('game_loss_title', 'Pay the check!')}</h2>
                     </div>
                 </div>
             </div>
@@ -125,7 +126,16 @@ function updatePlayerSlider(val) {
     document.getElementById('playerSliderVal').textContent = numPlayers;
 }
 
+function refreshGameCopy() {
+    const loserText = document.getElementById('loserText');
+    if (loserText) {
+        const player = currentLoser ?? 'X';
+        loserText.textContent = gameText('game_loss_text', `Player ${player}, you've found the X sign.`, { player });
+    }
+}
+
 function showGameStart() {
+    currentLoser = null;
     document.getElementById('gameStartScreen').style.display = 'flex';
     document.getElementById('gameBoardScreen').style.display = 'none';
     document.getElementById('gameLossPopup').style.display = 'none';
@@ -210,9 +220,10 @@ function handleBoxClick(index) {
 
 function endGame(loser) {
     gameActive = false;
+    currentLoser = loser;
     const popup = document.getElementById('gameLossPopup');
-    popup.querySelector('#loserText').textContent = typeof window.formatTranslation === 'function'
-        ? window.formatTranslation('game_loss_text', `Player ${loser}, you've found the X sign.`, { player: loser })
-        : `Player ${loser}, you've found the X sign.`;
+    refreshGameCopy();
     popup.style.display = 'flex';
 }
+
+window.__gameRefresh = refreshGameCopy;

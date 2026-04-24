@@ -1,33 +1,30 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr" id="htmlRoot">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="images/hero-default.svg" />
-  <title>Pizzeria Nour – Commandez en ligne à Tanger</title>
-  <meta name="description"
-    content="Commandez en ligne, découvrez le menu de Pizzeria Nour à Tanger et contactez facilement l'établissement." />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap"
-    rel="stylesheet" media="print" onload="this.media='all'" />
-  <link rel="stylesheet" href="home-shell.css" />
-  <link rel="preload" as="style" href="style.css" onload="this.onload=null;this.rel='stylesheet'" />
-  <link rel="stylesheet" href="home-polish.css" />
-  <link rel="stylesheet" href="laruche.css" />
+  <title>Pizzeria Nour â€“ Tanger</title>
+  <meta name="description" content="Commandez en ligne chez Pizzeria Nour Ã  Tanger." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="home-shell.css?v=2" />
+  <link rel="preload" as="style" href="style.css?v=2" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="stylesheet" href="laruche.css?v=2" />
+  <link rel="stylesheet" href="home-polish.css?v=2" />
+  <link rel="stylesheet" href="tailwind-out.css?v=2" />
   <noscript><link rel="stylesheet" href="style.css" /></noscript>
-  <noscript><link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap"
-    rel="stylesheet" /></noscript>
 </head>
 
 <body data-homepage-polish="v2">
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
+  <!-- TOP BAR (hidden) -->
+  <div class="top-bar hidden">
     <div class="top-bar-inner">
       <div class="top-contact">
-        <span id="topPhoneDisplay">📞 05 39 32 15 79</span>
+        <span id="topPhoneDisplay">ðŸ“ž 05 39 32 15 79</span>
         <span id="topAddressDisplay">Rue Figuig, Tanger</span>
       </div>
     </div>
@@ -36,383 +33,348 @@
   <!-- HEADER -->
   <header class="header" id="header">
     <div class="header-inner">
-      <div class="logo"><span id="brandLogoIconHeader">🍕</span> <span id="brandNameHeader">Pizzeria Nour</span></div>
-      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="headerNav">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="logo"><span id="brandLogoIconHeader">ðŸ•</span> <span id="brandNameHeader">Pizzeria Nour</span></div>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
       <nav class="header-nav" id="headerNav">
         <a href="#heroSlider" class="nav-link active-link" data-i18n="nav_home">Accueil</a>
         <a href="menu.html" class="nav-link" data-i18n="nav_menu">Menu</a>
-        <a href="#about" class="nav-link" data-i18n="nav_about" data-section-link="about">À Propos</a>
-        <a href="#events" class="nav-link" data-i18n="nav_events" data-section-link="events">Événements</a>
+        <a href="#about" class="nav-link" data-i18n="nav_about" data-section-link="about">Ã€ Propos</a>
+        <a href="#events" class="nav-link" data-i18n="nav_events" data-section-link="events">Ã‰vÃ©nements</a>
         <a href="#gallery" class="nav-link" data-i18n="nav_gallery" data-section-link="gallery">Galerie</a>
         <a href="#contact" class="nav-link" data-i18n="nav_contact" data-section-link="contact">Contact</a>
-        <a href="#hours" class="nav-link" data-i18n="nav_hours" data-section-link="hours">Horaires</a>
       </nav>
       <div class="header-actions">
         <div class="lang-selector">
           <div class="lang-dropdown" id="langDropdown">
-            <button class="lang-drop-btn" onclick="toggleLangDropdown()">
-              <span id="currentLangDisplay">FR</span>
-              <span class="chevron">▼</span>
-            </button>
+            <button class="lang-drop-btn" onclick="toggleLangDropdown()"><span id="currentLangDisplay">FR</span> <span class="chevron">â–¼</span></button>
             <div class="lang-options" id="langOptions">
-              <div class="lang-opt" onclick="window.setLang('fr', this)">
-                <span class="flag">🇫🇷</span> Français
-              </div>
-              <div class="lang-opt" onclick="window.setLang('en', this)">
-                <span class="flag">🇬🇧</span> English
-              </div>
-              <div class="lang-opt" onclick="window.setLang('ar', this)">
-                <span class="flag">🇲🇦</span> العربية
-              </div>
+              <div class="lang-opt" onclick="window.setLang('fr', this)">ðŸ‡«ðŸ‡· FranÃ§ais</div>
+              <div class="lang-opt" onclick="window.setLang('en', this)">ðŸ‡¬ðŸ‡§ English</div>
+              <div class="lang-opt" onclick="window.setLang('ar', this)">ðŸ‡²ðŸ‡¦ Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</div>
             </div>
           </div>
         </div>
-        <a href="https://maps.google.com" target="_blank" class="dir-btn" data-i18n="nav_directions" id="directionsLink">ITINÉRAIRE</a>
+        <a href="#contact" class="dir-btn" id="directionsLink" data-i18n="nav_directions">ITINÃ‰RAIRE</a>
       </div>
     </div>
   </header>
 
-  <!-- HERO SLIDER -->
-  <section class="hero-slider" id="heroSlider">
-    <div class="hero-status-slot">
+  <!-- HERO -->
+  <!-- HERO -->
+  <!-- HERO -->
+  <section class="hero-v3-slider relative h-screen w-full flex items-end justify-center overflow-hidden" id="heroSlider">
+    <div class="hero-status-slot hidden">
       <div class="status-badge" id="statusBadge">
         <span class="status-dot"></span>
-        <span class="status-text" id="statusText" data-i18n="status_loading">Chargement...</span>
+        <span id="statusText" data-i18n="status_loading">Chargement...</span>
       </div>
     </div>
-    <div class="slide slide-active" id="slide1">
-      <div class="slide-content">
-        <p class="slide-sub" data-i18n="hero_sub1">Une table pour</p>
-        <h1 class="slide-title" data-i18n="hero_title1">SAVEURS <span>AUTHENTIQUES</span></h1>
+    <div class="hero-v3-slide hero-v3-active absolute inset-0 w-full flex flex-col items-center justify-end text-center pb-8 px-5 md:pb-0 md:flex-row md:items-center md:justify-between md:text-start md:px-[6vw] md:max-w-7xl md:mx-auto">
+      <div class="hero-v3-content relative z-10 w-full flex flex-col items-center text-center md:items-start md:text-start md:max-w-[550px]">
+        <div class="hero-v3-img mb-6 md:mb-0 w-[140px] h-[140px] md:hidden">
+          <img src="images/hero-default.svg" alt="Logo du restaurant" data-i18n-alt="image_alt_logo" class="w-full h-full object-cover" />
+        </div>
+        <p class="hero-v3-sub" data-i18n="hero_sub1">L'Excellence Quotidienne</p>
+        <h1 class="hero-v3-title" data-i18n="hero_title1">SAVEURS <span>AUTHENTIQUES</span></h1>
+        <p class="hero-v3-desc" data-i18n="hero_desc1">Des recettes maison, gÃ©nÃ©reuses et prÃ©parÃ©es chaque jour avec passion.</p>
+        <a href="menu.html" class="hero-menu-cta slide-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
       </div>
-      <div class="slide-img"><img id="heroSlideImage1" src="images/hero-default.svg" alt="Pizzeria Nour hero preview" width="960" height="960" decoding="async" fetchpriority="high" /></div>
-    </div>
-    <div class="slide" id="slide2">
-      <div class="slide-content">
-        <p class="slide-sub"><span data-i18n="hero_sub2">Découvrez nos</span></p>
-        <h1 class="slide-title" data-i18n="hero_title2">PLATS <span>SIGNATURE</span></h1>
-        <p class="slide-desc" data-i18n="hero_desc2">Des recettes maison pensées pour tous les appétits</p>
+      <div class="hero-v3-img hidden md:flex w-[50%] max-w-[650px] aspect-square items-center justify-center">
+        <img id="heroSlideImage1" src="images/hero-default.svg" alt="Image principale du restaurant" data-i18n-alt="image_alt_hero" class="w-full h-full object-cover" />
       </div>
-      <div class="slide-img"><img id="heroSlideImage2" src="images/hero-cafe.svg"
-          alt="Restaurant atmosphere preview" width="960" height="960" loading="lazy" decoding="async" fetchpriority="low" /></div>
     </div>
-    <div class="slide" id="slide3">
-      <div class="slide-content">
-        <p class="slide-sub">🔥 <span data-i18n="hero_sub3">Cuisine préparée</span></p>
-        <h1 class="slide-title" data-i18n="hero_title3">FRAIS <span>CHAQUE JOUR</span></h1>
-        <p class="slide-desc" data-i18n="hero_desc3">Sur place, à emporter ou en livraison</p>
+    <div class="hero-v3-slide absolute inset-0 w-full flex flex-col items-center justify-end text-center pb-8 px-5 md:pb-0 md:flex-row md:items-center md:justify-between md:text-start md:px-[6vw] md:max-w-7xl md:mx-auto">
+      <div class="hero-v3-content relative z-10 w-full flex flex-col items-center text-center md:items-start md:text-start md:max-w-[550px]">
+        <div class="hero-v3-img mb-6 md:mb-0 w-[140px] h-[140px] md:hidden">
+          <img src="images/hero-default.svg" alt="Logo du restaurant" data-i18n-alt="image_alt_logo" class="w-full h-full object-cover" />
+        </div>
+        <p class="hero-v3-sub" data-i18n="hero_sub2">DÃ©couvrez</p>
+        <h2 class="hero-v3-title" data-i18n="hero_title2">PLATS <span>SIGNATURE</span></h2>
+        <p class="hero-v3-desc" data-i18n="hero_desc2">Recettes maison pour tous</p>
+        <a href="menu.html" class="hero-menu-cta slide-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
       </div>
-      <div class="slide-img"><img id="heroSlideImage3" src="images/hero-traditional.svg"
-          alt="Restaurant service preview" width="960" height="960" loading="lazy" decoding="async" fetchpriority="low" /></div>
+      <div class="hero-v3-img hidden md:flex w-[50%] max-w-[650px] aspect-square items-center justify-center">
+        <img id="heroSlideImage2" src="images/hero-default.svg" alt="Image principale du restaurant" data-i18n-alt="image_alt_hero" class="w-full h-full object-cover" />
+      </div>
     </div>
-    <div class="slide-dots">
-      <button class="dot dot-active" onclick="goSlide(0)"></button>
-      <button class="dot" onclick="goSlide(1)"></button>
-      <button class="dot" onclick="goSlide(2)"></button>
+    <div class="hero-v3-slide absolute inset-0 w-full flex flex-col items-center justify-end text-center pb-8 px-5 md:pb-0 md:flex-row md:items-center md:justify-between md:text-start md:px-[6vw] md:max-w-7xl md:mx-auto">
+      <div class="hero-v3-content relative z-10 w-full flex flex-col items-center text-center md:items-start md:text-start md:max-w-[550px]">
+        <div class="hero-v3-img mb-6 md:mb-0 w-[140px] h-[140px] md:hidden">
+          <img src="images/hero-default.svg" alt="Logo du restaurant" data-i18n-alt="image_alt_logo" class="w-full h-full object-cover" />
+        </div>
+        <p class="hero-v3-sub" data-i18n="hero_sub3">PrÃ©parÃ©</p>
+        <h2 class="hero-v3-title" data-i18n="hero_title3">FRAIS <span>DU JOUR</span></h2>
+        <p class="hero-v3-desc" data-i18n="hero_desc3">Sur place ou livraison</p>
+        <a href="menu.html" class="hero-menu-cta slide-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
+      </div>
+      <div class="hero-v3-img hidden md:flex w-[50%] max-w-[650px] aspect-square items-center justify-center">
+        <img id="heroSlideImage3" src="images/hero-default.svg" alt="Image principale du restaurant" data-i18n-alt="image_alt_hero" class="w-full h-full object-cover" />
+      </div>
+    </div>
+    <div class="slide-dots" aria-label="Hero slides">
+      <button type="button" class="dot dot-active" onclick="goSlide(0)" aria-label="Slide 1" aria-current="true"></button>
+      <button type="button" class="dot" onclick="goSlide(1)" aria-label="Slide 2" aria-current="false"></button>
+      <button type="button" class="dot" onclick="goSlide(2)" aria-label="Slide 3" aria-current="false"></button>
     </div>
   </section>
 
+  <!-- QUICK LINKS NAV -->
   <div class="utility-nav">
-    <a href="https://maps.google.com" target="_blank" class="utility-btn" id="reviewsLink">
-      <span class="utility-btn-icon" aria-hidden="true">&#11088;</span>
-      <span class="utility-btn-label" data-i18n="landing_reviews_title">Avis Google</span>
+    <a href="menu.html" class="utility-btn">
+      <div class="utility-btn-icon">ðŸ´</div>
+      <div class="utility-btn-label" data-i18n="nav_menu">MENU</div>
     </a>
-    <button class="utility-btn" onclick="openWifiModal()">
-      <span class="utility-btn-icon" aria-hidden="true">&#128246;</span>
-      <span class="utility-btn-label" data-i18n="landing_wifi_title">Code WiFi</span>
-    </button>
-  </div>
-  <div class="hero-menu-cta-wrap">
-    <a href="menu.html" class="hero-menu-cta" data-i18n="hero_cta">VOIR LA CARTE</a>
+    <a href="javascript:void(0)" class="utility-btn" onclick="openWifiModal()">
+      <div class="utility-btn-icon">ðŸ“¶</div>
+      <div class="utility-btn-label" data-i18n="landing_wifi_title">WIFI</div>
+    </a>
+    <a href="javascript:void(0)" class="utility-btn" onclick="openSocialModal()">
+      <div class="utility-btn-icon">ðŸ“¸</div>
+      <div class="utility-btn-label" data-i18n="landing_social_title">SOCIAL</div>
+    </a>
+    <a href="#contact" class="utility-btn">
+      <div class="utility-btn-icon">ðŸ“</div>
+      <div class="utility-btn-label" data-i18n="nav_contact">CONTACT</div>
+    </a>
   </div>
 
-  <div id="menu-area"></div>
   <div id="homepageDeferredRoot"></div>
+
   <template id="homepageDeferredTemplate">
 
-  <!-- ===== ABOUT US ===== -->
-  <section class="about-section section-reveal reveal-1" id="about">
-    <div class="about-inner">
-      <div class="about-header">
-        <p class="section-tag" data-i18n="about_tag">Notre Histoire</p>
-        <h2 class="section-title" data-i18n="about_title" id="aboutTitleHeading">À Propos de <span>Notre Maison</span></h2>
-        <div class="title-line"></div>
-      </div>
-      <div class="about-grid">
-        <div class="about-text">
-          <h4 class="about-tagline" data-i18n="about_tagline" id="aboutTaglineText">Cuisine sincère, service attentionné et identité locale</h4>
-          <p data-i18n="about_p1">Notre histoire commence avec une idée simple : proposer une table accueillante, lisible
-            et régulière pour les repas du quotidien comme pour les moments à partager.</p>
-          <p data-i18n="about_p2">Nous privilégions des ingrédients frais, une cuisine soignée et une ambiance qui donne
-            envie de revenir avec confiance.</p>
-          <p data-i18n="about_p3">Notre objectif est de devenir une adresse locale fiable, chaleureuse et facile à
-            recommander.</p>
-          <div class="about-signature">
-            <p class="sig-welcome" data-i18n="about_welcome">Bienvenue, revenez nous voir !</p>
-            <p class="sig-thanks" data-i18n="about_thanks">Merci,</p>
-            <p class="sig-name" id="aboutSignatureText">— L'équipe de Pizzeria Nour 🍕</p>
+    <!-- â”€â”€ ABOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <section class="about-section section-reveal" id="about">
+      <div class="about-inner">
+
+        <!-- Section header -->
+        <div class="flex flex-col items-center text-center mb-10">
+          <p class="section-tag" data-i18n="about_tag">Notre Histoire</p>
+          <h2 class="section-title" data-i18n="about_title" id="aboutTitleHeading">Ã€ Propos de <span>Pizzeria Nour</span></h2>
+          <div class="title-line"></div>
+        </div>
+
+        <div class="about-grid">
+          <!-- Text card -->
+          <div class="about-text">
+            <h4 class="about-tagline" id="aboutTaglineText" data-i18n="about_tagline">Cuisine sincÃ¨re et identitÃ© locale</h4>
+            <p data-i18n="about_p1">Notre histoire commence avec une idÃ©e simple : proposer une table accueillante.</p>
+            <p data-i18n="about_p2">Nous privilégions des ingrédients frais, une cuisine soignée et une ambiance qui donne envie de revenir avec confiance.</p>
+            <p data-i18n="about_p3">Notre objectif est de devenir une adresse locale fiable, chaleureuse et facile à recommander.</p>
+            <div class="about-signature">
+              <p class="sig-name" id="aboutSignatureText">â€” L'Ã©quipe de Pizzeria Nour ðŸ•</p>
+            </div>
+          </div>
+          <!-- Stat cards -->
+          <div class="about-visual">
+            <div class="about-card">
+              <div class="card-number">8+</div>
+              <div class="card-label" data-i18n="about_years">Ans exp.</div>
+            </div>
+            <div class="about-card">
+              <div class="card-number">4.9â˜…</div>
+              <div class="card-label" data-i18n="about_rating">Note clients</div>
+            </div>
           </div>
         </div>
-        <div class="about-visual">
-          <div class="about-card card-1">
-            <div class="card-number">15+</div>
-            <div class="card-label" data-i18n="about_years">Ans d'Expérience</div>
+
+      </div>
+    </section>
+
+    <!-- â”€â”€ PAYMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <section class="payment-facilities-section" id="payments">
+      <div class="pf-inner">
+        <div class="pf-grid">
+          <div class="pf-card" id="paymentsCard">
+            <h3 data-i18n="pf_payments_title">Paiement</h3>
+            <div class="pf-icons" id="paymentMethodsList"></div>
           </div>
-          <div class="about-card card-2">
-            <div class="card-number">40+</div>
-            <div class="card-label" data-i18n="about_items">Plats au Menu</div>
-          </div>
-          <div class="about-card card-3">
-            <div class="card-number">100%</div>
-            <div class="card-label" data-i18n="about_halal">Préparé chaque jour</div>
-          </div>
-          <div class="about-card card-4">
-            <div class="card-number">⭐ 4.8</div>
-            <div class="card-label" data-i18n="about_rating">Avis Clients</div>
+          <div class="pf-divider hidden" id="paymentsDivider"></div>
+          <div class="pf-card" id="facilitiesCard">
+            <h3 data-i18n="pf_facilities_title">FacilitÃ©s</h3>
+            <div class="pf-icons" id="facilityList"></div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== PAYMENT METHODS & FACILITIES ===== -->
-  <section class="payment-facilities-section section-reveal reveal-2" id="payments">
-    <div class="pf-inner">
-      <div class="pf-grid">
-        <!-- Payments side -->
-        <div class="pf-card payments-card" id="paymentsCard">
-          <h3 data-i18n="pf_payments_title">Les Modes De Paiement</h3>
-          <div class="pf-icons" id="paymentMethodsList"></div>
-        </div>
-        <div class="pf-divider" id="paymentsDivider"></div>
-        <!-- Facilities side -->
-        <div class="pf-card facilities-card" id="facilitiesCard">
-          <h3 data-i18n="pf_facilities_title">Facilités</h3>
-          <div class="pf-icons" id="facilityList"></div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <!-- â”€â”€ EVENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <section class="events-section" id="events">
+      <div class="events-inner">
 
-  <!-- ===== EVENTS ===== -->
-  <section class="events-section section-reveal reveal-3" id="events">
-    <div class="events-inner">
-      <div class="about-header">
-        <p class="section-tag" data-i18n="events_tag">Célébrez avec nous</p>
-        <h2 class="section-title" data-i18n="events_title">Événements <span>Privés</span></h2>
-        <div class="title-line"></div>
-      </div>
-      <div class="events-grid">
-        <div class="event-card" onclick="openEventModal('Anniversaire')">
-          <div class="event-icon">🎂</div>
-          <h3 data-i18n="event_birthday">Anniversaires</h3>
-          <p data-i18n="event_birthday_desc">Célébrez votre jour spécial avec un menu personnalisé et une ambiance
-            festive.</p>
-          <button class="event-reserve-btn" data-i18n="event_reserve">Réserver maintenant</button>
+        <div class="flex flex-col items-center text-center mb-10">
+          <p class="section-tag" data-i18n="events_tag">CÃ©lÃ©brez avec nous</p>
+          <h2 class="section-title" data-i18n="events_title">Ã‰vÃ©nements <span>PrivÃ©s</span></h2>
+          <div class="title-line"></div>
         </div>
-        <div class="event-card" onclick="openEventModal('Réunion Familiale')">
-          <div class="event-icon">👨‍👩‍👧‍👦</div>
-          <h3 data-i18n="event_family">Réunions Familiales</h3>
-          <p data-i18n="event_family_desc">Un espace chaleureux pour réunir votre famille autour de plats délicieux.</p>
-          <button class="event-reserve-btn" data-i18n="event_reserve">Réserver maintenant</button>
-        </div>
-        <div class="event-card" onclick="openEventModal('Événement Corporate')">
-          <div class="event-icon">🏢</div>
-          <h3 data-i18n="event_corporate">Événements Corporate</h3>
-          <p data-i18n="event_corporate_desc">Impressionnez vos collègues avec une offre professionnelle et savoureuse.
-          </p>
-          <button class="event-reserve-btn" data-i18n="event_reserve">Réserver maintenant</button>
-        </div>
-        <div class="event-card" onclick="openEventModal('Fête Privée')">
-          <div class="event-icon">🎉</div>
-          <h3 data-i18n="event_party">Fêtes Privées</h3>
-          <p data-i18n="event_party_desc">Profitez d’un espace adapté pour une soirée inoubliable avec vos amis.</p>
-          <button class="event-reserve-btn" data-i18n="event_reserve">Réserver maintenant</button>
-        </div>
-      </div>
-      <div class="events-cta">
-        <p data-i18n="events_cta_text">Intéressé par un événement ? Contactez-nous !</p>
-        <a href="#contact" target="_blank" class="events-btn" data-i18n="events_cta_btn"
-          id="eventWALink">📩 Demander
-          un Devis</a>
-      </div>
-    </div>
-  </section>
 
-  <!-- ===== GALLERY ===== -->
-  <section class="gallery-section section-reveal reveal-4" id="gallery">
-    <div class="gallery-inner">
-      <div class="about-header">
-        <p class="section-tag" data-i18n="gallery_tag" id="galleryTaglineText">Nos Moments</p>
-        <h2 class="section-title" data-i18n="gallery_title">Notre <span>Galerie</span></h2>
-        <div class="title-line"></div>
-      </div>
-      <div class="gallery-grid" id="mainGalleryGrid">
-        <!-- Dynamically populated -->
-      </div>
-    </div>
-  </section>
+        <div class="events-grid">
+          <div class="event-card" onclick="openEventModal('birthday')">
+            <div class="event-card-icon">ðŸŽ‚</div>
+            <h3 data-i18n="event_birthday">Anniversaires</h3>
+            <p class="event-card-desc" data-i18n="event_birthday_desc">CÃ©lÃ©brez votre jour spÃ©cial avec un menu personnalisÃ© et une ambiance festive.</p>
+            <button class="event-reserve-btn" data-i18n="event_reserve">RÃ©server maintenant</button>
+          </div>
+          <div class="event-card" onclick="openEventModal('family')">
+            <div class="event-card-icon">ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦</div>
+            <h3 data-i18n="event_family">RÃ©unions Familiales</h3>
+            <p class="event-card-desc" data-i18n="event_family_desc">Un espace chaleureux pour rÃ©unir votre famille autour de plats dÃ©licieux.</p>
+            <button class="event-reserve-btn" data-i18n="event_reserve">RÃ©server maintenant</button>
+          </div>
+          <div class="event-card" onclick="openEventModal('corporate')">
+            <div class="event-card-icon">ðŸ’¼</div>
+            <h3 data-i18n="event_corporate">Ã‰vÃ©nements Corporate</h3>
+            <p class="event-card-desc" data-i18n="event_corporate_desc">Impressionnez vos collÃ¨gues avec une offre professionnelle et savoureuse.</p>
+            <button class="event-reserve-btn" data-i18n="event_reserve">RÃ©server maintenant</button>
+          </div>
+          <div class="event-card" onclick="openEventModal('party')">
+            <div class="event-card-icon">ðŸŽ‰</div>
+            <h3 data-i18n="event_party">FÃªtes PrivÃ©es</h3>
+            <p class="event-card-desc" data-i18n="event_party_desc">Profitez dâ€™un espace adaptÃ© pour une soirÃ©e inoubliable avec vos amis.</p>
+            <button class="event-reserve-btn" data-i18n="event_reserve">RÃ©server maintenant</button>
+          </div>
+        </div>
 
-  <!-- ===== OPENING HOURS ===== -->
-  <section class="hours-section section-reveal reveal-5" id="hours">
-    <div class="hours-inner">
-      <div class="about-header">
-        <p class="section-tag" data-i18n="hours_tag">Quand nous visiter</p>
-        <h2 class="section-title" data-i18n="hours_title">Horaires <span>d'Ouverture</span></h2>
-        <div class="title-line"></div>
-      </div>
-      <div class="hours-card">
-        <div class="hours-clock">🕐</div>
-        <div class="hours-grid" id="hoursGrid">
-          <!-- Dynamically populated by app.js -->
+        <div class="events-cta">
+          <p data-i18n="events_cta_text">Interesse par un evenement ? Contactez-nous !</p>
+          <a href="#contact" class="events-btn" data-i18n="events_cta_btn">Demander un devis</a>
         </div>
-        <div class="hours-note" id="hoursNote" data-i18n="hours_note">🔥 Ouvert tous les jours ! Livraison disponible.
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ===== CONTACT ===== -->
-  <section class="contact-section section-reveal reveal-6" id="contact">
-    <div class="contact-inner">
-      <div class="about-header">
-        <p class="section-tag" data-i18n="contact_tag">Venez Manger</p>
-        <h2 class="section-title" data-i18n="contact_title">Contactez-<span>Nous</span></h2>
-        <div class="title-line"></div>
       </div>
-      <div class="contact-grid">
-        <div class="contact-card" id="contactAddressCard">
-          <div class="contact-icon">📍</div>
-          <h3 data-i18n="contact_address_title">Adresse</h3>
-          <p id="contactAddressText"></p>
-        </div>
-        <div class="contact-card">
-          <div class="contact-icon">📞</div>
-          <h3 data-i18n="contact_phone_title">Téléphone</h3>
-          <p><a href="tel:05393-007 07" id="contactPhoneLink">05393-007 07</a></p>
-        </div>
-        <div class="contact-card">
-          <div class="contact-icon">💬</div>
-          <h3 data-i18n="contact_whatsapp_title">WhatsApp</h3>
-          <p><a href="tel:+212600000000" id="contactWALink">+212 600 000 000</a></p>
-        </div>
-      </div>
-      <div class="social-links" id="contactSocialLinks"></div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FOOTER -->
-  <footer class="footer" id="footer">
-    <div class="footer-inner">
-      <div class="footer-brand"><span id="footerBrandIcon">🍕</span> <strong id="footerBrandName">Pizzeria Nour</strong></div>
-      <p id="footerAddressText">Rue Figuig, Tanger</p>
-      <p id="footerNoteText" data-i18n="footer_note">Cuisine sincère, service chaleureux et accueil de proximité.</p>
-      <div class="footer-social" id="footerSocial"></div>
-      <p class="footer-copy" id="footerCopyText">© 2026 Pizzeria Nour — Tous droits réservés.</p>
-      <div style="margin-top:20px; font-size: 0.7rem; opacity: 0.5;">
-        <a href="admin.html" style="color:#fff; text-decoration:none;" data-i18n="admin_panel_link">Admin Panel</a>
+    <!-- â”€â”€ GALLERY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <section class="gallery-section" id="gallery">
+      <div class="gallery-inner">
+        <div class="flex flex-col items-center text-center mb-10">
+          <p class="section-tag" data-i18n="gallery_tag">Ambiance & Assiettes</p>
+          <h2 class="section-title" data-i18n="gallery_title">Notre <span>Galerie</span></h2>
+          <div class="title-line"></div>
+        </div>
+        <div class="gallery-grid" id="mainGalleryGrid"></div>
       </div>
-    </div>
-  </footer>
+    </section>
+
+    <!-- â”€â”€ HOURS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <section class="hours-section" id="hours">
+      <div class="hours-inner">
+        <div class="flex flex-col items-center text-center mb-10">
+          <p class="section-tag" data-i18n="hours_tag">Quand nous visiter</p>
+          <h2 class="section-title" data-i18n="hours_title">Horaires <span>d'Ouverture</span></h2>
+          <div class="title-line"></div>
+        </div>
+        <div class="hours-card">
+          <div class="hours-grid" id="hoursGrid"></div>
+          <div id="hoursNote"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- â”€â”€ CONTACT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <section class="contact-section" id="contact">
+      <div class="contact-inner">
+        <div class="flex flex-col items-center text-center mb-10">
+          <p class="section-tag" data-i18n="contact_tag">Venez Manger</p>
+          <h2 class="section-title" data-i18n="contact_title">Contactez-<span>Nous</span></h2>
+          <div class="title-line"></div>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-card" id="contactAddressCard">
+            <span class="contact-icon">ðŸ“</span>
+            <h3 data-i18n="contact_address_title">Adresse</h3>
+            <p id="contactAddressText"></p>
+          </div>
+          <div class="contact-card">
+            <span class="contact-icon">ðŸ“ž</span>
+            <h3 data-i18n="contact_phone_title">TÃ©lÃ©phone</h3>
+            <p id="contactPhoneLink"></p>
+          </div>
+          <div class="contact-card" id="contactHoursCard">
+            <span class="contact-icon">ðŸ•</span>
+            <h3 data-i18n="contact_today_title">Aujourd'hui</h3>
+            <p id="contactTodayHours">11h00 â€“ 23h00</p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="contact-cta-row">
+          <a href="menu.html" class="contact-cta-btn">ðŸ• <span data-i18n="view_menu">Voir le Menu</span></a>
+          <a href="javascript:void(0)" onclick="openWifiModal()" class="contact-cta-btn contact-cta-btn--outline">ðŸ“¶ <span data-i18n="landing_wifi_title">Code WiFi</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <footer class="footer" id="footer">
+      <div class="footer-inner">
+        <div class="footer-brand"><span id="brandLogoIconFooter">ðŸ•</span> <strong id="brandNameFooter">Pizzeria Nour</strong></div>
+        <p id="footerTaglineText" class="footer-tagline">Saveurs authentiques depuis Tanger.</p>
+        <div class="footer-divider"></div>
+        <p id="footerAddressText"></p>
+        <p class="footer-copy" id="footerCopyText">Â© 2026 Pizzeria Nour â€” Tous droits rÃ©servÃ©s.</p>
+        <div class="mt-5 text-xs opacity-40"><a href="admin.html" class="text-white">Admin</a></div>
+      </div>
+    </footer>
+
   </template>
 
-  <!-- WIFI MODAL -->
+  <!-- â”€â”€ MODALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="wifi-overlay" id="wifiOverlay" onclick="closeWifiModal()"></div>
   <div class="wifi-modal-card" id="wifiModal">
-    <button class="wifi-modal-close" onclick="closeWifiModal()">✕</button>
-    <div class="wifi-modal-content">
-      <div class="wifi-modal-icon">📶</div>
-      <h2 data-i18n="wifi_title">WiFi Gratuit</h2>
-      <div class="wifi-modal-box">
-        <p id="wifiSSIDDisplay"><strong data-i18n="wifi_ssid_label">SSID</strong>: <span data-i18n="status_loading">Chargement...</span></p>
-        <p><strong data-i18n="wifi_password_label">Password</strong>: <code id="wifiPass">...</code> <button class="copy-wifi-btn"
-            onclick="copyWifi()">📋</button></p>
+    <div class="wifi-modal-close" onclick="closeWifiModal()" role="button" tabindex="0" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="Fermer" aria-label="Fermer">âœ•</div>
+    <div class="wifi-modal-icon">ðŸ“¶</div>
+    <h2 data-i18n="wifi_title">WiFi Gratuit</h2>
+    <div class="wifi-modal-box">
+      <p id="wifiSSIDDisplay"></p>
+      <div class="wifi-password-box">
+        <code id="wifiPass"></code>
+        <button class="copy-wifi-btn" onclick="copyWifi()" data-i18n-title="wifi_copy_password" data-i18n-aria-label="wifi_copy_password" title="Copier" aria-label="Copier">ðŸ“‹</button>
       </div>
-      <div class="qr-container">
-        <img id="wifiQR" src="" alt="WiFi QR Code" width="320" height="320" decoding="async" />
-        <p class="qr-hint" data-i18n="wifi_scan">Scannez pour vous connecter</p>
-      </div>
+    </div>
+    <div class="wifi-qr-box">
+      <img id="wifiQR" src="" alt="Code QR WiFi" data-i18n-alt="image_alt_wifi_qr" />
+      <p data-i18n="wifi_scan">Scannez pour vous connecter</p>
     </div>
   </div>
 
-  <!-- SOCIAL MODAL -->
   <div class="social-overlay" id="socialOverlay" onclick="closeSocialModal()"></div>
   <div class="social-modal-card" id="socialModal">
-    <button class="social-modal-close" onclick="closeSocialModal()">✕</button>
-    <div class="social-modal-content">
-      <div class="social-modal-icon">📱</div>
-      <h2 data-i18n="social_title">Suivez-nous</h2>
-      <div class="social-modal-list" id="modalSocialList">
-        <!-- Social links will be injected here -->
-      </div>
-    </div>
+    <div class="wifi-modal-close" onclick="closeSocialModal()" role="button" tabindex="0" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="Fermer" aria-label="Fermer">âœ•</div>
+    <h2 data-i18n="social_modal_title">Suivez-nous</h2>
+    <div id="modalSocialList" class="social-links-grid"></div>
   </div>
 
-  <!-- EVENT BOOKING MODAL -->
   <div class="event-booking-overlay" id="eventBookingOverlay" onclick="closeEventModal()"></div>
-  <div class="event-booking-modal" id="eventBookingModal">
-    <button class="event-booking-close" onclick="closeEventModal()">✕</button>
+  <div class="event-booking-modal" id="eventBookingModal" role="dialog" aria-modal="true" aria-labelledby="eventBookingTitle">
+    <button class="event-booking-close" onclick="closeEventModal()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="Fermer" aria-label="Fermer">&times;</button>
     <div class="event-booking-header">
-      <div class="event-booking-icon" id="eventBookingIcon">📅</div>
+      <div class="event-booking-icon" id="eventBookingIcon">ðŸ“…</div>
       <h2 id="eventBookingTitle"></h2>
       <p id="eventBookingSubtitle" data-i18n="event_booking_subtitle">Parlez-nous de votre projet</p>
     </div>
     <div class="event-booking-form">
       <div class="booking-field">
-        <label for="eventCustName" data-i18n="event_booking_name_label">Votre Nom</label>
-        <input type="text" id="eventCustName" placeholder="Ex: Ahmed Alaoui" data-i18n-placeholder="event_booking_name_placeholder" class="booking-input" />
+        <label for="eventCustName" data-i18n="event_booking_name_label">Votre nom</label>
+        <input id="eventCustName" class="booking-input" type="text" data-i18n-placeholder="event_booking_name_placeholder" placeholder="Ex : Ahmed Alaoui" autocomplete="name" />
       </div>
       <div class="booking-field">
-        <label for="eventCustPhone" data-i18n="event_booking_phone_label">Téléphone</label>
-        <input type="tel" id="eventCustPhone" placeholder="Ex: 0612345678" data-i18n-placeholder="event_booking_phone_placeholder" class="booking-input" />
+        <label for="eventCustPhone" data-i18n="event_booking_phone_label">TÃ©lÃ©phone</label>
+        <input id="eventCustPhone" class="booking-input" type="tel" data-i18n-placeholder="event_booking_phone_placeholder" placeholder="Ex : 0612345678" autocomplete="tel" />
       </div>
-      <button class="booking-submit-btn" onclick="sendEventWA()">
-        <span data-i18n="event_booking_submit">📩 Envoyer sur WhatsApp</span>
-      </button>
+      <button class="booking-submit-btn" onclick="sendEventWA()" data-i18n="event_booking_submit">Envoyer sur WhatsApp</button>
     </div>
   </div>
 
   <script src="shared-public.js" defer></script>
   <script src="app.js" defer></script>
   <script>
-    function toggleLangDropdown() {
-      const opts = document.getElementById('langOptions');
-      opts.classList.toggle('open');
-    }
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#langDropdown')) {
-        document.getElementById('langOptions')?.classList.remove('open');
-      }
-    });
-
-    // Elegant Scroll Reveals aligned with La Ruche
+    function toggleLangDropdown() { document.getElementById('langOptions').classList.toggle('open'); }
     document.addEventListener("DOMContentLoaded", () => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      }, { threshold: 0.1 });
-
+      const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("visible"); }); }, { threshold: 0.1 });
       document.querySelectorAll(".section-reveal").forEach(el => observer.observe(el));
-
-      // Header sticky transition
-      const header = document.getElementById('header');
-      window.addEventListener('scroll', () => {
-        if(window.scrollY > 50) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
-        }
-      });
+      window.addEventListener('scroll', () => { const h = document.getElementById('header'); if(window.scrollY > 50) h.classList.add('scrolled'); else h.classList.remove('scrolled'); });
     });
   </script>
 </body>
-
 </html>
+
 

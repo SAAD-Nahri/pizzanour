@@ -13,8 +13,10 @@
     "media:check": "node scripts/media-library-check.js",
     "uploads:audit": "node scripts/uploads-audit.js",
     "thumbs:build": "node scripts/build-upload-thumbnails.js",
+    "build:tailwind": "npx tailwindcss -i ./tailwind-input.css -o ./tailwind-out.css --minify",
+    "watch:tailwind": "npx tailwindcss -i ./tailwind-input.css -o ./tailwind-out.css --watch",
     "smoke": "node scripts/smoke-check.js",
-    "predeploy": "npm run build:public && npm run check && npm run smoke"
+    "predeploy": "npm run build:tailwind && npm run build:public && npm run check && npm run smoke"
   },
   "keywords": [],
   "author": "",
@@ -27,5 +29,9 @@
     "html-minifier-terser": "^7.2.0",
     "multer": "^2.1.1",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "purgecss": "^8.0.0",
+    "tailwindcss": "^3.4.19"
   }
 }

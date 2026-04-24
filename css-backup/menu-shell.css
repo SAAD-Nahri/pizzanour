@@ -375,6 +375,63 @@ body.menu-page {
 }
 
 /* Premium Hero Header */
+.menu-hero {
+  position: relative;
+  height: 220px;
+  background: var(--brand-hero-image) center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 30px 20px;
+  color: #fff;
+}
+
+.menu-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+}
+
+.menu-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.menu-hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  margin-bottom: 5px;
+}
+
+.menu-hero-tag {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  letter-spacing: 1px;
+}
+
+
+.hub-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  backdrop-filter: blur(5px);
+}
+
+.hub-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
 
 
 
@@ -466,6 +523,12 @@ body.menu-page {
 }
 
 /* NEW: Hero & Overlapping Logo */
+.menu-hero {
+  height: 200px;
+  position: relative;
+  overflow: visible;
+  /* To allow logo overlap */
+}
 
 .hero-logo-container {
   position: absolute;
@@ -473,6 +536,39 @@ body.menu-page {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
+}
+
+.overlap-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: #fff;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+.restaurant-info {
+  margin-top: 50px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.rest-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+
+.promo-line {
+  margin-top: 10px;
+  color: var(--red);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANDING PAGE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -624,6 +720,16 @@ body.menu-page {
 }
 
 /* Promo Banner */
+.promo-banner {
+  background: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 12px 0 14px;
+  font-size: 0.9rem;
+  color: #2e7d32;
+  font-weight: 600;
+}
 
 /* View Menu Button */
 .view-menu-btn {
@@ -742,6 +848,20 @@ body.menu-page {
   overflow: hidden;
   background: linear-gradient(180deg, #fff 0%, #fffdf9 100%);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+}
+
+.hour-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+  color: #333;
+}
+
+.hour-row:last-child {
+  border-bottom: none;
 }
 
 /* Social Links */
@@ -1168,6 +1288,10 @@ body.menu-page {
     gap: 10px;
   }
 
+  .menu-search-box {
+    margin-bottom: 20px;
+  }
+
   .super-cat-pills {
     gap: 8px;
     margin: 12px 0 8px;
@@ -1314,6 +1438,26 @@ body.menu-page {
 
   .landing-status {
     margin-bottom: 12px;
+  }
+
+  .promo-section-vibrant {
+    margin: 18px 0 12px !important;
+    padding: 0 !important;
+  }
+
+  .promo-inner-container {
+    padding: 0;
+  }
+
+  #promoCarousel {
+    padding: 8px 2px 6px !important;
+    gap: 12px !important;
+  }
+
+  .promo-empty-msg {
+    padding: 26px 14px;
+    border-radius: 20px;
+    font-size: 0.96rem;
   }
 
   .view-menu-btn {
@@ -2801,6 +2945,49 @@ body.menu-page {
 }
 
 /* Floating Actions */
+.floating-actions {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(calc(-50% + 180px));
+  /* Positioned relative to mobile wrapper */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 1000;
+}
+
+@media (max-width: 550px) {
+  .floating-actions {
+    left: auto;
+    right: 20px;
+    transform: none;
+  }
+}
+
+.float-btn {
+  width: 50px;
+  height: 50px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.float-btn:hover {
+  transform: translateY(-5px);
+}
+
+.float-btn.history-btn {
+  background: #1a1d23;
+  color: #fff;
+}
 
 /* Sexy Featured Header */
 .featured-header-sexy {
@@ -2994,7 +3181,11 @@ body.menu-page {
 }
 
 
-.menu-nav-hero-img {
+.menu-nav-hero-img,
+.order-btn:hover,
+.events-btn:hover,
+.promo-visual img,
+.promo-visual-vibrant img {
   animation: none !important;
   transition: none !important;
   transform: none !important;
@@ -3294,6 +3485,10 @@ body.menu-page {
     gap: 10px;
   }
 
+  .gb-text {
+    font-size: 0.96rem;
+  }
+
   .game-banner-note {
     font-size: 0.76rem;
   }
@@ -3303,6 +3498,14 @@ body.menu-page {
     border-radius: 999px;
     font-size: 0.7rem;
     letter-spacing: 0.08em;
+  }
+
+  .promo-section-vibrant {
+    margin: 14px 0 10px !important;
+  }
+
+  .promo-inner-container {
+    padding: 0;
   }
 
   .view-menu-btn {
@@ -3343,6 +3546,11 @@ body.menu-page {
 
   .hours-grid {
     border-radius: 18px;
+  }
+
+  .hour-row {
+    padding: 12px 14px;
+    font-size: 0.84rem;
   }
 
   .social-links {
@@ -3413,6 +3621,17 @@ body.menu-page {
     margin: 0 -12px 18px;
     padding: 8px 10px 12px;
     border-radius: 22px;
+  }
+
+  .menu-search-box {
+    margin: 0 -2px 16px;
+    padding: 4px 2px 2px;
+  }
+
+  .menu-search-box input {
+    border-radius: 18px;
+    padding: 14px 15px 14px 44px;
+    font-size: 0.88rem;
   }
 
   .menu-section {

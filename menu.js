@@ -12,6 +12,7 @@ let cart = typeof window.getStoredCart === 'function'
     ? window.getStoredCart()
     : [];
 let gameScriptPromise = null;
+let currentSharedModal = '';
 const gameLoaderPlaceholders = {};
 
 function getVersionedPublicAsset(pathname) {
@@ -254,6 +255,13 @@ async function syncDataFromServer() {
 
         // Update global config object
         if (typeof window.mergeRestaurantConfig === 'function') {
+            const currentBranding = window.restaurantConfig?.branding || {};
+            const nextBranding = data.branding || {};
+            
+            // Protect "Pizzeria Nour" branding from server defaults
+            const isPizzeriaNour = String(currentBranding.restaurantName || '').toLowerCase().includes('nour');
+            const brandingToApply = isPizzeriaNour ? currentBranding : nextBranding;
+
             window.mergeRestaurantConfig({
                 superCategories: Array.isArray(data.superCategories) ? data.superCategories : window.restaurantConfig.superCategories,
                 categoryTranslations: data.categoryTranslations || window.restaurantConfig.categoryTranslations,
@@ -264,7 +272,7 @@ async function syncDataFromServer() {
                 gallery: Array.isArray(data.gallery) ? data.gallery : window.restaurantConfig.gallery,
                 _hours: Array.isArray(data.hours) ? data.hours : window.restaurantConfig._hours,
                 _hoursNote: typeof data.hoursNote === 'string' ? data.hoursNote : window.restaurantConfig._hoursNote,
-                branding: data.branding || window.restaurantConfig.branding,
+                branding: brandingToApply,
                 contentTranslations: data.contentTranslations || window.restaurantConfig.contentTranslations
             });
         }
@@ -1061,15 +1069,11 @@ function renderLandingInfo() {
         const locationRow = locEl.closest('.info-row');
         const hasAddress = Boolean(locationConfig.address);
         locEl.textContent = locationConfig.address || getText('landing_address_placeholder', 'Restaurant address');
-        locEl.classList.toggle('is-empty', !hasAddress);
         if (locationRow && mapUrl && hasAddress) {
             locationRow.onclick = () => window.openSafeExternalUrl(mapUrl, '_blank');
-            locationRow.classList.add('is-actionable');
-            locationRow.classList.remove('is-empty');
+            locationRow.classList.remove('opacity-60');
         } else if (locationRow) {
             locationRow.onclick = null;
-            locationRow.classList.remove('is-actionable');
-            locationRow.classList.toggle('is-empty', !hasAddress);
         }
     }
 
@@ -1079,17 +1083,11 @@ function renderLandingInfo() {
         const phoneRow = phoneEl.closest('.info-row');
         const hasPhone = Boolean(config.phone);
         phoneEl.textContent = config.phone || getText('landing_phone_placeholder', 'Phone coming soon');
-        phoneEl.classList.toggle('is-empty', !hasPhone);
         if (phoneRow && phoneHref && hasPhone) {
-            phoneRow.onclick = () => {
-                window.location.href = phoneHref;
-            };
-            phoneRow.classList.add('is-actionable');
-            phoneRow.classList.remove('is-empty');
+            phoneRow.onclick = () => { window.location.href = phoneHref; };
+            phoneRow.classList.remove('opacity-60');
         } else if (phoneRow) {
             phoneRow.onclick = null;
-            phoneRow.classList.remove('is-actionable');
-            phoneRow.classList.toggle('is-empty', !hasPhone);
         }
     }
 
@@ -1109,18 +1107,13 @@ function renderLandingInfo() {
         socialEl.textContent = hasSocials
             ? '@' + (instagramHandle || fallbackHandle)
             : getText('landing_social_placeholder', 'Social links coming soon');
-        socialEl.classList.toggle('is-empty', !hasSocials);
         if (socialRow && hasSocials) {
             socialRow.onclick = () => openSocialModal();
-            socialRow.classList.add('is-actionable');
-            socialRow.classList.remove('is-empty');
+            socialRow.classList.remove('opacity-60');
         } else if (socialRow) {
             socialRow.onclick = null;
-            socialRow.classList.remove('is-actionable');
-            socialRow.classList.add('is-empty');
         }
     }
-
     // WiFi
     const wifiEl = document.getElementById('landingWifi');
     if (wifiEl) {
@@ -1129,15 +1122,11 @@ function renderLandingInfo() {
         wifiEl.textContent = hasWifi
             ? wifiConfig.name
             : getText('landing_wifi_placeholder', 'WiFi code available on site');
-        wifiEl.classList.toggle('is-empty', !hasWifi);
         if (wifiRow && hasWifi) {
             wifiRow.onclick = () => openWiFiModal();
-            wifiRow.classList.add('is-actionable');
-            wifiRow.classList.remove('is-empty');
+            wifiRow.classList.remove('opacity-60');
         } else if (wifiRow) {
             wifiRow.onclick = null;
-            wifiRow.classList.remove('is-actionable');
-            wifiRow.classList.add('is-empty');
         }
     }
 
@@ -1166,7 +1155,8 @@ function renderLandingSocialLinks() {
         wifi: '<svg viewBox="0 0 24 24"><path d="M1 9l2 2c5-5 13-5 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>'
     };
 
-    const links = [`<a href="index.html" class="social-icon-link" aria-label="${t('landing_home_title', 'Home')}">${SVG_ICONS.home}</a>`];
+    const homeLabel = t('landing_home_title', 'Home');
+    const links = [`<a href="index.html" class="social-icon-link" aria-label="${homeLabel}" title="${homeLabel}">${SVG_ICONS.home}</a>`];
     const socials = { ...(window.restaurantConfig?.socials || {}) };
     socials.facebook = window.getSafeExternalUrl(socials.facebook);
     socials.instagram = window.getSafeExternalUrl(socials.instagram);
@@ -1174,16 +1164,20 @@ function renderLandingSocialLinks() {
     socials.whatsapp = window.getWhatsAppNumber();
 
     if (socials.facebook) {
-        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link" aria-label="${t('social_facebook', 'Facebook')}">${SVG_ICONS.facebook}</a>`);
+        const label = t('social_facebook', 'Facebook');
+        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.facebook}</a>`);
     }
     if (socials.instagram) {
-        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link" aria-label="${t('social_instagram', 'Instagram')}">${SVG_ICONS.instagram}</a>`);
+        const label = t('social_instagram', 'Instagram');
+        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.instagram}</a>`);
     }
     if (socials.tiktok) {
-        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link" aria-label="${t('social_tiktok', 'TikTok')}">${SVG_ICONS.tiktok}</a>`);
+        const label = t('social_tiktok', 'TikTok');
+        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.tiktok}</a>`);
     }
     if (socials.whatsapp) {
-        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link" aria-label="${t('social_whatsapp', 'WhatsApp')}">${SVG_ICONS.whatsapp}</a>`);
+        const label = t('social_whatsapp', 'WhatsApp');
+        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.whatsapp}</a>`);
     }
 
     const config = window.restaurantConfig;
@@ -1194,13 +1188,16 @@ function renderLandingSocialLinks() {
     const hasWifi = Boolean(wifiConfig.name && wifiConfig.code);
 
     if (mapUrl && locationConfig.address) {
-        links.push(`<a href="${mapUrl}" target="_blank" class="social-icon-link" aria-label="Carte">${SVG_ICONS.map}</a>`);
+        const label = t('landing_map_title', 'View on map');
+        links.push(`<a href="${mapUrl}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.map}</a>`);
     }
     if (phoneHref && config.phone) {
-        links.push(`<a href="${phoneHref}" class="social-icon-link" aria-label="Appeler">${SVG_ICONS.phone}</a>`);
+        const label = t('landing_call_title', 'Call');
+        links.push(`<a href="${phoneHref}" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.phone}</a>`);
     }
     if (hasWifi) {
-        links.push(`<a href="#" onclick="openWiFiModal(); return false;" class="social-icon-link" aria-label="WiFi">${SVG_ICONS.wifi}</a>`);
+        const label = t('landing_wifi_title', 'WiFi code');
+        links.push(`<a href="#" onclick="openWiFiModal(); return false;" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.wifi}</a>`);
     }
 
     container.classList.toggle('social-links-minimal', links.length === 1);
@@ -1208,6 +1205,7 @@ function renderLandingSocialLinks() {
 }
 
 function openWiFiModal() {
+    currentSharedModal = 'wifi';
     const config = window.restaurantConfig;
     const wifiTitle = t('wifi_connect_title', 'Connect to WiFi');
     const networkLabel = t('wifi_network_label', 'Network');
@@ -1230,22 +1228,28 @@ function openWiFiModal() {
 }
 
 function openSocialModal() {
+    currentSharedModal = 'social';
     const config = window.restaurantConfig;
     const title = t('social_modal_title', 'Our social media');
     const closeLabel = t('modal_close', 'CLOSE');
     const emptyText = t('social_empty', 'No links configured yet.');
     const whatsappNumber = window.getWhatsAppNumber();
+    const instagramLabel = t('social_instagram', 'Instagram');
+    const facebookLabel = t('social_facebook', 'Facebook');
+    const tiktokLabel = t('social_tiktok', 'TikTok');
+    const tripAdvisorLabel = t('social_tripadvisor', 'TripAdvisor');
+    const whatsappLabel = t('social_whatsapp', 'WhatsApp');
     config.socials = config.socials || {};
     config.socials.instagram = window.getSafeExternalUrl(config.socials.instagram);
     config.socials.facebook = window.getSafeExternalUrl(config.socials.facebook);
     config.socials.tiktok = window.getSafeExternalUrl(config.socials.tiktok);
     config.socials.tripadvisor = window.getSafeExternalUrl(config.socials.tripadvisor);
     const socials = [
-        config.socials.instagram ? `<a href="${config.socials.instagram}" target="_blank" class="social-item"><span class="social-item-icon">${MENU_UI_ICONS.instagram}</span> <strong>${t('social_instagram', 'Instagram')}</strong></a>` : '',
-        config.socials.facebook ? `<a href="${config.socials.facebook}" target="_blank" class="social-item"><span class="social-item-icon">${MENU_UI_ICONS.facebook}</span> <strong>${t('social_facebook', 'Facebook')}</strong></a>` : '',
-        config.socials.tiktok ? `<a href="${config.socials.tiktok}" target="_blank" class="social-item"><span class="social-item-icon">${MENU_UI_ICONS.tiktok}</span> <strong>${t('social_tiktok', 'TikTok')}</strong></a>` : '',
-        config.socials.tripadvisor ? `<a href="${config.socials.tripadvisor}" target="_blank" class="social-item"><span class="social-item-icon">${MENU_UI_ICONS.sparkle}</span> <strong>${t('social_tripadvisor', 'TripAdvisor')}</strong></a>` : '',
-        whatsappNumber ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" class="social-item"><span class="social-item-icon">${MENU_UI_ICONS.whatsapp}</span> <strong>${t('social_whatsapp', 'WhatsApp')}</strong></a>` : ''
+        config.socials.instagram ? `<a href="${config.socials.instagram}" target="_blank" class="social-item" aria-label="${instagramLabel}" title="${instagramLabel}"><span class="social-item-icon">${MENU_UI_ICONS.instagram}</span> <strong>${instagramLabel}</strong></a>` : '',
+        config.socials.facebook ? `<a href="${config.socials.facebook}" target="_blank" class="social-item" aria-label="${facebookLabel}" title="${facebookLabel}"><span class="social-item-icon">${MENU_UI_ICONS.facebook}</span> <strong>${facebookLabel}</strong></a>` : '',
+        config.socials.tiktok ? `<a href="${config.socials.tiktok}" target="_blank" class="social-item" aria-label="${tiktokLabel}" title="${tiktokLabel}"><span class="social-item-icon">${MENU_UI_ICONS.tiktok}</span> <strong>${tiktokLabel}</strong></a>` : '',
+        config.socials.tripadvisor ? `<a href="${config.socials.tripadvisor}" target="_blank" class="social-item" aria-label="${tripAdvisorLabel}" title="${tripAdvisorLabel}"><span class="social-item-icon">${MENU_UI_ICONS.sparkle}</span> <strong>${tripAdvisorLabel}</strong></a>` : '',
+        whatsappNumber ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" class="social-item" aria-label="${whatsappLabel}" title="${whatsappLabel}"><span class="social-item-icon">${MENU_UI_ICONS.whatsapp}</span> <strong>${whatsappLabel}</strong></a>` : ''
     ].filter(Boolean).join('');
     const content = `
         <div class="modal-body menu-modal-body">
@@ -1271,6 +1275,7 @@ function showLanding() {
         'ticketModal', 'dishPage', 'historyOverlay'].forEach(id => {
             document.getElementById(id)?.classList.remove('open');
         });
+    currentSharedModal = '';
     document.body.style.overflow = '';
 
     // Now show landing and hide menu view
@@ -1564,6 +1569,11 @@ function rerenderCurrentMenuLanguageView() {
 
     const currentState = navigationStack[navigationStack.length - 1] || '';
 
+    if (!currentState) {
+        refreshLandingFeatured();
+        return;
+    }
+
     if (currentState.startsWith('items:')) {
         const categoryKey = currentState.slice('items:'.length);
         const activeSuperCategory = getSuperCategories().find((entry) => Array.isArray(entry?.cats) && entry.cats.includes(categoryKey));
@@ -1595,6 +1605,33 @@ if (baseMenuSetLang) {
         baseMenuSetLang(lang, btn);
         menuCategoryMarkupCache = new Map();
         rerenderCurrentMenuLanguageView();
+        if (document.getElementById('cartDrawer')?.classList.contains('open') && typeof window.renderDrawer === 'function') {
+            window.renderDrawer();
+        }
+        if (document.getElementById('historyOverlay')?.classList.contains('open') && typeof window.renderHistory === 'function') {
+            window.renderHistory();
+        }
+        if (document.getElementById('ticketModal')?.classList.contains('open') && typeof window.generateTicket === 'function') {
+            window.generateTicket();
+        }
+        if (document.getElementById('orderPromptOverlay')?.classList.contains('open') && typeof window.refreshOrderPrompt === 'function') {
+            window.refreshOrderPrompt();
+        }
+        const dishPage = document.getElementById('dishPage');
+        if (dishPage?.classList.contains('open') && typeof dishPage.__refreshDishPageCopy === 'function') {
+            dishPage.__refreshDishPageCopy();
+        }
+        const galleryOverlay = document.getElementById('galleryOverlay');
+        if (galleryOverlay?.style.display === 'flex' && typeof window.refreshGalleryCopy === 'function') {
+            window.refreshGalleryCopy();
+        }
+        if (document.getElementById('sharedOverlay')?.classList.contains('open')) {
+            if (currentSharedModal === 'wifi') {
+                openWiFiModal();
+            } else if (currentSharedModal === 'social') {
+                openSocialModal();
+            }
+        }
     };
 }
 

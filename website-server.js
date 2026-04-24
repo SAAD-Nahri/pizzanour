@@ -86,6 +86,17 @@ function sanitizePublicTranslations(input) {
   };
 }
 
+function sanitizePublicCategoryTranslations(input) {
+  const source = input && typeof input === "object" ? input : {};
+  const out = {};
+  for (const [key, value] of Object.entries(source)) {
+    const safeKey = asPublicString(key, 120).trim();
+    if (!safeKey) continue;
+    out[safeKey] = sanitizePublicTranslations(value);
+  }
+  return out;
+}
+
 function sanitizePublicMenuExtras(input) {
   const source = Array.isArray(input) ? input : [];
   return source
@@ -242,9 +253,7 @@ function buildPublicSitePayload(data) {
         phone: asPublicString(source.landing.phone, 120)
       }
       : { location: null, phone: "" },
-    categoryTranslations: source.categoryTranslations && typeof source.categoryTranslations === "object"
-      ? source.categoryTranslations
-      : {}
+    categoryTranslations: sanitizePublicCategoryTranslations(source.categoryTranslations)
   };
 }
 
@@ -335,9 +344,7 @@ function buildPublicMenuPayload(data) {
         phone: asPublicString(source.landing.phone, 120)
       }
       : { location: null, phone: "" },
-    categoryTranslations: source.categoryTranslations && typeof source.categoryTranslations === "object"
-      ? source.categoryTranslations
-      : {}
+    categoryTranslations: sanitizePublicCategoryTranslations(source.categoryTranslations)
   };
 }
 
