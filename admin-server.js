@@ -880,7 +880,7 @@ function repairPossibleImporterMojibake(value) {
   if (!result) return "";
 
   for (let index = 0; index < 2; index += 1) {
-    if (!/[ÃØÙðâ]/.test(result)) break;
+    if (!/[\u00C3\u00D8\u00D9\u00F0\u00E2]/.test(result)) break;
 
     try {
       const repairedLatin1 = Buffer.from(result, "latin1").toString("utf8");
@@ -923,7 +923,7 @@ function normalizeImporterSourceText(value) {
   raw.split("\n").forEach((line) => {
     const cleaned = line
       .replace(/[\u200B-\u200D\uFEFF]/g, " ")
-      .replace(/[â€¢Â·â–ªâ—â—¦â– â–º]/g, " ")
+      .replace(/[\u2022\u00B7\u25AA\u25CF\u25E6\u25A0\u25BA]/g, " ")
       .replace(/\s+/g, " ")
       .trim();
 

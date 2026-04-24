@@ -1,7 +1,7 @@
-﻿// WhatsApp management moved to socialLinks (Persistence Layer)
+// WhatsApp management moved to socialLinks (Persistence Layer)
 // const WHATSAPP_NUMBER = '212626081745';
 
-// Default Data â€” Full Menu from Restaurant Board
+// Default Data — Full Menu from Restaurant Board
 // Data and Translations are now loaded from shared.js
 
 
@@ -585,7 +585,7 @@ function syncHomepageHeaderState() {
     document.body.classList.toggle('home-header-scrolled', scrolled);
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DYNAMIC HOURS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ DYNAMIC HOURS ═══════════════════════
 function ensureHomepageExtrasScript() {
     if (window.__homepageExtrasReady) {
         return Promise.resolve();
@@ -660,13 +660,13 @@ function renderLocationCritical() {
 
     if (topAddressText) {
         topAddressText.textContent = window.restaurantConfig?.location?.address
-            ? `ðŸ“ ${window.restaurantConfig.location.address}`
+            ? `📍 ${window.restaurantConfig.location.address}`
             : '';
     }
 
     if (topPhoneText) {
         topPhoneText.textContent = window.restaurantConfig?.phone
-            ? `ðŸ“ž ${window.restaurantConfig.phone}`
+            ? `📞 ${window.restaurantConfig.phone}`
             : '';
     }
 

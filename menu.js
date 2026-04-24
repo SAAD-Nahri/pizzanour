@@ -1,6 +1,6 @@
 /**
  * Menu JS - 3-Tier Navigation
- * Landing â†’ Super Category â†’ Sub Category â†’ Items
+ * Landing → Super Category → Sub Category → Items
  */
 
 let menu = window.defaultMenu || [];
@@ -222,7 +222,7 @@ async function fetchPublicDataWithTimeout() {
     }
 }
 
-// â•â•â• SYNC DATA FROM SERVER â•â•â•
+// ═══ SYNC DATA FROM SERVER ═══
 async function syncDataFromServer() {
     if (syncInFlight) return syncInFlight;
     lastPublicSyncStartedAt = Date.now();
@@ -353,7 +353,7 @@ window.addEventListener('focus', () => {
     }
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESTAURANT CONFIG â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ RESTAURANT CONFIG ═══════════════════════
 const config = window.restaurantConfig;
 
 function getSuperCategories() {
@@ -1018,7 +1018,7 @@ function scheduleMenuMotionRefresh() {
     });
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ INIT ═══════════════════════
 
 document.addEventListener('DOMContentLoaded', async () => {
     initMenuApp();
@@ -1266,7 +1266,7 @@ function openSocialModal() {
     document.getElementById('sharedOverlay').classList.add('open');
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANDING & VIEWS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ LANDING & VIEWS ═══════════════════════
 
 function showLanding() {
     featuredRenderToken += 1;
@@ -1453,7 +1453,7 @@ function menuGoBack() {
 // DELETED - Replaced by direct calls in menuGoBack
 
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SUPER CATEGORY SHEET â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ SUPER CATEGORY SHEET ═══════════════════════
 
 function renderSuperCatSheet() {
     const list = document.getElementById('superCatList');
@@ -1505,7 +1505,7 @@ function selectSuperCategory(scId) {
     showSubCategoryGrid(sc, true);
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SUB CATEGORY GRID â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ SUB CATEGORY GRID ═══════════════════════
 
 function showSubCategoryGrid(sc, addToStack = true) {
     if (addToStack) navigationStack.push(`subcats:${sc.id}`);
@@ -1542,7 +1542,7 @@ function showSubCategoryGrid(sc, addToStack = true) {
     scheduleMenuMotionRefresh();
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CATEGORY ITEMS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ CATEGORY ITEMS ═══════════════════════
 
 function showCategoryItems(cat, addToStack = true) {
     if (addToStack) navigationStack.push(`items:${cat}`);
@@ -1635,7 +1635,7 @@ if (baseMenuSetLang) {
     };
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RENDERING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ RENDERING ═══════════════════════
 
 function renderMenu(categoryFilter = null) {
     const wrap = document.getElementById('menuContent');
@@ -1741,7 +1741,7 @@ function imgTag(item, options = {}) {
     return `<span class="emoji-placeholder">${safeFallbackEmoji}</span>`;
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DISH PAGE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ DISH PAGE ═══════════════════════
 
 function openDishPage(id) {
     return ensureMenuInteractionsScriptLoaded().then(() => window.openDishPage(id));
@@ -1751,7 +1751,7 @@ function closeDishPage() {
     return ensureMenuInteractionsScriptLoaded().then(() => window.closeDishPage());
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• IMAGE GALLERY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ IMAGE GALLERY ═══════════════════════
 function openGallery(items, startIndex = 0) {
     return ensureMenuInteractionsScriptLoaded().then(() => window.openGallery(items, startIndex));
 }
@@ -1782,7 +1782,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SEARCH â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ SEARCH ═══════════════════════
 
 function searchMenu(q) {
     const query = q.toLowerCase().trim();
@@ -1802,7 +1802,7 @@ function searchMenu(q) {
     });
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LANG DROPDOWN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ LANG DROPDOWN ═══════════════════════
 
 function toggleLangDropdown() {
     document.getElementById('langOptions')?.classList.toggle('open');
@@ -1814,7 +1814,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CART â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ CART ═══════════════════════
 
 window.addToCart = function (id, sizeOrConfig, extrasArg) {
     const item = menu.find(m => sameMenuItemId(m.id, id));
@@ -1885,7 +1885,7 @@ function updateCartUI() {
     });
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ MODALS ═══════════════════════
 
 function openDrawer() {
     return ensureMenuInteractionsScriptLoaded().then(() => window.openDrawer());
@@ -1899,7 +1899,7 @@ function renderDrawer() {
     return ensureMenuInteractionsScriptLoaded().then(() => window.renderDrawer());
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HISTORY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ HISTORY ═══════════════════════
 
 function openHistory() {
     return ensureMenuInteractionsScriptLoaded().then(() => window.openHistory());
@@ -1936,12 +1936,12 @@ function updateHistoryBadge() {
     });
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TICKET â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ TICKET ═══════════════════════
 function generateTicket() {
     return ensureMenuInteractionsScriptLoaded().then(() => window.generateTicket());
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LIKES HANDLER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ LIKES HANDLER ═══════════════════════
 
 function handleToggleLike(id, btn) {
     const newCount = window.toggleLike(id);
@@ -1956,7 +1956,7 @@ function handleToggleLike(id, btn) {
 }
 window.handleToggleLike = handleToggleLike;
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GLOBALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════ GLOBALS ═══════════════════════
 window.showLanding = showLanding;
 window.openSuperCatSheet = openSuperCatSheet;
 window.closeSuperCatSheet = closeSuperCatSheet;

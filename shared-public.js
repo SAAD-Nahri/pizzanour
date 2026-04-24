@@ -58,7 +58,7 @@ function cloneStarterMenuItem(item) {
 function repairPossibleMojibake(value) {
     let result = typeof value === 'string' ? value : '';
     for (let i = 0; i < 2; i += 1) {
-        if (!/[ÃØÙðâ]/.test(result)) break;
+        if (!/[\u00C3\u00D8\u00D9\u00F0\u00E2]/.test(result)) break;
         try {
             const repaired = decodeURIComponent(escape(result));
             if (!repaired || repaired === result) break;
