@@ -303,6 +303,7 @@ const IMPORTER_SYSTEM_PROMPT = [
   "If a category is ambiguous, choose the closest canonical group and record the uncertainty in review.warnings instead of inventing a new top-level group.",
   "When a source item has multiple sizes or prices, use the lowest clear base price in menu[].price, preserve the size/price detail in the description, and add a review warning.",
   "When a price is missing or visually unclear, use null for menu[].price and add a review warning; do not invent a price.",
+  "In prepared source text, a double hyphen marker (--) means the following phrase is a description or modifier for the same item, not a new item name.",
   "Flag uncertainty in review.warnings or review.blockers instead of pretending confidence.",
   "Use category keys consistently: restaurantData.categories[].key must match menu[].cat and superCategories[].cats[].",
   "Follow the JSON schema exactly."
@@ -1101,6 +1102,7 @@ function normalizeImporterSourceText(value) {
 const IMPORTER_PRICE_TOKEN_SOURCE = String.raw`(?:\d{1,4}(?:[.,]\d{1,2})?\s*(?:mad|dh|dhs|da|eur|usd|\u20ac|\$)?|(?:mad|dh|dhs|da|eur|usd|\u20ac|\$)\s*\d{1,4}(?:[.,]\d{1,2})?)`;
 const IMPORTER_PRICE_ONLY_REGEX = new RegExp(String.raw`^[\s.\-:|/]*${IMPORTER_PRICE_TOKEN_SOURCE}[\s.\-:|/]*$`, "i");
 const IMPORTER_SIZE_WORD_REGEX = /^(small|medium|large|mini|normal|regular|grand|petit|moyen|xl|l|m|s)\b/i;
+const IMPORTER_MENU_HEADING_WORDS_REGEX = /^(menu|menus|carte|formule|formules|category|categories|categorie|categories|special|specials|nos|our|les|des|de|du|la|le)\b/i;
 
 function isImporterLikelyPriceToken(value) {
   const raw = asImporterString(value);
@@ -1122,6 +1124,44 @@ function countImporterPriceTokens(value) {
 function isImporterPriceOnlyLine(value) {
   const line = normalizeImporterText(value);
   return IMPORTER_PRICE_ONLY_REGEX.test(line) && isImporterLikelyPriceToken(line);
+}
+
+function isImporterPriceGroupOnlyLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || /\p{L}(?!\s*(?:mad|dh|dhs|da|eur|usd)\b)/iu.test(line.replace(/\b(?:mad|dh|dhs|da|eur|usd)\b/giu, ""))) {
+    return false;
+  }
+
+  const matches = [...line.matchAll(new RegExp(IMPORTER_PRICE_TOKEN_SOURCE, "gi"))]
+    .filter((match) => isImporterLikelyPriceToken(match[0]));
+  if (!matches.length) return false;
+
+  const remainder = matches.reduce((next, match) => next.replace(match[0], " "), line);
+  return /^[\s.,;:|/\-–—]+$/.test(remainder) || !normalizeImporterText(remainder);
+}
+
+function isLikelyImporterHeadingLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || hasImporterPriceToken(line)) return false;
+  const words = line.split(/\s+/).filter(Boolean);
+  if (!words.length || words.length > 5) return false;
+  if (IMPORTER_MENU_HEADING_WORDS_REGEX.test(line)) return true;
+  const lettersOnly = line.replace(/[^\p{L}\s]/gu, "").trim();
+  if (!lettersOnly) return false;
+  const upperLetters = lettersOnly.replace(/[^\p{Lu}]/gu, "").length;
+  const totalLetters = lettersOnly.replace(/[^\p{L}]/gu, "").length;
+  return totalLetters >= 3 && upperLetters / totalLetters >= 0.72;
+}
+
+function isLikelyImporterDescriptionLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || hasImporterPriceToken(line) || isLikelyImporterHeadingLine(line)) return false;
+  const words = line.split(/\s+/).filter(Boolean);
+  if (words.length >= 5) return true;
+  if (/^[a-zà-ÿ]/.test(line)) return true;
+  if (/[,;]/.test(line) && words.length >= 3) return true;
+  if (/^(avec|servi|served|with|garni|sauce|fromage|cheese|tomate|tomato|lettuce|viande|poulet|beef|chicken)\b/i.test(line)) return true;
+  return false;
 }
 
 function splitObviousImporterMultiItemLine(value) {
@@ -1185,6 +1225,30 @@ function prepareImporterSourceTextForStructuring(value) {
         if (!previous) continue;
         if (!hasImporterPriceToken(previous) && /\p{L}/u.test(previous)) {
           joinedLines[index] = normalizeImporterText(`${previous} ${clean}`);
+          return;
+        }
+        break;
+      }
+    }
+
+    if (isImporterPriceGroupOnlyLine(clean)) {
+      for (let index = joinedLines.length - 1; index >= 0; index -= 1) {
+        const previous = joinedLines[index];
+        if (!previous) continue;
+        if (!hasImporterPriceToken(previous) && /\p{L}/u.test(previous)) {
+          joinedLines[index] = normalizeImporterText(`${previous} ${clean}`);
+          return;
+        }
+        break;
+      }
+    }
+
+    if (isLikelyImporterDescriptionLine(clean)) {
+      for (let index = joinedLines.length - 1; index >= 0; index -= 1) {
+        const previous = joinedLines[index];
+        if (!previous) continue;
+        if (hasImporterPriceToken(previous) && /\p{L}/u.test(previous)) {
+          joinedLines[index] = normalizeImporterText(`${previous} -- ${clean}`);
           return;
         }
         break;
