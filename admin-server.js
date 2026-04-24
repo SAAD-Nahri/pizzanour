@@ -3,6 +3,7 @@ const compression = require("compression");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const pdfParse = require("pdf-parse");
 const sharp = require("sharp");
 
 const {
@@ -61,6 +62,8 @@ const IMPORTER_MAX_MENU_IMAGES = 16;
 const IMPORTER_MAX_VENUE_IMAGES = 6;
 const IMPORTER_SOURCE_STRUCTURING_MAX_PAGES = 3;
 const IMPORTER_SOURCE_STRUCTURING_MAX_CHARS = 6500;
+const IMPORTER_IMAGE_MAX_DIMENSION = 1800;
+const IMPORTER_IMAGE_JPEG_QUALITY = 85;
 
 const app = express();
 const port = parsePort(process.env.PORT, 3115);
@@ -289,6 +292,8 @@ const IMPORTER_SYSTEM_PROMPT = [
   "Use these canonical super-categories as the default top-level groups: Starters, Main Courses, Sides, Desserts, Beverages, Breakfast.",
   "Do not mirror category names as super-category names unless they clearly match one of those canonical groups.",
   "If a category is ambiguous, choose the closest canonical group and record the uncertainty in review.warnings instead of inventing a new top-level group.",
+  "When a source item has multiple sizes or prices, use the lowest clear base price in menu[].price, preserve the size/price detail in the description, and add a review warning.",
+  "When a price is missing or visually unclear, use null for menu[].price and add a review warning; do not invent a price.",
   "Flag uncertainty in review.warnings or review.blockers instead of pretending confidence.",
   "Use category keys consistently: restaurantData.categories[].key must match menu[].cat and superCategories[].cats[].",
   "Follow the JSON schema exactly."
@@ -298,7 +303,10 @@ const IMPORTER_SOURCE_EXTRACTION_SYSTEM_PROMPT = [
   "You extract raw restaurant menu source text from uploaded menu images or PDFs.",
   "Return page-by-page text only.",
   "Preserve headings, item names, prices, and short descriptions with meaningful line breaks.",
+  "Menus may use multiple columns. Read each visible column top-to-bottom before moving to the next column unless the layout clearly indicates a different order.",
   "Capture currency symbols, item sizes (e.g., Small/Large), dietary markers (e.g., Vegan/Spicy), and other crucial item modifiers if present.",
+  "If a price appears on a separate visual line, keep it directly after the closest item name line.",
+  "For items with multiple sizes or prices, keep all visible size/price text near the item instead of choosing one during source extraction.",
   "Preserve visible section headings and subsection headings even when they do not explicitly say category or super-category.",
   "Ensure distinctly separated dishes are not mistakenly merged into one. Use double line breaks or clear spacing to separate unconnected items.",
   "If names, descriptions, and prices are visually separated, keep the closest related lines together in reading order.",
@@ -313,7 +321,10 @@ const IMPORTER_SOURCE_TEXT_FALLBACK_SYSTEM_PROMPT = [
   "You extract raw restaurant menu text from one uploaded menu image or PDF.",
   "Return plain text only.",
   "Preserve the visible menu reading order as faithfully as possible.",
+  "Menus may use multiple columns. Read each visible column top-to-bottom before moving to the next column unless the layout clearly indicates a different order.",
   "Capture currency symbols, item sizes, dietary markers, and modifiers if present.",
+  "If a price appears alone on its own line, place it immediately after the closest item name.",
+  "For items with multiple sizes or prices, keep all visible size/price text near the item.",
   "Preserve visible section headings and subsection headings as separate lines when they appear.",
   "Ensure distinct dishes are separated by clear line breaks so they do not blend together.",
   "Keep item names, prices, and short descriptions together when they clearly belong together.",
@@ -703,15 +714,38 @@ function resolveLocalUploadPath(value) {
   return path.join(uploadsDir, relativePath);
 }
 
-function buildInputImageFromUploadUrl(value) {
+async function buildInputImageFromUploadUrl(value) {
   const filePath = resolveLocalUploadPath(value);
   if (!filePath || !fs.existsSync(filePath)) return null;
   const mimeType = guessMimeType(filePath);
   if (!mimeType || !mimeType.startsWith("image/")) return null;
-  const base64 = fs.readFileSync(filePath).toString("base64");
+
+  let buffer;
+  let outputMimeType = "image/jpeg";
+  try {
+    buffer = await sharp(filePath)
+      .rotate()
+      .resize({
+        width: IMPORTER_IMAGE_MAX_DIMENSION,
+        height: IMPORTER_IMAGE_MAX_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true
+      })
+      .jpeg({
+        quality: IMPORTER_IMAGE_JPEG_QUALITY,
+        mozjpeg: true
+      })
+      .toBuffer();
+  } catch (error) {
+    console.warn(`Importer image preprocessing failed for ${filePath}:`, error.message);
+    buffer = fs.readFileSync(filePath);
+    outputMimeType = mimeType;
+  }
+
+  const base64 = buffer.toString("base64");
   return {
     type: "input_image",
-    image_url: `data:${mimeType};base64,${base64}`
+    image_url: `data:${outputMimeType};base64,${base64}`
   };
 }
 
@@ -751,15 +785,15 @@ function buildImporterAssetLabel(kind, index, url) {
   return normalizedBaseName ? `${fallback}: ${normalizedBaseName}` : fallback;
 }
 
-function buildImporterAssetDescriptors(input) {
-  const imageAssets = (Array.isArray(input?.menuImageUrls) ? input.menuImageUrls : [])
-    .map((url, index) => ({
+async function buildImporterAssetDescriptors(input) {
+  const imageAssets = (await Promise.all((Array.isArray(input?.menuImageUrls) ? input.menuImageUrls : [])
+    .map(async (url, index) => ({
       kind: "image",
       index,
       url,
       label: buildImporterAssetLabel("image", index, url),
-      contentInput: buildInputImageFromUploadUrl(url)
-    }))
+      contentInput: await buildInputImageFromUploadUrl(url)
+    }))))
     .filter((asset) => asset.contentInput);
 
   const pdfAssets = (Array.isArray(input?.menuPdfUrls) ? input.menuPdfUrls : [])
@@ -773,6 +807,121 @@ function buildImporterAssetDescriptors(input) {
     .filter((asset) => asset.contentInput);
 
   return [...pdfAssets, ...imageAssets];
+}
+
+async function renderImporterPdfPageText(pageData) {
+  const textContent = await pageData.getTextContent({
+    normalizeWhitespace: false,
+    disableCombineTextItems: false
+  });
+  const items = Array.isArray(textContent?.items)
+    ? textContent.items
+      .map((item) => ({
+        text: normalizeImporterText(item?.str),
+        x: Number(item?.transform?.[4]) || 0,
+        y: Number(item?.transform?.[5]) || 0
+      }))
+      .filter((item) => item.text)
+    : [];
+
+  if (!items.length) return "";
+
+  const rows = [];
+  items
+    .sort((left, right) => (right.y - left.y) || (left.x - right.x))
+    .forEach((item) => {
+      const row = rows.find((entry) => Math.abs(entry.y - item.y) <= 2);
+      if (row) {
+        row.items.push(item);
+        row.y = (row.y + item.y) / 2;
+      } else {
+        rows.push({ y: item.y, items: [item] });
+      }
+    });
+
+  return rows
+    .sort((left, right) => right.y - left.y)
+    .map((row) => row.items
+      .sort((left, right) => left.x - right.x)
+      .map((item) => item.text)
+      .join(" "))
+    .join("\n");
+}
+
+function getImporterMenuTextStats(pages) {
+  const lines = (Array.isArray(pages) ? pages : [])
+    .flatMap((page) => normalizeImporterSourceText(page?.text).split("\n"))
+    .map((line) => normalizeImporterText(line))
+    .filter(Boolean);
+  const text = lines.join("\n");
+  const alphaLineCount = lines.filter((line) => /\p{L}/u.test(line)).length;
+  const priceLineCount = lines.filter((line) => hasImporterPriceToken(line)).length;
+
+  return {
+    charCount: text.length,
+    lineCount: lines.length,
+    alphaLineCount,
+    priceLineCount,
+    priceTokenCount: countImporterPriceTokens(text)
+  };
+}
+
+function isImporterLocalPdfSourceUsable(pages) {
+  const stats = getImporterMenuTextStats(pages);
+  return stats.charCount >= 80
+    && stats.alphaLineCount >= 3
+    && (
+      stats.priceTokenCount >= 2
+      || (stats.priceTokenCount >= 1 && stats.alphaLineCount >= 6)
+    );
+}
+
+async function extractLocalPdfMenuSourceFromAsset(asset) {
+  const filePath = resolveLocalUploadPath(asset?.url);
+  if (!filePath || !fs.existsSync(filePath)) {
+    throw new Error("local_pdf_file_not_found");
+  }
+
+  const mimeType = guessMimeType(filePath);
+  if (mimeType !== "application/pdf") {
+    throw new Error("local_pdf_file_not_pdf");
+  }
+
+  const pageTexts = [];
+  const buffer = fs.readFileSync(filePath);
+  await pdfParse(buffer, {
+    pagerender: async (pageData) => {
+      const pageText = await renderImporterPdfPageText(pageData);
+      pageTexts.push(pageText);
+      return pageText;
+    }
+  });
+
+  const pages = pageTexts
+    .map((text, index) => ({
+      label: `${asset.label} - Page ${index + 1}`,
+      text: normalizeImporterSourceText(text)
+    }))
+    .filter((page) => page.text);
+
+  if (!pages.length) {
+    throw new Error("local_pdf_text_empty");
+  }
+  if (!isImporterLocalPdfSourceUsable(pages)) {
+    throw new Error("local_pdf_text_not_menu_like");
+  }
+
+  return {
+    asset: {
+      kind: "pdf",
+      label: asset.label,
+      url: asset.url,
+      model: "pdf-parse@1.1.1",
+      mode: "local_pdf_text"
+    },
+    pages,
+    warnings: [`${asset.label}: Local PDF text extraction used; OpenAI source extraction skipped for this text PDF.`]
+  };
 }
 
 function copyUploadUrlsToSellerJob(jobId, relativeDir, urls = []) {
@@ -940,6 +1089,105 @@ function normalizeImporterSourceText(value) {
   return normalizedLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+const IMPORTER_PRICE_TOKEN_SOURCE = String.raw`(?:\d{1,4}(?:[.,]\d{1,2})?\s*(?:mad|dh|dhs|da|eur|usd|\u20ac|\$)?|(?:mad|dh|dhs|da|eur|usd|\u20ac|\$)\s*\d{1,4}(?:[.,]\d{1,2})?)`;
+const IMPORTER_PRICE_ONLY_REGEX = new RegExp(String.raw`^[\s.\-:|/]*${IMPORTER_PRICE_TOKEN_SOURCE}[\s.\-:|/]*$`, "i");
+const IMPORTER_SIZE_WORD_REGEX = /^(small|medium|large|mini|normal|regular|grand|petit|moyen|xl|l|m|s)\b/i;
+
+function isImporterLikelyPriceToken(value) {
+  const raw = asImporterString(value);
+  return /(?:mad|dh|dhs|da|eur|usd|\u20ac|\$)/i.test(raw)
+    || /\d[.,]\d{1,2}/.test(raw)
+    || /\d{2,4}/.test(raw);
+}
+
+function hasImporterPriceToken(value) {
+  return countImporterPriceTokens(value) > 0;
+}
+
+function countImporterPriceTokens(value) {
+  return [...asImporterString(value).matchAll(new RegExp(IMPORTER_PRICE_TOKEN_SOURCE, "gi"))]
+    .filter((match) => isImporterLikelyPriceToken(match[0]))
+    .length;
+}
+
+function isImporterPriceOnlyLine(value) {
+  const line = normalizeImporterText(value);
+  return IMPORTER_PRICE_ONLY_REGEX.test(line) && isImporterLikelyPriceToken(line);
+}
+
+function splitObviousImporterMultiItemLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line) return [];
+
+  const matches = [...line.matchAll(new RegExp(IMPORTER_PRICE_TOKEN_SOURCE, "gi"))]
+    .filter((match) => isImporterLikelyPriceToken(match[0]));
+  if (matches.length < 2) return [line];
+
+  const parts = [];
+  let start = 0;
+  for (let index = 0; index < matches.length - 1; index += 1) {
+    const match = matches[index];
+    const end = Number(match.index) + match[0].length;
+    const before = line.slice(start, end).trim();
+    const after = line.slice(end).trim();
+    if (
+      before
+      && after
+      && /\p{L}/u.test(before)
+      && /^\p{L}/u.test(after)
+      && !IMPORTER_SIZE_WORD_REGEX.test(after)
+    ) {
+      parts.push(before);
+      start = end;
+    }
+  }
+
+  if (!parts.length) return [line];
+
+  const finalPart = line.slice(start).trim();
+  if (finalPart) parts.push(finalPart);
+  return parts.length > 1 ? parts : [line];
+}
+
+function prepareImporterSourceTextForStructuring(value) {
+  const text = normalizeImporterSourceText(value);
+  if (!text) return "";
+
+  const splitLines = [];
+  text.split("\n").forEach((line) => {
+    if (!line.trim()) {
+      if (splitLines[splitLines.length - 1] !== "") splitLines.push("");
+      return;
+    }
+    splitLines.push(...splitObviousImporterMultiItemLine(line));
+  });
+
+  const joinedLines = [];
+  splitLines.forEach((line) => {
+    const clean = normalizeImporterText(line);
+    if (!clean) {
+      if (joinedLines[joinedLines.length - 1] !== "") joinedLines.push("");
+      return;
+    }
+
+    if (isImporterPriceOnlyLine(clean)) {
+      for (let index = joinedLines.length - 1; index >= 0; index -= 1) {
+        const previous = joinedLines[index];
+        if (!previous) continue;
+        if (!hasImporterPriceToken(previous) && /\p{L}/u.test(previous)) {
+          joinedLines[index] = normalizeImporterText(`${previous} ${clean}`);
+          return;
+        }
+        break;
+      }
+    }
+
+    joinedLines.push(clean);
+  });
+
+  return normalizeImporterSourceText(joinedLines.join("\n"));
+}
+
 function trimImporterSeparators(value) {
   return asImporterString(value)
     .replace(/^[\s\-–—:;|.,/\\]+/, "")
@@ -1008,9 +1256,23 @@ function normalizeImporterPrice(explicitPrice, ...fallbackTexts) {
     const source = normalizeImporterText(text);
     if (!source) continue;
 
+    const detectedPrices = [...source.matchAll(new RegExp(IMPORTER_PRICE_TOKEN_SOURCE, "gi"))]
+      .filter((match) => isImporterLikelyPriceToken(match[0]))
+      .map((match) => parsePossiblePriceToken(match[0]))
+      .filter((candidate) => Number.isFinite(candidate));
+    if (detectedPrices.length > 1) {
+      return Math.min(...detectedPrices);
+    }
     const trailing = extractTrailingPrice(source);
     if (Number.isFinite(trailing.price)) {
       return trailing.price;
+    }
+
+    if (!detectedPrices.length) {
+      continue;
+    }
+    if (detectedPrices.length === 1) {
+      return detectedPrices[0];
     }
 
     const matches = [...source.matchAll(/(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:mad|dh|dhs|da|eur|usd|€|\$|درهم|د\.?\s*م)?/giu)];
@@ -1495,7 +1757,7 @@ function prepareImporterSourceForStructuring(source, limits = {}) {
 
   pages.forEach((page, index) => {
     const label = normalizeImporterText(page?.label) || `Page ${index + 1}`;
-    const text = normalizeImporterSourceText(page?.text);
+    const text = prepareImporterSourceTextForStructuring(page?.text);
     if (!text) return;
 
     const maxChars = Number(limits.maxCharsPerPage) || 0;
@@ -1689,6 +1951,8 @@ function normalizeStructuredImporterDraft(parsed) {
   let derivedCategoryCount = 0;
   let derivedSuperCategoryCount = 0;
   let duplicateIdCount = 0;
+  let missingPriceCount = 0;
+  let multiplePriceDetailCount = 0;
 
   const derivedCategories = categories.length
     ? categories
@@ -1794,6 +2058,8 @@ function normalizeStructuredImporterDraft(parsed) {
       id: nextId
     };
   });
+  missingPriceCount = restaurantData.menu.filter((item) => !Number.isFinite(item?.price)).length;
+  multiplePriceDetailCount = restaurantData.menu.filter((item) => countImporterPriceTokens(`${item?.name || ""} ${item?.desc || ""}`) >= 2).length;
 
   const normalizedSuperCategories = (Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : []).map((entry, index) => {
     const cats = Array.isArray(entry?.cats)
@@ -1845,6 +2111,12 @@ function normalizeStructuredImporterDraft(parsed) {
     || `Extracted ${restaurantData.menu.length} menu item(s) across ${Object.keys(categoryTranslations).length} category(ies).`;
   if (normalizedPriceCount > 0) {
     reviewWarnings.push(`Recovered ${normalizedPriceCount} price value(s) from extracted menu text.`);
+  }
+  if (missingPriceCount > 0) {
+    reviewWarnings.push(`${missingPriceCount} item(s) still miss a price after import cleanup.`);
+  }
+  if (multiplePriceDetailCount > 0) {
+    reviewWarnings.push(`${multiplePriceDetailCount} item(s) include multiple visible size/price options; the base price should be reviewed.`);
   }
   if (fallbackCategoryCount > 0) {
     reviewWarnings.push(`Grouped ${fallbackCategoryCount} item(s) into a fallback Menu category because no category label was extracted.`);
@@ -2210,7 +2482,7 @@ async function repairImporterJsonText(rawText) {
 }
 
 async function buildImporterDraftFromPlainTextFallback(input, context = {}) {
-  const assets = buildImporterAssetDescriptors(input);
+  const assets = await buildImporterAssetDescriptors(input);
   const warnings = Array.isArray(context?.warnings) ? context.warnings.slice() : [];
   const extractedResults = [];
 
@@ -2670,6 +2942,135 @@ function applyImporterProductLibraryMatches(draft) {
   return { draft: nextDraft, matchedCount };
 }
 
+const IMPORTER_COMMON_FRENCH_MENU_WORD_REGEX = /\b(poulet|boeuf|fromage|thon|crevette|salade|soupe|jus|viande|poisson|oeuf|frites|lait|pain|pomme|champignon|eau|cafe|gateau|glace|entree|plat|boisson)\b/i;
+
+function isImporterLikelyWeakLanguageValue(baseValue, translatedValue, language) {
+  const value = asImporterString(translatedValue);
+  if (!value) return true;
+
+  if (language === "ar") {
+    return !/[\u0600-\u06FF]/.test(value);
+  }
+
+  if (language === "en") {
+    const base = normalizeImporterText(baseValue);
+    return Boolean(base)
+      && canonicalImporterLookup(base) === canonicalImporterLookup(value)
+      && IMPORTER_COMMON_FRENCH_MENU_WORD_REGEX.test(base);
+  }
+
+  return false;
+}
+
+function getImporterTranslationConfidenceSignals(draft) {
+  const restaurantData = draft?.restaurantData && typeof draft.restaurantData === "object"
+    ? draft.restaurantData
+    : {};
+  const entries = [
+    ...(Array.isArray(restaurantData.menu) ? restaurantData.menu : []).map((item) => ({
+      label: asImporterString(item?.name),
+      desc: asImporterString(item?.desc),
+      translations: item?.translations
+    })),
+    ...Object.values(restaurantData.categoryTranslations || {}).map((translations) => ({
+      label: asImporterString(translations?.fr?.name),
+      desc: asImporterString(translations?.fr?.desc),
+      translations
+    })),
+    ...(Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : []).map((entry) => ({
+      label: asImporterString(entry?.name),
+      desc: asImporterString(entry?.desc),
+      translations: entry?.translations
+    }))
+  ];
+
+  let missingCount = 0;
+  let weakCount = 0;
+  let checkedCount = 0;
+
+  entries.forEach((entry) => {
+    const translations = fillTranslationSet(entry.translations, entry.label, entry.desc);
+    ["fr", "en", "ar"].forEach((language) => {
+      checkedCount += 1;
+      if (!asImporterString(translations?.[language]?.name)) {
+        missingCount += 1;
+      }
+    });
+    ["en", "ar"].forEach((language) => {
+      if (isImporterLikelyWeakLanguageValue(entry.label, translations?.[language]?.name, language)) {
+        weakCount += 1;
+      }
+      if (entry.desc && isImporterLikelyWeakLanguageValue(entry.desc, translations?.[language]?.desc, language)) {
+        weakCount += 1;
+      }
+    });
+  });
+
+  return {
+    checkedCount,
+    missingCount,
+    weakCount
+  };
+}
+
+function applyImporterReviewConfidence(draft, meta = {}) {
+  const nextDraft = draft && typeof draft === "object" ? JSON.parse(JSON.stringify(draft)) : {};
+  const restaurantData = nextDraft.restaurantData && typeof nextDraft.restaurantData === "object"
+    ? nextDraft.restaurantData
+    : {};
+  const menu = Array.isArray(restaurantData.menu) ? restaurantData.menu : [];
+  const review = nextDraft.review && typeof nextDraft.review === "object" ? nextDraft.review : {};
+  const warnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+  const blockers = Array.isArray(review.blockers) ? review.blockers : [];
+  const missingPriceCount = menu.filter((item) => !Number.isFinite(item?.price)).length;
+  const missingPriceRatio = menu.length ? missingPriceCount / menu.length : 1;
+  const translationSignals = getImporterTranslationConfidenceSignals(nextDraft);
+  const translationRiskCount = translationSignals.missingCount + translationSignals.weakCount;
+  const translationRiskRatio = translationSignals.checkedCount ? translationRiskCount / translationSignals.checkedCount : 1;
+  const mediaLibraryMatches = Number(meta?.mediaLibraryMatches) || Number(review.mediaLibraryMatches) || 0;
+  const itemImageCount = menu.filter((item) => asImporterString(item?.img) || (Array.isArray(item?.images) && item.images.some((value) => asImporterString(value)))).length;
+
+  let menuExtraction = "high";
+  if (!menu.length || blockers.length || missingPriceRatio > 0.5) {
+    menuExtraction = "low";
+  } else if (missingPriceRatio > 0.15) {
+    menuExtraction = "medium";
+  }
+
+  let translations = "high";
+  if (!menu.length || translationRiskRatio > 0.5) {
+    translations = "low";
+  } else if (translationRiskCount > 0) {
+    translations = "medium";
+  }
+
+  let mediaMatching = "unknown";
+  if (menu.length && itemImageCount >= menu.length) {
+    mediaMatching = "high";
+  } else if (itemImageCount > 0 || mediaLibraryMatches > 0) {
+    mediaMatching = "medium";
+  }
+
+  if (menuExtraction === "low" && menu.length) {
+    warnings.push("Low menu extraction confidence; review item boundaries, categories, and prices before publishing.");
+  }
+  if (translations === "low" && menu.length) {
+    warnings.push("Low translation confidence; review FR, EN, and AR item text before publishing.");
+  }
+
+  nextDraft.review = {
+    ...review,
+    warnings: [...new Set(warnings.filter(Boolean))],
+    confidence: {
+      ...(review.confidence && typeof review.confidence === "object" ? review.confidence : {}),
+      menuExtraction,
+      translations,
+      mediaMatching
+    }
+  };
+  return nextDraft;
+}
+
 async function extractImporterMenuSourceFromAsset(input, asset) {
   const notes = asImporterString(input?.notes);
   const restaurantName = asImporterString(input?.restaurantName);
@@ -2829,7 +3230,7 @@ async function extractImporterMenuSourceTextFallbackFromAsset(input, asset) {
 }
 
 async function extractImporterMenuSource(input) {
-  const assets = buildImporterAssetDescriptors(input);
+  const assets = await buildImporterAssetDescriptors(input);
   if (!assets.length) {
     return { pages: [], warnings: [], assets: [] };
   }
@@ -2838,6 +3239,16 @@ async function extractImporterMenuSource(input) {
   const results = [];
 
   for (const asset of assets) {
+    if (asset.kind === "pdf") {
+      try {
+        const localResult = await extractLocalPdfMenuSourceFromAsset(asset);
+        results.push(localResult);
+        continue;
+      } catch (localError) {
+        warnings.push(`${asset.label}: Local PDF text extraction was not usable (${localError.message}); falling back to OpenAI PDF extraction.`);
+      }
+    }
+
     try {
       const primaryResult = await extractImporterMenuSourceFromAsset(input, asset);
       if (Array.isArray(primaryResult.pages) && primaryResult.pages.length) {
@@ -2858,8 +3269,9 @@ async function extractImporterMenuSource(input) {
     }
   }
 
+  const rawPages = results.flatMap((entry) => entry.pages || []);
   const merged = prepareImporterSourceForStructuring({
-    pages: results.flatMap((entry) => entry.pages || []),
+    pages: rawPages,
     warnings: [
       ...warnings,
       ...results.flatMap((entry) => Array.isArray(entry.warnings) ? entry.warnings : [])
@@ -2870,6 +3282,7 @@ async function extractImporterMenuSource(input) {
 
   return {
     ...merged,
+    rawPages,
     assets: results.map((entry) => ({
       ...entry.asset,
       pages: Array.isArray(entry.pages) ? entry.pages : [],
@@ -2954,7 +3367,7 @@ async function buildImporterDraftDirectFromAssets(input) {
   const shortName = asImporterString(input?.shortName);
   const notes = asImporterString(input?.notes);
   const importerModel = getImporterModelForInput(input);
-  const imageInputs = menuImageUrls.map(buildInputImageFromUploadUrl).filter(Boolean);
+  const imageInputs = (await Promise.all(menuImageUrls.map((url) => buildInputImageFromUploadUrl(url)))).filter(Boolean);
   const fileInputs = menuPdfUrls.map(buildInputFileFromUploadUrl).filter(Boolean);
   const userContext = [
     `Restaurant name: ${restaurantName || "(not provided)"}`,
@@ -3080,6 +3493,9 @@ async function finalizeImporterDraft(parsedDraft, input, extraWarnings = []) {
   let mergedDraft = deepMerge(skeleton, enrichedDraft);
   const matchedMedia = applyImporterProductLibraryMatches(mergedDraft);
   mergedDraft = matchedMedia.draft;
+  mergedDraft = applyImporterReviewConfidence(mergedDraft, {
+    mediaLibraryMatches: matchedMedia.matchedCount
+  });
 
   return {
     draft: mergedDraft,
@@ -3150,6 +3566,12 @@ async function generateImporterDraft(input, options = {}) {
       setImporterStage("source_extraction");
       sourceExtraction = await extractImporterMenuSource(inputContext);
       writeSellerJobJson(job.jobId, "extraction/menu-source.json", sourceExtraction);
+      if (Array.isArray(sourceExtraction.rawPages) && sourceExtraction.rawPages.length) {
+        writeSellerJobText(job.jobId, "extraction/menu-source-raw.txt", formatImporterSourceForPrompt({
+          pages: sourceExtraction.rawPages,
+          warnings: []
+        }));
+      }
       if (Array.isArray(sourceExtraction.assets)) {
         sourceExtraction.assets.forEach((asset, index) => {
           const assetKey = String(index + 1).padStart(2, "0");
@@ -3164,7 +3586,9 @@ async function generateImporterDraft(input, options = {}) {
       }
 
       if (sourceExtraction.pages.length) {
-        writeSellerJobText(job.jobId, "extraction/menu-source.txt", formatImporterSourceForPrompt(sourceExtraction));
+        const preparedSourceText = formatImporterSourceForPrompt(sourceExtraction);
+        writeSellerJobText(job.jobId, "extraction/menu-source.txt", preparedSourceText);
+        writeSellerJobText(job.jobId, "extraction/menu-source-prepared.txt", preparedSourceText);
         const sourceChunks = splitImporterSourceIntoChunks(sourceExtraction);
         writeSellerJobJson(job.jobId, "extraction/source-chunks/index.json", sourceChunks.map((chunk, index) => ({
           chunk: index + 1,
