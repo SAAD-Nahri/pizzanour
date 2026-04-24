@@ -29,7 +29,6 @@ let deferredAdminInstallPrompt = null;
 let adminSaveLoopPromise = null;
 let adminSaveRequested = false;
 let adminLoginInFlight = false;
-let adminHelpToggleIdCounter = 0;
 let categoryImageDraftValue = '';
 const ADMIN_APP_SECTION_KEY = 'restaurant_admin_last_section';
 const ADMIN_IMPORTER_ACTIVE_JOB_KEY = 'restaurant_admin_importer_active_job';
@@ -132,128 +131,20 @@ const SUPER_CATEGORY_ICON_PRESETS = Object.freeze([
     { icon: '🍹', label: 'Beverages' }
 ]);
 const SUPER_CATEGORY_ICON_RULES = Object.freeze([
-    { icon: '🍳', terms: ['breakfast', 'morning', 'brunch', 'petit déjeuner', 'petit-dejeuner', 'matin', 'فطور', 'إفطار', 'صباح'] },
-    { icon: '☕', terms: ['coffee', 'cafe', 'café', 'espresso', 'tea', 'thé', 'boisson chaude', 'قهوة', 'شاي'] },
-    { icon: '🥐', terms: ['bakery', 'viennoiserie', 'pastry', 'croissant', 'boulangerie', 'معجنات'] },
-    { icon: '🥗', terms: ['salad', 'healthy', 'fresh', 'veg', 'vég', 'green', 'سلطة', 'طازج'] },
-    { icon: '🍔', terms: ['burger', 'sandwich', 'snack', 'tacos', 'wrap', 'برغر', 'ساندويتش'] },
-    { icon: '🍕', terms: ['pizza', 'pizzeria'] },
-    { icon: '🍝', terms: ['pasta', 'italian', 'italien', 'mac', 'spaghetti'] },
-    { icon: '🍲', terms: ['meal', 'main', 'lunch', 'dinner', 'plat', 'plats', 'repas', 'tajine', 'طاجين', 'وجبات', 'رئيسية'] },
-    { icon: '🥩', terms: ['grill', 'bbq', 'steak', 'meat', 'viande', 'grillade', 'مشاوي', 'لحم'] },
-    { icon: '🍰', terms: ['dessert', 'sweet', 'cake', 'gateau', 'gâteau', 'patisserie', 'حلويات', 'تحلية'] },
-    { icon: '🍹', terms: ['drink', 'drinks', 'juice', 'cocktail', 'beverage', 'boisson', 'boissons', 'عصير', 'مشروبات'] }
+    { icon: '\u{1F373}', terms: ['breakfast', 'morning', 'brunch', 'petit d\u00e9jeuner', 'petit-dejeuner', 'matin', '\u0641\u0637\u0648\u0631', '\u0625\u0641\u0637\u0627\u0631', '\u0635\u0628\u0627\u062d'] },
+    { icon: '\u2615', terms: ['coffee', 'cafe', 'caf\u00e9', 'espresso', 'tea', 'th\u00e9', 'boisson chaude', '\u0642\u0647\u0648\u0629', '\u0634\u0627\u064a'] },
+    { icon: '\u{1F950}', terms: ['bakery', 'viennoiserie', 'pastry', 'croissant', 'boulangerie', '\u0645\u0639\u062c\u0646\u0627\u062a'] },
+    { icon: '\u{1F957}', terms: ['salad', 'healthy', 'fresh', 'veg', 'v\u00e9g', 'green', '\u0633\u0644\u0637\u0629', '\u0637\u0627\u0632\u062c'] },
+    { icon: '\u{1F354}', terms: ['burger', 'sandwich', 'snack', 'tacos', 'wrap', '\u0628\u0631\u063a\u0631', '\u0633\u0627\u0646\u062f\u0648\u064a\u062a\u0634'] },
+    { icon: '\u{1F355}', terms: ['pizza', 'pizzeria'] },
+    { icon: '\u{1F35D}', terms: ['pasta', 'italian', 'italien', 'mac', 'spaghetti'] },
+    { icon: '\u{1F372}', terms: ['meal', 'main', 'lunch', 'dinner', 'plat', 'plats', 'repas', 'tajine', '\u0637\u0627\u062c\u064a\u0646', '\u0648\u062c\u0628\u0627\u062a', '\u0631\u0626\u064a\u0633\u064a\u0629'] },
+    { icon: '\u{1F969}', terms: ['grill', 'bbq', 'steak', 'meat', 'viande', 'grillade', '\u0645\u0634\u0627\u0648\u064a', '\u0644\u062d\u0645'] },
+    { icon: '\u{1F370}', terms: ['dessert', 'sweet', 'cake', 'gateau', 'g\u00e2teau', 'patisserie', '\u062d\u0644\u0648\u064a\u0627\u062a', '\u062a\u062d\u0644\u064a\u0629'] },
+    { icon: '\u{1F379}', terms: ['drink', 'drinks', 'juice', 'cocktail', 'beverage', 'boisson', 'boissons', '\u0639\u0635\u064a\u0631', '\u0645\u0634\u0631\u0648\u0628\u0627\u062a'] }
 ]);
 let adminActionDialogResolver = null;
 let superCategoryIconManuallyChosen = false;
-const ADMIN_HELP_TOGGLE_RULES = Object.freeze([
-    {
-        hostSelector: '.menu-builder-stage',
-        anchorSelector: '.menu-builder-heading',
-        helpSelector: '#menuBuilderCopy, #menuBuilderOnboarding, #menuBuilderOverview',
-        label: 'Menu builder help'
-    },
-    {
-        hostSelector: '.menu-crud-form-intro',
-        anchorSelector: '.menu-crud-form-intro-shell',
-        helpSelector: '.menu-crud-form-intro-copy, .menu-crud-form-meta',
-        label: 'Form guidance'
-    },
-    {
-        hostSelector: '.menu-form-block',
-        anchorSelector: '.menu-form-block-header',
-        helpSelector: '.menu-form-block-copy, .menu-form-side-panel',
-        label: 'Section guidance'
-    },
-    {
-        hostSelector: '.translation-summary-card',
-        anchorSelector: '.translation-summary-header',
-        helpSelector: '.translation-summary-header p, .translation-summary-note',
-        label: 'Translation guidance'
-    },
-    {
-        hostSelector: '.info-hero-header',
-        anchorSelector: '.info-hero-copy',
-        helpSelector: '.info-hero-copy p',
-        label: 'Info overview help'
-    },
-    {
-        hostSelector: '.owner-subsection-heading',
-        helpSelector: 'p',
-        label: 'Section help'
-    },
-    {
-        hostSelector: '.section-divider',
-        helpSelector: '.section-divider-copy',
-        label: 'Section help'
-    },
-    {
-        hostSelector: '.branding-overview-card',
-        anchorSelector: '.branding-overview-copy',
-        helpSelector: '.branding-overview-copy p',
-        label: 'Branding overview help'
-    },
-    {
-        hostSelector: '.brand-asset-card',
-        anchorSelector: 'h4',
-        helpSelector: 'p',
-        label: 'Media help'
-    },
-    {
-        hostSelector: '#wifi',
-        anchorSelector: 'h3',
-        helpSelector: ':scope > p[data-i18n="admin.wifi.subtitle"]',
-        label: 'Network help'
-    },
-    {
-        hostSelector: '#branding',
-        anchorSelector: 'h3',
-        helpSelector: ':scope > p[data-i18n="admin.branding.subtitle"]',
-        label: 'Branding help'
-    },
-    {
-        hostSelector: '#landing',
-        anchorSelector: 'h3',
-        helpSelector: ':scope > p[data-i18n="admin.landing.subtitle"]',
-        label: 'Homepage help'
-    },
-    {
-        hostSelector: '#hours',
-        anchorSelector: 'h3',
-        helpSelector: ':scope > p',
-        label: 'Hours help'
-    },
-    {
-        hostSelector: '#supercategories',
-        anchorSelector: 'h3',
-        helpSelector: ':scope > p',
-        label: 'Super category help'
-    },
-    {
-        hostSelector: '#data-tools .tool-card--accent',
-        anchorSelector: 'h4',
-        helpSelector: ':scope > p, .muted-copy',
-        label: 'Import help'
-    },
-    {
-        hostSelector: '#security',
-        anchorSelector: 'h3',
-        helpSelector: ':scope > p.copy-muted, .security-help, .info-save-note',
-        label: 'Security help'
-    },
-    {
-        hostSelector: '.image-modal-dropzone',
-        anchorSelector: '.image-modal-label',
-        helpSelector: '.image-modal-helper',
-        label: 'Image manager help'
-    },
-    {
-        hostSelector: '.super-icon-picker',
-        anchorSelector: '.super-icon-preview',
-        helpSelector: '.super-icon-helper, .super-icon-preview-note',
-        label: 'Icon picker help'
-    }
-]);
 
 function getSuperCategoryIconPresetMeta(icon = '') {
     const normalized = String(icon || '').trim();
@@ -1914,83 +1805,6 @@ function setTextIfPresent(id, value) {
     if (el) el.textContent = value;
 }
 
-function getAdminHelpDisplayValue(element) {
-    if (!element) return 'block';
-    if (element.classList.contains('menu-form-side-panel')) return 'grid';
-    if (element.tagName === 'UL') return 'grid';
-    if (element.tagName === 'SPAN') return 'inline';
-    return 'block';
-}
-
-function ensureAdminHelpNodeId(element) {
-    if (!element.id) {
-        adminHelpToggleIdCounter += 1;
-        element.id = `adminHelpNode${adminHelpToggleIdCounter}`;
-    }
-    return element.id;
-}
-
-function setAdminHelpNodeVisibility(element, visible) {
-    if (!element) return;
-    if (!element.dataset.adminHelpDisplay) {
-        element.dataset.adminHelpDisplay = getAdminHelpDisplayValue(element);
-    }
-    if (visible) {
-        element.hidden = false;
-        element.setAttribute('aria-hidden', 'false');
-        element.style.setProperty('display', element.dataset.adminHelpDisplay, 'important');
-        return;
-    }
-    element.hidden = true;
-    element.setAttribute('aria-hidden', 'true');
-    element.style.setProperty('display', 'none', 'important');
-}
-
-function initializeAdminHelpToggles() {
-    document.querySelectorAll('.info-save-note, .branding-save-note, .security-help, .super-icon-preview-note').forEach((node) => {
-        setAdminHelpNodeVisibility(node, false);
-    });
-
-    ADMIN_HELP_TOGGLE_RULES.forEach((rule) => {
-        document.querySelectorAll(rule.hostSelector).forEach((host) => {
-            const helpNodes = Array.from(host.querySelectorAll(rule.helpSelector)).filter((node) => {
-                return node && String(node.textContent || '').trim();
-            });
-            if (!helpNodes.length) return;
-
-            const anchor = rule.anchorSelector ? host.querySelector(rule.anchorSelector) : host;
-            if (!anchor) return;
-
-            anchor.classList.add('admin-help-host', 'has-admin-help');
-            let toggle = anchor.querySelector('[data-admin-help-toggle="true"]');
-
-            if (!toggle) {
-                toggle = document.createElement('button');
-                toggle.type = 'button';
-                toggle.className = 'admin-help-toggle';
-                toggle.dataset.adminHelpToggle = 'true';
-                toggle.textContent = '?';
-                toggle.title = rule.label || 'Show guidance';
-                toggle.setAttribute('aria-label', rule.label || 'Show guidance');
-                toggle.setAttribute('aria-expanded', 'false');
-                anchor.appendChild(toggle);
-            }
-
-            toggle.setAttribute('aria-controls', helpNodes.map((node) => ensureAdminHelpNodeId(node)).join(' '));
-            helpNodes.forEach((node) => setAdminHelpNodeVisibility(node, false));
-
-            if (toggle.dataset.adminHelpBound === 'true') return;
-            toggle.dataset.adminHelpBound = 'true';
-            toggle.addEventListener('click', () => {
-                const expanded = toggle.getAttribute('aria-expanded') === 'true';
-                const nextVisible = !expanded;
-                toggle.setAttribute('aria-expanded', nextVisible ? 'true' : 'false');
-                helpNodes.forEach((node) => setAdminHelpNodeVisibility(node, nextVisible));
-            });
-        });
-    });
-}
-
 function getFilledTranslationCount(translations) {
     const normalized = normalizeEntityTranslations(translations);
     return ['fr', 'en', 'ar'].reduce((total, lang) => total + (normalized[lang].name ? 1 : 0), 0);
@@ -3531,7 +3345,7 @@ function renderMenuBuilderOverview() {
             <div class="menu-builder-focus-note">${focusNote}</div>
         </div>
     `;
-    initializeAdminHelpToggles();
+
 }
 
 function renderMenuBuilderEmptyState(emptyEl, options = {}) {
@@ -3632,7 +3446,7 @@ function renderMenuBuilderOnboarding() {
             ${adminCapabilities.sellerToolsEnabled ? '<button type="button" class="brand-secondary-btn btn-auto" onclick="openMenuBuilderSetupAction(\'import\')">Open Import Studio</button>' : ''}
         </div>
     `;
-    initializeAdminHelpToggles();
+
 }
 
 function renderMenuBuilder() {
@@ -4219,7 +4033,7 @@ function refreshUI() {
     if (typeof window.applyBranding === 'function') {
         window.applyBranding();
     }
-    initializeAdminHelpToggles();
+
     updateAdminInstallUi();
 }
 
@@ -5066,26 +4880,26 @@ function renderLandingContentEditor() {
     if (!container) return;
 
     container.innerHTML = LANDING_CONTENT_FIELDS.map((field) => `
-        <div class="landing-copy-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-            <div style="margin-bottom:14px;">
-                <div class="landing-copy-field-title" style="font-weight:700; color:#111; margin-bottom:4px;">${escapeHtml(field.label)}</div>
-                <div class="landing-copy-field-hint" style="font-size:0.82rem; color:#6b7280; line-height:1.5;">${escapeHtml(field.hint)}</div>
+        <div class="landing-copy-card">
+            <div class="landing-copy-card-header">
+                <h5 class="landing-copy-field-title">${escapeHtml(field.label)}</h5>
+                <span class="landing-copy-field-type">${field.type === 'textarea' ? 'Long copy' : 'Short text'}</span>
             </div>
-            <div class="landing-copy-language-grid" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px;">
+            <div class="landing-copy-language-grid">
                 ${CONTENT_EDITOR_LANGUAGES.map((lang) => {
                     const value = escapeHtml(getContentTranslationValue(lang, field.key));
                     const label = lang.toUpperCase();
                     if (field.type === 'textarea') {
                         return `
-                            <label style="display:flex; flex-direction:column; gap:6px; font-size:0.8rem; font-weight:700; color:#374151;">
-                                <span>${label}</span>
-                                <textarea data-content-lang="${lang}" data-content-key="${field.key}" rows="4" style="min-height:96px; resize:vertical;">${value}</textarea>
+                            <label class="landing-copy-language-field">
+                                <span class="landing-copy-language-label">${label}</span>
+                                <textarea data-content-lang="${lang}" data-content-key="${field.key}" rows="6">${value}</textarea>
                             </label>
                         `;
                     }
                     return `
-                        <label style="display:flex; flex-direction:column; gap:6px; font-size:0.8rem; font-weight:700; color:#374151;">
-                            <span>${label}</span>
+                        <label class="landing-copy-language-field">
+                            <span class="landing-copy-language-label">${label}</span>
                             <input type="text" data-content-lang="${lang}" data-content-key="${field.key}" value="${value}" />
                         </label>
                     `;
@@ -5616,6 +5430,8 @@ window.updateBrandingPreview = function () {
     const preset = typeof window.getBrandPresetConfig === 'function'
         ? window.getBrandPresetConfig(draft.presetId)
         : { label: 'Preset', heroImage: draft.heroImage };
+    const presetLabelText = t(`admin.branding.preset_${draft.presetId || 'core'}`, preset.label || draft.presetId || 'Preset');
+    const brandName = draft.shortName || draft.restaurantName;
     const heroGradient = `linear-gradient(135deg, ${draft.accentColor} 0%, ${draft.secondaryColor} 45%, ${draft.primaryColor} 100%)`;
     const previewCard = document.querySelector('.brand-preview-card');
     const previewBody = document.querySelector('.brand-preview-body');
@@ -5624,10 +5440,10 @@ window.updateBrandingPreview = function () {
         ? `${heroGradient}, ${toCssImageUrl(draft.heroImage)}`
         : heroGradient;
 
-    title.textContent = `${draft.shortName || draft.restaurantName} website`;
-    heroText.textContent = draft.tagline || 'Logo, colors, and cover image will update here as you edit.';
+    title.textContent = t('admin.branding.preview_title_template', '{name} website', { name: brandName });
+    heroText.textContent = draft.tagline || t('admin.branding.preview_hero_text', 'Logo, colors, and cover image will update here as you edit.');
     name.textContent = draft.restaurantName;
-    tagline.textContent = draft.tagline || 'Brand identity preview';
+    tagline.textContent = draft.tagline || t('admin.branding.preview_identity_text', 'Brand identity preview');
 
     if (previewCard) {
         previewCard.style.background = draft.surfaceColor;
@@ -5658,7 +5474,7 @@ window.updateBrandingPreview = function () {
     accent.style.background = draft.accentColor;
 
     if (presetLabel) {
-        presetLabel.textContent = preset.label || draft.presetId || 'Preset';
+        presetLabel.textContent = presetLabelText;
     }
 
     if (homepageMock) {
@@ -5667,13 +5483,13 @@ window.updateBrandingPreview = function () {
             : heroGradient;
     }
     if (homepageMockTitle) {
-        homepageMockTitle.textContent = `${draft.shortName || draft.restaurantName} website`;
+        homepageMockTitle.textContent = t('admin.branding.preview_title_template', '{name} website', { name: brandName });
     }
     if (homepageMockText) {
-        homepageMockText.textContent = draft.tagline || 'Homepage hero, CTA, and media preview.';
+        homepageMockText.textContent = draft.tagline || t('admin.branding.preview_homepage_text', 'Homepage hero, CTA, and media preview.');
     }
     if (homepageMockMeta) {
-        homepageMockMeta.textContent = `${preset.label || 'Preset'} preview`;
+        homepageMockMeta.textContent = t('admin.branding.preview_preset_template', '{preset} preview', { preset: presetLabelText });
     }
     if (homepageMockCta) {
         homepageMockCta.style.background = `linear-gradient(135deg, ${draft.primaryColor}, ${draft.secondaryColor})`;
@@ -5684,7 +5500,7 @@ window.updateBrandingPreview = function () {
     }
     if (menuChipPrimary) {
         menuChipPrimary.style.background = `linear-gradient(135deg, ${draft.primaryColor}, ${draft.secondaryColor})`;
-        menuChipPrimary.textContent = draft.shortName || 'Menu';
+        menuChipPrimary.textContent = draft.shortName || t('admin.branding.preview_menu', 'Menu');
     }
     if (menuCardPreview) {
         menuCardPreview.style.background = draft.menuSurface;
@@ -5696,10 +5512,14 @@ window.updateBrandingPreview = function () {
         menuCardMedia.style.backgroundImage = `${heroGradient}, ${toCssImageUrl(mediaSrc)}`;
     }
     if (menuCardTitle) {
-        menuCardTitle.textContent = `${draft.shortName || 'Signature'} Selection`;
+        menuCardTitle.textContent = t('admin.branding.preview_selection_template', '{name} Selection', {
+            name: draft.shortName || t('admin.branding.preview_signature', 'Signature')
+        });
     }
     if (menuCardText) {
-        menuCardText.textContent = `Menu cards, background depth, and accent contrast for the ${preset.label || 'active'} preset.`;
+        menuCardText.textContent = t('admin.branding.preview_menu_card_text', 'Menu cards, background depth, and accent contrast for the {preset} preset.', {
+            preset: presetLabelText
+        });
     }
     if (menuCardPrice) {
         menuCardPrice.style.color = draft.accentColor;
@@ -6003,7 +5823,7 @@ function renderImporterDraftOutputs(draft) {
         if (applyMenuOnlyBtn) applyMenuOnlyBtn.disabled = true;
         if (applyStructureBtn) applyStructureBtn.disabled = true;
         if (copyBtn) copyBtn.disabled = true;
-        initializeAdminHelpToggles();
+
         return;
     }
 
@@ -6092,7 +5912,7 @@ function renderImporterDraftOutputs(draft) {
             applyNoteEl.style.display = 'block';
         }
     }
-    initializeAdminHelpToggles();
+
 }
 
 function getImporterReviewReport(draft) {
