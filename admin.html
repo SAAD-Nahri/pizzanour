@@ -267,23 +267,17 @@
         .info-overview-card {
             position: relative;
             overflow: hidden;
-            background:
-                radial-gradient(circle at top right, rgba(255, 141, 8, 0.22), transparent 34%),
-                radial-gradient(circle at bottom left, rgba(226, 27, 27, 0.08), transparent 30%),
-                linear-gradient(145deg, rgba(255, 253, 249, 0.98), rgba(255, 247, 236, 0.94));
+            background: linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.96));
             border-color: rgba(232, 216, 197, 0.98);
-            box-shadow: 0 24px 54px rgba(75, 47, 24, 0.08);
+            box-shadow: 0 20px 42px rgba(75, 47, 24, 0.07);
         }
 
         .info-overview-card::before {
             content: "";
             position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(90deg, rgba(255, 255, 255, 0.42) 0 1px, transparent 1px 100%),
-                linear-gradient(rgba(255, 255, 255, 0.32) 0 1px, transparent 1px 100%);
-            background-size: 28px 28px;
-            opacity: 0.18;
+            inset: 0 0 auto;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
             pointer-events: none;
         }
 
@@ -341,6 +335,33 @@
             flex-wrap: wrap;
             gap: 10px;
             justify-content: flex-end;
+        }
+
+        .info-quick-actions {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 10px;
+            margin: 4px 0 22px;
+        }
+
+        .info-jump-btn {
+            min-height: 48px;
+            border-radius: 16px;
+            border: 1px solid rgba(232, 216, 197, 0.96);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--text);
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(75, 47, 24, 0.04);
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .info-jump-btn:hover,
+        .info-jump-btn:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(255, 141, 8, 0.32);
+            background: #fff;
+            outline: none;
         }
 
         .info-save-btn {
@@ -430,11 +451,11 @@
             position: relative;
             overflow: hidden;
             padding: 18px;
-            border-radius: 20px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 241, 0.88));
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
             border: 1px solid rgba(232, 216, 197, 0.92);
-            box-shadow: 0 16px 34px rgba(75, 47, 24, 0.06);
-            min-height: 126px;
+            box-shadow: 0 12px 26px rgba(75, 47, 24, 0.05);
+            min-height: 118px;
             display: grid;
             gap: 10px;
             align-content: start;
@@ -448,8 +469,16 @@
             width: 72px;
             height: 4px;
             border-radius: 999px;
-            background: linear-gradient(90deg, #ff6b2c, #ffb648);
+            background: #d8c6b4;
             opacity: 0.92;
+        }
+
+        .info-summary-card.is-ready::before {
+            background: #16a34a;
+        }
+
+        .info-summary-card.is-attention::before {
+            background: var(--secondary);
         }
 
         .info-summary-card:hover {
@@ -488,7 +517,7 @@
 
         .info-workspace-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+            grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
             gap: 22px;
             align-items: start;
         }
@@ -501,9 +530,7 @@
 
         .info-primary-card {
             padding-bottom: 20px;
-            background:
-                radial-gradient(circle at top right, rgba(255, 141, 8, 0.08), transparent 28%),
-                linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
+            background: linear-gradient(180deg, rgba(255, 254, 251, 0.98), rgba(255, 249, 241, 0.94));
         }
 
         .info-primary-card .owner-subsection-heading {
@@ -519,10 +546,10 @@
         }
 
         .info-panel-card {
-            border-radius: 22px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 241, 0.92));
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(232, 216, 197, 0.92);
-            box-shadow: 0 18px 38px rgba(75, 47, 24, 0.06);
+            box-shadow: 0 14px 30px rgba(75, 47, 24, 0.05);
             transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
         }
 
@@ -540,7 +567,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 14px;
-            min-height: 88px;
+            min-height: 78px;
         }
 
         .info-panel-card summary>span:first-child {
@@ -6703,6 +6730,10 @@
                 width: 100%;
             }
 
+            .info-quick-actions {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
             .info-summary-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -7265,6 +7296,10 @@
             .info-contact-grid,
             .info-social-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .info-quick-actions {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .info-form-actions {
@@ -8862,23 +8897,31 @@
                             <button type="submit" id="infoLandingSaveBtn" form="landingPageForm" class="primary-btn info-save-btn">Save Public Details</button>
                         </div>
                     </div>
+                    <nav class="info-quick-actions" aria-label="Info workspace shortcuts">
+                        <button type="button" class="info-jump-btn" onclick="focusInfoWorkspacePanel('public')">Public</button>
+                        <button type="button" class="info-jump-btn" onclick="focusInfoWorkspacePanel('social')">Social</button>
+                        <button type="button" class="info-jump-btn" onclick="focusInfoWorkspacePanel('facilities')">Guest</button>
+                        <button type="button" class="info-jump-btn" onclick="focusInfoWorkspacePanel('hours')">Hours</button>
+                        <button type="button" class="info-jump-btn" onclick="focusInfoWorkspacePanel('wifi')">WiFi</button>
+                        <button type="button" class="info-jump-btn" onclick="focusInfoWorkspacePanel('security')">Admin</button>
+                    </nav>
                     <div class="info-summary-grid">
-                        <article class="info-summary-card">
+                        <article class="info-summary-card" id="infoSummaryLocationCard">
                             <span class="info-summary-label">Location</span>
                             <div class="info-summary-value" id="infoSummaryLocationValue">Add address</div>
                             <div class="info-summary-note" id="infoSummaryLocationNote">Map link pending</div>
                         </article>
-                        <article class="info-summary-card">
+                        <article class="info-summary-card" id="infoSummaryContactCard">
                             <span class="info-summary-label">Contact</span>
                             <div class="info-summary-value" id="infoSummaryContactValue">Add phone number</div>
                             <div class="info-summary-note" id="infoSummaryContactNote">No public links yet</div>
                         </article>
-                        <article class="info-summary-card">
+                        <article class="info-summary-card" id="infoSummaryGuestCard">
                             <span class="info-summary-label">Guest Experience</span>
                             <div class="info-summary-value" id="infoSummaryGuestValue">Review facilities</div>
                             <div class="info-summary-note" id="infoSummaryGuestNote">Public experience details not configured</div>
                         </article>
-                        <article class="info-summary-card">
+                        <article class="info-summary-card" id="infoSummaryOpsCard">
                             <span class="info-summary-label">Operations</span>
                             <div class="info-summary-value" id="infoSummaryOpsValue">Admin access</div>
                             <div class="info-summary-note" id="infoSummaryOpsNote">Set WiFi and opening hours</div>
@@ -8888,7 +8931,7 @@
 
                 <div class="info-workspace-grid">
                     <div class="info-main-column">
-                        <section class="owner-section-card info-primary-card" data-admin-subsection="landing">
+                        <section class="owner-section-card info-primary-card" id="infoPanelPublic" data-admin-subsection="landing">
                             <div class="owner-subsection-heading">
                                 <h4>Public information</h4>
                                 <p>Update the address, maps link, and phone number customers should use first.</p>
@@ -8896,7 +8939,7 @@
                             <div id="infoLandingPrimaryMount"></div>
                         </section>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card">
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" id="infoPanelSocial">
                             <summary>
                                 <span class="info-panel-heading">
                                     <strong>Social Links</strong>
@@ -8909,7 +8952,7 @@
                             </div>
                         </details>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card">
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" id="infoPanelFacilities">
                             <summary>
                                 <span class="info-panel-heading">
                                     <strong>Guest Facilities & Payments</strong>
@@ -8924,7 +8967,7 @@
                     </div>
 
                     <div class="info-side-column">
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" data-admin-subsection="hours">
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" id="infoPanelHours" data-admin-subsection="hours">
                             <summary>
                                 <span class="info-panel-heading">
                                     <strong>Hours</strong>
@@ -8937,7 +8980,7 @@
                             </div>
                         </details>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" data-admin-subsection="wifi">
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" id="infoPanelWifi" data-admin-subsection="wifi">
                             <summary>
                                 <span class="info-panel-heading">
                                     <strong>WiFi</strong>
@@ -8950,7 +8993,7 @@
                             </div>
                         </details>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" data-admin-subsection="security">
+                        <details class="admin-disclosure admin-panel-disclosure info-panel-card" id="infoPanelSecurity" data-admin-subsection="security">
                             <summary>
                                 <span class="info-panel-heading">
                                     <strong>Admin Access</strong>
@@ -10002,10 +10045,26 @@
                                             <span>Dishes plus imported categories and super-categories.</span>
                                         </div>
                                     </label>
+                                    <label class="importer-scope-option">
+                                        <input type="radio" name="importApplyScope" value="menu_info" />
+                                        <div>
+                                            <strong>Menu + info</strong>
+                                            <span>Dishes plus detected contact, hours, WiFi, payments, and facilities.</span>
+                                        </div>
+                                    </label>
+                                    <label class="importer-scope-option">
+                                        <input type="radio" name="importApplyScope" value="menu_colors" />
+                                        <div>
+                                            <strong>Menu + colors</strong>
+                                            <span>Dishes plus palette colors sampled from the menu images.</span>
+                                        </div>
+                                    </label>
                                 </div>
                                 <div class="tool-actions">
                                     <button type="button" id="applyImporterMenuOnlyBtn" class="primary-btn btn-auto" onclick="applyImporterDraft('menu_only')">Publish Menu</button>
                                     <button type="button" id="applyImporterStructureBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_structure')">Publish Structure</button>
+                                    <button type="button" id="applyImporterInfoBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_info')">Publish Info</button>
+                                    <button type="button" id="applyImporterColorsBtn" class="brand-secondary-btn" onclick="applyImporterDraft('menu_colors')">Publish Colors</button>
                                 </div>
                                 <div id="importStudioApplyNote" class="importer-apply-note"></div>
                             </div>

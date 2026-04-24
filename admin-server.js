@@ -64,6 +64,15 @@ const IMPORTER_SOURCE_STRUCTURING_MAX_PAGES = 3;
 const IMPORTER_SOURCE_STRUCTURING_MAX_CHARS = 6500;
 const IMPORTER_IMAGE_MAX_DIMENSION = 1800;
 const IMPORTER_IMAGE_JPEG_QUALITY = 85;
+const IMPORTER_INFO_DAY_DEFS = [
+  { key: "mon", day: "Lundi", i18n: "day_mon", pattern: /\b(mon|monday|lundi|lun)\b/i },
+  { key: "tue", day: "Mardi", i18n: "day_tue", pattern: /\b(tue|tuesday|mardi|mar)\b/i },
+  { key: "wed", day: "Mercredi", i18n: "day_wed", pattern: /\b(wed|wednesday|mercredi|mer)\b/i },
+  { key: "thu", day: "Jeudi", i18n: "day_thu", pattern: /\b(thu|thursday|jeudi|jeu)\b/i },
+  { key: "fri", day: "Vendredi", i18n: "day_fri", pattern: /\b(fri|friday|vendredi|ven)\b/i },
+  { key: "sat", day: "Samedi", i18n: "day_sat", pattern: /\b(sat|saturday|samedi|sam)\b/i },
+  { key: "sun", day: "Dimanche", i18n: "day_sun", pattern: /\b(sun|sunday|dimanche|dim)\b/i }
+];
 
 const app = express();
 const port = parsePort(process.env.PORT, 3115);
@@ -1904,6 +1913,377 @@ function formatImporterSourceForPrompt(source) {
   ].filter(Boolean).join("\n\n");
 }
 
+function normalizeImporterUrl(value) {
+  return asImporterString(value).replace(/[),.;]+$/, "");
+}
+
+function normalizeImporterPhone(value) {
+  const raw = asImporterString(value);
+  if (!raw) return "";
+  const compact = raw
+    .replace(/[^\d+]/g, "")
+    .replace(/(?!^)\+/g, "");
+  if (/^\+?212[5-7]\d{8}$/.test(compact)) {
+    return compact.startsWith("+") ? compact : `+${compact}`;
+  }
+  if (/^0[5-7]\d{8}$/.test(compact)) {
+    return compact;
+  }
+  if (/^[5-7]\d{8}$/.test(compact)) {
+    return `0${compact}`;
+  }
+  return raw.trim();
+}
+
+function extractImporterInfoPhone(text) {
+  const source = asImporterString(text);
+  const matches = source.match(/(?:\+?\s*212|0)?[\s().-]*[5-7](?:[\s().-]*\d){8}/g) || [];
+  for (const match of matches) {
+    const phone = normalizeImporterPhone(match);
+    if (phone) return phone;
+  }
+  return "";
+}
+
+function extractImporterInfoSocials(text, phone) {
+  const source = asImporterString(text);
+  const socials = {};
+  const socialDefs = [
+    ["instagram", /(?:https?:\/\/)?(?:www\.)?instagram\.com\/[A-Za-z0-9._-]+|(?:instagram|insta|ig)\s*[:@]\s*([A-Za-z0-9._-]+)/i],
+    ["facebook", /(?:https?:\/\/)?(?:www\.)?facebook\.com\/[A-Za-z0-9._/-]+|(?:facebook|fb)\s*[:@]\s*([A-Za-z0-9._-]+)/i],
+    ["tiktok", /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@?[A-Za-z0-9._-]+|(?:tiktok)\s*[:@]\s*([A-Za-z0-9._-]+)/i],
+    ["tripadvisor", /(?:https?:\/\/)?(?:www\.)?tripadvisor\.[^\s]+/i]
+  ];
+
+  socialDefs.forEach(([key, regex]) => {
+    const match = source.match(regex);
+    if (!match) return;
+    socials[key] = normalizeImporterUrl(match[0].includes("http") || match[0].includes(".com")
+      ? match[0]
+      : match[1] || match[0]);
+  });
+
+  if (/\bwhats\s*app\b|\bwhatsapp\b/i.test(source) && phone) {
+    socials.whatsapp = phone;
+  }
+
+  return socials;
+}
+
+function extractImporterInfoAddress(lines) {
+  const addressLabelRegex = /\b(adresse|address|localisation|location|situ[eé]|rue|avenue|av\.|boulevard|bd\.|quartier|hay|lotissement|residence|résidence|tanger|tangier|maroc|morocco)\b/i;
+  const rejectedRegex = /(?:https?:\/\/|www\.|@|instagram|facebook|tiktok|whatsapp|\bmenu\b|\bprix\b|\bprice\b)/i;
+  const candidate = (Array.isArray(lines) ? lines : [])
+    .map((line) => normalizeImporterText(line))
+    .find((line) => line.length >= 12 && line.length <= 180 && addressLabelRegex.test(line) && !rejectedRegex.test(line));
+  if (!candidate) return "";
+  return candidate.replace(/^(adresse|address|localisation|location)\s*[:\-]\s*/i, "").trim();
+}
+
+function extractImporterInfoMapUrl(text) {
+  const source = asImporterString(text);
+  const match = source.match(/https?:\/\/[^\s)]+(?:google|goo\.gl|maps)[^\s)]*/i)
+    || source.match(/https?:\/\/maps\.app\.goo\.gl\/[^\s)]+/i);
+  return match ? normalizeImporterUrl(match[0]) : "";
+}
+
+function normalizeImporterInfoTime(hour, minute = "") {
+  const h = Number.parseInt(String(hour || ""), 10);
+  if (!Number.isFinite(h) || h < 0 || h > 23) return "";
+  const m = minute === "" || typeof minute === "undefined" ? "00" : String(minute).padStart(2, "0");
+  return `${String(h).padStart(2, "0")}:${m.slice(0, 2)}`;
+}
+
+function extractImporterInfoTimeRange(line) {
+  const source = normalizeImporterText(line);
+  const match = source.match(/(?:^|\D)([01]?\d|2[0-3])\s*(?:h|:|\.)?\s*([0-5]\d)?\s*(?:-|–|—|a|à|to|until|jusqu'?a|jusqu.?à)\s*([01]?\d|2[0-3])\s*(?:h|:|\.)?\s*([0-5]\d)?(?:\D|$)/i);
+  if (!match) return null;
+  const open = normalizeImporterInfoTime(match[1], match[2]);
+  const close = normalizeImporterInfoTime(match[3], match[4]);
+  return open && close ? { open, close } : null;
+}
+
+function extractImporterInfoHours(lines) {
+  const rows = [];
+  const usedKeys = new Set();
+  const allDaysLine = (Array.isArray(lines) ? lines : [])
+    .map((line) => normalizeImporterText(line))
+    .find((line) => /(tous\s+les\s+jours|7j\/7|7\/7|every\s+day|daily|open\s+daily|ouvert\s+.*jours)/i.test(line) && extractImporterInfoTimeRange(line));
+
+  if (allDaysLine) {
+    const range = extractImporterInfoTimeRange(allDaysLine);
+    return IMPORTER_INFO_DAY_DEFS.map((def, index) => ({
+      day: def.day,
+      i18n: def.i18n,
+      open: range.open,
+      close: range.close,
+      highlight: index >= 5
+    }));
+  }
+
+  (Array.isArray(lines) ? lines : []).forEach((line) => {
+    const range = extractImporterInfoTimeRange(line);
+    if (!range) return;
+    IMPORTER_INFO_DAY_DEFS.forEach((def, index) => {
+      if (usedKeys.has(def.key) || !def.pattern.test(line)) return;
+      usedKeys.add(def.key);
+      rows.push({
+        day: def.day,
+        i18n: def.i18n,
+        open: range.open,
+        close: range.close,
+        highlight: index >= 5
+      });
+    });
+  });
+
+  return rows;
+}
+
+function extractImporterInfoGuestExperience(text) {
+  const source = canonicalImporterLookup(text);
+  const paymentMethods = [];
+  const facilities = [];
+  if (/\b(cash|espece|especes|esp[eè]ces|liquide|cash)\b/.test(source)) paymentMethods.push("cash");
+  if (/\b(tpe|card|carte|visa|mastercard|terminal|cb|bank card)\b/.test(source)) paymentMethods.push("tpe");
+  if (/\b(wifi|wi-fi|internet)\b/.test(source)) facilities.push("wifi");
+  if (/\b(accessible|accessibilite|accessibilit[eé]|pmr|wheelchair)\b/.test(source)) facilities.push("accessible");
+  if (/\b(parking|stationnement)\b/.test(source)) facilities.push("parking");
+  if (/\b(terrace|terrasse|outdoor|exterieur|ext[eé]rieur)\b/.test(source)) facilities.push("terrace");
+  if (/\b(family|familial|famille|kids|enfant|children)\b/.test(source)) facilities.push("family");
+  return {
+    paymentMethods: [...new Set(paymentMethods)],
+    facilities: [...new Set(facilities)]
+  };
+}
+
+function extractImporterInfoWifi(lines) {
+  const wifiLine = (Array.isArray(lines) ? lines : [])
+    .map((line) => normalizeImporterText(line))
+    .find((line) => /\b(wifi|wi-fi)\b/i.test(line));
+  if (!wifiLine) return { ssid: "", pass: "" };
+  const ssidMatch = wifiLine.match(/(?:wifi|wi-fi|ssid|reseau|réseau)\s*[:\-]\s*([^|;,]+?)(?:\s{2,}|$|pass|password|code|mot de passe)/i);
+  const passMatch = wifiLine.match(/(?:pass|password|code|mot de passe)\s*[:\-]\s*([^|;,]+)/i);
+  return {
+    ssid: normalizeImporterText(ssidMatch?.[1]) || "",
+    pass: normalizeImporterText(passMatch?.[1]) || ""
+  };
+}
+
+function extractImporterInfoHoursNote(lines) {
+  const note = (Array.isArray(lines) ? lines : [])
+    .map((line) => normalizeImporterText(line))
+    .find((line) => /(delivery|livraison|takeaway|a emporter|à emporter|sur place|open every day|ouvert tous les jours|7j\/7|7\/7)/i.test(line));
+  return note || "";
+}
+
+function extractImporterInfoFromSource(sourceExtraction) {
+  const pages = [
+    ...(Array.isArray(sourceExtraction?.rawPages) ? sourceExtraction.rawPages : []),
+    ...(Array.isArray(sourceExtraction?.pages) ? sourceExtraction.pages : [])
+  ];
+  const lines = [...new Set(pages
+    .flatMap((page) => normalizeImporterSourceText(page?.text).split("\n"))
+    .map((line) => normalizeImporterText(line))
+    .filter(Boolean))];
+  const text = lines.join("\n");
+  const phone = extractImporterInfoPhone(text);
+  const socials = extractImporterInfoSocials(text, phone);
+  const address = extractImporterInfoAddress(lines);
+  const mapUrl = extractImporterInfoMapUrl(text);
+  const guestExperience = extractImporterInfoGuestExperience(text);
+  const wifi = extractImporterInfoWifi(lines);
+  const hours = extractImporterInfoHours(lines);
+  const hoursNote = extractImporterInfoHoursNote(lines);
+  const fieldCount = [
+    phone,
+    address,
+    mapUrl,
+    wifi.ssid,
+    wifi.pass,
+    hoursNote,
+    ...hours,
+    ...Object.values(socials),
+    ...guestExperience.paymentMethods,
+    ...guestExperience.facilities
+  ].filter(Boolean).length;
+
+  const warnings = [];
+  if (!fieldCount) {
+    warnings.push("No clear restaurant info fields were detected in the imported source.");
+  } else {
+    warnings.push(`Detected ${fieldCount} restaurant info signal(s) from imported source text.`);
+  }
+  if (phone && !socials.whatsapp && /whatsapp/i.test(text)) {
+    warnings.push("WhatsApp was mentioned but no separate WhatsApp number was detected; review the contact info.");
+  }
+  if (hours.length && hours.length < 7) {
+    warnings.push("Opening hours were partially detected; review missing days before publishing info.");
+  }
+
+  return {
+    landing: {
+      location: {
+        address,
+        url: mapUrl
+      },
+      phone
+    },
+    social: socials,
+    wifi,
+    guestExperience,
+    hours,
+    hoursNote,
+    detectedFieldCount: fieldCount,
+    warnings
+  };
+}
+
+function clampImporterColorChannel(value) {
+  return Math.max(0, Math.min(255, Math.round(Number(value) || 0)));
+}
+
+function importerRgbToHex(color) {
+  return `#${[color.r, color.g, color.b]
+    .map((channel) => clampImporterColorChannel(channel).toString(16).padStart(2, "0"))
+    .join("")}`.toUpperCase();
+}
+
+function importerHexToRgb(hex) {
+  const raw = asImporterString(hex).replace(/^#/, "");
+  if (!/^[0-9a-f]{6}$/i.test(raw)) return null;
+  return {
+    r: Number.parseInt(raw.slice(0, 2), 16),
+    g: Number.parseInt(raw.slice(2, 4), 16),
+    b: Number.parseInt(raw.slice(4, 6), 16)
+  };
+}
+
+function mixImporterColors(left, right, amount = 0.5) {
+  const a = typeof left === "string" ? importerHexToRgb(left) : left;
+  const b = typeof right === "string" ? importerHexToRgb(right) : right;
+  if (!a || !b) return "#FFFFFF";
+  const ratio = Math.max(0, Math.min(1, amount));
+  return importerRgbToHex({
+    r: a.r + ((b.r - a.r) * ratio),
+    g: a.g + ((b.g - a.g) * ratio),
+    b: a.b + ((b.b - a.b) * ratio)
+  });
+}
+
+function getImporterColorMetrics(color) {
+  const max = Math.max(color.r, color.g, color.b);
+  const min = Math.min(color.r, color.g, color.b);
+  const brightness = (color.r * 0.299) + (color.g * 0.587) + (color.b * 0.114);
+  const saturation = max ? (max - min) / max : 0;
+  return { brightness, saturation };
+}
+
+function importerColorDistance(left, right) {
+  return Math.sqrt(
+    ((left.r - right.r) ** 2)
+    + ((left.g - right.g) ** 2)
+    + ((left.b - right.b) ** 2)
+  );
+}
+
+function scoreImporterPaletteColor(color, count) {
+  const metrics = getImporterColorMetrics(color);
+  if (metrics.brightness < 34 || metrics.brightness > 236 || metrics.saturation < 0.16) return 0;
+  const brightnessBalance = 1 - (Math.abs(metrics.brightness - 126) / 126);
+  return count * (1 + metrics.saturation * 2.6 + brightnessBalance * 0.8);
+}
+
+async function extractImporterPaletteFromMenuImages(input) {
+  const urls = Array.isArray(input?.menuImageUrls) ? input.menuImageUrls.slice(0, 4) : [];
+  const buckets = new Map();
+
+  for (const url of urls) {
+    const filePath = resolveLocalUploadPath(url);
+    if (!filePath || !fs.existsSync(filePath)) continue;
+    const mimeType = guessMimeType(filePath);
+    if (!mimeType.startsWith("image/")) continue;
+
+    try {
+      const { data, info } = await sharp(filePath)
+        .rotate()
+        .resize({ width: 96, height: 96, fit: "inside", withoutEnlargement: true })
+        .removeAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const channels = info.channels || 3;
+      for (let offset = 0; offset < data.length; offset += channels * 2) {
+        const r = data[offset];
+        const g = data[offset + 1];
+        const b = data[offset + 2];
+        const color = {
+          r: Math.round(r / 24) * 24,
+          g: Math.round(g / 24) * 24,
+          b: Math.round(b / 24) * 24
+        };
+        const score = scoreImporterPaletteColor(color, 1);
+        if (!score) continue;
+        const key = `${color.r},${color.g},${color.b}`;
+        const entry = buckets.get(key) || { color, count: 0 };
+        entry.count += 1;
+        buckets.set(key, entry);
+      }
+    } catch (error) {
+      console.warn(`Importer palette extraction failed for ${filePath}:`, error.message);
+    }
+  }
+
+  const ranked = [...buckets.values()]
+    .map((entry) => ({
+      ...entry,
+      score: scoreImporterPaletteColor(entry.color, entry.count)
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => right.score - left.score);
+
+  if (!ranked.length) {
+    return {
+      detected: false,
+      warnings: ["No usable brand palette could be derived from menu images."]
+    };
+  }
+
+  const chosen = [];
+  ranked.forEach((entry) => {
+    if (chosen.length >= 3) return;
+    if (chosen.every((selected) => importerColorDistance(selected.color, entry.color) >= 54)) {
+      chosen.push(entry);
+    }
+  });
+  while (chosen.length < 3 && ranked[chosen.length]) {
+    chosen.push(ranked[chosen.length]);
+  }
+
+  const primaryColor = importerRgbToHex(chosen[0].color);
+  const secondaryColor = importerRgbToHex((chosen[1] || chosen[0]).color);
+  const accentColor = importerRgbToHex((chosen[2] || chosen[1] || chosen[0]).color);
+  const menuBackground = mixImporterColors(primaryColor, "#050505", 0.82);
+  const menuSurface = mixImporterColors(primaryColor, "#101010", 0.68);
+
+  return {
+    detected: true,
+    sourceImageCount: urls.length,
+    colors: {
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      surfaceColor: mixImporterColors(primaryColor, "#FFFFFF", 0.9),
+      surfaceMuted: mixImporterColors(secondaryColor, "#FFFFFF", 0.84),
+      textColor: "#241915",
+      textMuted: "#75655C",
+      menuBackground,
+      menuSurface
+    },
+    swatches: chosen.map((entry) => importerRgbToHex(entry.color)),
+    warnings: [`Derived branding colors from ${urls.length} menu image(s); review contrast before publishing colors.`]
+  };
+}
+
 function deepMerge(target, source) {
   if (Array.isArray(source)) {
     return source.slice();
@@ -2192,6 +2572,137 @@ function applyImporterMediaFallbacks(draft, input) {
 
   restaurantData.branding = branding;
   workingDraft.restaurantData = restaurantData;
+  return workingDraft;
+}
+
+function mergeImporterDetectedInfo(draft, info) {
+  const workingDraft = draft && typeof draft === "object" ? draft : {};
+  const restaurantData = workingDraft.restaurantData && typeof workingDraft.restaurantData === "object"
+    ? workingDraft.restaurantData
+    : {};
+  const review = workingDraft.review && typeof workingDraft.review === "object" ? workingDraft.review : {};
+  const warnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+  const detected = info && typeof info === "object" ? info : {};
+  const detectedFieldCount = Number(detected.detectedFieldCount) || 0;
+
+  restaurantData.landing = restaurantData.landing && typeof restaurantData.landing === "object"
+    ? restaurantData.landing
+    : { location: {}, phone: "" };
+  restaurantData.landing.location = restaurantData.landing.location && typeof restaurantData.landing.location === "object"
+    ? restaurantData.landing.location
+    : {};
+
+  const detectedAddress = asImporterString(detected?.landing?.location?.address);
+  const detectedMapUrl = asImporterString(detected?.landing?.location?.url);
+  const detectedPhone = asImporterString(detected?.landing?.phone);
+  if (detectedAddress && !asImporterString(restaurantData.landing.location.address)) {
+    restaurantData.landing.location.address = detectedAddress;
+  }
+  if (detectedMapUrl && !asImporterString(restaurantData.landing.location.url)) {
+    restaurantData.landing.location.url = detectedMapUrl;
+  }
+  if (detectedPhone && !asImporterString(restaurantData.landing.phone)) {
+    restaurantData.landing.phone = detectedPhone;
+  }
+
+  restaurantData.social = restaurantData.social && typeof restaurantData.social === "object" ? restaurantData.social : {};
+  Object.entries(detected.social || {}).forEach(([key, value]) => {
+    const cleanValue = asImporterString(value);
+    if (cleanValue && !asImporterString(restaurantData.social[key])) {
+      restaurantData.social[key] = cleanValue;
+    }
+  });
+
+  restaurantData.wifi = restaurantData.wifi && typeof restaurantData.wifi === "object" ? restaurantData.wifi : { ssid: "", pass: "" };
+  if (asImporterString(detected?.wifi?.ssid) && !asImporterString(restaurantData.wifi.ssid)) {
+    restaurantData.wifi.ssid = asImporterString(detected.wifi.ssid);
+  }
+  if (asImporterString(detected?.wifi?.pass) && !asImporterString(restaurantData.wifi.pass)) {
+    restaurantData.wifi.pass = asImporterString(detected.wifi.pass);
+  }
+
+  const detectedGuestExperience = detected.guestExperience && typeof detected.guestExperience === "object"
+    ? detected.guestExperience
+    : {};
+  const currentGuestExperience = restaurantData.guestExperience && typeof restaurantData.guestExperience === "object"
+    ? restaurantData.guestExperience
+    : {};
+  restaurantData.guestExperience = {
+    paymentMethods: [...new Set([
+      ...(Array.isArray(currentGuestExperience.paymentMethods) ? currentGuestExperience.paymentMethods : []),
+      ...(Array.isArray(detectedGuestExperience.paymentMethods) ? detectedGuestExperience.paymentMethods : [])
+    ].filter(Boolean))],
+    facilities: [...new Set([
+      ...(Array.isArray(currentGuestExperience.facilities) ? currentGuestExperience.facilities : []),
+      ...(Array.isArray(detectedGuestExperience.facilities) ? detectedGuestExperience.facilities : [])
+    ].filter(Boolean))]
+  };
+
+  if (Array.isArray(detected.hours) && detected.hours.length && !(Array.isArray(restaurantData.hours) && restaurantData.hours.length)) {
+    restaurantData.hours = detected.hours;
+  }
+  if (asImporterString(detected.hoursNote) && !asImporterString(restaurantData.hoursNote)) {
+    restaurantData.hoursNote = asImporterString(detected.hoursNote);
+  }
+
+  workingDraft.restaurantData = restaurantData;
+  workingDraft.review = {
+    ...review,
+    warnings: [...new Set([
+      ...warnings,
+      ...(Array.isArray(detected.warnings) ? detected.warnings.map((warning) => `Info extraction: ${warning}`) : [])
+    ].filter(Boolean))],
+    infoExtraction: {
+      detectedFieldCount
+    }
+  };
+  return workingDraft;
+}
+
+function mergeImporterDetectedBrandingColors(draft, palette) {
+  const workingDraft = draft && typeof draft === "object" ? draft : {};
+  if (!palette?.detected || !palette.colors) return workingDraft;
+
+  const restaurantData = workingDraft.restaurantData && typeof workingDraft.restaurantData === "object"
+    ? workingDraft.restaurantData
+    : {};
+  const branding = restaurantData.branding && typeof restaurantData.branding === "object"
+    ? restaurantData.branding
+    : {};
+  const review = workingDraft.review && typeof workingDraft.review === "object" ? workingDraft.review : {};
+  const warnings = Array.isArray(review.warnings) ? review.warnings.slice() : [];
+
+  [
+    "primaryColor",
+    "secondaryColor",
+    "accentColor",
+    "surfaceColor",
+    "surfaceMuted",
+    "textColor",
+    "textMuted",
+    "menuBackground",
+    "menuSurface"
+  ].forEach((key) => {
+    const value = asImporterString(palette.colors[key]);
+    if (value && !asImporterString(branding[key])) {
+      branding[key] = value;
+    }
+  });
+
+  restaurantData.branding = branding;
+  workingDraft.restaurantData = restaurantData;
+  workingDraft.review = {
+    ...review,
+    warnings: [...new Set([
+      ...warnings,
+      ...(Array.isArray(palette.warnings) ? palette.warnings.map((warning) => `Brand color extraction: ${warning}`) : [])
+    ].filter(Boolean))],
+    brandColorExtraction: {
+      detected: true,
+      sourceImageCount: Number(palette.sourceImageCount) || 0,
+      swatches: Array.isArray(palette.swatches) ? palette.swatches : []
+    }
+  };
   return workingDraft;
 }
 
@@ -3029,6 +3540,7 @@ function applyImporterReviewConfidence(draft, meta = {}) {
   const translationRiskRatio = translationSignals.checkedCount ? translationRiskCount / translationSignals.checkedCount : 1;
   const mediaLibraryMatches = Number(meta?.mediaLibraryMatches) || Number(review.mediaLibraryMatches) || 0;
   const itemImageCount = menu.filter((item) => asImporterString(item?.img) || (Array.isArray(item?.images) && item.images.some((value) => asImporterString(value)))).length;
+  const infoSignalCount = Number(review?.infoExtraction?.detectedFieldCount) || 0;
 
   let menuExtraction = "high";
   if (!menu.length || blockers.length || missingPriceRatio > 0.5) {
@@ -3051,6 +3563,15 @@ function applyImporterReviewConfidence(draft, meta = {}) {
     mediaMatching = "medium";
   }
 
+  let infoExtraction = "unknown";
+  if (infoSignalCount >= 5) {
+    infoExtraction = "high";
+  } else if (infoSignalCount > 0) {
+    infoExtraction = "medium";
+  } else {
+    infoExtraction = "low";
+  }
+
   if (menuExtraction === "low" && menu.length) {
     warnings.push("Low menu extraction confidence; review item boundaries, categories, and prices before publishing.");
   }
@@ -3065,7 +3586,8 @@ function applyImporterReviewConfidence(draft, meta = {}) {
       ...(review.confidence && typeof review.confidence === "object" ? review.confidence : {}),
       menuExtraction,
       translations,
-      mediaMatching
+      mediaMatching,
+      infoExtraction
     }
   };
   return nextDraft;
@@ -3463,13 +3985,19 @@ async function buildImporterDraftDirectFromAssets(input) {
   }
 }
 
-async function finalizeImporterDraft(parsedDraft, input, extraWarnings = []) {
+async function finalizeImporterDraft(parsedDraft, input, extraWarnings = [], options = {}) {
   const skeleton = buildImporterDraftSkeleton(input);
   let enrichedDraft = normalizeStructuredImporterDraft(parsedDraft);
   enrichedDraft = applyImporterMediaFallbacks(enrichedDraft, {
     logoImageUrl: input.logoImageUrl,
     restaurantPhotoUrls: input.restaurantPhotoUrls
   });
+  if (options?.detectedInfo) {
+    enrichedDraft = mergeImporterDetectedInfo(enrichedDraft, options.detectedInfo);
+  }
+  if (options?.detectedBrandColors) {
+    enrichedDraft = mergeImporterDetectedBrandingColors(enrichedDraft, options.detectedBrandColors);
+  }
 
   if (extraWarnings.length) {
     const review = enrichedDraft.review && typeof enrichedDraft.review === "object" ? enrichedDraft.review : {};
@@ -3560,12 +4088,18 @@ async function generateImporterDraft(input, options = {}) {
 
     let parsedDraft = null;
     let sourceExtraction = null;
+    let detectedInfo = null;
+    let detectedBrandColors = null;
     const importerWarnings = [];
 
     try {
       setImporterStage("source_extraction");
       sourceExtraction = await extractImporterMenuSource(inputContext);
       writeSellerJobJson(job.jobId, "extraction/menu-source.json", sourceExtraction);
+      detectedInfo = extractImporterInfoFromSource(sourceExtraction);
+      writeSellerJobJson(job.jobId, "extraction/info-source.json", detectedInfo);
+      detectedBrandColors = await extractImporterPaletteFromMenuImages(inputContext);
+      writeSellerJobJson(job.jobId, "extraction/brand-colors.json", detectedBrandColors);
       if (Array.isArray(sourceExtraction.rawPages) && sourceExtraction.rawPages.length) {
         writeSellerJobText(job.jobId, "extraction/menu-source-raw.txt", formatImporterSourceForPrompt({
           pages: sourceExtraction.rawPages,
@@ -3657,7 +4191,11 @@ async function generateImporterDraft(input, options = {}) {
         ...(Array.isArray(sourceExtraction?.warnings)
           ? sourceExtraction.warnings.map((warning) => `Source extraction: ${warning}`)
           : [])
-      ]
+      ],
+      {
+        detectedInfo,
+        detectedBrandColors
+      }
     );
 
     writeSellerJobJson(job.jobId, "final/draft.json", finalized.draft);

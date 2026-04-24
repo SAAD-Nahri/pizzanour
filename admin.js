@@ -448,6 +448,8 @@ function renderImporterImpactPanel(report, draft, meta = {}) {
     const confidence = review.confidence || {};
     const menuOnlyState = report.canApplyMenuOnly ? 'is-ready' : report.blockers.length ? 'is-block' : 'is-warn';
     const structureState = report.canApplyMenuStructure ? 'is-ready' : report.blockers.length ? 'is-block' : 'is-warn';
+    const infoState = report.canApplyInfo ? 'is-ready' : 'is-warn';
+    const colorsState = report.canApplyBrandColors ? 'is-ready' : 'is-warn';
 
     impactEl.innerHTML = `
         <h5>Publish decision</h5>
@@ -469,6 +471,20 @@ function renderImporterImpactPanel(report, draft, meta = {}) {
             </li>
             <li>
                 <div>
+                    <strong>Menu + info</strong>
+                    <span>Also replaces detected contact, hours, WiFi, payments, and facilities.</span>
+                </div>
+                <span class="importer-impact-state ${infoState}">${report.canApplyInfo ? `${report.infoSignalCount} found` : 'No info'}</span>
+            </li>
+            <li>
+                <div>
+                    <strong>Menu + colors</strong>
+                    <span>Also applies palette colors sampled from menu images.</span>
+                </div>
+                <span class="importer-impact-state ${colorsState}">${report.canApplyBrandColors ? 'Palette ready' : 'No palette'}</span>
+            </li>
+            <li>
+                <div>
                     <strong>Library matches</strong>
                     <span>Existing media auto-matched into the draft.</span>
                 </div>
@@ -477,7 +493,7 @@ function renderImporterImpactPanel(report, draft, meta = {}) {
             <li>
                 <div>
                     <strong>Confidence mix</strong>
-                    <span>Extraction ${escapeHtml(confidence.menuExtraction || 'unknown')} / Translation ${escapeHtml(confidence.translations || 'unknown')} / Media ${escapeHtml(confidence.mediaMatching || 'unknown')}</span>
+                    <span>Menu ${escapeHtml(confidence.menuExtraction || 'unknown')} / Info ${escapeHtml(confidence.infoExtraction || 'unknown')} / Translation ${escapeHtml(confidence.translations || 'unknown')} / Media ${escapeHtml(confidence.mediaMatching || 'unknown')}</span>
                 </div>
                 <span class="importer-impact-state">${escapeHtml(meta.jobId ? `Job ${meta.jobId}` : 'Draft')}</span>
             </li>
@@ -489,6 +505,7 @@ function buildImporterConfidencePillsMarkup(review = {}) {
     const confidence = review.confidence || {};
     const entries = [
         { label: 'Extraction', value: confidence.menuExtraction || 'unknown' },
+        { label: 'Info', value: confidence.infoExtraction || 'unknown' },
         { label: 'Translation', value: confidence.translations || 'unknown' },
         { label: 'Media', value: confidence.mediaMatching || 'unknown' }
     ];
@@ -4993,6 +5010,34 @@ function setInfoWorkspaceText(id, value) {
     el.textContent = value;
 }
 
+function setInfoSummaryState(id, isReady) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('is-ready', Boolean(isReady));
+    el.classList.toggle('is-attention', !isReady);
+}
+
+window.focusInfoWorkspacePanel = function (panelKey) {
+    const panelMap = {
+        public: 'infoPanelPublic',
+        social: 'infoPanelSocial',
+        facilities: 'infoPanelFacilities',
+        hours: 'infoPanelHours',
+        wifi: 'infoPanelWifi',
+        security: 'infoPanelSecurity'
+    };
+    const target = document.getElementById(panelMap[panelKey] || '');
+    if (!target) return;
+    if (target.tagName === 'DETAILS') {
+        target.open = true;
+    }
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const focusTarget = target.querySelector('input, textarea, select, button') || target;
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+        setTimeout(() => focusTarget.focus({ preventScroll: true }), 220);
+    }
+};
+
 function renderInfoWorkspaceSummary() {
     const readValue = (id, fallback = '') => {
         const el = document.getElementById(id);
@@ -5046,17 +5091,21 @@ function renderInfoWorkspaceSummary() {
 
     setInfoWorkspaceText('infoSummaryLocationValue', address || 'Add address');
     setInfoWorkspaceText('infoSummaryLocationNote', mapUrl && isValidAbsoluteUrl(mapUrl) ? 'Map link ready' : 'Map link pending');
+    setInfoSummaryState('infoSummaryLocationCard', Boolean(address && mapUrl && isValidAbsoluteUrl(mapUrl)));
 
     setInfoWorkspaceText('infoSummaryContactValue', phone || 'Add phone number');
     setInfoWorkspaceText('infoSummaryContactNote', socialLinks.length
         ? `${socialLinks.length} public link${socialLinks.length > 1 ? 's' : ''} live`
         : 'No public links yet');
+    setInfoSummaryState('infoSummaryContactCard', Boolean(phone));
 
     setInfoWorkspaceText('infoSummaryGuestValue', guestSignalCount ? `${guestSignalCount} guest signals live` : 'Review facilities');
     setInfoWorkspaceText('infoSummaryGuestNote', `${visibleSectionCount} homepage section${visibleSectionCount > 1 ? 's' : ''} visible`);
+    setInfoSummaryState('infoSummaryGuestCard', guestSignalCount > 0);
 
     setInfoWorkspaceText('infoSummaryOpsValue', securityUser ? `@${securityUser}` : 'Review access');
     setInfoWorkspaceText('infoSummaryOpsNote', wifiName ? `WiFi: ${summarizeInfoCopy(wifiName)}` : 'WiFi not configured');
+    setInfoSummaryState('infoSummaryOpsCard', Boolean(securityUser && wifiName && configuredHoursCount));
 
     setInfoWorkspaceText('infoSocialMetric', socialLinks.length
         ? `${socialLinks.length} link${socialLinks.length > 1 ? 's' : ''} live`
@@ -5803,6 +5852,8 @@ function renderImporterDraftOutputs(draft) {
     const applyNoteEl = document.getElementById('importStudioApplyNote');
     const applyMenuOnlyBtn = document.getElementById('applyImporterMenuOnlyBtn');
     const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
+    const applyInfoBtn = document.getElementById('applyImporterInfoBtn');
+    const applyColorsBtn = document.getElementById('applyImporterColorsBtn');
     const copyBtn = document.querySelector('#data-tools .tool-actions .brand-secondary-btn');
     if (!summaryEl || !jsonEl) return;
 
@@ -5822,6 +5873,8 @@ function renderImporterDraftOutputs(draft) {
         }
         if (applyMenuOnlyBtn) applyMenuOnlyBtn.disabled = true;
         if (applyStructureBtn) applyStructureBtn.disabled = true;
+        if (applyInfoBtn) applyInfoBtn.disabled = true;
+        if (applyColorsBtn) applyColorsBtn.disabled = true;
         if (copyBtn) copyBtn.disabled = true;
 
         return;
@@ -5831,6 +5884,26 @@ function renderImporterDraftOutputs(draft) {
     const review = draft.review || {};
     const menuItems = Array.isArray(restaurantData.menu) ? restaurantData.menu : [];
     const superCategories = Array.isArray(restaurantData.superCategories) ? restaurantData.superCategories : [];
+    const landing = restaurantData.landing && typeof restaurantData.landing === 'object' ? restaurantData.landing : {};
+    const social = restaurantData.social && typeof restaurantData.social === 'object' ? restaurantData.social : {};
+    const wifi = restaurantData.wifi && typeof restaurantData.wifi === 'object' ? restaurantData.wifi : {};
+    const guestExperience = restaurantData.guestExperience && typeof restaurantData.guestExperience === 'object' ? restaurantData.guestExperience : {};
+    const importedBranding = restaurantData.branding && typeof restaurantData.branding === 'object' ? restaurantData.branding : {};
+    const infoSignalCount = Number(review?.infoExtraction?.detectedFieldCount)
+        || [
+            landing?.phone,
+            landing?.location?.address,
+            landing?.location?.url,
+            wifi?.ssid,
+            wifi?.pass,
+            ...(Array.isArray(restaurantData.hours) ? restaurantData.hours : []),
+            restaurantData.hoursNote,
+            ...Object.values(social || {}),
+            ...(Array.isArray(guestExperience.paymentMethods) ? guestExperience.paymentMethods : []),
+            ...(Array.isArray(guestExperience.facilities) ? guestExperience.facilities : [])
+        ].filter(Boolean).length;
+    const brandColorKeys = ['primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor', 'surfaceMuted', 'textColor', 'textMuted', 'menuBackground', 'menuSurface'];
+    const brandColorCount = brandColorKeys.filter((key) => /^#[0-9a-f]{6}$/i.test(String(importedBranding[key] || '').trim())).length;
     const untranslatedItems = Array.isArray(review.untranslatedItems) ? review.untranslatedItems : [];
     const reviewReport = getImporterReviewReport(draft);
     lastImporterReviewReport = reviewReport;
@@ -5843,9 +5916,12 @@ function renderImporterDraftOutputs(draft) {
         `Super categories: ${superCategories.length}`,
         `Blockers: ${reviewReport.blockers.length}`,
         `Warnings: ${reviewReport.warnings.length}`,
+        `Info signals: ${reviewReport.infoSignalCount}`,
+        `Brand color palette: ${reviewReport.canApplyBrandColors ? 'detected' : 'not detected'}`,
         `Untranslated items: ${untranslatedItems.length}`,
         `Library image matches: ${lastImporterDraftMeta?.mediaLibraryMatches || review.mediaLibraryMatches || 0}`,
         `Menu extraction confidence: ${review.confidence?.menuExtraction || 'unknown'}`,
+        `Info extraction confidence: ${review.confidence?.infoExtraction || 'unknown'}`,
         `Translation confidence: ${review.confidence?.translations || 'unknown'}`,
         `Media confidence: ${review.confidence?.mediaMatching || 'unknown'}`,
         '',
@@ -5862,6 +5938,7 @@ function renderImporterDraftOutputs(draft) {
             { value: reviewReport.categoryCount, label: 'Categories' },
             { value: reviewReport.superCategoryCount, label: 'Super Categories' },
             { value: reviewReport.missingPriceCount, label: 'Missing Price' },
+            { value: reviewReport.infoSignalCount, label: 'Info Signals' },
             { value: reviewReport.missingTranslationCount + reviewReport.weakTranslationCount, label: 'Language Review' },
             { value: reviewReport.uncategorizedCount, label: 'Needs Placement' }
         ].map((entry) => `
@@ -5894,6 +5971,12 @@ function renderImporterDraftOutputs(draft) {
     }
     if (applyStructureBtn) {
         applyStructureBtn.disabled = importStudioBusy || !reviewReport.canApplyMenuStructure;
+    }
+    if (applyInfoBtn) {
+        applyInfoBtn.disabled = importStudioBusy || !reviewReport.canApplyInfo;
+    }
+    if (applyColorsBtn) {
+        applyColorsBtn.disabled = importStudioBusy || !reviewReport.canApplyBrandColors;
     }
     if (copyBtn) copyBtn.disabled = importStudioBusy;
 
@@ -6020,10 +6103,14 @@ function getImporterReviewReport(draft) {
         duplicateIdCount,
         duplicateNameCount,
         orphanSuperCategoryRefCount,
+        infoSignalCount,
+        brandColorCount,
         blockers,
         warnings,
         canApplyMenuOnly: menuItems.length > 0,
-        canApplyMenuStructure: menuItems.length > 0
+        canApplyMenuStructure: menuItems.length > 0,
+        canApplyInfo: menuItems.length > 0 && infoSignalCount > 0,
+        canApplyBrandColors: menuItems.length > 0 && brandColorCount >= 3
     };
 }
 
@@ -6277,6 +6364,29 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
     });
 
     const applyStructure = scope === 'menu_structure';
+    const applyInfo = scope === 'menu_info';
+    const applyColors = scope === 'menu_colors';
+    const importedLanding = imported.landing && typeof imported.landing === 'object' ? imported.landing : {};
+    const importedLocation = importedLanding.location && typeof importedLanding.location === 'object' ? importedLanding.location : {};
+    const importedWifi = imported.wifi && typeof imported.wifi === 'object' ? imported.wifi : {};
+    const importedSocial = imported.social && typeof imported.social === 'object' ? imported.social : {};
+    const importedGuestExperience = imported.guestExperience && typeof imported.guestExperience === 'object'
+        ? imported.guestExperience
+        : null;
+    const importedHours = Array.isArray(imported.hours) && imported.hours.length ? imported.hours : null;
+    const importedBranding = imported.branding && typeof imported.branding === 'object' ? imported.branding : {};
+    const currentBranding = restaurantConfig.branding || window.defaultBranding || {};
+    const importedColorKeys = ['primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor', 'surfaceMuted', 'textColor', 'textMuted', 'menuBackground', 'menuSurface'];
+    const importedColors = Object.fromEntries(importedColorKeys
+        .map((key) => [key, importedBranding[key]])
+        .filter(([, value]) => /^#[0-9a-f]{6}$/i.test(String(value || '').trim())));
+    const compactImportedObject = (value) => Object.fromEntries(
+        Object.entries(value && typeof value === 'object' ? value : {})
+            .filter(([, entryValue]) => typeof entryValue === 'string' ? entryValue.trim() : Boolean(entryValue))
+    );
+    const currentGuestExperience = restaurantConfig.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] };
+    const importedPaymentMethods = Array.isArray(importedGuestExperience?.paymentMethods) ? importedGuestExperience.paymentMethods : [];
+    const importedFacilities = Array.isArray(importedGuestExperience?.facilities) ? importedGuestExperience.facilities : [];
 
     return {
         menu: preparedMenu,
@@ -6288,17 +6398,29 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
             ? { ...(imported.categoryTranslations || {}) }
             : { ...categoryTranslations },
         wifi: {
-            ssid: restaurantConfig.wifi?.name || '',
-            pass: restaurantConfig.wifi?.code || ''
+            ssid: applyInfo ? (importedWifi.ssid || restaurantConfig.wifi?.name || '') : (restaurantConfig.wifi?.name || ''),
+            pass: applyInfo ? (importedWifi.pass || restaurantConfig.wifi?.code || '') : (restaurantConfig.wifi?.code || '')
         },
         social: {
-            ...(restaurantConfig.socials || {})
+            ...(applyInfo ? { ...(restaurantConfig.socials || {}), ...compactImportedObject(importedSocial) } : (restaurantConfig.socials || {}))
         },
-        guestExperience: restaurantConfig.guestExperience || window.defaultConfig?.guestExperience || { paymentMethods: [], facilities: [] },
+        guestExperience: applyInfo
+            ? {
+                paymentMethods: [...new Set([
+                    ...(Array.isArray(currentGuestExperience.paymentMethods) ? currentGuestExperience.paymentMethods : []),
+                    ...importedPaymentMethods
+                ].filter(Boolean))],
+                facilities: [...new Set([
+                    ...(Array.isArray(currentGuestExperience.facilities) ? currentGuestExperience.facilities : []),
+                    ...importedFacilities
+                ].filter(Boolean))]
+            }
+            : currentGuestExperience,
         sectionVisibility: restaurantConfig.sectionVisibility || window.defaultConfig?.sectionVisibility || {},
         sectionOrder: restaurantConfig.sectionOrder || window.defaultConfig?.sectionOrder || ADMIN_SECTION_ORDER_KEYS,
         branding: {
-            ...(restaurantConfig.branding || window.defaultBranding || {})
+            ...currentBranding,
+            ...(applyColors ? importedColors : {})
         },
         contentTranslations: {
             fr: { ...(restaurantConfig.contentTranslations?.fr || {}) },
@@ -6314,14 +6436,15 @@ function buildImporterApplyPayload(draft, scope = 'menu_only') {
             : (Array.isArray(restaurantConfig.superCategories)
                 ? restaurantConfig.superCategories.map((entry) => sanitizeSuperCategoryForStorage(entry))
                 : []),
-        hours: restaurantConfig._hours || null,
-        hoursNote: restaurantConfig._hoursNote || '',
+        hours: applyInfo ? (importedHours || restaurantConfig._hours || null) : (restaurantConfig._hours || null),
+        hoursNote: applyInfo ? (imported.hoursNote || restaurantConfig._hoursNote || '') : (restaurantConfig._hoursNote || ''),
         gallery: restaurantConfig.gallery || [],
         landing: {
             location: {
-                ...(restaurantConfig.location || {})
+                ...(restaurantConfig.location || {}),
+                ...(applyInfo ? compactImportedObject(importedLocation) : {})
             },
-            phone: restaurantConfig.phone || ''
+            phone: applyInfo ? (importedLanding.phone || restaurantConfig.phone || '') : (restaurantConfig.phone || '')
         }
     };
 }
@@ -6516,16 +6639,68 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         showToast('The draft does not contain any menu items to apply.');
         return;
     }
+    if (scope === 'menu_info' && !report.canApplyInfo) {
+        showToast('No reliable info fields were detected in this draft.');
+        return;
+    }
+    if (scope === 'menu_colors' && !report.canApplyBrandColors) {
+        showToast('No reliable color palette was detected from the menu images.');
+        return;
+    }
 
-    const confirmText = scope === 'menu_structure'
-        ? 'Apply menu items and imported category structure to the current restaurant instance? Branding, landing, gallery, and other site identity settings will stay unchanged.'
-        : 'Apply menu items only to the current restaurant instance? Category structure and site identity settings will stay unchanged.';
+    const scopeLabels = {
+        menu_only: {
+            kicker: 'Apply menu only',
+            title: 'Publish menu items?',
+            confirm: 'Publish menu',
+            progressTitle: 'Publishing menu items',
+            meta: 'Menu only',
+            success: 'The reviewed menu is saved on the server.',
+            doneTitle: 'Menu items published',
+            toast: 'Menu items published.',
+            copy: 'Apply menu items only to the current restaurant instance? Category structure and site identity settings will stay unchanged.'
+        },
+        menu_structure: {
+            kicker: 'Apply menu + structure',
+            title: 'Publish menu and structure?',
+            confirm: 'Publish everything',
+            progressTitle: 'Publishing menu and structure',
+            meta: 'Menu + structure',
+            success: 'The reviewed menu and structure are saved on the server.',
+            doneTitle: 'Menu and structure published',
+            toast: 'Menu and structure published.',
+            copy: 'Apply menu items and imported category structure to the current restaurant instance? Branding, landing, gallery, and other site identity settings will stay unchanged.'
+        },
+        menu_info: {
+            kicker: 'Apply menu + info',
+            title: 'Publish menu and info?',
+            confirm: 'Publish menu + info',
+            progressTitle: 'Publishing menu and info',
+            meta: 'Menu + info',
+            success: 'The reviewed menu and imported info are saved on the server.',
+            doneTitle: 'Menu and info published',
+            toast: 'Menu and info published.',
+            copy: 'Apply menu items plus detected phone, address, socials, WiFi, hours, payments, and facilities? Branding, gallery, and category structure will stay unchanged.'
+        },
+        menu_colors: {
+            kicker: 'Apply menu + colors',
+            title: 'Publish menu and palette?',
+            confirm: 'Publish menu + colors',
+            progressTitle: 'Publishing menu and palette',
+            meta: 'Menu + colors',
+            success: 'The reviewed menu and sampled brand colors are saved on the server.',
+            doneTitle: 'Menu and colors published',
+            toast: 'Menu and colors published.',
+            copy: 'Apply menu items plus brand colors sampled from the uploaded menu images? Logo, hero media, gallery, contact info, and category structure will stay unchanged.'
+        }
+    };
+    const scopeCopy = scopeLabels[scope] || scopeLabels.menu_only;
     const confirmed = await showAdminConfirm({
-        kicker: scope === 'menu_structure' ? 'Apply menu + structure' : 'Apply menu only',
-        title: scope === 'menu_structure' ? 'Publish menu and structure?' : 'Publish menu items?',
-        copy: confirmText,
+        kicker: scopeCopy.kicker,
+        title: scopeCopy.title,
+        copy: scopeCopy.copy,
         note: 'This writes the reviewed draft into the active restaurant data.',
-        confirmLabel: scope === 'menu_structure' ? 'Publish everything' : 'Publish menu',
+        confirmLabel: scopeCopy.confirm,
         cancelLabel: 'Not yet',
         tone: 'danger'
     });
@@ -6538,17 +6713,15 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
             status: 'running',
             stageKey: 'publish',
             badge: 'Publishing draft',
-            title: scope === 'menu_structure' ? 'Publishing menu and structure' : 'Publishing menu items',
+            title: scopeCopy.progressTitle,
             copy: 'The reviewed draft is being written into the live restaurant data.',
             progress: 42,
-            meta: scope === 'menu_structure' ? 'Menu + structure' : 'Menu only',
+            meta: scopeCopy.meta,
             hint: 'Please wait while the current restaurant data is updated.'
         });
         setAdminSaveState(
             ADMIN_REQUEST_STATE.saving,
-            scope === 'menu_structure'
-                ? 'Publishing the reviewed menu and structure to the server...'
-                : 'Publishing the reviewed menu to the server...'
+            `${scopeCopy.progressTitle} to the server...`
         );
         const payload = buildImporterApplyPayload(lastImporterDraft, scope);
         const response = await fetch('/api/data/import', {
@@ -6570,9 +6743,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         refreshUI();
         setAdminSaveState(
             ADMIN_REQUEST_STATE.success,
-            scope === 'menu_structure'
-                ? 'The reviewed menu and structure are saved on the server.'
-                : 'The reviewed menu is saved on the server.',
+            scopeCopy.success,
             {
                 savedAt: data?.meta?.savedAt || new Date().toISOString(),
                 dataVersion: data?.meta?.dataVersion || adminSaveState.dataVersion
@@ -6582,7 +6753,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
             status: 'succeeded',
             stageKey: 'publish',
             badge: 'Publish complete',
-            title: scope === 'menu_structure' ? 'Menu and structure published' : 'Menu items published',
+            title: scopeCopy.doneTitle,
             copy: 'The public site can now use the reviewed importer data.',
             progress: 100,
             meta: 'Saved',
@@ -6590,7 +6761,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         }, { overlay: false });
         setAdminTaskOverlay(null);
         setImportStudioControlsBusy(false);
-        showToast(scope === 'menu_structure' ? 'Menu and structure published.' : 'Menu items published.');
+        showToast(scopeCopy.toast);
     } catch (error) {
         console.error('Apply importer draft error:', error);
         reflectAdminRequestFailure(error);
