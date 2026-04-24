@@ -14,6 +14,40 @@ function tx(key, fallback, vars) {
     return fallback;
 }
 
+const HOURS_DAY_I18N_KEYS = {
+    lundi: 'day_mon',
+    monday: 'day_mon',
+    'الاثنين': 'day_mon',
+    mardi: 'day_tue',
+    tuesday: 'day_tue',
+    'الثلاثاء': 'day_tue',
+    mercredi: 'day_wed',
+    wednesday: 'day_wed',
+    'الأربعاء': 'day_wed',
+    jeudi: 'day_thu',
+    thursday: 'day_thu',
+    'الخميس': 'day_thu',
+    vendredi: 'day_fri',
+    friday: 'day_fri',
+    'الجمعة': 'day_fri',
+    samedi: 'day_sat',
+    saturday: 'day_sat',
+    'السبت': 'day_sat',
+    dimanche: 'day_sun',
+    sunday: 'day_sun',
+    'الأحد': 'day_sun'
+};
+
+function getHoursDayI18nKey(hourEntry) {
+    const explicitKey = typeof hourEntry?.i18n === 'string' && hourEntry.i18n.trim()
+        ? hourEntry.i18n.trim()
+        : '';
+    if (explicitKey) return explicitKey;
+
+    const dayName = String(hourEntry?.day || '').trim().toLowerCase();
+    return HOURS_DAY_I18N_KEYS[dayName] || '';
+}
+
 function ensureDeferredHomepageDom() {
     const root = document.getElementById('homepageDeferredRoot');
     const template = document.getElementById('homepageDeferredTemplate');
@@ -33,13 +67,15 @@ function renderHours() {
     const hours = Array.isArray(window.restaurantConfig?._hours) && window.restaurantConfig._hours.length > 0
         ? window.restaurantConfig._hours
         : window.defaultHours;
-    const isDefaultNote = !window.restaurantConfig?._hoursNote;
-    const note = isDefaultNote
-        ? tx('hours_note_default', window.defaultHoursNote || '')
-        : (window.restaurantConfig._hoursNote || '');
+    const currentLang = window.currentLang || document.documentElement.lang || 'fr';
+    const customNote = window.restaurantConfig?._hoursNote || '';
+    const shouldUseTranslatedDefaultNote = !customNote || currentLang !== 'fr';
+    const note = shouldUseTranslatedDefaultNote
+        ? tx('hours_note_default', window.defaultHoursNote || customNote || '')
+        : customNote;
 
     grid.innerHTML = hours.map(h => {
-        const dayKey = typeof h.i18n === 'string' && h.i18n.trim() ? h.i18n.trim() : '';
+        const dayKey = getHoursDayI18nKey(h);
         const dayLabel = dayKey ? tx(dayKey, h.day) : h.day;
         const dayI18nAttr = dayKey ? ` data-i18n="${dayKey}"` : '';
         return `
@@ -52,7 +88,7 @@ function renderHours() {
     }).join('');
 
     if (noteEl) {
-        if (isDefaultNote && window.defaultHoursNote) {
+        if (shouldUseTranslatedDefaultNote && window.defaultHoursNote) {
             noteEl.setAttribute('data-i18n', 'hours_note_default');
         } else {
             noteEl.removeAttribute('data-i18n');

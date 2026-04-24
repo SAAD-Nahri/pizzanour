@@ -346,7 +346,7 @@ body[data-homepage-polish="v2"]:not(.menu-page) .lang-selector { display: flex !
 }
 
 .hero-menu-cta::after {
-  content: "→";
+  content: "\2192";
   font-size: 1.3rem;
   transition: transform 0.3s;
 }
@@ -359,7 +359,7 @@ body[data-homepage-polish="v2"]:not(.menu-page) .lang-selector { display: flex !
 .hero-menu-cta:hover::after { transform: translateX(6px); }
 
 /* Hide redundant elements */
-.slide-dots, .hero-status-slot, .hero-menu-cta-wrap, .slide-cta, .slide::before { display: none !important; }
+.slide-dots, .hero-status-slot, .hero-menu-cta-wrap, .slide::before { display: none !important; }
 
 /* ── 5. UTILITY NAV ──────────────────────────────────────────────────────── */
 body[data-homepage-polish="v2"]:not(.menu-page) .utility-nav {
