@@ -1017,6 +1017,89 @@ const LANDING_CONTENT_FIELDS = [
     { key: 'footer_note', label: 'Footer - Note', type: 'textarea', hint: 'Small footer sentence that reinforces the restaurant identity.' },
     { key: 'footer_rights', label: 'Footer - Rights Text', type: 'text', hint: 'Short legal/footer rights sentence shown after the year and restaurant name.' }
 ];
+const NOUR_HOMEPAGE_COPY_DEFAULTS = {
+    fr: {
+        hero_sub1: 'Au coeur de Tanger',
+        hero_title1: 'SAVEURS <span>GENEREUSES</span>',
+        hero_desc1: 'Pizzas généreuses, cuisine conviviale et accueil chaleureux au cœur de Tanger.',
+        hero_sub2: 'Decouvrez les',
+        hero_title2: 'INCONTOURNABLES <span>NOUR</span>',
+        hero_desc2: 'Pizzas, plats chauds et assiettes gourmandes preparees pour les vraies faims.',
+        hero_sub3: 'Sur place ou a emporter',
+        hero_title3: 'CHAUD <span>ET RAPIDE</span>',
+        hero_desc3: 'Une table conviviale pour dejeuner, diner ou partager un moment simple.',
+        hero_cta: 'VOIR LA CARTE',
+        about_p1: "Pizzeria Nour est une adresse chaleureuse a Tanger ou l'on vient pour bien manger, retrouver des saveurs familieres et profiter d'un accueil sincere.",
+        about_p2: 'Notre cuisine mise sur des recettes genereuses, des produits choisis avec soin et une preparation reguliere, pour servir des pizzas et des plats qui donnent envie de revenir.',
+        about_p3: "Que ce soit pour un repas en famille, une pause entre amis ou une commande a emporter, notre promesse reste la meme : du gout, de la constance et une belle generosite dans l'assiette.",
+        event_birthday: 'Anniversaires',
+        event_birthday_desc: 'Une table vivante et gourmande pour celebrer un anniversaire autour de pizzas, plats a partager et boissons pour tous.',
+        event_family: 'Repas en Famille',
+        event_family_desc: "Un cadre detendu pour reunir petits et grands autour d'une cuisine genereuse et facile a partager.",
+        event_corporate: "Repas d'Equipe",
+        event_corporate_desc: "Une solution simple et savoureuse pour les dejeuners de travail, commandes de groupe et moments d'equipe.",
+        event_party: 'Soirees Privees',
+        event_party_desc: 'Un lieu convivial pour organiser une soiree entre amis ou une petite celebration dans une ambiance chaleureuse.',
+        events_cta_text: 'Vous preparez un anniversaire, un repas de groupe ou un moment prive ? Parlons-en.',
+        events_cta_btn: 'Demander un devis',
+        footer_note: 'Pizzas genereuses, cuisine conviviale et accueil chaleureux au coeur de Tanger.',
+        footer_rights: 'Tous droits reserves.'
+    },
+    en: {
+        hero_sub1: 'In the heart of Tangier',
+        hero_title1: 'GENEROUS <span>FLAVORS</span>',
+        hero_desc1: 'Generous pizza, welcoming service, and comforting food in the heart of Tangier.',
+        hero_sub2: "Discover Nour's",
+        hero_title2: 'SIGNATURE <span>FAVORITES</span>',
+        hero_desc2: 'Pizza, hot dishes, and comforting plates made for real appetites.',
+        hero_sub3: 'Dine in or takeaway',
+        hero_title3: 'HOT <span>& READY</span>',
+        hero_desc3: 'A welcoming table for lunch, dinner, or an easy moment to share.',
+        hero_cta: 'VIEW MENU',
+        about_p1: 'Pizzeria Nour is a warm address in Tangier where people come to eat well, enjoy familiar flavors, and feel genuinely welcomed.',
+        about_p2: 'Our kitchen focuses on generous recipes, carefully selected ingredients, and consistent preparation so every pizza and dish feels satisfying and reliable.',
+        about_p3: 'Whether you join us with family, meet friends, or order takeaway, our promise stays the same: real flavor, steady quality, and generous plates.',
+        event_birthday: 'Birthdays',
+        event_birthday_desc: 'A lively, food-filled setup for birthdays with pizza, shareable dishes, and a warm atmosphere for every guest.',
+        event_family: 'Family Meals',
+        event_family_desc: 'A relaxed place to gather around comforting food that works beautifully for both kids and adults.',
+        event_corporate: 'Team Meals',
+        event_corporate_desc: 'A simple and tasty option for work lunches, group orders, and casual team gatherings.',
+        event_party: 'Private Nights',
+        event_party_desc: 'A friendly spot for a private evening, informal celebration, or relaxed get-together with friends.',
+        events_cta_text: "Planning a birthday, group meal, or private moment? Let's talk.",
+        events_cta_btn: 'Request a Quote',
+        footer_note: 'Generous pizza, welcoming service, and comforting food in the heart of Tangier.',
+        footer_rights: 'All rights reserved.'
+    },
+    ar: {
+        hero_sub1: 'في قلب طنجة',
+        hero_title1: 'نكهات <span>سخية</span>',
+        hero_desc1: 'بيتزا سخية وخدمة دافئة وأطباق مريحة في قلب طنجة.',
+        hero_sub2: 'اكتشفوا',
+        hero_title2: 'مفضلات <span>نور</span>',
+        hero_desc2: 'بيتزا وأطباق ساخنة ووصفات مريحة تناسب الشهية الحقيقية.',
+        hero_sub3: 'داخل المطعم أو سفري',
+        hero_title3: 'ساخن <span>وجاهز</span>',
+        hero_desc3: 'مكان دافئ للغداء أو العشاء أو لقضاء لحظة جميلة مع من تحب.',
+        hero_cta: 'عرض القائمة',
+        about_p1: 'بيتزا نور عنوان دافئ في طنجة، يأتي إليه الناس ليستمتعوا بالأكل الجيد والنكهات المحبوبة والاستقبال الصادق.',
+        about_p2: 'نركز في مطبخنا على وصفات سخية ومكونات مختارة بعناية وتحضير ثابت، حتى تكون كل بيتزا وكل طبق مشبعاً وموثوقاً.',
+        about_p3: 'سواء أتيت مع العائلة أو الأصدقاء أو طلبت سفري، يبقى وعدنا واحداً: طعم حقيقي وجودة ثابتة وكرم واضح في كل طبق.',
+        event_birthday: 'أعياد الميلاد',
+        event_birthday_desc: 'أجواء حيوية ولذيذة للاحتفال بعيد الميلاد مع البيتزا والأطباق المشتركة واستقبال دافئ للجميع.',
+        event_family: 'وجبات عائلية',
+        event_family_desc: 'مكان مريح يجمع الصغار والكبار حول أطباق مشبعة وسهلة المشاركة.',
+        event_corporate: 'وجبات الفرق',
+        event_corporate_desc: 'خيار عملي ولذيذ لغداء العمل والطلبات الجماعية ولقاءات الفريق.',
+        event_party: 'أمسيات خاصة',
+        event_party_desc: 'مكان ودود لأمسية خاصة أو احتفال بسيط أو لقاء جميل بين الأصدقاء.',
+        events_cta_text: 'هل تخطط لعيد ميلاد أو وجبة جماعية أو مناسبة خاصة؟ تواصل معنا.',
+        events_cta_btn: 'اطلب عرض سعر',
+        footer_note: 'بيتزا سخية وخدمة دافئة وأطباق مريحة في قلب طنجة.',
+        footer_rights: 'جميع الحقوق محفوظة.'
+    }
+};
 const MENU_ITEM_TRANSLATION_LANGUAGES = [
     { code: 'fr', label: 'French' },
     { code: 'en', label: 'English' },
@@ -4975,7 +5058,7 @@ function initForms() {
 }
 
 function getContentTranslationValue(lang, key) {
-    return restaurantConfig?.contentTranslations?.[lang]?.[key] || '';
+    return restaurantConfig?.contentTranslations?.[lang]?.[key] || NOUR_HOMEPAGE_COPY_DEFAULTS?.[lang]?.[key] || '';
 }
 
 function renderLandingContentEditor() {
@@ -4983,12 +5066,12 @@ function renderLandingContentEditor() {
     if (!container) return;
 
     container.innerHTML = LANDING_CONTENT_FIELDS.map((field) => `
-        <div style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+        <div class="landing-copy-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
             <div style="margin-bottom:14px;">
-                <div style="font-weight:700; color:#111; margin-bottom:4px;">${escapeHtml(field.label)}</div>
-                <div style="font-size:0.82rem; color:#6b7280; line-height:1.5;">${escapeHtml(field.hint)}</div>
+                <div class="landing-copy-field-title" style="font-weight:700; color:#111; margin-bottom:4px;">${escapeHtml(field.label)}</div>
+                <div class="landing-copy-field-hint" style="font-size:0.82rem; color:#6b7280; line-height:1.5;">${escapeHtml(field.hint)}</div>
             </div>
-            <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px;">
+            <div class="landing-copy-language-grid" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px;">
                 ${CONTENT_EDITOR_LANGUAGES.map((lang) => {
                     const value = escapeHtml(getContentTranslationValue(lang, field.key));
                     const label = lang.toUpperCase();
