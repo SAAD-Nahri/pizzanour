@@ -294,6 +294,9 @@ const IMPORTER_SYSTEM_PROMPT = [
   "Use extracted menu source text as the source of truth when it is provided.",
   "If extracted source text is not provided, use the uploaded menu images or PDFs as the source of truth for menu items, prices, categories, and descriptions.",
   "Infer FR, EN, and AR names and descriptions for menu items, categories, and super-categories when confidence is reasonable.",
+  "If a word or phrase is clearly truncated by OCR or a line break, autocomplete the missing letters from surrounding context when you are highly confident.",
+  "If a single short line is only a wrapped fragment of the previous word, treat it as the same word when the repair is strongly supported by the surrounding context.",
+  "If a lone lowercase fragment follows a full menu item, prefer completing it as part of that same item or description instead of starting a new entry.",
   "Do not invent contact details, maps, hours, WiFi, or social links.",
   "Do not invent branding, hero media, gallery media, website copy, or restaurant story content.",
   "If information is missing, leave the field empty and record a warning.",
@@ -317,6 +320,7 @@ const IMPORTER_SOURCE_EXTRACTION_SYSTEM_PROMPT = [
   "Capture currency symbols, item sizes (e.g., Small/Large), dietary markers (e.g., Vegan/Spicy), and other crucial item modifiers if present.",
   "If a price appears on a separate visual line, keep it directly after the closest item name line.",
   "For items with multiple sizes or prices, keep all visible size/price text near the item instead of choosing one during source extraction.",
+  "If a visible word is clearly cut off by OCR or a line break, complete it only when the missing letters are strongly supported by the surrounding context.",
   "Preserve visible section headings and subsection headings even when they do not explicitly say category or super-category.",
   "Ensure distinctly separated dishes are not mistakenly merged into one. Use double line breaks or clear spacing to separate unconnected items.",
   "If names, descriptions, and prices are visually separated, keep the closest related lines together in reading order.",
@@ -335,6 +339,7 @@ const IMPORTER_SOURCE_TEXT_FALLBACK_SYSTEM_PROMPT = [
   "Capture currency symbols, item sizes, dietary markers, and modifiers if present.",
   "If a price appears alone on its own line, place it immediately after the closest item name.",
   "For items with multiple sizes or prices, keep all visible size/price text near the item.",
+  "If a visible word is clearly cut off by OCR or a line break, complete it only when the missing letters are strongly supported by the surrounding context.",
   "Preserve visible section headings and subsection headings as separate lines when they appear.",
   "Ensure distinct dishes are separated by clear line breaks so they do not blend together.",
   "Keep item names, prices, and short descriptions together when they clearly belong together.",
@@ -1017,20 +1022,32 @@ function canonicalImporterLookup(value) {
     .toLowerCase();
 }
 
-function fillTranslationBucket(bucket, fallbackName = "", fallbackDesc = "") {
+function resolveImporterFallbackText(fallback, language = "") {
+  if (!fallback) return "";
+  if (typeof fallback === "object" && !Array.isArray(fallback)) {
+    return asImporterString(fallback[language])
+      || asImporterString(fallback.default)
+      || asImporterString(fallback.en)
+      || asImporterString(fallback.fr)
+      || asImporterString(fallback.ar);
+  }
+  return asImporterString(fallback);
+}
+
+function fillTranslationBucket(bucket, fallbackName = "", fallbackDesc = "", language = "") {
   const source = bucket && typeof bucket === "object" ? bucket : {};
   return {
     name: asImporterString(source.name) || fallbackName,
-    desc: asImporterString(source.desc) || fallbackDesc
+    desc: asImporterString(source.desc) || resolveImporterFallbackText(fallbackDesc, language)
   };
 }
 
 function fillTranslationSet(translations, fallbackName = "", fallbackDesc = "") {
   const source = translations && typeof translations === "object" ? translations : {};
   return {
-    fr: fillTranslationBucket(source.fr, fallbackName, fallbackDesc),
-    en: fillTranslationBucket(source.en, fallbackName, fallbackDesc),
-    ar: fillTranslationBucket(source.ar, fallbackName, fallbackDesc)
+    fr: fillTranslationBucket(source.fr, fallbackName, fallbackDesc, "fr"),
+    en: fillTranslationBucket(source.en, fallbackName, fallbackDesc, "en"),
+    ar: fillTranslationBucket(source.ar, fallbackName, fallbackDesc, "ar")
   };
 }
 
@@ -1103,6 +1120,162 @@ const IMPORTER_PRICE_TOKEN_SOURCE = String.raw`(?:\d{1,4}(?:[.,]\d{1,2})?\s*(?:m
 const IMPORTER_PRICE_ONLY_REGEX = new RegExp(String.raw`^[\s.\-:|/]*${IMPORTER_PRICE_TOKEN_SOURCE}[\s.\-:|/]*$`, "i");
 const IMPORTER_SIZE_WORD_REGEX = /^(small|medium|large|mini|normal|regular|grand|petit|moyen|xl|l|m|s)\b/i;
 const IMPORTER_MENU_HEADING_WORDS_REGEX = /^(menu|menus|carte|formule|formules|category|categories|categorie|categories|special|specials|nos|our|les|des|de|du|la|le)\b/i;
+const IMPORTER_COMMON_MENU_WORDS = new Set([
+  "bolognese",
+  "broccoli",
+  "caramel",
+  "caesarsalad",
+  "cafegourmand",
+  "caprese",
+  "burger",
+  "cheesecake",
+  "cheeseburger",
+  "chocolate",
+  "cremebrulee",
+  "crepe",
+  "crevette",
+  "crevettes",
+  "croissant",
+  "croque",
+  "escargot",
+  "espresso",
+  "falafel",
+  "fries",
+  "frites",
+  "halloumi",
+  "hamburger",
+  "hummus",
+  "filet",
+  "lasagna",
+  "lemonade",
+  "macandcheese",
+  "macaroni",
+  "margherita",
+  "mayonnaise",
+  "mojito",
+  "mozzarella",
+  "mushroom",
+  "omelette",
+  "parmesan",
+  "profiterole",
+  "pepperoni",
+  "pistachio",
+  "pomegranate",
+  "pancake",
+  "pancakes",
+  "pasta",
+  "raspberry",
+  "salmon",
+  "salade",
+  "sandwich",
+  "shawarma",
+  "spaghetti",
+  "tajine",
+  "tagine",
+  "tacos",
+  "strawberry",
+  "tiramisu",
+  "vanilla",
+  "watermelon",
+  "vegetable",
+  "viande",
+  "wrap"
+]);
+
+const IMPORTER_COMMON_MENU_PHRASES = new Set([
+  "cafegourmand",
+  "cremebrulee",
+  "croquemonsieur",
+  "croquemadame",
+  "fishtchips",
+  "saladecesar",
+  "steakfrites",
+  "tartetatin",
+  "thonfrites",
+  "tunisien",
+  "wrappoulet"
+]);
+
+function normalizeImporterWordKey(value) {
+  return normalizeImporterText(value)
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .toLowerCase();
+}
+
+function normalizeImporterLooseWordKey(value) {
+  return normalizeImporterWordKey(value).replace(/^(l|d|c|j|m|n|t|s)/i, "");
+}
+
+function normalizeImporterPhraseKey(value) {
+  return normalizeImporterText(value)
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .toLowerCase();
+}
+
+function isImporterOneEditAway(left, right) {
+  const a = asImporterString(left);
+  const b = asImporterString(right);
+  if (Math.abs(a.length - b.length) > 1) return false;
+
+  let i = 0;
+  let j = 0;
+  let edits = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) {
+      i += 1;
+      j += 1;
+      continue;
+    }
+
+    edits += 1;
+    if (edits > 1) return false;
+
+    if (a.length > b.length) {
+      i += 1;
+    } else if (b.length > a.length) {
+      j += 1;
+    } else {
+      i += 1;
+      j += 1;
+    }
+  }
+
+  if (i < a.length || j < b.length) edits += 1;
+  return edits <= 1;
+}
+
+function findImporterCommonMenuWord(candidate) {
+  const normalized = normalizeImporterWordKey(candidate);
+  if (!normalized) return "";
+  if (IMPORTER_COMMON_MENU_WORDS.has(normalized)) return normalized;
+  const looseNormalized = normalizeImporterLooseWordKey(candidate);
+  if (looseNormalized && IMPORTER_COMMON_MENU_WORDS.has(looseNormalized)) return looseNormalized;
+
+  for (const knownWord of IMPORTER_COMMON_MENU_WORDS) {
+    if (Math.abs(knownWord.length - normalized.length) > 1) continue;
+    if (isImporterOneEditAway(knownWord, normalized)) return knownWord;
+    if (looseNormalized && isImporterOneEditAway(knownWord, looseNormalized)) return knownWord;
+  }
+
+  return "";
+}
+
+function findImporterCommonMenuPhrase(candidate) {
+  const normalized = normalizeImporterPhraseKey(candidate);
+  if (!normalized) return "";
+  if (IMPORTER_COMMON_MENU_PHRASES.has(normalized)) return normalized;
+
+  for (const knownPhrase of IMPORTER_COMMON_MENU_PHRASES) {
+    if (Math.abs(knownPhrase.length - normalized.length) > 1) continue;
+    if (isImporterOneEditAway(knownPhrase, normalized)) return knownPhrase;
+  }
+
+  return "";
+}
 
 function isImporterLikelyPriceToken(value) {
   const raw = asImporterString(value);
@@ -1198,7 +1371,7 @@ function splitObviousImporterMultiItemLine(value) {
   return parts.length > 1 ? parts : [line];
 }
 
-function prepareImporterSourceTextForStructuring(value) {
+function prepareImporterSourceTextForStructuring(value, stats = null) {
   const text = normalizeImporterSourceText(value);
   if (!text) return "";
 
@@ -1217,6 +1390,50 @@ function prepareImporterSourceTextForStructuring(value) {
     if (!clean) {
       if (joinedLines[joinedLines.length - 1] !== "") joinedLines.push("");
       return;
+    }
+
+    const splitWord = isImporterSplitWordLine(clean);
+    if (splitWord) {
+      joinedLines.push(splitWord);
+      incrementImporterPrepStat(stats, "repairedFragments");
+      return;
+    }
+
+    const splitPhrase = isImporterSplitPhraseLine(clean);
+    if (splitPhrase) {
+      joinedLines.push(splitPhrase);
+      incrementImporterPrepStat(stats, "repairedFragments");
+      return;
+    }
+
+    const articleSplitWord = isImporterArticleSplitWordLine(clean);
+    if (articleSplitWord) {
+      joinedLines.push(articleSplitWord);
+      incrementImporterPrepStat(stats, "repairedFragments");
+      return;
+    }
+
+    const apostropheSplitWord = isImporterApostropheSplitWordLine(clean);
+    if (apostropheSplitWord) {
+      joinedLines.push(apostropheSplitWord);
+      incrementImporterPrepStat(stats, "repairedFragments");
+      return;
+    }
+
+    if (joinedLines.length) {
+      const previous = joinedLines[joinedLines.length - 1];
+      if (previous && isImporterHyphenBreakContinuation(previous, clean)) {
+        joinedLines[joinedLines.length - 1] = normalizeImporterText(`${previous.replace(/[-–—]+$/, "")}${clean}`);
+        return;
+      }
+    }
+
+    if (joinedLines.length) {
+      const previous = joinedLines[joinedLines.length - 1];
+      if (previous && isImporterWordFragmentContinuation(previous, clean)) {
+        joinedLines[joinedLines.length - 1] = normalizeImporterText(`${previous}${clean}`);
+        return;
+      }
     }
 
     if (isImporterPriceOnlyLine(clean)) {
@@ -1270,6 +1487,108 @@ function trimImporterSeparators(value) {
 
 function normalizeImporterText(value) {
   return trimImporterSeparators(normalizeImporterWhitespace(value));
+}
+
+function isImporterHyphenBreakContinuation(previous, current) {
+  const prior = normalizeImporterText(previous);
+  const next = normalizeImporterText(current);
+  if (!prior || !next) return false;
+  if (hasImporterPriceToken(prior) || hasImporterPriceToken(next)) return false;
+  if (!/[\p{L}\p{N}]-$/u.test(prior)) return false;
+  if (!/^[\p{Ll}\p{N}]/u.test(next)) return false;
+  if (next.split(/\s+/).filter(Boolean).length > 3) return false;
+  return true;
+}
+
+function isImporterWordFragmentContinuation(previous, current) {
+  const prior = normalizeImporterText(previous);
+  const next = normalizeImporterText(current);
+  if (!prior || !next) return false;
+  if (hasImporterPriceToken(prior) || hasImporterPriceToken(next)) return false;
+  if (/[\.\?!]$/.test(prior)) return false;
+  if (!/^[\p{Ll}]/u.test(next)) return false;
+  if (next.split(/\s+/).filter(Boolean).length > 1) return false;
+
+  const priorWord = prior.split(/\s+/).filter(Boolean).pop() || "";
+  const nextWord = next.split(/\s+/).filter(Boolean)[0] || "";
+  if (priorWord.length < 3 || priorWord.length > 7) return false;
+  if (nextWord.length < 2 || nextWord.length > 7) return false;
+  if (priorWord.length + nextWord.length > 10) return false;
+  if (!/^[\p{L}\p{N}]+$/u.test(priorWord) || !/^[\p{L}\p{N}]+$/u.test(nextWord)) return false;
+
+  return true;
+}
+
+function incrementImporterPrepStat(stats, key) {
+  if (!stats || typeof stats !== "object") return;
+  stats[key] = (Number(stats[key]) || 0) + 1;
+}
+
+function isImporterSplitWordLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || hasImporterPriceToken(line)) return "";
+  if (/[\.,;:!?]/.test(line)) return "";
+  const words = line.split(/\s+/).filter(Boolean);
+  if (words.length !== 2) return "";
+
+  const [left, right] = words;
+  if (!/^[\p{Ll}\p{N}]+$/u.test(left) || !/^[\p{Ll}\p{N}]+$/u.test(right)) return "";
+  if (left.length < 3 || right.length < 2) return "";
+
+  const joined = findImporterCommonMenuWord(`${left}${right}`);
+  return joined ? normalizeImporterText(joined) : "";
+}
+
+function isImporterSplitPhraseLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || hasImporterPriceToken(line)) return "";
+  if (/[\.,;:!?]/.test(line)) return "";
+  const words = line.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 3) return "";
+
+  const joined = findImporterCommonMenuPhrase(words.join(""));
+  return joined ? normalizeImporterText(words.join(" ")) : "";
+}
+
+function isImporterArticleSplitWordLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || hasImporterPriceToken(line)) return "";
+  if (/[\.,;:!?]/.test(line)) return "";
+  const words = line.split(/\s+/).filter(Boolean);
+  if (words.length !== 2) return "";
+
+  const [article, noun] = words;
+  if (!/^[ldcnjt]$/i.test(article)) return "";
+  if (!/^[\p{Ll}\p{N}]+$/u.test(noun) || noun.length < 3) return "";
+
+  const normalizedNoun = findImporterCommonMenuWord(noun);
+  if (normalizedNoun) return normalizeImporterText(normalizedNoun);
+  const normalizedPhrase = findImporterCommonMenuPhrase(noun);
+  return normalizedPhrase ? normalizeImporterText(normalizedPhrase) : "";
+}
+
+function isImporterApostropheSplitWordLine(value) {
+  const line = normalizeImporterText(value);
+  if (!line || hasImporterPriceToken(line)) return "";
+  if (/[\.,;:!?]/.test(line)) return "";
+
+  const compactMatch = line.match(/^([ldcjmnst])['’](.+)$/i);
+  if (compactMatch) {
+    const normalizedNoun = findImporterCommonMenuWord(compactMatch[2]);
+    if (normalizedNoun) return normalizeImporterText(normalizedNoun);
+    const normalizedPhrase = findImporterCommonMenuPhrase(compactMatch[2]);
+    return normalizedPhrase ? normalizeImporterText(normalizedPhrase) : "";
+  }
+
+  const words = line.split(/\s+/).filter(Boolean);
+  if (words.length !== 2) return "";
+  const [article, noun] = words;
+  if (!/^[ldcjmnst]['’]?$/i.test(article)) return "";
+
+  const normalizedNoun = findImporterCommonMenuWord(noun);
+  if (normalizedNoun) return normalizeImporterText(normalizedNoun);
+  const normalizedPhrase = findImporterCommonMenuPhrase(noun);
+  return normalizedPhrase ? normalizeImporterText(normalizedPhrase) : "";
 }
 
 function slugifyImporterKey(value) {
@@ -1391,6 +1710,127 @@ function splitInlineNameAndDesc(name, desc) {
     name: nextName,
     desc: nextDesc
   };
+}
+
+function buildImporterFallbackDescriptionSet(name, category = "") {
+  const source = canonicalImporterLookup(`${name} ${category}`);
+  const templates = [
+    {
+      test: /\b(pizza|pizza|margherita|pepperoni|calzone|fourche|quatrefromages)\b/,
+      fr: "Pizza preparée avec des garnitures classiques.",
+      en: "Pizza prepared with classic toppings.",
+      ar: "بيتزا محضرة بإضافات كلاسيكية."
+    },
+    {
+      test: /\b(burger|hamburger|cheeseburger)\b/,
+      fr: "Burger préparé à la commande.",
+      en: "Burger prepared to order.",
+      ar: "برغر محضر عند الطلب."
+    },
+    {
+      test: /\b(salade|salad|caesar|cesar|greek)\b/,
+      fr: "Salade fraîche préparée à la commande.",
+      en: "Fresh salad prepared to order.",
+      ar: "سلطة طازجة محضرة عند الطلب."
+    },
+    {
+      test: /\b(pasta|spaghetti|tagine|tajine|couscous|lasagna|macaroni)\b/,
+      fr: "Plat préparé à la commande.",
+      en: "Dish prepared to order.",
+      ar: "طبق محضر عند الطلب."
+    },
+    {
+      test: /\b(wrap|sandwich|tacos|shawarma|croque)\b/,
+      fr: "Plat pratique préparé à la commande.",
+      en: "Handheld item prepared to order.",
+      ar: "طبق سهل التناول محضر عند الطلب."
+    },
+    {
+      test: /\b(dessert|cake|gateau|tarte|tiramisu|crepe|waffle|cheesecake|mousse|glace)\b/,
+      fr: "Dessert prepare frais.",
+      en: "Fresh dessert prepared to order.",
+      ar: "تحلية طازجة محضرة عند الطلب."
+    },
+    {
+      test: /\b(cafe|coffee|tea|the|juice|jus|soda|mojito|cocktail|smoothie|latte|espresso)\b/,
+      fr: "Boisson servie fraîchement préparée.",
+      en: "Beverage served fresh.",
+      ar: "مشروب يقدم طازجا."
+    },
+    {
+      test: /\b(chicken|poulet|beef|boeuf|fish|poisson|salmon|thon|seafood|crevette|shrimp)\b/,
+      fr: "Plat principal préparé à la commande.",
+      en: "Main dish prepared to order.",
+      ar: "طبق رئيسي محضر عند الطلب."
+    }
+  ];
+
+  const matched = templates.find((template) => template.test.test(source));
+  if (matched) {
+    return {
+      fr: matched.fr,
+      en: matched.en,
+      ar: matched.ar
+    };
+  }
+
+  return {
+    fr: "Spécialité de la maison préparée à la commande.",
+    en: "House specialty prepared to order.",
+    ar: "طبق من توقيع المطعم محضر عند الطلب."
+  };
+}
+
+function chooseImporterFallbackLanguage(name, category = "") {
+  const source = canonicalImporterLookup(`${name} ${category}`);
+  if (/[\u0600-\u06FF]/.test(source)) return "ar";
+  if (IMPORTER_COMMON_FRENCH_MENU_WORD_REGEX.test(source)) return "fr";
+  return "en";
+}
+
+function buildImporterContextualFallbackDescriptionSet(name, category = "") {
+  const source = canonicalImporterLookup(`${name} ${category}`);
+  const language = chooseImporterFallbackLanguage(name, category);
+  const baseSet = buildImporterFallbackDescriptionSet(name, category);
+  const detailParts = [];
+
+  if (/\b(spicy|hot|piquant|harissa|epice|epicee)\b/.test(source)) detailParts.push("spicy");
+  if (/\b(grill|grilled|braise|roast|roti|charcoal|brochette)\b/.test(source)) detailParts.push("grilled");
+  if (/\b(fried|crispy|croustillant|croustillante|pane)\b/.test(source)) detailParts.push("crispy");
+  if (/\b(cheese|fromage|cheesy|mozzarella|parmesan)\b/.test(source)) detailParts.push("with cheese");
+  if (/\b(vegan|vegetarian|vegetarien|vegetarienne|veggie)\b/.test(source)) detailParts.push("vegetarian");
+  if (/\b(seafood|fish|poisson|thon|salmon|crevette|shrimp)\b/.test(source)) detailParts.push("seafood");
+  if (/\b(fresh|frais|fraiche|maison|house)\b/.test(source)) detailParts.push("freshly prepared");
+
+  const detailText = detailParts.length ? ` ${detailParts.join(", ")}.` : "";
+  const nextSet = {
+    fr: asImporterString(baseSet.fr),
+    en: asImporterString(baseSet.en),
+    ar: asImporterString(baseSet.ar)
+  };
+
+  if (detailText) {
+    if (language === "fr") nextSet.fr = `${nextSet.fr}${detailText}`;
+    else if (language === "ar") nextSet.ar = `${nextSet.ar}${detailText}`;
+    else nextSet.en = `${nextSet.en}${detailText}`;
+  }
+
+  return nextSet;
+}
+
+function selectImporterFallbackDescription(fallbackSet, language = "en") {
+  return resolveImporterFallbackText(fallbackSet, language);
+}
+
+function isImporterWeakDescription(name, desc) {
+  const cleanName = canonicalImporterLookup(name);
+  const cleanDesc = canonicalImporterLookup(desc);
+  if (!cleanDesc) return true;
+  if (!cleanName) return false;
+  if (cleanDesc === cleanName) return true;
+  if (cleanDesc.length <= 5) return true;
+  if (cleanDesc.length <= 14 && !/[,:;()\-]/.test(asImporterString(desc))) return true;
+  return false;
 }
 
 function guessImporterCategoryEmoji(value) {
@@ -1827,10 +2267,11 @@ function prepareImporterSourceForStructuring(source, limits = {}) {
   const warnings = Array.isArray(source?.warnings) ? source.warnings.slice() : [];
   const preparedPages = [];
   let splitPageCount = 0;
+  const prepStats = { repairedFragments: 0 };
 
   pages.forEach((page, index) => {
     const label = normalizeImporterText(page?.label) || `Page ${index + 1}`;
-    const text = prepareImporterSourceTextForStructuring(page?.text);
+    const text = prepareImporterSourceTextForStructuring(page?.text, prepStats);
     if (!text) return;
 
     const maxChars = Number(limits.maxCharsPerPage) || 0;
@@ -1847,6 +2288,9 @@ function prepareImporterSourceForStructuring(source, limits = {}) {
   }
   if (splitPageCount > 0) {
     warnings.push(`Split ${splitPageCount} oversized extracted page(s) into smaller parts before structuring.`);
+  }
+  if (prepStats.repairedFragments > 0) {
+    warnings.push(`Recovered ${prepStats.repairedFragments} OCR fragment(s) while preparing extracted source text.`);
   }
 
   return {
@@ -2397,6 +2841,7 @@ function normalizeStructuredImporterDraft(parsed) {
   let duplicateIdCount = 0;
   let missingPriceCount = 0;
   let multiplePriceDetailCount = 0;
+  let filledDescriptionCount = 0;
 
   const derivedCategories = categories.length
     ? categories
@@ -2421,7 +2866,8 @@ function normalizeStructuredImporterDraft(parsed) {
       || normalizedFrName
       || normalizedName
       || `category-${index + 1}`;
-    const categoryTranslationSet = fillTranslationSet(translations, normalizedName || key, "");
+    const categoryFallbackDesc = buildImporterContextualFallbackDescriptionSet(normalizedName || key, "");
+    const categoryTranslationSet = fillTranslationSet(translations, normalizedName || key, categoryFallbackDesc);
 
     catEmojis[key] = asImporterString(category?.emoji) || guessImporterCategoryEmoji(key);
     categoryTranslations[key] = categoryTranslationSet;
@@ -2451,6 +2897,20 @@ function normalizeStructuredImporterDraft(parsed) {
       fallbackCategoryCount += 1;
     }
 
+    const fallbackDescriptionSet = buildImporterContextualFallbackDescriptionSet(splitText.name, normalizedCat);
+    const fallbackDesc = selectImporterFallbackDescription(
+      fallbackDescriptionSet,
+      chooseImporterFallbackLanguage(splitText.name, normalizedCat)
+    );
+    const resolvedDesc = isImporterWeakDescription(splitText.name, splitText.desc)
+      ? fallbackDesc
+      : splitText.desc;
+    if (!splitText.desc && resolvedDesc) {
+      filledDescriptionCount += 1;
+    } else if (isImporterWeakDescription(splitText.name, splitText.desc) && resolvedDesc) {
+      filledDescriptionCount += 1;
+    }
+
     const normalizedPrice = normalizeImporterPrice(item?.price, item?.name, item?.desc);
     if (!Number.isFinite(parsePossiblePriceToken(item?.price)) && Number.isFinite(normalizedPrice)) {
       normalizedPriceCount += 1;
@@ -2461,11 +2921,11 @@ function normalizeStructuredImporterDraft(parsed) {
       id: asImporterString(item?.id) || `item-${slugifyImporterKey(normalizedCat)}-${index + 1}`,
       cat: normalizedCat,
       name: splitText.name,
-      desc: splitText.desc,
+      desc: resolvedDesc,
       price: Number.isFinite(normalizedPrice) ? normalizedPrice : null,
       img,
       images: img && !images.length ? [img] : images,
-      translations: fillTranslationSet(item?.translations, splitText.name, splitText.desc),
+      translations: fillTranslationSet(item?.translations, splitText.name, fallbackDescriptionSet),
       ingredients: Array.isArray(item?.ingredients)
         ? item.ingredients.map((value) => normalizeImporterText(value)).filter(Boolean)
         : []
@@ -2561,6 +3021,9 @@ function normalizeStructuredImporterDraft(parsed) {
   }
   if (multiplePriceDetailCount > 0) {
     reviewWarnings.push(`${multiplePriceDetailCount} item(s) include multiple visible size/price options; the base price should be reviewed.`);
+  }
+  if (filledDescriptionCount > 0) {
+    reviewWarnings.push(`Filled ${filledDescriptionCount} missing menu description(s) with deterministic fallback copy.`);
   }
   if (fallbackCategoryCount > 0) {
     reviewWarnings.push(`Grouped ${fallbackCategoryCount} item(s) into a fallback Menu category because no category label was extracted.`);

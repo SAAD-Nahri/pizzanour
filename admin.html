@@ -17,6 +17,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Bebas+Neue&display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <style>
         :root {
             --primary: #ff8d08;
@@ -423,8 +424,8 @@
 
         .info-summary-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
         }
 
         .info-summary-card {
@@ -435,7 +436,7 @@
             background: rgba(255, 255, 255, 0.82);
             border: 1px solid rgba(232, 216, 197, 0.92);
             box-shadow: none;
-            min-height: 76px;
+            min-height: 88px;
             display: grid;
             gap: 7px;
             align-content: center;
@@ -503,12 +504,23 @@
         }
 
         .info-workspace-grid {
-            display: block;
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+            gap: 18px;
+            align-items: start;
         }
 
         .info-main-column,
         .info-side-column {
-            display: contents;
+            display: grid;
+            gap: 20px;
+            align-content: start;
+            min-width: 0;
+        }
+
+        .info-side-column {
+            position: sticky;
+            top: 24px;
         }
 
         .info-workspace-panel {
@@ -551,7 +563,7 @@
 
         .info-panel-card {
             border-radius: 18px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             border: 1px solid rgba(232, 216, 197, 0.92);
             box-shadow: 0 14px 30px rgba(75, 47, 24, 0.05);
             transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
@@ -572,7 +584,7 @@
             align-items: center;
             gap: 14px;
             min-height: 62px;
-            padding-bottom: 14px;
+            padding: 18px 24px 12px;
         }
 
         .info-workspace-panel.is-active > summary {
@@ -618,6 +630,19 @@
             font-weight: 800;
             letter-spacing: 0.02em;
             white-space: nowrap;
+        }
+
+        .info-primary-card,
+        .info-panel-card {
+            contain: layout paint;
+        }
+
+        .info-summary-grid {
+            grid-auto-rows: 1fr;
+        }
+
+        .info-summary-card .info-summary-value {
+            font-size: 1.02rem;
         }
 
         .info-contact-grid,
@@ -6712,6 +6737,10 @@
                 gap: 14px;
             }
 
+            .info-side-column {
+                position: static;
+            }
+
             .branding-overview-card,
             .branding-section-card,
             .branding-save-bar,
@@ -8452,15 +8481,15 @@
 
     <nav class="mobile-bottom-nav">
         <button class="nav-btn mobile-bottom-nav-btn active" id="menuMobileNavBtn" data-section="menu" onclick="showSection('menu', this)">
-            <span class="mobile-bottom-nav-icon">&#127869;&#65039;</span>
+            <span class="mobile-bottom-nav-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
             <span>Menu</span>
         </button>
         <button class="nav-btn mobile-bottom-nav-btn" id="infoMobileNavBtn" data-section="info" onclick="showSection('info', this)">
-            <span class="mobile-bottom-nav-icon">&#8505;&#65039;</span>
+            <span class="mobile-bottom-nav-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
             <span>Info</span>
         </button>
         <button class="nav-btn mobile-bottom-nav-btn" id="parametersMobileNavBtn" data-section="parameters" onclick="toggleSidebar()">
-            <span class="mobile-bottom-nav-icon">&#9881;&#65039;</span>
+            <span class="mobile-bottom-nav-icon"><i class="bi bi-gear-fill" aria-hidden="true"></i></span>
             <span>Parameters</span>
         </button>
     </nav>
@@ -8482,15 +8511,15 @@
 
     <div class="sidebar" id="adminSidebar" style="display:none">
         <h1 id="adminSidebarTitleText" data-i18n="admin.sidebar_title">Restaurant Admin</h1>
-        <button class="nav-btn sidebar-nav-mobile-hidden active" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)">&#127869;&#65039; Menu</button>
-        <button class="nav-btn sidebar-nav-mobile-hidden" id="infoNavBtn" data-section="info" onclick="showSection('info', this)">&#8505;&#65039; Info</button>
-        <button class="nav-btn" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)">&#127912; Branding</button>
-        <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)">&#128229; Import</button>
+        <button class="nav-btn sidebar-nav-mobile-hidden active" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)"><i class="bi bi-journal-text" aria-hidden="true"></i> Menu</button>
+        <button class="nav-btn sidebar-nav-mobile-hidden" id="infoNavBtn" data-section="info" onclick="showSection('info', this)"><i class="bi bi-info-circle" aria-hidden="true"></i> Info</button>
+        <button class="nav-btn" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)"><i class="bi bi-palette2" aria-hidden="true"></i> Branding</button>
+        <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)"><i class="bi bi-download" aria-hidden="true"></i> Import</button>
         <div class="sidebar-actions">
             <div id="adminSaveStatus" class="admin-save-status" aria-live="polite"></div>
             <button class="nav-btn sidebar-install-btn" id="adminSidebarInstallBtn" type="button" onclick="installAdminApp()" hidden>⬇ Install App</button>
-            <a href="/" class="nav-btn sidebar-home-link" data-i18n="admin.header.website_home">&larr; Website Home</a>
-            <button class="nav-btn sidebar-logout-btn" onclick="adminLogout()" data-i18n="admin.nav.logout">&#128682; D&eacute;connexion</button>
+            <a href="/" class="nav-btn sidebar-home-link" data-i18n="admin.header.website_home"><i class="bi bi-house-door" aria-hidden="true"></i> Website Home</a>
+            <button class="nav-btn sidebar-logout-btn" onclick="adminLogout()" data-i18n="admin.nav.logout"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> D&eacute;connexion</button>
         </div>
     </div>
 
@@ -8507,7 +8536,7 @@
                             <p id="menuBuilderCopy" class="copy-muted" style="margin:0;">Set the structure, then add dishes.</p>
                         </div>
                     <div class="menu-builder-actions">
-                        <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="&#8592;" onclick="goBackMenuBuilder()">Back</button>
+                        <button type="button" id="menuBuilderBackBtn" class="brand-secondary-btn menu-icon-btn" data-mobile-icon="←" onclick="goBackMenuBuilder()">Back</button>
                         <button type="button" id="menuBuilderAddBtn" class="primary-btn btn-auto" onclick="openMenuBuilderAdd()">Add</button>
                     </div>
                 </div>
@@ -8530,7 +8559,7 @@
             <dialog id="menuCrudModal" class="menu-crud-dialog" aria-labelledby="menuCrudModalTitle">
                 <div class="menu-crud-modal-card">
                     <div class="menu-crud-modal-header">
-                        <button type="button" class="menu-crud-close" aria-label="Close form" title="Close form" onclick="closeMenuCrudModal()">&times;</button>
+                        <button type="button" class="menu-crud-close" aria-label="Close form" title="Close form" onclick="closeMenuCrudModal()"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
                         <h3 id="menuCrudModalTitle" class="menu-crud-modal-title">Edit</h3>
                     </div>
                     <div id="menuCrudModalBody"></div>
@@ -8870,22 +8899,18 @@
                         <article class="info-summary-card" id="infoSummaryLocationCard" role="button" tabindex="0" onclick="focusInfoWorkspacePanel('public')" onkeydown="handleInfoSummaryCardKey(event, 'public')">
                             <span class="info-summary-label" data-i18n="admin.info.summary_location">Location</span>
                             <div class="info-summary-value" id="infoSummaryLocationValue">Add address</div>
-                            <div class="info-summary-note" id="infoSummaryLocationNote">Map link pending</div>
                         </article>
                         <article class="info-summary-card" id="infoSummaryContactCard" role="button" tabindex="0" onclick="focusInfoWorkspacePanel('social')" onkeydown="handleInfoSummaryCardKey(event, 'social')">
                             <span class="info-summary-label" data-i18n="admin.info.summary_contact">Contact</span>
                             <div class="info-summary-value" id="infoSummaryContactValue">Add phone number</div>
-                            <div class="info-summary-note" id="infoSummaryContactNote">No public links yet</div>
                         </article>
                         <article class="info-summary-card" id="infoSummaryGuestCard" role="button" tabindex="0" onclick="focusInfoWorkspacePanel('facilities')" onkeydown="handleInfoSummaryCardKey(event, 'facilities')">
                             <span class="info-summary-label" data-i18n="admin.info.summary_guest">Guest Experience</span>
                             <div class="info-summary-value" id="infoSummaryGuestValue">Review facilities</div>
-                            <div class="info-summary-note" id="infoSummaryGuestNote">Public experience details not configured</div>
                         </article>
                         <article class="info-summary-card" id="infoSummaryOpsCard" role="button" tabindex="0" onclick="focusInfoWorkspacePanel('hours')" onkeydown="handleInfoSummaryCardKey(event, 'hours')">
                             <span class="info-summary-label" data-i18n="admin.info.summary_ops">Operations</span>
                             <div class="info-summary-value" id="infoSummaryOpsValue">Admin access</div>
-                            <div class="info-summary-note" id="infoSummaryOpsNote">Set WiFi and opening hours</div>
                         </article>
                     </div>
                 </section>
@@ -8978,7 +9003,7 @@
         <div id="imageModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="imgModalHeading"
             style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
             <div class="modal-card image-modal-card">
-                <button class="image-modal-close" aria-label="Close image manager" title="Close image manager" onclick="closeImageModal()">&times;</button>
+                <button class="image-modal-close" aria-label="Close image manager" title="Close image manager" onclick="closeImageModal()"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
                 <h2 id="imgModalHeading" class="image-modal-title">Manage Images: <span id="imgModalItemName"></span></h2>
 
                 <div class="image-modal-dropzone">

@@ -3008,9 +3008,9 @@ function mountOwnerAdminLayout() {
     moveNodeToHost('landingContactBlock', 'infoLandingPrimaryMount');
     moveDisclosureBodyContentToHost('landingSocialBlock', 'infoLandingSocialMount');
     moveDisclosureBodyContentToHost('landingFacilitiesBlock', 'infoLandingFacilitiesMount');
-    moveSectionContentToHost('hours', 'infoHoursMount', ['h3', 'p']);
-    moveSectionContentToHost('wifi', 'infoWifiMount', ['h3', 'p']);
-    moveSectionContentToHost('security', 'infoSecurityMount', ['h3', 'p']);
+    moveSectionContentToHost('hours', 'infoHoursMount', ['h3']);
+    moveSectionContentToHost('wifi', 'infoWifiMount', ['h3']);
+    moveSectionContentToHost('security', 'infoSecurityMount', ['h3']);
     moveNodeToHost('landingLayoutBlock', 'brandingHomepageLayoutMount');
     moveNodeToHost('landingCopyBlock', 'brandingHomepageCopyMount');
     moveSectionChildren('gallery', 'brandingGalleryMount');
@@ -5163,31 +5163,17 @@ function renderInfoWorkspaceSummary() {
     const securityUser = readValue('adminNewUser', adminAuth?.user || '');
 
     setInfoWorkspaceText('infoSummaryLocationValue', address || t('admin.info.add_address', 'Add address'));
-    setInfoWorkspaceText('infoSummaryLocationNote', mapUrl && isValidAbsoluteUrl(mapUrl)
-        ? t('admin.info.map_ready', 'Map link ready')
-        : t('admin.info.map_pending', 'Map link pending'));
     setInfoSummaryState('infoSummaryLocationCard', Boolean(address && mapUrl && isValidAbsoluteUrl(mapUrl)));
 
     setInfoWorkspaceText('infoSummaryContactValue', phone || t('admin.info.add_phone', 'Add phone number'));
-    setInfoWorkspaceText('infoSummaryContactNote', socialLinks.length
-        ? t(socialLinks.length > 1 ? 'admin.info.public_links_live_plural' : 'admin.info.public_links_live', '{count} public link live', { count: socialLinks.length })
-        : t('admin.info.no_public_links', 'No public links yet'));
     setInfoSummaryState('infoSummaryContactCard', Boolean(phone));
 
     setInfoWorkspaceText('infoSummaryGuestValue', guestSignalCount
         ? t('admin.info.guest_signals_live', '{count} guest signals live', { count: guestSignalCount })
         : t('admin.info.review_facilities', 'Review facilities'));
-    setInfoWorkspaceText('infoSummaryGuestNote', t(
-        visibleSectionCount > 1 ? 'admin.info.home_sections_visible_plural' : 'admin.info.home_sections_visible',
-        '{count} homepage section visible',
-        { count: visibleSectionCount }
-    ));
     setInfoSummaryState('infoSummaryGuestCard', guestSignalCount > 0);
 
     setInfoWorkspaceText('infoSummaryOpsValue', securityUser ? `@${securityUser}` : t('admin.info.review_access', 'Review access'));
-    setInfoWorkspaceText('infoSummaryOpsNote', wifiName
-        ? t('admin.info.wifi_summary', 'WiFi: {name}', { name: summarizeInfoCopy(wifiName) })
-        : t('admin.info.wifi_not_configured', 'WiFi not configured'));
     setInfoSummaryState('infoSummaryOpsCard', Boolean(securityUser && wifiName && configuredHoursCount));
 
     setInfoWorkspaceText('infoSocialMetric', socialLinks.length

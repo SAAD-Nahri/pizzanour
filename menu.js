@@ -486,6 +486,17 @@ function getAvailableSuperCategories() {
     );
 }
 
+function getMenuLiveStats() {
+    const visibleItems = menu.filter((item) => item?.available !== false);
+    const visibleCategories = new Set(visibleItems.map((item) => item?.cat).filter(Boolean));
+    const featuredCount = visibleItems.filter((item) => item?.featured).length;
+    return {
+        items: visibleItems.length,
+        categories: visibleCategories.size,
+        featured: featuredCount
+    };
+}
+
 function getAvailableItemExtras(item) {
     return Array.isArray(item?.extras)
         ? item.extras
@@ -578,8 +589,19 @@ function getCategoryPreviewSource(cat) {
     };
 }
 
+function getMenuCategoryItemCount(cat) {
+    return menu.reduce((count, item) => count + ((item?.cat === cat && item?.available !== false) ? 1 : 0), 0);
+}
+
+function getSuperCategoryItemCount(sc) {
+    if (!sc || !Array.isArray(sc.cats)) return 0;
+    const cats = new Set(sc.cats);
+    return menu.reduce((count, item) => count + ((item?.available !== false && cats.has(item?.cat)) ? 1 : 0), 0);
+}
+
 function buildCategoryNavigationCardMarkup(cat) {
     const localizedName = window.getLocalizedCategoryName(cat, cat);
+    const itemCount = getMenuCategoryItemCount(cat);
     const preview = getCategoryPreviewSource(cat);
     const fallbackGlyph = (localizedName || cat || MENU_UI_ICONS.plate).trim().charAt(0).toUpperCase() || '•';
     const originalSrcAttr = preview.originalSrc && preview.originalSrc !== preview.src
@@ -593,6 +615,7 @@ function buildCategoryNavigationCardMarkup(cat) {
             </span>
             <span class="menu-category-card-shade"></span>
             <span class="menu-category-card-title">${localizedName}</span>
+            <span class="menu-category-card-count">${itemCount}</span>
         </button>
     `;
 }
@@ -608,10 +631,12 @@ function getSuperCategoryForCategory(cat) {
 
 function buildCategorySubnavButtonMarkup(cat, isActive = false) {
     const localizedName = window.getLocalizedCategoryName(cat, cat);
+    const itemCount = getMenuCategoryItemCount(cat);
 
     return `
         <button class="menu-subnav-tab ${isActive ? 'active' : ''} menu-reveal-observe" data-cat="${escapeHtmlAttr(cat)}" onclick="showCategoryItems(${serializeInlineId(cat)})" ${isActive ? 'aria-current="page"' : ''}>
             <span class="menu-subnav-name">${localizedName}</span>
+            <span class="menu-subnav-count">${itemCount}</span>
         </button>
     `;
 }
@@ -845,8 +870,13 @@ function observeDeferredMenuImages(scope = document) {
 }
 
 function buildMenuItemCardMarkup(item, cat, itemIndex) {
+    const isFeatured = !!item?.featured;
+    const itemMeta = [];
+    if (item?.hasSizes) itemMeta.push(t('multiple_sizes', 'Plusieurs tailles'));
+    if (Array.isArray(item?.extras) && item.extras.length) itemMeta.push(t('extras_available', 'Extras'));
     return `
-        <div class="menu-item-card menu-reveal-observe" onclick="openDishPage(${serializeInlineId(item.id)})">
+        <div class="menu-item-card menu-reveal-observe ${isFeatured ? 'menu-item-card--featured' : ''}" onclick="openDishPage(${serializeInlineId(item.id)})">
+            ${isFeatured ? `<span class="menu-item-badge">${t('featured_label', 'Signature')}</span>` : ''}
             <button class="love-btn menu-item-love ${window.getLikeCount(item.id) > 0 ? 'loved text-pop' : ''}" 
                     onclick="event.stopPropagation(); window.handleToggleLike(${serializeInlineId(item.id)}, this)">
                 <span class="love-icon">${MENU_UI_ICONS.heart}</span><span class="love-count">${window.getLikeCount(item.id)}</span>
@@ -857,9 +887,10 @@ function buildMenuItemCardMarkup(item, cat, itemIndex) {
             <div class="menu-item-info">
                 <div class="menu-item-name">${window.getLocalizedMenuName(item)}</div>
                 <div class="menu-item-desc">${window.getLocalizedMenuDescription(item)}</div>
+                ${itemMeta.length ? `<div class="menu-item-meta">${itemMeta.map((label) => `<span class="menu-item-meta-pill">${label}</span>`).join('')}</div>` : ''}
                 <div class="menu-item-price">
                     ${item.hasSizes
-                        ? `<span style="font-size:0.7em; opacity:0.7;">${t('price_from', 'À partir de')}</span> ${window.getItemPrice(item, 'small').toFixed(0)} MAD`
+                        ? `<span class="menu-item-price-prefix"><i class="bi bi-tag-fill" aria-hidden="true"></i> ${t('price_from', 'À partir de')}</span> ${window.getItemPrice(item, 'small').toFixed(0)} MAD`
                         : `${item.price.toFixed(0)} MAD`}
                 </div>
             </div>
@@ -877,17 +908,23 @@ function getMenuCategoryCacheKey(cat) {
     return `${lastDataVersion || 'runtime'}::${currentLang}::${cat}`;
 }
 
-function buildCategorySectionMarkup(cat, gridMarkup) {
+function buildCategorySectionMarkup(cat, gridMarkup, itemCount = 0) {
     return `
         <section class="menu-section menu-reveal-observe" id="cat-${cat.replace(/\s/g, '-')}">
-            <h2 class="menu-section-title">${catEmojis[cat] || MENU_UI_ICONS.plate} ${window.getLocalizedCategoryName(cat, cat)}</h2>
+            <h2 class="menu-section-title">
+                <span class="menu-section-title-main">${catEmojis[cat] || MENU_UI_ICONS.plate} ${window.getLocalizedCategoryName(cat, cat)}</span>
+                <span class="menu-section-count">${itemCount}</span>
+            </h2>
             <div class="menu-grid">${gridMarkup}</div>
         </section>
     `;
 }
 
 function cacheRenderedCategoryMarkup(cat, gridMarkup) {
-    menuCategoryMarkupCache.set(getMenuCategoryCacheKey(cat), buildCategorySectionMarkup(cat, gridMarkup));
+    const itemCount = typeof gridMarkup === 'string'
+        ? (gridMarkup.match(/class="menu-item-card/g) || []).length
+        : 0;
+    menuCategoryMarkupCache.set(getMenuCategoryCacheKey(cat), buildCategorySectionMarkup(cat, gridMarkup, itemCount));
 }
 
 function ensureCategoryChunkSentinel(state) {
@@ -1057,11 +1094,27 @@ function renderLandingInfo() {
     const locationConfig = config.location || {};
     const socialsConfig = config.socials || {};
     const wifiConfig = config.wifi || {};
+    const stats = getMenuLiveStats();
     const mapUrl = window.getSafeExternalUrl(locationConfig.url);
     const phoneHref = window.getSafePhoneHref(config.phone);
     const getText = (key, fallback) => typeof window.getTranslation === 'function'
         ? window.getTranslation(key, fallback)
         : fallback;
+
+    const subtitleEl = document.getElementById('landingSubtitle');
+    if (subtitleEl) {
+        subtitleEl.textContent = getText(
+            'menu_landing_subtitle',
+            'Carte du jour, prête à parcourir.'
+        );
+    }
+
+    const metaItemsEl = document.getElementById('landingMetaItems');
+    const metaCategoriesEl = document.getElementById('landingMetaCategories');
+    const metaFeaturedEl = document.getElementById('landingMetaFeatured');
+    if (metaItemsEl) metaItemsEl.textContent = `${stats.items} ${getText('menu_items', 'plats')}`;
+    if (metaCategoriesEl) metaCategoriesEl.textContent = `${stats.categories} ${getText('categories', 'catégories')}`;
+    if (metaFeaturedEl) metaFeaturedEl.textContent = `${stats.featured} ${getText('featured_label', 'signature')}`;
 
     // Location
     const locEl = document.getElementById('landingLocation');
@@ -1366,9 +1419,18 @@ function renderFeaturedSlider(items, containerId) {
     }
 
     container.style.display = 'block';
+    const liveStats = getMenuLiveStats();
     container.innerHTML = `
         <div class="featured-header-sexy menu-reveal-observe">
-            <span class="featured-header-label">${t('featured_label', 'Sélection Signature')}</span>
+            <div class="featured-header-copy">
+                <span class="featured-header-label">${t('featured_label', 'Sélection Signature')}</span>
+                <div class="featured-header-meta">
+                    <span class="featured-header-stat">${liveStats.items} ${t('menu_items', 'plats')}</span>
+                    <span class="featured-header-stat">${liveStats.categories} ${t('categories', 'catégories')}</span>
+                    <span class="featured-header-stat">${liveStats.featured} ${t('featured_label', 'signature')}</span>
+                    <span class="featured-header-stat">${items.length} ${t('featured_label', 'sélection')}</span>
+                </div>
+            </div>
         </div>
         <div class="featured-slider">
             ${items.map(item => `
@@ -1470,6 +1532,7 @@ function renderSuperCatSheet() {
                     <div class="super-cat-row-desc">${window.getLocalizedSuperCategoryDescription(sc, '')}</div>
                 </div>
             </div>
+            <span class="super-cat-row-count">${getSuperCategoryItemCount(sc)}</span>
             <span class="super-cat-row-arrow">&rsaquo;</span>
         </div>
     `).join('')
@@ -1672,7 +1735,7 @@ function renderMenu(categoryFilter = null) {
             return;
         }
 
-        wrap.innerHTML = buildCategorySectionMarkup(cat, '');
+        wrap.innerHTML = buildCategorySectionMarkup(cat, '', items.length);
 
         const grid = wrap.querySelector('.menu-grid');
         if (!grid) return;
@@ -1696,7 +1759,7 @@ function renderMenu(categoryFilter = null) {
             if (isCompactMenuViewport()) ensureCategoryChunkSentinel(activeCategoryRenderState);
             else scheduleNextCategoryChunk(activeCategoryRenderToken);
         } else {
-            cacheRenderedCategoryMarkup(cat, grid.innerHTML);
+        cacheRenderedCategoryMarkup(cat, grid.innerHTML);
         }
         return;
     }
@@ -1705,7 +1768,10 @@ function renderMenu(categoryFilter = null) {
         const items = menu.filter(m => m.cat === cat && m.available !== false);
         return `
             <section class="menu-section menu-reveal-observe" id="cat-${cat.replace(/\s/g, '-')}">
-                <h2 class="menu-section-title">${catEmojis[cat] || MENU_UI_ICONS.plate} ${window.getLocalizedCategoryName(cat, cat)}</h2>
+                <h2 class="menu-section-title">
+                    <span class="menu-section-title-main">${catEmojis[cat] || MENU_UI_ICONS.plate} ${window.getLocalizedCategoryName(cat, cat)}</span>
+                    <span class="menu-section-count">${items.length}</span>
+                </h2>
                 <div class="menu-grid">
                     ${items.map((item, itemIndex) => buildMenuItemCardMarkup(item, cat, itemIndex)).join('')}
                 </div>
