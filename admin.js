@@ -1037,6 +1037,7 @@ const BRANDING_SECTION_IDS = ['branding', 'gallery'];
 const MENU_WORKSPACE_SECTION_IDS = ['menu', 'categories', 'supercategories'];
 const MENU_WORKSPACE_STEPS = ['supercategories', 'categories', 'items'];
 const BRANDING_WORKSPACE_TABS = ['identity', 'homepage', 'gallery'];
+const INFO_WORKSPACE_PANELS = ['public', 'social', 'facilities', 'hours', 'wifi', 'security'];
 const ADMIN_SECTION_ORDER_KEYS = ['about', 'payments', 'events', 'gallery', 'hours', 'contact'];
 const SECTION_ORDER_LABELS = {
     about: 'admin.section_order.about',
@@ -1049,6 +1050,7 @@ const SECTION_ORDER_LABELS = {
 let landingSectionOrderDraft = [...ADMIN_SECTION_ORDER_KEYS];
 let currentMenuWorkspaceStep = 'supercategories';
 let currentBrandingWorkspaceTab = 'identity';
+let currentInfoWorkspacePanel = 'public';
 let menuBuilderSelectedSuperCategoryId = '';
 let menuBuilderSelectedCategoryKey = '';
 let menuCrudDirty = false;
@@ -2732,7 +2734,6 @@ async function loadDataFromServer({ silent = false } = {}) {
                 }
             );
         }
-        console.log('[ADMIN] Loaded', menu.length, 'items from server');
         return true;
     } catch (error) {
         console.error('[ADMIN] Failed to load data from server:', error);
@@ -2832,7 +2833,6 @@ async function checkSession() {
         if (!res.ok) return;
         const data = await res.json();
         if (data.ok && data.authenticated) {
-            console.log('[ADMIN] Session valid. Auto-logging in...');
             showDashboard();
         }
     } catch (e) {
@@ -3015,6 +3015,9 @@ function mountOwnerAdminLayout() {
     moveNodeToHost('landingCopyBlock', 'brandingHomepageCopyMount');
     moveSectionChildren('gallery', 'brandingGalleryMount');
     mountMenuCrudForms();
+    initInfoWorkspaceNavigation();
+    initAdminLanguageRefresh();
+    syncInfoWorkspacePanels();
 }
 
 function syncMenuWorkspaceStepButtons() {
@@ -3041,6 +3044,69 @@ function syncBrandingWorkspaceTabs() {
             panel.classList.toggle('active', tab === currentBrandingWorkspaceTab);
         }
     });
+}
+
+function syncInfoWorkspacePanels() {
+    INFO_WORKSPACE_PANELS.forEach((panelKey) => {
+        const button = document.getElementById(`infoPanelBtn-${panelKey}`);
+        const panel = document.querySelector(`[data-info-panel="${panelKey}"]`);
+        const isActive = panelKey === currentInfoWorkspacePanel;
+
+        if (button) {
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            button.tabIndex = isActive ? 0 : -1;
+        }
+
+        if (panel) {
+            panel.classList.toggle('is-active', isActive);
+            panel.hidden = !isActive;
+            if (panel.tagName === 'DETAILS') {
+                panel.open = isActive;
+            }
+        }
+    });
+}
+
+function initInfoWorkspaceNavigation() {
+    const nav = document.querySelector('.info-quick-actions');
+    if (!nav || nav.dataset.navigationReady === 'true') return;
+
+    nav.addEventListener('keydown', (event) => {
+        const currentIndex = INFO_WORKSPACE_PANELS.indexOf(currentInfoWorkspacePanel);
+        if (currentIndex < 0) return;
+
+        let nextIndex = currentIndex;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+            nextIndex = (currentIndex + 1) % INFO_WORKSPACE_PANELS.length;
+        } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+            nextIndex = (currentIndex - 1 + INFO_WORKSPACE_PANELS.length) % INFO_WORKSPACE_PANELS.length;
+        } else if (event.key === 'Home') {
+            nextIndex = 0;
+        } else if (event.key === 'End') {
+            nextIndex = INFO_WORKSPACE_PANELS.length - 1;
+        } else {
+            return;
+        }
+
+        event.preventDefault();
+        const nextPanel = INFO_WORKSPACE_PANELS[nextIndex];
+        window.focusInfoWorkspacePanel(nextPanel);
+        document.getElementById(`infoPanelBtn-${nextPanel}`)?.focus({ preventScroll: true });
+    });
+
+    nav.dataset.navigationReady = 'true';
+}
+
+function initAdminLanguageRefresh() {
+    if (window.__adminLanguageRefreshReady) return;
+    window.addEventListener('app:languagechange', () => {
+        document.querySelectorAll('.info-save-btn[data-original-label]').forEach((button) => {
+            delete button.dataset.originalLabel;
+        });
+        renderInfoWorkspaceSummary();
+    });
+    window.__adminLanguageRefreshReady = true;
 }
 
 window.setMenuWorkspaceStep = function (step) {
@@ -4747,7 +4813,7 @@ function initForms() {
 
     document.getElementById('landingPageForm').onsubmit = async (e) => {
         e.preventDefault();
-        const saveButton = e.submitter || document.getElementById('infoLandingSaveBtn');
+        const saveButton = e.submitter || document.getElementById('infoPublicSaveBtn');
         const previousLocation = cloneAdminDraft(restaurantConfig.location || {});
         const previousPhone = restaurantConfig.phone || '';
         const previousSocials = cloneAdminDraft(restaurantConfig.socials || {});
@@ -5028,14 +5094,19 @@ window.focusInfoWorkspacePanel = function (panelKey) {
     };
     const target = document.getElementById(panelMap[panelKey] || '');
     if (!target) return;
-    if (target.tagName === 'DETAILS') {
-        target.open = true;
-    }
+    currentInfoWorkspacePanel = INFO_WORKSPACE_PANELS.includes(panelKey) ? panelKey : 'public';
+    syncInfoWorkspacePanels();
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     const focusTarget = target.querySelector('input, textarea, select, button') || target;
     if (focusTarget && typeof focusTarget.focus === 'function') {
         setTimeout(() => focusTarget.focus({ preventScroll: true }), 220);
     }
+};
+
+window.handleInfoSummaryCardKey = function (event, panelKey) {
+    if (!event || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    window.focusInfoWorkspacePanel(panelKey);
 };
 
 function renderInfoWorkspaceSummary() {
@@ -5084,36 +5155,52 @@ function renderInfoWorkspaceSummary() {
     const configuredHoursCount = hoursSource.filter((entry) => entry && entry.open && entry.close).length;
     const hoursSummary = hoursNote
         ? summarizeInfoCopy(hoursNote)
-        : (configuredHoursCount ? `${configuredHoursCount} days configured` : 'Set opening hours');
+        : (configuredHoursCount
+            ? t('admin.info.hours_configured', '{count} days configured', { count: configuredHoursCount })
+            : t('admin.info.set_hours', 'Set opening hours'));
 
     const wifiName = readValue('wifiSSID', restaurantConfig.wifi?.name || '');
     const securityUser = readValue('adminNewUser', adminAuth?.user || '');
 
-    setInfoWorkspaceText('infoSummaryLocationValue', address || 'Add address');
-    setInfoWorkspaceText('infoSummaryLocationNote', mapUrl && isValidAbsoluteUrl(mapUrl) ? 'Map link ready' : 'Map link pending');
+    setInfoWorkspaceText('infoSummaryLocationValue', address || t('admin.info.add_address', 'Add address'));
+    setInfoWorkspaceText('infoSummaryLocationNote', mapUrl && isValidAbsoluteUrl(mapUrl)
+        ? t('admin.info.map_ready', 'Map link ready')
+        : t('admin.info.map_pending', 'Map link pending'));
     setInfoSummaryState('infoSummaryLocationCard', Boolean(address && mapUrl && isValidAbsoluteUrl(mapUrl)));
 
-    setInfoWorkspaceText('infoSummaryContactValue', phone || 'Add phone number');
+    setInfoWorkspaceText('infoSummaryContactValue', phone || t('admin.info.add_phone', 'Add phone number'));
     setInfoWorkspaceText('infoSummaryContactNote', socialLinks.length
-        ? `${socialLinks.length} public link${socialLinks.length > 1 ? 's' : ''} live`
-        : 'No public links yet');
+        ? t(socialLinks.length > 1 ? 'admin.info.public_links_live_plural' : 'admin.info.public_links_live', '{count} public link live', { count: socialLinks.length })
+        : t('admin.info.no_public_links', 'No public links yet'));
     setInfoSummaryState('infoSummaryContactCard', Boolean(phone));
 
-    setInfoWorkspaceText('infoSummaryGuestValue', guestSignalCount ? `${guestSignalCount} guest signals live` : 'Review facilities');
-    setInfoWorkspaceText('infoSummaryGuestNote', `${visibleSectionCount} homepage section${visibleSectionCount > 1 ? 's' : ''} visible`);
+    setInfoWorkspaceText('infoSummaryGuestValue', guestSignalCount
+        ? t('admin.info.guest_signals_live', '{count} guest signals live', { count: guestSignalCount })
+        : t('admin.info.review_facilities', 'Review facilities'));
+    setInfoWorkspaceText('infoSummaryGuestNote', t(
+        visibleSectionCount > 1 ? 'admin.info.home_sections_visible_plural' : 'admin.info.home_sections_visible',
+        '{count} homepage section visible',
+        { count: visibleSectionCount }
+    ));
     setInfoSummaryState('infoSummaryGuestCard', guestSignalCount > 0);
 
-    setInfoWorkspaceText('infoSummaryOpsValue', securityUser ? `@${securityUser}` : 'Review access');
-    setInfoWorkspaceText('infoSummaryOpsNote', wifiName ? `WiFi: ${summarizeInfoCopy(wifiName)}` : 'WiFi not configured');
+    setInfoWorkspaceText('infoSummaryOpsValue', securityUser ? `@${securityUser}` : t('admin.info.review_access', 'Review access'));
+    setInfoWorkspaceText('infoSummaryOpsNote', wifiName
+        ? t('admin.info.wifi_summary', 'WiFi: {name}', { name: summarizeInfoCopy(wifiName) })
+        : t('admin.info.wifi_not_configured', 'WiFi not configured'));
     setInfoSummaryState('infoSummaryOpsCard', Boolean(securityUser && wifiName && configuredHoursCount));
 
     setInfoWorkspaceText('infoSocialMetric', socialLinks.length
-        ? `${socialLinks.length} link${socialLinks.length > 1 ? 's' : ''} live`
-        : 'No links live');
-    setInfoWorkspaceText('infoFacilitiesMetric', guestSignalCount ? `${guestSignalCount} active` : 'Nothing active');
+        ? t(socialLinks.length > 1 ? 'admin.info.links_live_plural' : 'admin.info.links_live', '{count} link live', { count: socialLinks.length })
+        : t('admin.info.no_links_live', 'No links live'));
+    setInfoWorkspaceText('infoFacilitiesMetric', guestSignalCount
+        ? t('admin.info.active_count', '{count} active', { count: guestSignalCount })
+        : t('admin.info.nothing_active', 'Nothing active'));
     setInfoWorkspaceText('infoHoursMetric', hoursSummary);
-    setInfoWorkspaceText('infoWifiMetric', wifiName ? summarizeInfoCopy(wifiName, 'Configured') : 'Not configured');
-    setInfoWorkspaceText('infoSecurityMetric', securityUser ? `@${securityUser}` : 'Update login');
+    setInfoWorkspaceText('infoWifiMetric', wifiName
+        ? summarizeInfoCopy(wifiName, t('admin.info.configured', 'Configured'))
+        : t('admin.info.not_configured', 'Not configured'));
+    setInfoWorkspaceText('infoSecurityMetric', securityUser ? `@${securityUser}` : t('admin.info.update_login', 'Update login'));
 }
 
 function getInfoSaveButtonOriginalLabel(button) {
@@ -6975,7 +7062,6 @@ function setAdminLoginPendingState(active) {
 }
 
 async function performAdminLogin() {
-    console.log('[LOGIN] performAdminLogin triggered');
     const userEl = document.getElementById('loginUser');
     const passEl = document.getElementById('loginPass');
     const errorEl = document.getElementById('loginError');
@@ -6988,8 +7074,6 @@ async function performAdminLogin() {
     const username = userEl.value.trim();
     const password = passEl.value;
     if (adminLoginInFlight) return;
-
-    console.log('[LOGIN] Attempting login for:', username);
 
     try {
         setAdminLoginPendingState(true);
@@ -7004,7 +7088,6 @@ async function performAdminLogin() {
             body: JSON.stringify({ username, password })
         });
         const data = await res.json();
-        console.log('[LOGIN] Server response:', data);
         if (!res.ok || !data.ok) {
             if (errorEl) {
                 if (data.error === 'too_many_attempts' && data.retryAfterSec) {
@@ -7455,16 +7538,10 @@ function initWifiForm() {
         const el = document.getElementById(id);
         if (el) el.value = fields[id];
     }
-    const hintS = document.getElementById('hintS');
-    const hintP = document.getElementById('hintP');
-    if (hintS) hintS.textContent = restaurantConfig.wifi.name;
-    if (hintP) hintP.textContent = restaurantConfig.wifi.code;
     ['wifiSSID', 'wifiPassInput'].forEach((id) => {
         const input = document.getElementById(id);
         if (!input) return;
         input.oninput = () => {
-            if (hintS) hintS.textContent = document.getElementById('wifiSSID')?.value || '';
-            if (hintP) hintP.textContent = document.getElementById('wifiPassInput')?.value || '';
             renderInfoWorkspaceSummary();
         };
         input.onchange = input.oninput;

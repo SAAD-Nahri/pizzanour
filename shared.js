@@ -2296,6 +2296,111 @@ Object.assign(window.translations.fr, {
 });
 
 Object.assign(window.translations.fr, {
+    'admin.info.kicker': 'Espace informations',
+    'admin.info.nav_label': 'Sections des informations',
+    'admin.info.title': 'Informations du site public',
+    'admin.info.tab_public': 'Public',
+    'admin.info.tab_social': 'Social',
+    'admin.info.tab_guest': 'Accueil',
+    'admin.info.tab_hours': 'Horaires',
+    'admin.info.tab_wifi': 'WiFi',
+    'admin.info.tab_admin': 'Admin',
+    'admin.info.summary_location': 'Adresse',
+    'admin.info.summary_contact': 'Contact',
+    'admin.info.summary_guest': 'Experience client',
+    'admin.info.summary_ops': 'Operations',
+    'admin.info.public_heading': 'Informations publiques',
+    'admin.info.social_heading': 'Liens sociaux',
+    'admin.info.guest_heading': 'Services clients et paiements',
+    'admin.info.hours_heading': 'Horaires',
+    'admin.info.wifi_heading': 'WiFi',
+    'admin.info.admin_heading': 'Acces admin',
+    'admin.info.save_public': 'Enregistrer les informations',
+    'admin.info.save_social': 'Enregistrer les liens sociaux',
+    'admin.info.save_guest': 'Enregistrer les services clients',
+    'admin.hours.title': 'Horaires d ouverture',
+    'admin.hours.subtitle': 'Modifiez les horaires affiches sur le site.',
+    'admin.hours.day': 'Jour',
+    'admin.hours.open': 'Ouverture',
+    'admin.hours.close': 'Fermeture',
+    'admin.hours.weekend': 'Weekend',
+    'admin.hours.note_label': 'Note affichee sous les horaires',
+    'admin.hours.note_placeholder': 'ex. Ouvert tous les jours. Livraison disponible.',
+    'admin.hours.save_hours': 'Enregistrer les horaires'
+});
+
+Object.assign(window.translations.en, {
+    'admin.info.kicker': 'Info Workspace',
+    'admin.info.nav_label': 'Info workspace sections',
+    'admin.info.title': 'Public site essentials',
+    'admin.info.tab_public': 'Public',
+    'admin.info.tab_social': 'Social',
+    'admin.info.tab_guest': 'Guest',
+    'admin.info.tab_hours': 'Hours',
+    'admin.info.tab_wifi': 'WiFi',
+    'admin.info.tab_admin': 'Admin',
+    'admin.info.summary_location': 'Location',
+    'admin.info.summary_contact': 'Contact',
+    'admin.info.summary_guest': 'Guest Experience',
+    'admin.info.summary_ops': 'Operations',
+    'admin.info.public_heading': 'Public information',
+    'admin.info.social_heading': 'Social Links',
+    'admin.info.guest_heading': 'Guest Facilities & Payments',
+    'admin.info.hours_heading': 'Hours',
+    'admin.info.wifi_heading': 'WiFi',
+    'admin.info.admin_heading': 'Admin Access',
+    'admin.info.save_public': 'Save Public Information',
+    'admin.info.save_social': 'Save Social Links',
+    'admin.info.save_guest': 'Save Guest Details',
+    'admin.hours.title': 'Opening Hours',
+    'admin.hours.subtitle': 'Update the hours shown on the website.',
+    'admin.hours.day': 'Day',
+    'admin.hours.open': 'Open',
+    'admin.hours.close': 'Close',
+    'admin.hours.weekend': 'Weekend',
+    'admin.hours.note_label': 'Note shown under the hours',
+    'admin.hours.note_placeholder': 'e.g. Open every day. Delivery available.',
+    'admin.hours.save_hours': 'Save Hours'
+});
+
+Object.assign(window.translations.ar, {
+    'admin.info.kicker': 'مساحة المعلومات',
+    'admin.info.nav_label': 'أقسام مساحة المعلومات',
+    'admin.info.title': 'أساسيات الموقع العام',
+    'admin.info.tab_public': 'عام',
+    'admin.info.tab_social': 'اجتماعي',
+    'admin.info.tab_guest': 'الضيوف',
+    'admin.info.tab_hours': 'الساعات',
+    'admin.info.tab_wifi': 'WiFi',
+    'admin.info.tab_admin': 'الإدارة',
+    'admin.info.summary_location': 'الموقع',
+    'admin.info.summary_contact': 'الاتصال',
+    'admin.info.summary_guest': 'تجربة الضيوف',
+    'admin.info.summary_ops': 'التشغيل',
+    'admin.info.public_heading': 'المعلومات العامة',
+    'admin.info.social_heading': 'روابط التواصل',
+    'admin.info.guest_heading': 'خدمات الضيوف والدفع',
+    'admin.info.hours_heading': 'ساعات العمل',
+    'admin.info.wifi_heading': 'WiFi',
+    'admin.info.admin_heading': 'دخول الإدارة',
+    'admin.info.save_public': 'حفظ المعلومات العامة',
+    'admin.info.save_social': 'حفظ روابط التواصل',
+    'admin.info.save_guest': 'حفظ تفاصيل الضيوف'
+});
+
+Object.assign(window.translations.ar, {
+    'admin.hours.title': 'ساعات العمل',
+    'admin.hours.subtitle': 'حدّث ساعات العمل المعروضة على الموقع.',
+    'admin.hours.day': 'اليوم',
+    'admin.hours.open': 'الفتح',
+    'admin.hours.close': 'الإغلاق',
+    'admin.hours.weekend': 'نهاية الأسبوع',
+    'admin.hours.note_label': 'ملاحظة تظهر تحت ساعات العمل',
+    'admin.hours.note_placeholder': 'مثال: مفتوح كل يوم. التوصيل متوفر.',
+    'admin.hours.save_hours': 'حفظ ساعات العمل'
+});
+
+Object.assign(window.translations.fr, {
     'admin.tools.starter': 'Starter',
     'admin.tools.quick_launch_preset': 'Preset de démarrage rapide',
     'admin.tools.quick_launch_preset_desc': "Appliquez une base solide pour un fast-food, un café ou un restaurant traditionnel avant l'ajustement final.",
@@ -3561,6 +3666,7 @@ window.setLang = function (lang, btn) {
     if (typeof window.__gameRefresh === 'function') {
         window.__gameRefresh();
     }
+    window.dispatchEvent(new CustomEvent('app:languagechange', { detail: { lang: nextLang } }));
 
     // Save preference
     window.setStoredLanguage(nextLang);
@@ -3768,4 +3874,85 @@ Object.assign(window.translations.ar, {
     dish_size_title: 'اختر الحجم',
     dish_extras_title: 'أضف إضافات',
     dish_included_label: 'مشمول'
+});
+
+Object.assign(window.translations.fr, {
+    'admin.info.add_address': 'Ajouter une adresse',
+    'admin.info.map_ready': 'Lien carte pret',
+    'admin.info.map_pending': 'Lien carte manquant',
+    'admin.info.add_phone': 'Ajouter un telephone',
+    'admin.info.public_links_live': '{count} lien public actif',
+    'admin.info.public_links_live_plural': '{count} liens publics actifs',
+    'admin.info.no_public_links': 'Aucun lien public',
+    'admin.info.guest_signals_live': '{count} infos client actives',
+    'admin.info.review_facilities': 'Verifier les services',
+    'admin.info.home_sections_visible': '{count} section homepage visible',
+    'admin.info.home_sections_visible_plural': '{count} sections homepage visibles',
+    'admin.info.review_access': 'Verifier l acces',
+    'admin.info.wifi_summary': 'WiFi: {name}',
+    'admin.info.wifi_not_configured': 'WiFi non configure',
+    'admin.info.links_live': '{count} lien actif',
+    'admin.info.links_live_plural': '{count} liens actifs',
+    'admin.info.no_links_live': 'Aucun lien actif',
+    'admin.info.active_count': '{count} actif',
+    'admin.info.nothing_active': 'Rien actif',
+    'admin.info.hours_configured': '{count} jours configures',
+    'admin.info.set_hours': 'Definir les horaires',
+    'admin.info.configured': 'Configure',
+    'admin.info.not_configured': 'Non configure',
+    'admin.info.update_login': 'Modifier le login'
+});
+
+Object.assign(window.translations.en, {
+    'admin.info.add_address': 'Add address',
+    'admin.info.map_ready': 'Map link ready',
+    'admin.info.map_pending': 'Map link pending',
+    'admin.info.add_phone': 'Add phone number',
+    'admin.info.public_links_live': '{count} public link live',
+    'admin.info.public_links_live_plural': '{count} public links live',
+    'admin.info.no_public_links': 'No public links yet',
+    'admin.info.guest_signals_live': '{count} guest signals live',
+    'admin.info.review_facilities': 'Review facilities',
+    'admin.info.home_sections_visible': '{count} homepage section visible',
+    'admin.info.home_sections_visible_plural': '{count} homepage sections visible',
+    'admin.info.review_access': 'Review access',
+    'admin.info.wifi_summary': 'WiFi: {name}',
+    'admin.info.wifi_not_configured': 'WiFi not configured',
+    'admin.info.links_live': '{count} link live',
+    'admin.info.links_live_plural': '{count} links live',
+    'admin.info.no_links_live': 'No links live',
+    'admin.info.active_count': '{count} active',
+    'admin.info.nothing_active': 'Nothing active',
+    'admin.info.hours_configured': '{count} days configured',
+    'admin.info.set_hours': 'Set opening hours',
+    'admin.info.configured': 'Configured',
+    'admin.info.not_configured': 'Not configured',
+    'admin.info.update_login': 'Update login'
+});
+
+Object.assign(window.translations.ar, {
+    'admin.info.add_address': 'أضف العنوان',
+    'admin.info.map_ready': 'رابط الخريطة جاهز',
+    'admin.info.map_pending': 'رابط الخريطة غير مكتمل',
+    'admin.info.add_phone': 'أضف رقم الهاتف',
+    'admin.info.public_links_live': '{count} رابط عام نشط',
+    'admin.info.public_links_live_plural': '{count} روابط عامة نشطة',
+    'admin.info.no_public_links': 'لا توجد روابط عامة بعد',
+    'admin.info.guest_signals_live': '{count} معلومات للضيوف نشطة',
+    'admin.info.review_facilities': 'راجع خدمات الضيوف',
+    'admin.info.home_sections_visible': '{count} قسم ظاهر في الصفحة الرئيسية',
+    'admin.info.home_sections_visible_plural': '{count} أقسام ظاهرة في الصفحة الرئيسية',
+    'admin.info.review_access': 'راجع الدخول',
+    'admin.info.wifi_summary': 'WiFi: {name}',
+    'admin.info.wifi_not_configured': 'WiFi غير مضبوط',
+    'admin.info.links_live': '{count} رابط نشط',
+    'admin.info.links_live_plural': '{count} روابط نشطة',
+    'admin.info.no_links_live': 'لا توجد روابط نشطة',
+    'admin.info.active_count': '{count} نشط',
+    'admin.info.nothing_active': 'لا شيء نشط',
+    'admin.info.hours_configured': '{count} أيام مضبوطة',
+    'admin.info.set_hours': 'اضبط ساعات العمل',
+    'admin.info.configured': 'مضبوط',
+    'admin.info.not_configured': 'غير مضبوط',
+    'admin.info.update_login': 'حدّث الدخول'
 });

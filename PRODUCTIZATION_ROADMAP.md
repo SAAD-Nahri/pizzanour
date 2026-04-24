@@ -157,7 +157,7 @@ The project is already live on Coolify, so every iteration should be deploy-safe
 - CSS and UI styling are spread across large files plus many inline styles
 - Social/profile fields are inconsistent across storage and frontend rendering
 - The product is still structured like one restaurant site, not a reusable SaaS-like template
-- The importer is only partially implemented yet: image inputs work, but PDF parsing and stricter structured-output validation are still missing
+- The importer is implemented for images and PDFs, including local text extraction for text-based PDFs, but still needs more real-world QA across scanned PDFs, dense multi-column images, and low-quality phone photos
 
 ## Working Rules For Each Iteration
 

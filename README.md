@@ -68,7 +68,7 @@ Already working in the codebase:
 Still not finished:
 
 - launch-quality media/content pass for the first sellable package
-- PDF ingestion for the seller importer
+- broader real-menu QA coverage for the seller importer across more scanned PDFs and multi-column photos
 - stronger schema enforcement and review UX for the seller importer
 - internal launcher / AI onboarding tooling
 - stronger preset/theme system for different restaurant categories
@@ -173,6 +173,7 @@ The future importer and launcher should write into that same normalized shape in
 Current importer status:
 
 - PDF and image menu input work through `Seller Tools -> AI Import Studio`
+- text-based PDFs are parsed locally first for speed/cost, while weak/scanned PDFs and images still fall back to OpenAI extraction
 - the importer UI only asks for menu files now; it uses the current restaurant identity already stored in admin instead of requesting extra branding inputs
 - the importer is menu-scoped: it extracts dishes, prices, categories, super-categories, and FR / EN / AR translations without overwriting branding or landing identity
 - extraction is now staged: uploaded menu assets are first turned into page-level menu source text, then the structured draft is built from that extracted text, with the older direct multimodal path kept as fallback
