@@ -245,7 +245,8 @@ function setStaticAssetHeaders(res, filePath) {
   }
 
   if (LONG_CACHE_EXTENSIONS.has(extension)) {
-    res.setHeader("Cache-Control", "public, max-age=2592000, immutable");
+    // Long-lived, fingerprinted/static assets (fonts/images/etc).
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   }
 }
 

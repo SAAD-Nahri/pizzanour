@@ -508,7 +508,7 @@ app.get("/uploads/.thumbs/:file", createThumbnailRequestHandler());
 
 app.use("/uploads", express.static(uploadsDir, {
   immutable: true,
-  maxAge: "30d"
+  maxAge: "365d"
 }));
 
 app.get(Array.from(PUBLIC_BUILD_FILES), (req, res, next) => {
