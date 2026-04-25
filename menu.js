@@ -1075,17 +1075,24 @@ function initMenuApp() {
         ? window.getStoredLanguage()
         : 'fr';
     window.setLang(savedLang);
+
+    // Keep first paint light: show the landing basics now, and defer everything else.
     renderLandingInfo();
-    refreshLandingFeatured();
-    updateCartUI();
-    updateHistoryBadge();
-    scheduleMenuMotionRefresh();
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            window.updateStatus();
-            window.applyBranding();
-        }, 0);
-    });
+
+    const deferredInit = () => {
+        refreshLandingFeatured();
+        updateCartUI();
+        updateHistoryBadge();
+        scheduleMenuMotionRefresh();
+        window.updateStatus();
+        window.applyBranding();
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(deferredInit, { timeout: 700 });
+    } else {
+        requestAnimationFrame(() => setTimeout(deferredInit, 0));
+    }
 }
 
 function renderLandingInfo() {
@@ -1360,7 +1367,7 @@ function refreshLandingFeatured() {
     if (!container) return;
 
     if (initialMenuSyncState === 'pending' && !menu.length) {
-        container.style.display = 'block';
+        container.dataset.state = 'loading';
         container.innerHTML = buildMenuEmptyStateMarkup({
             className: 'is-landing',
             icon: MENU_UI_ICONS.sparkle,
@@ -1373,7 +1380,7 @@ function refreshLandingFeatured() {
     }
 
     if (initialMenuSyncState === 'error' && !menu.length) {
-        container.style.display = 'block';
+        container.dataset.state = 'error';
         container.innerHTML = buildMenuEmptyStateMarkup({
             className: 'is-landing',
             icon: MENU_UI_ICONS.sparkle,
@@ -1388,7 +1395,7 @@ function refreshLandingFeatured() {
     }
 
     if (!menu.length || !getAvailableSuperCategories().length) {
-        container.style.display = 'block';
+        container.dataset.state = 'empty';
         container.innerHTML = buildMenuEmptyStateMarkup({
             className: 'is-landing',
             icon: MENU_UI_ICONS.plate,
@@ -1402,6 +1409,7 @@ function refreshLandingFeatured() {
         return;
     }
 
+    container.dataset.state = 'ready';
     scheduleDeferredFeaturedRender(
         menu.filter((item) => item?.featured && item?.available !== false),
         'featuredLanding'
@@ -1413,12 +1421,13 @@ function renderFeaturedSlider(items, containerId) {
     if (!container) return;
 
     if (!items || items.length === 0) {
-        container.style.display = 'none';
+        container.dataset.state = 'empty';
+        container.innerHTML = '';
         scheduleMenuMotionRefresh();
         return;
     }
 
-    container.style.display = 'block';
+    container.dataset.state = 'ready';
     const liveStats = getMenuLiveStats();
     container.innerHTML = `
         <div class="featured-header-sexy menu-reveal-observe">
@@ -1941,13 +1950,13 @@ function saveCart() {
 
 function updateCartUI() {
     const count = cart.reduce((s, c) => s + c.qty, 0);
-    ['cartNavBtnLanding', 'cartNavBtnMenu'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) btn.style.display = count > 0 ? 'flex' : 'none';
-    });
     ['cartBadgeLanding', 'cartBadgeMenu'].forEach(id => {
         const badge = document.getElementById(id);
-        if (badge) badge.textContent = count;
+        if (badge) {
+            // Keep layout stable: always reserve space, hide only when empty.
+            badge.textContent = count;
+            badge.style.visibility = count > 0 ? 'visible' : 'hidden';
+        }
     });
 }
 

@@ -4,6 +4,37 @@
             padding: 0;
         }
 
+        /* Reserve space on landing to avoid CLS when the featured strip loads. */
+        .featured-section--landing {
+            /* Header + one row of cards on mobile. */
+            min-height: 340px;
+        }
+
+        .featured-section--landing[data-state='loading'],
+        .featured-section--landing[data-state='error'],
+        .featured-section--landing[data-state='empty'] {
+            display: block;
+        }
+
+        .featured-section--landing[data-state='loading']:empty::before {
+            content: '';
+            display: block;
+            height: 300px;
+            border-radius: 24px;
+            background:
+                linear-gradient(110deg, rgba(255, 255, 255, 0.06) 8%, rgba(255, 255, 255, 0.12) 18%, rgba(255, 255, 255, 0.06) 33%),
+                rgba(255, 255, 255, 0.04);
+            background-size: 240% 100%;
+            animation: menuSkeletonShimmer 1.2s ease-in-out infinite;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        @keyframes menuSkeletonShimmer {
+            0% { background-position: 0% 0; }
+            100% { background-position: 120% 0; }
+        }
+
         .featured-section > .menu-empty-state.is-landing {
             margin-top: 6px;
         }
@@ -2087,6 +2118,7 @@
             align-items: center;
             justify-content: center;
             min-height: 30px;
+            min-width: 108px;
             padding: 0 12px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.72);
@@ -2097,6 +2129,7 @@
             letter-spacing: 0.04em;
             text-transform: uppercase;
             box-shadow: 0 8px 16px rgba(75, 47, 24, 0.06);
+            font-variant-numeric: tabular-nums;
         }
 
         .landing-rest-name {
