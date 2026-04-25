@@ -13,6 +13,7 @@ const ASSETS = [
   { input: "tailwind-out.css", loader: "css" },
   { input: "style.css", loader: "css" },
   { input: "laruche.css", loader: "css" },
+  { input: "vendor/bootstrap-icons/bootstrap-icons.min.css", loader: "css" },
   { input: "menu-shell.css", loader: "css" },
   { input: "menu-page.css", loader: "css" },
   { input: "game.css", loader: "css" },
@@ -28,6 +29,15 @@ const HTML_FILES = ["index.html", "menu.html"];
 
 async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
+}
+
+async function copyAssetFile(input) {
+  const srcPath = path.join(ROOT, input);
+  const outPath = path.join(OUT_DIR, input);
+  await ensureDir(path.dirname(outPath));
+  await fs.copyFile(srcPath, outPath);
+  const stat = await fs.stat(srcPath);
+  return { input, before: stat.size, after: stat.size };
 }
 
 async function minifyAsset({ input, loader }) {
@@ -69,6 +79,7 @@ async function minifyHtmlFile(input, version) {
     .replace(/href="menu-shell\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("menu-shell.css", version)}"`)
     .replace(/href="menu-page\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("menu-page.css", version)}"`)
     .replace(/href="laruche\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("laruche.css", version)}"`)
+    .replace(/href="vendor\/bootstrap-icons\/bootstrap-icons\.min\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("vendor/bootstrap-icons/bootstrap-icons.min.css", version)}"`)
     .replace(/src="shared-public\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("shared-public.js", version)}"`)
     .replace(/src="app\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("app.js", version)}"`)
     .replace(/src="menu\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("menu.js", version)}"`)
@@ -111,6 +122,14 @@ async function main() {
     const result = await minifyAsset(asset);
     results.push(result);
     assetResults.push(result);
+  }
+
+  // Vendor font binaries: copy as-is so the built CSS can resolve relative URLs.
+  for (const input of [
+    "vendor/bootstrap-icons/fonts/bootstrap-icons.woff2",
+    "vendor/bootstrap-icons/fonts/bootstrap-icons.woff"
+  ]) {
+    results.push(await copyAssetFile(input));
   }
 
   const versionHash = crypto
