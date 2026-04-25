@@ -12,6 +12,7 @@ const ASSETS = [
   { input: "home-polish.css", loader: "css" },
   { input: "tailwind-out.css", loader: "css" },
   { input: "style.css", loader: "css" },
+  { input: "laruche.css", loader: "css" },
   { input: "menu-shell.css", loader: "css" },
   { input: "menu-page.css", loader: "css" },
   { input: "game.css", loader: "css" },
@@ -60,22 +61,21 @@ async function minifyHtmlFile(input, version) {
   const inputPath = path.join(ROOT, input);
   const source = await fs.readFile(inputPath, "utf8");
   const versionedSource = source
-    .replace(/href="home-shell\.css"/g, `href="${versionedAssetPath("home-shell.css", version)}"`)
-    .replace(/href="home-polish\.css"/g, `href="${versionedAssetPath("home-polish.css", version)}"`)
-    .replace(/href="tailwind-out\.css"/g, `href="${versionedAssetPath("tailwind-out.css", version)}"`)
-    .replace(/href="style\.css"/g, `href="${versionedAssetPath("style.css", version)}"`)
-    .replace(/href="menu-shell\.css"/g, `href="${versionedAssetPath("menu-shell.css", version)}"`)
-    .replace(/href="menu-page\.css"/g, `href="${versionedAssetPath("menu-page.css", version)}"`)
-    .replace(/href="shared-public\.js"/g, `href="${versionedAssetPath("shared-public.js", version)}"`)
-    .replace(/href="app\.js"/g, `href="${versionedAssetPath("app.js", version)}"`)
-    .replace(/href="menu\.js"/g, `href="${versionedAssetPath("menu.js", version)}"`)
-    .replace(/href="homepage-extras\.js"/g, `href="${versionedAssetPath("homepage-extras.js", version)}"`)
-    .replace(/href="game\.js"/g, `href="${versionedAssetPath("game.js", version)}"`)
-    .replace(/src="shared-public\.js"/g, `src="${versionedAssetPath("shared-public.js", version)}"`)
-    .replace(/src="app\.js"/g, `src="${versionedAssetPath("app.js", version)}"`)
-    .replace(/src="menu\.js"/g, `src="${versionedAssetPath("menu.js", version)}"`)
-    .replace(/href="game\.css"/g, `href="${versionedAssetPath("game.css", version)}"`)
-    .replace(/href="homepage-extras\.js"/g, `href="${versionedAssetPath("homepage-extras.js", version)}"`)
+    // Replace both bare references and already-versioned ones like `file.css?v=2`.
+    .replace(/href="home-shell\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("home-shell.css", version)}"`)
+    .replace(/href="home-polish\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("home-polish.css", version)}"`)
+    .replace(/href="tailwind-out\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("tailwind-out.css", version)}"`)
+    .replace(/href="style\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("style.css", version)}"`)
+    .replace(/href="menu-shell\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("menu-shell.css", version)}"`)
+    .replace(/href="menu-page\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("menu-page.css", version)}"`)
+    .replace(/href="laruche\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("laruche.css", version)}"`)
+    .replace(/src="shared-public\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("shared-public.js", version)}"`)
+    .replace(/src="app\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("app.js", version)}"`)
+    .replace(/src="menu\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("menu.js", version)}"`)
+    .replace(/src="homepage-extras\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("homepage-extras.js", version)}"`)
+    .replace(/src="game\.js(?:\?v=[^"]*)?"/g, `src="${versionedAssetPath("game.js", version)}"`)
+    .replace(/href="game\.css(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("game.css", version)}"`)
+    .replace(/href="homepage-extras\.js(?:\?v=[^"]*)?"/g, `href="${versionedAssetPath("homepage-extras.js", version)}"`)
     .replace(
       /(<script src="shared-public[^"]*" defer><\/script>)/,
       `<script>window.__PUBLIC_BUILD_VERSION=${JSON.stringify(version)};</script>$1`

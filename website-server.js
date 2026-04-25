@@ -17,6 +17,7 @@ const publicBuildDir = path.join(__dirname, "public-build");
 const PUBLIC_BUILD_FILES = new Set([
   "/home-shell.css",
   "/home-polish.css",
+  "/laruche.css",
   "/style.css",
   "/menu-shell.css",
   "/menu-page.css",
