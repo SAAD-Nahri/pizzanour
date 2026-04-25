@@ -230,7 +230,14 @@ function renderGallery() {
     if (!grid) return;
     const gallerySection = document.getElementById('gallery');
 
-    const images = window.restaurantConfig?.gallery || [];
+    const images = (window.restaurantConfig?.gallery || []).map((img) => {
+        if (typeof img !== 'string') return img;
+        // Prefer built-in WebP gallery assets when callers still reference the old PNGs.
+        if (img.startsWith('images/gallery_') && img.toLowerCase().endsWith('.png')) {
+            return img.replace(/\.png$/i, '.webp');
+        }
+        return img;
+    });
     const emptyText = typeof window.getTranslation === 'function'
         ? window.getTranslation('gallery_empty', 'De nouvelles photos arrivent bientôt...')
         : 'De nouvelles photos arrivent bientôt...';

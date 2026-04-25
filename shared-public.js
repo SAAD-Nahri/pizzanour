@@ -381,9 +381,9 @@ window.defaultConfig = {
         "code": ""
     },
     "gallery": [
-        "images/gallery_pizza.png",
-        "images/gallery_pasta.png",
-        "images/gallery_interior.png"
+        "images/gallery_pizza.webp",
+        "images/gallery_pasta.webp",
+        "images/gallery_interior.webp"
     ],
     "guestExperience": {
         "paymentMethods": ["cash", "tpe"],
