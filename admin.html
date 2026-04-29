@@ -11499,6 +11499,19 @@
                 padding-bottom: calc(var(--admin-mobile-nav-height) + 26px + env(safe-area-inset-bottom, 0px));
             }
 
+            /* Mobile: keep the workflow focused. Hide heavy preview/debug panels. */
+            body.admin-standalone .branding-preview-panel {
+                display: none !important;
+            }
+
+            body.admin-standalone .importer-review-side {
+                display: none !important;
+            }
+
+            body.admin-standalone .importer-advanced-panel {
+                display: none !important;
+            }
+
             body.admin-standalone .menu-builder-stage,
             body.admin-standalone .owner-section-card,
             body.admin-standalone .info-overview-card,
