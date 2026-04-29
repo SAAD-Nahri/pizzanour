@@ -6471,11 +6471,15 @@
             .image-modal-helper,
             .super-icon-helper,
             .super-icon-preview-note,
+            .menu-crud-form-intro-copy,
+            .menu-form-block-copy,
             .hint-chip-row,
             .menu-crud-nav-copy,
             .menu-builder-focus-copy,
             .menu-builder-focus-note,
             .menu-builder-empty-copy,
+            .importer-status-copy,
+            .importer-review-narrative,
             .info-hero-copy p,
             .readiness-item small,
             .admin-install-copy,
@@ -7695,6 +7699,30 @@
 
             .info-panel-card .admin-disclosure-body {
                 padding: 14px 16px 18px;
+            }
+
+            /* Hours editor: make each day row fit small screens cleanly. */
+            #info .hours-admin-row {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+                gap: 8px;
+            }
+
+            #info .hours-admin-row.is-header {
+                display: none;
+            }
+
+            #info .hours-admin-row > label {
+                grid-column: 1 / -1;
+                font-weight: 800;
+            }
+
+            #info .hours-admin-row > input[type="time"] {
+                width: 100%;
+            }
+
+            #info .hours-admin-row > input[type="checkbox"] {
+                display: none;
             }
 
             /* Import workspace: stack controls and reduce vertical waste on small screens. */
@@ -10182,9 +10210,9 @@
             <div class="tool-grid">
                 <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow">Importer</div>
-                    <h4>AI Import Studio</h4>
-                    <p>Upload a menu, create a draft, review the result, then publish only what you trust.</p>
-                    <p class="muted-copy">Imports affect menu data only. Branding, landing, and gallery stay untouched.</p>
+                            <h4>AI Import Studio</h4>
+                            <p class="muted-copy">Upload a menu, create a draft, review the result, then publish only what you trust.</p>
+                            <p class="muted-copy">Imports affect menu data only. Branding, landing, and gallery stay untouched.</p>
                     <div class="form-group">
                         <label for="importStudioMenuFiles">Menu Images / PDF</label>
                         <input type="file" id="importStudioMenuFiles" accept="image/*,.pdf,application/pdf" multiple />
@@ -10196,7 +10224,7 @@
                     <div id="importStudioStatusCard" class="importer-status-card" hidden aria-live="polite">
                         <div class="importer-status-head">
                             <span id="importStudioStatusBadge" class="importer-status-badge">Importer busy</span>
-                            <span id="importStudioStatusMeta" class="importer-status-meta">Preparing…</span>
+                            <span id="importStudioStatusMeta" class="importer-status-meta">Preparing...</span>
                         </div>
                         <h5 id="importStudioStatusTitle" class="importer-status-title">Preparing your import</h5>
                         <p id="importStudioStatusCopy" class="importer-status-copy">Keep this page open while the draft is prepared.</p>
