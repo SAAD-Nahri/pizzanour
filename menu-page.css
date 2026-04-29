@@ -1149,9 +1149,7 @@
                 opacity: 1;
             }
         }
-
-        /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIBRANT PROMO CAROUSEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
+        /* ======================= VIBRANT PROMO CAROUSEL ======================= */
         @media (prefers-reduced-motion: reduce) {
             .menu-reveal-observe,
             .menu-reveal-observe.is-visible,
@@ -1709,8 +1707,7 @@
             color: #888;
             margin-left: 2px;
         }
-
-        /* â•â•â•â•â•â•â•â•â•â•â•â• GAME STYLES â•â•â•â•â•â•â•â•â•â•â•â• */
+        /* ============================= GAME STYLES ============================ */
         .game-banner {
             background: linear-gradient(135deg, #e01e2f, #ff4c4c);
             border-radius: 18px;
