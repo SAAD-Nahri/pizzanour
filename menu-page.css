@@ -847,13 +847,15 @@
         .menu-item-badge {
             position: absolute;
             top: 10px;
-            left: 10px;
+            /* Use logical positioning so LTR/RTL stays consistent and avoids clashing with the like button. */
+            inset-inline-start: 10px;
             z-index: 6;
             display: inline-flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            max-width: 96px;
+            /* Keep the badge within the thumbnail column to avoid covering the dish title in LTR. */
+            max-width: 74px;
             padding: 5px 8px;
             border-radius: 14px;
             background: linear-gradient(135deg, rgba(255, 159, 67, 0.96), rgba(230, 57, 70, 0.94));
@@ -1194,8 +1196,8 @@
 
             .menu-item-badge {
                 top: 8px;
-                left: 8px;
-                max-width: 80px;
+                inset-inline-start: 8px;
+                max-width: 72px;
                 padding: 4px 7px;
                 font-size: 0.58rem;
             }
@@ -2043,7 +2045,7 @@
             }
 
             .menu-item-badge {
-                max-width: 74px;
+                max-width: 60px;
             }
 
             .menu-item-img {
