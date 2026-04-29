@@ -2914,7 +2914,9 @@ function resolveTopLevelSection(sectionId) {
     if (isMenuWorkspaceSection(sectionId)) return 'menu';
     if (isInfoSection(sectionId)) return 'info';
     if (isBrandingSection(sectionId)) return 'branding';
-    return sectionId;
+    if (sectionId === 'data-tools') return 'data-tools';
+    // Keep the admin navigation production-safe: legacy/internal sections should never be activated.
+    return 'menu';
 }
 
 function getMenuWorkspaceStepForSection(sectionId) {
