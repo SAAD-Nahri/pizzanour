@@ -178,6 +178,11 @@
             animation: fadeIn 0.4s ease;
         }
 
+        /* Internal mount sources: kept in DOM for data entry + JS mounts, never shown as pages. */
+        .internal-mount-source {
+            display: none !important;
+        }
+
         .owner-section-stack {
             display: grid;
             gap: 22px;
@@ -9260,7 +9265,7 @@
         </div>
 
         <!-- WIFI SECTION -->
-        <div id="wifi" class="section">
+        <div id="wifi" class="internal-mount-source">
             <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.wifi.title">Network Settings</h3>
             <form id="wifiForm">
@@ -9279,7 +9284,7 @@
         </div>
 
         <!-- STATS SECTION -->
-        <div id="stats" class="section">
+        <div id="stats" class="internal-mount-source">
             <h3 data-i18n="admin.stats.title">Business Overview</h3>
             <div class="grid">
                 <div class="stat-card">
@@ -9591,7 +9596,7 @@
         </div>
 
         <!-- LANDING PAGE SECTION -->
-        <div id="landing" class="section">
+        <div id="landing" class="internal-mount-source">
             <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.landing.title">Landing Page Configuration</h3>
             <p data-i18n="admin.landing.subtitle">Update what your customers see when they first visit your site.</p>
@@ -9926,7 +9931,7 @@
         </div>
 
         <!-- HOURS SECTION -->
-        <div id="hours" class="section">
+        <div id="hours" class="internal-mount-source">
             <h3 data-i18n="admin.hours.title">Opening Hours</h3>
             <p data-i18n="admin.hours.subtitle">Update the hours shown on the website. Changes become visible right away.</p>
             <form id="hoursForm" class="hours-form">
@@ -10123,7 +10128,7 @@
         </div>
 
         <!-- SECURITY SECTION -->
-        <div id="security" class="section">
+        <div id="security" class="internal-mount-source">
             <div class="parameter-shell" data-parameter-shell></div>
             <h3 data-i18n="admin.security.title">Admin Security</h3>
             <div class="security-layout">
