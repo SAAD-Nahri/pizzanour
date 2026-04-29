@@ -7743,6 +7743,29 @@
                 font-size: 16px;
             }
 
+            /* Menu tables: avoid horizontal clipping on mobile, prefer scroll. */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table-container table {
+                min-width: 720px;
+            }
+
+            .menu-builder-table-wrap {
+                overflow-x: auto;
+            }
+
+            .menu-builder-table td {
+                padding: 12px;
+            }
+
+            .action-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
             .menu-builder-actions {
                 flex-direction: row;
             }
