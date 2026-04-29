@@ -2631,6 +2631,7 @@ Object.assign(window.translations.fr, {
     'admin.stats.title': 'Vue d’ensemble',
     'admin.stats.total_products': 'Produits au total',
     'admin.stats.categories': 'Catégories',
+    'admin.stats.featured_items': 'Plats en vedette',
     'admin.stats.promo_status': 'Statut promo'
 });
 
@@ -3037,6 +3038,7 @@ Object.assign(window.translations.en, {
     'admin.stats.title': 'Business Overview',
     'admin.stats.total_products': 'Total Products',
     'admin.stats.categories': 'Categories',
+    'admin.stats.featured_items': 'Featured items',
     'admin.stats.promo_status': 'Promo Status',
     'admin.branding.title': 'Brand Setup',
     'admin.branding.subtitle': 'Configure the restaurant identity, colors, and media.',
@@ -3277,6 +3279,7 @@ Object.assign(window.translations.ar, {
     'admin.stats.title': 'نظرة عامة على النشاط',
     'admin.stats.total_products': 'إجمالي المنتجات',
     'admin.stats.categories': 'الفئات',
+    'admin.stats.featured_items': 'أطباق مميزة',
     'admin.stats.promo_status': 'حالة العرض',
     'admin.branding.title': 'إعداد الهوية',
     'admin.branding.subtitle': 'اضبط هوية المطعم والألوان والوسائط.',
