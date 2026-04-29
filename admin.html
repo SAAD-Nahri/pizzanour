@@ -7766,6 +7766,29 @@
                 min-height: 44px;
             }
 
+            /* Menu CRUD modals: make the primary action obvious and thumb-friendly. */
+            .menu-crud-primary-actions {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .menu-crud-primary-actions .menu-crud-save-btn {
+                grid-column: 1 / -1;
+                min-height: 52px;
+                font-size: 0.95rem;
+            }
+
+            .menu-crud-primary-actions .menu-crud-progress-back,
+            .menu-crud-primary-actions .menu-crud-cancel-btn {
+                min-height: 46px;
+            }
+
+            .category-filter-btn {
+                min-height: 42px;
+                padding: 10px 16px;
+                border-radius: 999px;
+                font-size: 0.9rem;
+            }
+
             .menu-builder-actions {
                 flex-direction: row;
             }
