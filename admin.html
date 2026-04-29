@@ -4660,6 +4660,27 @@
             box-shadow: 0 12px 28px rgba(75, 47, 24, 0.05);
         }
 
+        /* Reduce duplication: keep the "Save" control in one predictable place. */
+        @media (min-width: 900px) {
+            .branding-save-bar,
+            .branding-tab-savebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 899px) {
+            .branding-overview-actions {
+                display: none;
+            }
+
+            .branding-save-bar,
+            .branding-tab-savebar {
+                position: sticky;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+                z-index: 40;
+            }
+        }
+
         .branding-overview-actions .info-save-btn,
         .branding-save-bar .info-save-btn {
             min-width: 188px;
