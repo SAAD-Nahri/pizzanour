@@ -270,6 +270,10 @@
             gap: 20px;
         }
 
+        .info-workspace-shell.owner-section-stack {
+            width: min(100%, 980px);
+        }
+
         .info-overview-card {
             position: relative;
             overflow: hidden;
@@ -632,6 +636,10 @@
 
         .info-panel-header .info-panel-heading {
             min-width: 0;
+        }
+
+        .info-panel-card .admin-disclosure-body {
+            padding: 16px 24px 22px;
         }
 
         .info-panel-heading {
@@ -7637,6 +7645,46 @@
                 padding: 12px;
             }
 
+            .owner-section-card {
+                padding: 16px;
+                border-radius: 20px;
+            }
+
+            .info-overview-card {
+                padding: 16px 14px 18px;
+            }
+
+            .info-quick-actions {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .info-jump-btn {
+                min-height: 42px;
+                border-radius: 14px;
+                font-size: 0.78rem;
+                padding: 10px 8px;
+            }
+
+            .info-summary-card {
+                min-height: 76px;
+                padding: 12px 14px 12px 16px;
+            }
+
+            .info-summary-value {
+                font-size: 0.98rem;
+            }
+
+            .info-panel-header {
+                padding: 14px 16px 10px;
+                min-height: 54px;
+            }
+
+            .info-panel-card .admin-disclosure-body {
+                padding: 14px 16px 18px;
+            }
+
             .menu-builder-actions {
                 flex-direction: row;
             }
@@ -8983,7 +9031,7 @@
                             </div>
                         </section>
 
-                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelSocial" role="tabpanel" aria-labelledby="infoPanelBtn-social" data-info-panel="social">
+                        <section class="info-panel-card info-workspace-panel" id="infoPanelSocial" role="tabpanel" aria-labelledby="infoPanelBtn-social" data-info-panel="social">
                             <div class="info-panel-header">
                                 <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.social_heading">Social Links</strong>
@@ -8998,7 +9046,7 @@
                             </div>
                         </section>
 
-                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelFacilities" role="tabpanel" aria-labelledby="infoPanelBtn-facilities" data-info-panel="facilities">
+                        <section class="info-panel-card info-workspace-panel" id="infoPanelFacilities" role="tabpanel" aria-labelledby="infoPanelBtn-facilities" data-info-panel="facilities">
                             <div class="info-panel-header">
                                 <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.guest_heading">Guest Facilities & Payments</strong>
@@ -9012,7 +9060,7 @@
                                 </div>
                             </div>
                         </section>
-                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelHours" role="tabpanel" aria-labelledby="infoPanelBtn-hours" data-info-panel="hours" data-admin-subsection="hours">
+                        <section class="info-panel-card info-workspace-panel" id="infoPanelHours" role="tabpanel" aria-labelledby="infoPanelBtn-hours" data-info-panel="hours" data-admin-subsection="hours">
                             <div class="info-panel-header">
                                 <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.hours_heading">Hours</strong>
@@ -9024,7 +9072,7 @@
                             </div>
                         </section>
 
-                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelWifi" role="tabpanel" aria-labelledby="infoPanelBtn-wifi" data-info-panel="wifi" data-admin-subsection="wifi">
+                        <section class="info-panel-card info-workspace-panel" id="infoPanelWifi" role="tabpanel" aria-labelledby="infoPanelBtn-wifi" data-info-panel="wifi" data-admin-subsection="wifi">
                             <div class="info-panel-header">
                                 <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.wifi_heading">WiFi</strong>
@@ -9036,7 +9084,7 @@
                             </div>
                         </section>
 
-                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelSecurity" role="tabpanel" aria-labelledby="infoPanelBtn-security" data-info-panel="security" data-admin-subsection="security">
+                        <section class="info-panel-card info-workspace-panel" id="infoPanelSecurity" role="tabpanel" aria-labelledby="infoPanelBtn-security" data-info-panel="security" data-admin-subsection="security">
                             <div class="info-panel-header">
                                 <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.admin_heading">Admin Access</strong>
