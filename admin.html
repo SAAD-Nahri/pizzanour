@@ -510,6 +510,16 @@
             align-items: start;
         }
 
+        .info-workspace-grid--single {
+            grid-template-columns: minmax(0, 1fr);
+            width: min(100%, 980px);
+            margin-inline: auto;
+        }
+
+        .info-main-column--full {
+            width: 100%;
+        }
+
         .info-main-column,
         .info-side-column {
             display: grid;
@@ -578,6 +588,11 @@
             box-shadow: 0 26px 44px rgba(75, 47, 24, 0.09);
         }
 
+        /* Non-<details> panels should still feel "open" when active. */
+        .info-workspace-panel.is-active.info-panel-card {
+            box-shadow: 0 26px 44px rgba(75, 47, 24, 0.09);
+        }
+
         .info-panel-card summary {
             display: flex;
             justify-content: space-between;
@@ -597,6 +612,20 @@
         }
 
         .info-panel-card summary>span:first-child {
+            min-width: 0;
+        }
+
+        .info-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            min-height: 62px;
+            padding: 18px 24px 12px;
+            border-bottom: 1px solid rgba(232, 216, 197, 0.72);
+        }
+
+        .info-panel-header .info-panel-heading {
             min-width: 0;
         }
 
@@ -7305,7 +7334,8 @@
                 width: 100%;
             }
 
-            .info-panel-card summary {
+            .info-panel-card summary,
+            .info-panel-header {
                 align-items: flex-start;
                 flex-direction: column;
             }
@@ -8915,8 +8945,8 @@
                     </div>
                 </section>
 
-                <div class="info-workspace-grid">
-                    <div class="info-main-column">
+                <div class="info-workspace-grid info-workspace-grid--single">
+                    <div class="info-main-column info-main-column--full">
                         <section class="owner-section-card info-primary-card info-workspace-panel is-active" id="infoPanelPublic" role="tabpanel" aria-labelledby="infoPanelBtn-public" data-info-panel="public" data-admin-subsection="landing">
                             <div class="owner-subsection-heading">
                                 <h4 data-i18n="admin.info.public_heading">Public information</h4>
@@ -8927,73 +8957,70 @@
                             </div>
                         </section>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card info-workspace-panel" id="infoPanelSocial" role="tabpanel" aria-labelledby="infoPanelBtn-social" data-info-panel="social">
-                            <summary>
-                                <span class="info-panel-heading">
+                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelSocial" role="tabpanel" aria-labelledby="infoPanelBtn-social" data-info-panel="social">
+                            <div class="info-panel-header">
+                                <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.social_heading">Social Links</strong>
-                                </span>
+                                </div>
                                 <span class="info-panel-metric" id="infoSocialMetric">0 links live</span>
-                            </summary>
+                            </div>
                             <div class="admin-disclosure-body">
                                 <div id="infoLandingSocialMount"></div>
                                 <div class="info-form-actions">
                                     <button type="submit" id="infoSocialSaveBtn" form="landingPageForm" class="primary-btn info-save-btn" data-i18n="admin.info.save_social">Save Social Links</button>
                                 </div>
                             </div>
-                        </details>
+                        </section>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card info-workspace-panel" id="infoPanelFacilities" role="tabpanel" aria-labelledby="infoPanelBtn-facilities" data-info-panel="facilities">
-                            <summary>
-                                <span class="info-panel-heading">
+                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelFacilities" role="tabpanel" aria-labelledby="infoPanelBtn-facilities" data-info-panel="facilities">
+                            <div class="info-panel-header">
+                                <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.guest_heading">Guest Facilities & Payments</strong>
-                                </span>
+                                </div>
                                 <span class="info-panel-metric" id="infoFacilitiesMetric">0 active</span>
-                            </summary>
+                            </div>
                             <div class="admin-disclosure-body">
                                 <div id="infoLandingFacilitiesMount"></div>
                                 <div class="info-form-actions">
                                     <button type="submit" id="infoFacilitiesSaveBtn" form="landingPageForm" class="primary-btn info-save-btn" data-i18n="admin.info.save_guest">Save Guest Details</button>
                                 </div>
                             </div>
-                        </details>
-                    </div>
-
-                    <div class="info-side-column">
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card info-workspace-panel" id="infoPanelHours" role="tabpanel" aria-labelledby="infoPanelBtn-hours" data-info-panel="hours" data-admin-subsection="hours">
-                            <summary>
-                                <span class="info-panel-heading">
+                        </section>
+                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelHours" role="tabpanel" aria-labelledby="infoPanelBtn-hours" data-info-panel="hours" data-admin-subsection="hours">
+                            <div class="info-panel-header">
+                                <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.hours_heading">Hours</strong>
-                                </span>
+                                </div>
                                 <span class="info-panel-metric" id="infoHoursMetric">Not configured</span>
-                            </summary>
+                            </div>
                             <div class="admin-disclosure-body">
                                 <div id="infoHoursMount"></div>
                             </div>
-                        </details>
+                        </section>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card info-workspace-panel" id="infoPanelWifi" role="tabpanel" aria-labelledby="infoPanelBtn-wifi" data-info-panel="wifi" data-admin-subsection="wifi">
-                            <summary>
-                                <span class="info-panel-heading">
+                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelWifi" role="tabpanel" aria-labelledby="infoPanelBtn-wifi" data-info-panel="wifi" data-admin-subsection="wifi">
+                            <div class="info-panel-header">
+                                <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.wifi_heading">WiFi</strong>
-                                </span>
+                                </div>
                                 <span class="info-panel-metric" id="infoWifiMetric">Not configured</span>
-                            </summary>
+                            </div>
                             <div class="admin-disclosure-body">
                                 <div id="infoWifiMount"></div>
                             </div>
-                        </details>
+                        </section>
 
-                        <details class="admin-disclosure admin-panel-disclosure info-panel-card info-workspace-panel" id="infoPanelSecurity" role="tabpanel" aria-labelledby="infoPanelBtn-security" data-info-panel="security" data-admin-subsection="security">
-                            <summary>
-                                <span class="info-panel-heading">
+                        <section class="owner-section-card info-panel-card info-workspace-panel" id="infoPanelSecurity" role="tabpanel" aria-labelledby="infoPanelBtn-security" data-info-panel="security" data-admin-subsection="security">
+                            <div class="info-panel-header">
+                                <div class="info-panel-heading">
                                     <strong data-i18n="admin.info.admin_heading">Admin Access</strong>
-                                </span>
+                                </div>
                                 <span class="info-panel-metric" id="infoSecurityMetric">Review login</span>
-                            </summary>
+                            </div>
                             <div class="admin-disclosure-body">
                                 <div id="infoSecurityMount"></div>
                             </div>
-                        </details>
+                        </section>
                     </div>
                 </div>
             </div>

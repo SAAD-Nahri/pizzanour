@@ -3008,9 +3008,10 @@ function mountOwnerAdminLayout() {
     moveNodeToHost('landingContactBlock', 'infoLandingPrimaryMount');
     moveDisclosureBodyContentToHost('landingSocialBlock', 'infoLandingSocialMount');
     moveDisclosureBodyContentToHost('landingFacilitiesBlock', 'infoLandingFacilitiesMount');
-    moveSectionContentToHost('hours', 'infoHoursMount', ['h3']);
-    moveSectionContentToHost('wifi', 'infoWifiMount', ['h3']);
-    moveSectionContentToHost('security', 'infoSecurityMount', ['h3']);
+    // The Info workspace has its own headers/structure; skip legacy section headings/copy.
+    moveSectionContentToHost('hours', 'infoHoursMount', ['h3', 'p']);
+    moveSectionContentToHost('wifi', 'infoWifiMount', ['h3', 'p']);
+    moveSectionContentToHost('security', 'infoSecurityMount', ['h3', 'p']);
     moveNodeToHost('landingLayoutBlock', 'brandingHomepageLayoutMount');
     moveNodeToHost('landingCopyBlock', 'brandingHomepageCopyMount');
     moveSectionChildren('gallery', 'brandingGalleryMount');
