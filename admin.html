@@ -6483,6 +6483,11 @@
                 display: none !important;
             }
 
+            /* Mobile-first: remove non-essential "guidance" panels so forms stay compact. */
+            .menu-form-side-panel {
+                display: none !important;
+            }
+
             .admin-save-status {
                 display: none;
             }
@@ -9230,9 +9235,7 @@
                             <input type="file" id="modalImgCapture" accept="image/*" capture="environment" onchange="handleModalImageUpload(this)" />
                         </label>
                     </div>
-                    <p class="image-modal-helper">Upload images or take a photo.</p>
                     <div id="modalAiImageTools" class="image-modal-ai-tools" style="display:none;">
-                        <p class="image-modal-helper">Generate a dish image from the item details.</p>
                         <button type="button" id="modalGenerateImageBtn" class="secondary-btn" onclick="generateModalImageWithAI()">Generate with AI</button>
                     </div>
                     <div id="modalImageProgress" class="image-modal-progress" hidden aria-live="polite">
@@ -9964,7 +9967,6 @@
                                                 </div>
                                             </div>
                                         </details>
-                                        <p class="super-icon-helper">Use simple icons here. Save richer visuals for categories.</p>
                                     </div>
                                 </div>
                             </div>
