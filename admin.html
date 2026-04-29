@@ -7685,6 +7685,39 @@
                 padding: 14px 16px 18px;
             }
 
+            /* Import workspace: stack controls and reduce vertical waste on small screens. */
+            #data-tools .tool-card {
+                padding: 16px;
+            }
+
+            #data-tools .tool-actions {
+                gap: 10px;
+            }
+
+            #data-tools .tool-actions .primary-btn,
+            #data-tools .tool-actions .brand-secondary-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #copyImporterDraftJsonBtn {
+                display: none;
+            }
+
+            #data-tools .importer-scope-grid {
+                gap: 10px;
+            }
+
+            #data-tools .importer-scope-option {
+                padding: 12px 12px;
+                border-radius: 16px;
+            }
+
+            #data-tools .importer-review-grid,
+            #data-tools .importer-issue-grid {
+                gap: 12px;
+            }
+
             .menu-builder-actions {
                 flex-direction: row;
             }
@@ -10064,8 +10097,8 @@
 
         <!-- DATA TOOLS SECTION -->
         <div id="data-tools" class="section">
-            <h3>Menu Import</h3>
-            <p class="copy-muted">Turn menu images or a PDF into a reviewable draft before publishing.</p>
+            <h3 data-i18n="admin.import.title">Menu Import</h3>
+            <p class="copy-muted" data-i18n="admin.import.subtitle">Turn menu images or a PDF into a reviewable draft before publishing.</p>
             <div class="tool-grid">
                 <div class="tool-card tool-card--accent tool-card--wide">
                     <div class="tool-card-eyebrow">Importer</div>
