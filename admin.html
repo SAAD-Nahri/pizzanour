@@ -7718,6 +7718,31 @@
                 gap: 12px;
             }
 
+            /* Branding: make cards denser and prevent horizontal overflow on very small screens. */
+            #branding .branding-form-grid .form-group,
+            #branding .branding-color-grid .form-group {
+                padding: 12px 12px;
+            }
+
+            #branding .brand-asset-tools {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            #branding .brand-asset-tools > .primary-btn,
+            #branding .brand-asset-tools > .brand-secondary-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* iOS zoom prevention for branding inputs too (keep >=16px). */
+            #branding input,
+            #branding select,
+            #branding textarea {
+                font-size: 16px;
+            }
+
             .menu-builder-actions {
                 flex-direction: row;
             }
