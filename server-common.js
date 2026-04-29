@@ -232,6 +232,15 @@ function createBuildFingerprint(filePaths) {
 
 function setStaticAssetHeaders(res, filePath) {
   const extension = path.extname(filePath || "").toLowerCase();
+  // Ensure browsers decode localized strings consistently.
+  // (Some CDNs/proxies can drop charsets; being explicit prevents mojibake.)
+  if (extension === ".html" || extension === ".css" || extension === ".js" || extension === ".json") {
+    const contentType = res.getHeader("Content-Type");
+    if (typeof contentType === "string" && !/charset=/i.test(contentType)) {
+      res.setHeader("Content-Type", `${contentType}; charset=utf-8`);
+    }
+  }
+
   if (NO_STORE_EXTENSIONS.has(extension)) {
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     res.setHeader("Pragma", "no-cache");
