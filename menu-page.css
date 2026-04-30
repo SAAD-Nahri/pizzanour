@@ -2137,6 +2137,50 @@
         }
 
         @media (max-width: 360px) {
+            .menu-empty-state {
+                gap: 7px;
+                padding: 20px 14px;
+                border-radius: 20px;
+            }
+
+            .menu-empty-state-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 14px;
+                font-size: 1.05rem;
+            }
+
+            .menu-empty-state-eyebrow {
+                padding: 5px 8px;
+                font-size: 0.56rem;
+                letter-spacing: 0.08em;
+            }
+
+            .menu-empty-state-title {
+                font-size: 1rem;
+                line-height: 1.18;
+            }
+
+            .menu-empty-state-copy {
+                font-size: 0.78rem;
+                line-height: 1.45;
+            }
+
+            .menu-empty-state-action {
+                min-height: 40px;
+                padding: 0 12px;
+                font-size: 0.76rem;
+            }
+
+            .menu-content-area > .menu-empty-state.is-surface {
+                min-height: 180px;
+                margin: 10px 0 4px;
+            }
+
+            #superCatList > .menu-empty-state.is-sheet {
+                margin: 6px 0 0;
+            }
+
             .menu-item-card {
                 grid-template-columns: 56px minmax(0, 1fr) 36px;
                 gap: 8px;
