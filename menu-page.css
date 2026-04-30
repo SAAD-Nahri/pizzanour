@@ -2602,6 +2602,74 @@
             }
         }
 
+        @media (max-width: 480px) {
+            .landing-body {
+                gap: 14px;
+                padding: 16px 12px 22px;
+            }
+
+            .landing-meta-row {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 6px;
+            }
+
+            .landing-meta-pill {
+                min-width: 0;
+                width: 100%;
+                padding: 0 6px;
+                letter-spacing: 0.01em;
+                white-space: nowrap;
+            }
+
+            .view-menu-btn {
+                width: min(312px, 100%);
+                min-height: 50px;
+                margin-top: -2px;
+                border-radius: 16px;
+            }
+
+            .featured-section--landing {
+                margin-bottom: 8px;
+            }
+
+            .info-section {
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .info-row {
+                min-height: 84px;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                padding: 10px 8px;
+                border-radius: 17px;
+                text-align: center;
+            }
+
+            .info-label {
+                min-height: 18px;
+                padding: 0 7px;
+                font-size: 0.54rem;
+                letter-spacing: 0.04em;
+            }
+
+            .info-icon {
+                margin-bottom: 0 !important;
+                font-size: 1.25rem !important;
+                line-height: 1 !important;
+            }
+
+            .info-text {
+                width: 100%;
+                font-size: 0.62rem !important;
+                line-height: 1.2;
+                text-align: center;
+                overflow-wrap: anywhere;
+            }
+        }
+
         html[dir="rtl"] .info-text {
             text-align: right;
         }
