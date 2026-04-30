@@ -4823,6 +4823,20 @@ function getAdminCredentials() {
   );
 }
 
+function assertProductionCredentialsAreSafe(credentials) {
+  const isProduction = process.env.NODE_ENV === "production";
+  const allowDefaultCredentials = booleanFromEnv(process.env.ALLOW_DEFAULT_ADMIN_CREDENTIALS, false);
+
+  if (!isProduction || !credentials?.usesDefaultCredentials || allowDefaultCredentials) {
+    return;
+  }
+
+  console.error("[AUTH] Refusing to start in production with default admin credentials.");
+  console.error("[AUTH] Set ADMIN_USER and ADMIN_PASS to strong values, or save credentials to AUTH_FILE.");
+  console.error("[AUTH] Emergency override: ALLOW_DEFAULT_ADMIN_CREDENTIALS=true. Do not use it for client handoff.");
+  process.exit(1);
+}
+
 function saveAdminCredentials(user, password) {
   try {
     const hashed = hashPassword(password);
@@ -4906,6 +4920,7 @@ function clearFailedLogins(key) {
 }
 
 let currentCreds = getAdminCredentials();
+assertProductionCredentialsAreSafe(currentCreds);
 if (currentCreds.usesDefaultCredentials) {
   console.warn("Using default fallback credentials (admin / foody2026). Consider changing them in the Security tab.");
 }

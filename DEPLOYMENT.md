@@ -44,6 +44,7 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `ADMIN_DOMAIN=<admin-domain>`
 - `ADMIN_USER=<admin-username>`
 - `ADMIN_PASS=<strong-password>`
+- `ALLOW_DEFAULT_ADMIN_CREDENTIALS=false`
 - `OPENAI_API_KEY=<server-side-key>` if you want seller-side menu import or per-item AI image generation
 - `OPENAI_IMPORT_MODEL=gpt-4o` optional override for image-based menu imports; recommended for reliability
 - `OPENAI_IMPORT_PDF_MODEL=gpt-4o` optional override for PDF menu imports; use a stronger model here
@@ -59,6 +60,7 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 Recommended production rule:
 
 - never leave `ADMIN_PASS` on the fallback default
+- `NODE_ENV=production` refuses to start with the built-in default admin credentials unless `ALLOW_DEFAULT_ADMIN_CREDENTIALS=true`; keep that override off for real deployments
 - keep `AUTH_FILE` inside the persisted `/app/data` volume so Security-tab password changes survive redeploys
 - keep `OPENAI_API_KEY` server-side only; do not expose it to the client or browser
 
@@ -88,6 +90,7 @@ For the current `matsco` target, use:
 Minimum env review before clicking deploy:
 
 - `ADMIN_PASS` is strong and not the fallback value
+- `ALLOW_DEFAULT_ADMIN_CREDENTIALS=false` or unset
 - `COOKIE_SECURE=true`
 - `DATA_FILE=/app/data/data.json`
 - `UPLOADS_DIR=/app/uploads`

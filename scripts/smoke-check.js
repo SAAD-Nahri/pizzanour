@@ -49,6 +49,7 @@ function startServer(entryFile, port, runtime) {
     cwd: projectRoot,
     env: {
       ...process.env,
+      NODE_ENV: "test",
       PORT: String(port),
       COOKIE_SECURE: "false",
       DATA_FILE: runtime.dataFile,
