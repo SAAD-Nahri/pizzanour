@@ -2603,6 +2603,43 @@
         }
 
         @media (max-width: 480px) {
+            .top-nav-bar {
+                width: calc(100% - 12px);
+                padding-inline: 8px;
+            }
+
+            .top-nav-left,
+            .top-nav-right {
+                gap: 6px;
+                min-width: 0;
+            }
+
+            .top-nav-left {
+                flex: 1 1 auto;
+            }
+
+            .top-nav-right {
+                flex: 0 0 auto;
+            }
+
+            .nav-icon-btn,
+            .lang-drop-btn {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                border-radius: 14px;
+            }
+
+            .lang-drop-btn {
+                padding: 0 7px;
+                font-size: 0.72rem;
+            }
+
+            .nav-breadcrumb {
+                max-width: min(30vw, 118px);
+                font-size: 0.78rem;
+            }
+
             .landing-body {
                 gap: 14px;
                 padding: 16px 12px 22px;
