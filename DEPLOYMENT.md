@@ -55,6 +55,8 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `AI_MEDIA_TOOLS_ENABLED=false` unless you explicitly want the per-item AI image button available inside the item image modal
 - `COOKIE_SECURE=true`
 - `DATA_FILE=/app/data/data.json`
+- `DATA_BACKUP_DIR=/app/data/data-backups`
+- `DATA_BACKUP_LIMIT=20`
 - `UPLOADS_DIR=/app/uploads`
 - `AUTH_FILE=/app/data/auth.json`
 
@@ -64,6 +66,7 @@ Recommended production rule:
 - `NODE_ENV=production` refuses to start with the built-in default admin credentials unless `ALLOW_DEFAULT_ADMIN_CREDENTIALS=true`; keep that override off for real deployments
 - keep `SECURITY_HEADERS_HSTS=true` after HTTPS is active on the final domains
 - keep `AUTH_FILE` inside the persisted `/app/data` volume so Security-tab password changes survive redeploys
+- keep `DATA_BACKUP_DIR` inside the persisted `/app/data` volume; every admin save/reset keeps a rolling JSON backup
 - keep `OPENAI_API_KEY` server-side only; do not expose it to the client or browser
 
 ## Configure In Coolify
@@ -96,6 +99,7 @@ Minimum env review before clicking deploy:
 - `COOKIE_SECURE=true`
 - `SECURITY_HEADERS_HSTS=true` after HTTPS is confirmed
 - `DATA_FILE=/app/data/data.json`
+- `DATA_BACKUP_DIR=/app/data/data-backups`
 - `UPLOADS_DIR=/app/uploads`
 - `AUTH_FILE=/app/data/auth.json`
 - `OPENAI_API_KEY` is set if you want the seller-only importer or AI media generation enabled

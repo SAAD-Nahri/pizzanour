@@ -6,6 +6,8 @@ const bundledDataFile = path.join(__dirname, "data.json");
 const bundledUploadsDir = path.join(__dirname, "uploads");
 const dataFile = process.env.DATA_FILE || bundledDataFile;
 const uploadsDir = process.env.UPLOADS_DIR || bundledUploadsDir;
+const dataBackupDir = process.env.DATA_BACKUP_DIR || path.join(path.dirname(dataFile), "data-backups");
+const DATA_BACKUP_LIMIT = Number.parseInt(process.env.DATA_BACKUP_LIMIT || "20", 10) || 20;
 
 const FALLBACK_DATA = {
   menu: [],
@@ -439,6 +441,70 @@ function ensureParentDirectory(filePath) {
   }
 }
 
+function safeBackupLabel(value) {
+  return String(value || "save")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "save";
+}
+
+function createDataBackup(reason = "save") {
+  if (!fs.existsSync(dataFile)) return null;
+
+  try {
+    const raw = fs.readFileSync(dataFile, "utf8");
+    JSON.parse(raw);
+
+    fs.mkdirSync(dataBackupDir, { recursive: true });
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const hash = crypto.createHash("sha1").update(raw).digest("hex").slice(0, 10);
+    const backupPath = path.join(dataBackupDir, `${stamp}-${safeBackupLabel(reason)}-${hash}.json`);
+    fs.writeFileSync(backupPath, raw, "utf8");
+    pruneDataBackups();
+    return backupPath;
+  } catch (error) {
+    console.warn("[DATA] Skipped backup before write:", error?.message || error);
+    return null;
+  }
+}
+
+function pruneDataBackups() {
+  if (!fs.existsSync(dataBackupDir)) return;
+
+  const limit = Math.max(1, DATA_BACKUP_LIMIT);
+  const entries = fs.readdirSync(dataBackupDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => {
+      const filePath = path.join(dataBackupDir, entry.name);
+      let mtimeMs = 0;
+      try {
+        mtimeMs = fs.statSync(filePath).mtimeMs;
+      } catch (_error) {
+        mtimeMs = 0;
+      }
+      return { filePath, mtimeMs };
+    })
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+  entries.slice(limit).forEach((entry) => {
+    try {
+      fs.unlinkSync(entry.filePath);
+    } catch (_error) {
+      // Best-effort cleanup only.
+    }
+  });
+}
+
+function writeJsonFileAtomic(filePath, value) {
+  ensureParentDirectory(filePath);
+  const dir = path.dirname(filePath);
+  const tmpPath = path.join(dir, `.${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`);
+  fs.writeFileSync(tmpPath, JSON.stringify(value, null, 2), "utf8");
+  fs.renameSync(tmpPath, filePath);
+}
+
 function copyDirectoryContents(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) return;
   for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
@@ -512,20 +578,24 @@ function getDataVersion() {
 function writeData(data) {
   ensureStorage();
   const normalized = normalizeData(data);
-  fs.writeFileSync(dataFile, JSON.stringify(normalized, null, 2), "utf8");
+  createDataBackup("save");
+  writeJsonFileAtomic(dataFile, normalized);
   return normalized;
 }
 
 function resetToBundledData() {
   ensureStorage();
   const defaults = normalizeData(readBundledSeed());
-  fs.writeFileSync(dataFile, JSON.stringify(defaults, null, 2), "utf8");
+  createDataBackup("reset");
+  writeJsonFileAtomic(dataFile, defaults);
   return defaults;
 }
 
 module.exports = {
   dataFile,
+  dataBackupDir,
   uploadsDir,
+  createDataBackup,
   ensureStorage,
   getDataVersion,
   readData,

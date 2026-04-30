@@ -26,7 +26,7 @@ async function main() {
     ]);
 
     await runChecks(websitePort, adminPort);
-    await runAuthenticatedAdminRoundTrip(websitePort, adminPort);
+    await runAuthenticatedAdminRoundTrip(websitePort, adminPort, runtime);
     console.log("Smoke checks passed.");
   } finally {
     await Promise.allSettled([stopServer(websiteServer), stopServer(adminServer)]);
@@ -40,7 +40,8 @@ async function prepareSmokeRuntime() {
   await fs.copyFile(bundledDataFile, path.join(smokeRuntimeDir, "data.json"));
   return {
     dataFile: path.join(smokeRuntimeDir, "data.json"),
-    authFile: path.join(smokeRuntimeDir, "auth.json")
+    authFile: path.join(smokeRuntimeDir, "auth.json"),
+    backupDir: path.join(smokeRuntimeDir, "data-backups")
   };
 }
 
@@ -54,6 +55,7 @@ function startServer(entryFile, port, runtime) {
       COOKIE_SECURE: "false",
       DATA_FILE: runtime.dataFile,
       AUTH_FILE: runtime.authFile,
+      DATA_BACKUP_DIR: runtime.backupDir,
       UPLOADS_DIR: uploadsDir,
       ADMIN_USER: adminCredentials.user,
       ADMIN_PASS: adminCredentials.pass
@@ -130,7 +132,7 @@ async function runChecks(websitePort, adminPort) {
   });
 }
 
-async function runAuthenticatedAdminRoundTrip(websitePort, adminPort) {
+async function runAuthenticatedAdminRoundTrip(websitePort, adminPort, runtime) {
   const adminBaseUrl = `http://127.0.0.1:${adminPort}`;
   const websiteBaseUrl = `http://127.0.0.1:${websitePort}`;
   const cookie = await loginToAdmin(adminBaseUrl);
@@ -154,6 +156,10 @@ async function runAuthenticatedAdminRoundTrip(websitePort, adminPort) {
     }
     if (!saveResult.payload?.meta?.dataVersion) {
       throw new Error("Admin save response did not include dataVersion metadata.");
+    }
+    const backupFiles = await fs.readdir(runtime.backupDir).catch(() => []);
+    if (!backupFiles.some((fileName) => fileName.endsWith(".json"))) {
+      throw new Error("Admin save did not create a JSON data backup.");
     }
 
     const adminReloaded = await getJsonWithHeaders(`${adminBaseUrl}/api/data`, {
