@@ -331,14 +331,14 @@ body[data-homepage-polish="v2"]:not(.menu-page) .lang-selector { display: flex !
   gap: 12px;
   width: 100%;
   max-width: 320px;
-  height: 80px;
-  padding: 0 40px;
+  min-height: 64px;
+  padding: 0 28px;
   border-radius: 40px;
   background: linear-gradient(135deg, var(--bp) 0%, #ff7043 100%);
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
   text-decoration: none;
   box-shadow: 0 15px 45px rgba(255,87,34,0.4);
   transition: all 0.3s ease;
@@ -360,6 +360,20 @@ body[data-homepage-polish="v2"]:not(.menu-page) .lang-selector { display: flex !
 
 /* Hide redundant elements */
 .slide-dots, .hero-status-slot, .hero-menu-cta-wrap, .slide::before { display: none !important; }
+
+@media (max-width: 480px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .hero-v3-desc {
+    margin-bottom: 20px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .hero-menu-cta {
+    max-width: 280px;
+    min-height: 58px;
+    padding: 0 22px;
+    font-size: 0.92rem;
+    box-shadow: 0 12px 28px rgba(255,87,34,0.34);
+  }
+}
 
 /* ── 5. UTILITY NAV ──────────────────────────────────────────────────────── */
 body[data-homepage-polish="v2"]:not(.menu-page) .utility-nav {
@@ -734,6 +748,30 @@ body[data-homepage-polish="v2"]:not(.menu-page) .hours-grid {
   gap: 8px;
   margin-bottom: 20px;
   text-align: left;
+}
+
+body[data-homepage-polish="v2"]:not(.menu-page) .hours-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 0;
+}
+
+body[data-homepage-polish="v2"]:not(.menu-page) .hours-row:hover {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+body[data-homepage-polish="v2"]:not(.menu-page) .hours-day,
+body[data-homepage-polish="v2"]:not(.menu-page) .hours-time {
+  min-width: 0;
+  line-height: 1.25;
+}
+
+body[data-homepage-polish="v2"]:not(.menu-page) .hours-dash {
+  display: none;
 }
 
 body[data-homepage-polish="v2"]:not(.menu-page) .hours-note {
