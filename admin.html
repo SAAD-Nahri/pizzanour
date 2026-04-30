@@ -12005,6 +12005,58 @@
             }
         }
 
+        @media (max-width: 360px) {
+            body.admin-standalone {
+                --admin-mobile-gutter: 10px;
+                --admin-mobile-nav-height: 82px;
+            }
+
+            body.admin-standalone .mobile-header {
+                padding-inline: 10px;
+            }
+
+            body.admin-standalone #mobileAdminTitleText {
+                font-size: 1.1rem !important;
+                letter-spacing: 0.04em;
+            }
+
+            body.admin-standalone .mobile-header-meta {
+                gap: 4px;
+            }
+
+            body.admin-standalone .mobile-header-status,
+            body.admin-standalone .mobile-header-connection {
+                max-width: 96px;
+                min-height: 22px;
+                padding: 3px 7px;
+                font-size: 0.54rem;
+                letter-spacing: 0.04em;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            body.admin-standalone .mobile-bottom-nav {
+                left: 8px;
+                right: 8px;
+                bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+                padding: 6px;
+                border-radius: 18px;
+            }
+
+            body.admin-standalone .mobile-bottom-nav-btn {
+                min-height: 54px;
+                padding: 7px 3px;
+                font-size: 0.62rem;
+                letter-spacing: 0;
+            }
+
+            body.admin-standalone .mobile-bottom-nav-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.95rem;
+            }
+        }
+
         @media (max-width: 992px) {
             body.admin-page:not(.admin-standalone) {
                 --admin-mobile-gutter: 14px;
