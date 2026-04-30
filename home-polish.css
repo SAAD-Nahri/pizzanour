@@ -420,6 +420,29 @@ body[data-homepage-polish="v2"]:not(.menu-page) .utility-btn-label {
   text-transform: uppercase !important;
 }
 
+@media (max-width: 380px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .utility-nav {
+    gap: 8px !important;
+    width: min(420px, calc(100% - 24px)) !important;
+    margin-bottom: 28px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .utility-btn {
+    min-height: 72px !important;
+    padding: 12px 10px !important;
+    border-radius: 16px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .utility-btn-icon {
+    font-size: 1.28rem !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .utility-btn-label {
+    font-size: 0.66rem !important;
+    letter-spacing: 0 !important;
+  }
+}
+
 @media (min-width: 900px) {
   body[data-homepage-polish="v2"]:not(.menu-page) .utility-nav {
     grid-template-columns: repeat(4, 1fr) !important;
@@ -859,6 +882,40 @@ body[data-homepage-polish="v2"]:not(.menu-page) .contact-cta-btn:hover {
   transform: translateY(-2px);
 }
 
+@media (max-width: 420px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-grid {
+    gap: 10px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-card {
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-icon {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-card p,
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-card a {
+    font-size: 0.95rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-cta-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-cta-btn {
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 18px;
+  }
+}
+
 body[data-homepage-polish="v2"]:not(.menu-page) .contact-cta-btn--outline {
   background: transparent;
   color: var(--bp);
@@ -1062,7 +1119,7 @@ body[data-homepage-polish="v2"]:not(.menu-page) .section-reveal.visible {
 }
 
 /* ── 17. RTL ─────────────────────────────────────────────────────────────── */
-html[dir="rtl"] body[data-homepage-polish="v2"]:not(.menu-page) .hero-menu-cta::after { content: "←"; }
+html[dir="rtl"] body[data-homepage-polish="v2"]:not(.menu-page) .hero-menu-cta::after { content: "\2190"; }
 html[dir="rtl"] body[data-homepage-polish="v2"]:not(.menu-page) .hero-menu-cta:hover::after { transform: translateX(-6px); }
 html[dir="rtl"] body[data-homepage-polish="v2"]:not(.menu-page) .about-text { text-align: right; }
 html[dir="rtl"] body[data-homepage-polish="v2"]:not(.menu-page) .footer-inner { text-align: right; }
