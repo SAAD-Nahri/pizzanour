@@ -3766,6 +3766,146 @@ body.menu-page {
   }
 
   @media (max-width: 360px) {
+    .menu-modal-body {
+      padding: 20px 14px;
+    }
+
+    .menu-modal-body.is-centered {
+      padding: 26px 14px;
+    }
+
+    .menu-modal-icon {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+    }
+
+    .menu-modal-title {
+      margin-bottom: 6px;
+      font-size: 1rem;
+      line-height: 1.2;
+    }
+
+    .menu-modal-subtitle {
+      margin-bottom: 18px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .menu-modal-code-card {
+      padding: 14px;
+      border-radius: 13px;
+      font-size: 1.08rem;
+      letter-spacing: 0.08em;
+      overflow-wrap: anywhere;
+    }
+
+    .menu-modal-action {
+      min-height: 46px;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 13px;
+      font-size: 0.84rem;
+    }
+
+    .social-list {
+      gap: 8px;
+    }
+
+    .social-item {
+      min-height: 46px;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 13px;
+      font-size: 0.84rem;
+    }
+
+    .social-item-icon {
+      font-size: 1.2rem;
+    }
+
+    .menu-empty-state {
+      gap: 7px;
+      padding: 18px 14px;
+      border-radius: 18px;
+    }
+
+    .menu-empty-state-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      font-size: 1.25rem;
+    }
+
+    .menu-empty-state-eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+    }
+
+    .menu-empty-state-title {
+      font-size: 1rem;
+    }
+
+    .menu-empty-state-copy {
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .menu-empty-state-action {
+      min-width: 0;
+      min-height: 42px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+    }
+
+    .order-prompt-overlay {
+      padding: 10px;
+    }
+
+    .order-prompt-card {
+      gap: 8px;
+      padding: 18px 14px 14px;
+      border-radius: 20px;
+    }
+
+    .order-prompt-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      font-size: 1.25rem;
+    }
+
+    .order-prompt-eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+    }
+
+    .order-prompt-title {
+      font-size: 1rem;
+    }
+
+    .order-prompt-copy {
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .order-prompt-note {
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    .order-prompt-actions {
+      gap: 7px;
+      margin-top: 3px;
+    }
+
+    .order-prompt-btn {
+      min-height: 42px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+
     .history-modal {
       width: calc(100% - 16px);
       max-height: calc(100dvh - 22px);
