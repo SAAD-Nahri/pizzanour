@@ -253,8 +253,17 @@ async function runUploadValidationChecks(adminPort) {
     type: "image/png",
     bytes: tinyPng
   });
-  if (validUpload.status !== 200 || !validUpload.payload?.url) {
+  if (validUpload.status !== 200 || !validUpload.payload?.url || !validUpload.payload.url.endsWith(".webp")) {
     throw new Error(`Expected tiny png upload to succeed, got ${validUpload.status}: ${validUpload.payload?.error || "unknown"}.`);
+  }
+  if (validUpload.payload.optimized !== true || !Number.isFinite(Number(validUpload.payload.size))) {
+    throw new Error("Expected valid image upload to report optimization metadata.");
+  }
+  const uploadedResponse = await fetch(`${adminBaseUrl}${validUpload.payload.url}`, {
+    headers: { Cookie: cookie }
+  });
+  if (!uploadedResponse.ok || !String(uploadedResponse.headers.get("content-type") || "").includes("image/webp")) {
+    throw new Error("Optimized image upload was not served back as WebP.");
   }
 }
 

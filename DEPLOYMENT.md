@@ -58,6 +58,8 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `DATA_BACKUP_DIR=/app/data/data-backups`
 - `DATA_BACKUP_LIMIT=20`
 - `UPLOADS_DIR=/app/uploads`
+- `UPLOAD_IMAGE_MAX_DIMENSION=1920`
+- `UPLOAD_IMAGE_QUALITY=78`
 - `AUTH_FILE=/app/data/auth.json`
 
 Recommended production rule:
@@ -67,6 +69,7 @@ Recommended production rule:
 - keep `SECURITY_HEADERS_HSTS=true` after HTTPS is active on the final domains
 - keep `AUTH_FILE` inside the persisted `/app/data` volume so Security-tab password changes survive redeploys
 - keep `DATA_BACKUP_DIR` inside the persisted `/app/data` volume; every admin save/reset keeps a rolling JSON backup
+- keep uploaded phone photos optimized with `UPLOAD_IMAGE_MAX_DIMENSION=1920` and `UPLOAD_IMAGE_QUALITY=78` unless the client needs larger print-ready originals
 - keep `OPENAI_API_KEY` server-side only; do not expose it to the client or browser
 
 ## Configure In Coolify
@@ -101,6 +104,8 @@ Minimum env review before clicking deploy:
 - `DATA_FILE=/app/data/data.json`
 - `DATA_BACKUP_DIR=/app/data/data-backups`
 - `UPLOADS_DIR=/app/uploads`
+- `UPLOAD_IMAGE_MAX_DIMENSION=1920`
+- `UPLOAD_IMAGE_QUALITY=78`
 - `AUTH_FILE=/app/data/auth.json`
 - `OPENAI_API_KEY` is set if you want the seller-only importer or AI media generation enabled
 

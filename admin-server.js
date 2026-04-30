@@ -14,6 +14,7 @@ const {
   createSessionManager,
   createUploadMiddleware,
   getSessionToken,
+  optimizeUploadedImage,
   parsePort,
   setSecurityHeaders,
   setStaticAssetHeaders,
@@ -5459,7 +5460,7 @@ app.post("/api/data/reset", requireAuth, requireSellerTools, requireNoActiveImpo
 });
 
 app.post("/api/upload", requireAuth, (req, res, next) => {
-  upload.single("image")(req, res, (error) => {
+  upload.single("image")(req, res, async (error) => {
     if (error) {
       if (error.message === "unsupported_file_type") {
         res.status(400).json({ ok: false, error: "unsupported_file_type" });
@@ -5487,6 +5488,13 @@ app.post("/api/upload", requireAuth, (req, res, next) => {
       return;
     }
 
+    const optimization = await optimizeUploadedImage(req.file);
+    if (!optimization.ok) {
+      fs.unlink(req.file.path, () => {});
+      res.status(400).json({ ok: false, error: optimization.error });
+      return;
+    }
+
     Promise.all([
       ensureThumbnailFile(req.file.filename, getThumbnailTargetFileName(req.file.filename, "default"), "default"),
       ensureThumbnailFile(req.file.filename, getThumbnailTargetFileName(req.file.filename, "menu"), "menu"),
@@ -5495,7 +5503,13 @@ app.post("/api/upload", requireAuth, (req, res, next) => {
       console.warn("Thumbnail generation failed:", thumbnailError);
     });
 
-    res.json({ ok: true, url: `/uploads/${req.file.filename}` });
+    res.json({
+      ok: true,
+      url: `/uploads/${req.file.filename}`,
+      optimized: Boolean(optimization.optimized),
+      originalSize: optimization.originalSize || req.file.size || 0,
+      size: optimization.size || req.file.size || 0
+    });
   });
 });
 

@@ -2586,6 +2586,7 @@ function getUploadFailureMessage(code, status) {
         unsupported_file_type: 'Use a JPG, PNG, WebP, GIF, or PDF file. SVG uploads are not accepted for safety.',
         file_signature_mismatch: 'This file does not match its extension. Export it again as JPG, PNG, WebP, GIF, or PDF.',
         missing_uploaded_file: 'The upload could not be read. Please choose the file again.',
+        image_optimization_failed: 'This image could not be optimized. Export it again as JPG, PNG, or WebP and retry.',
         file_too_large: 'This file is too large. Use a file under 10 MB.'
     };
     return messages[code] || `Upload failed: ${status || code || 'unknown error'}`;

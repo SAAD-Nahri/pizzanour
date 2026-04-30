@@ -2,12 +2,16 @@ const crypto = require("crypto");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const sharp = require("sharp");
 
 const { uploadsDir } = require("./site-store");
 
 const MAX_JSON_BYTES = "1mb";
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const UPLOAD_IMAGE_MAX_DIMENSION = Number.parseInt(process.env.UPLOAD_IMAGE_MAX_DIMENSION || "1920", 10) || 1920;
+const UPLOAD_IMAGE_QUALITY = Number.parseInt(process.env.UPLOAD_IMAGE_QUALITY || "78", 10) || 78;
 const ALLOWED_UPLOAD_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif", "pdf"]);
+const OPTIMIZABLE_UPLOAD_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp"]);
 const SESSION_COOKIE = "restaurant_admin_session";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const NO_STORE_EXTENSIONS = new Set([".html"]);
@@ -254,6 +258,66 @@ function validateUploadedFile(file) {
   return { ok: true };
 }
 
+async function optimizeUploadedImage(file) {
+  const extension = path.extname(file?.filename || "").toLowerCase().replace(/^\./, "");
+  const filePath = file?.path;
+
+  if (!OPTIMIZABLE_UPLOAD_EXTENSIONS.has(extension)) {
+    return { ok: true, optimized: false, file };
+  }
+
+  if (!filePath || !fs.existsSync(filePath)) {
+    return { ok: false, error: "missing_uploaded_file" };
+  }
+
+  const originalSize = fs.statSync(filePath).size;
+  const baseName = path.basename(file.filename, path.extname(file.filename));
+  const outputFileName = `${baseName}.webp`;
+  const outputPath = path.join(path.dirname(filePath), outputFileName);
+  const tempPath = path.join(path.dirname(filePath), `.${outputFileName}.${process.pid}.${Date.now()}.tmp`);
+
+  try {
+    await sharp(filePath, { failOn: "none" })
+      .rotate()
+      .resize({
+        width: UPLOAD_IMAGE_MAX_DIMENSION,
+        height: UPLOAD_IMAGE_MAX_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true
+      })
+      .webp({
+        quality: UPLOAD_IMAGE_QUALITY,
+        effort: 4
+      })
+      .toFile(tempPath);
+
+    if (outputPath === filePath) {
+      fs.rmSync(filePath, { force: true });
+    }
+    fs.renameSync(tempPath, outputPath);
+    if (outputPath !== filePath) {
+      fs.rmSync(filePath, { force: true });
+    }
+
+    const optimizedSize = fs.statSync(outputPath).size;
+    file.filename = outputFileName;
+    file.path = outputPath;
+    file.mimetype = "image/webp";
+    file.size = optimizedSize;
+
+    return {
+      ok: true,
+      optimized: true,
+      file,
+      originalSize,
+      size: optimizedSize
+    };
+  } catch (error) {
+    fs.rmSync(tempPath, { force: true });
+    return { ok: false, error: "image_optimization_failed", detail: error?.message || String(error) };
+  }
+}
+
 function createBuildFingerprint(filePaths) {
   const hash = crypto.createHash("sha1");
 
@@ -321,6 +385,7 @@ module.exports = {
   createSessionManager,
   createUploadMiddleware,
   getSessionToken,
+  optimizeUploadedImage,
   parsePort,
   setSecurityHeaders,
   setStaticAssetHeaders,
