@@ -3766,6 +3766,125 @@ body.menu-page {
   }
 
   @media (max-width: 360px) {
+    .cart-drawer-body {
+      padding-inline: 10px;
+      padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .cart-drawer-header {
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+    }
+
+    .cart-drawer-title {
+      font-size: 0.94rem;
+    }
+
+    .cart-drawer-clear,
+    .cart-drawer-count {
+      min-height: 30px;
+      padding: 6px 8px;
+      font-size: 0.64rem;
+    }
+
+    .cart-items-list {
+      max-height: 30dvh;
+      margin-bottom: 9px;
+    }
+
+    .cart-item-card {
+      gap: 8px;
+      padding: 8px;
+      border-radius: 12px;
+    }
+
+    .cart-item-name {
+      font-size: 0.84rem;
+    }
+
+    .cart-item-price,
+    .cart-item-size,
+    .cart-item-extras {
+      font-size: 0.72rem;
+      line-height: 1.3;
+    }
+
+    .cart-item-controls {
+      gap: 5px;
+    }
+
+    .cart-qty-btn {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 9px;
+    }
+
+    .cart-item-qty {
+      min-width: 14px;
+      text-align: center;
+      font-size: 0.84rem;
+    }
+
+    .cart-service-grid {
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .cart-service-btn {
+      min-height: 48px;
+      padding: 8px 4px;
+      border-radius: 12px;
+      gap: 3px;
+    }
+
+    .cart-service-icon {
+      font-size: 1rem;
+    }
+
+    .cart-service-label {
+      font-size: 0.58rem;
+      line-height: 1.1;
+    }
+
+    .cart-delivery-block {
+      margin-bottom: 9px;
+    }
+
+    .cart-delivery-label {
+      margin-bottom: 5px;
+      font-size: 0.78rem;
+    }
+
+    .cart-delivery-input {
+      min-height: 64px;
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    .cart-delivery-hint {
+      margin-top: 5px;
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    .cart-total-card {
+      padding: 10px 12px;
+      margin-bottom: 9px;
+      border-radius: 13px;
+    }
+
+    .cart-total-row {
+      font-size: 0.92rem;
+    }
+
+    .cart-confirm-btn {
+      min-height: 46px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+    }
+
     .super-cat-sheet {
       padding: 14px 10px calc(46px + env(safe-area-inset-bottom, 0px));
       border-radius: 20px 20px 0 0;
