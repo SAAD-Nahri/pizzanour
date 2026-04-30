@@ -3765,6 +3765,64 @@ body.menu-page {
     border-radius: 14px;
   }
 
+  @media (max-width: 360px) {
+    .super-cat-sheet {
+      padding: 14px 10px calc(46px + env(safe-area-inset-bottom, 0px));
+      border-radius: 20px 20px 0 0;
+    }
+
+    .super-cat-sheet::before {
+      width: 42px;
+      margin-bottom: 10px;
+    }
+
+    .super-sheet-close {
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      font-size: 0.92rem;
+    }
+
+    .super-sheet-title {
+      padding-inline: 38px;
+      margin-bottom: 10px;
+      font-size: 0.98rem;
+      line-height: 1.2;
+    }
+
+    .super-cat-row {
+      padding: 9px;
+      gap: 8px;
+      margin-bottom: 7px;
+      border-radius: 14px;
+    }
+
+    .super-cat-row-left {
+      gap: 8px;
+    }
+
+    .super-cat-row-emoji {
+      min-width: 30px;
+      font-size: 1.15rem;
+    }
+
+    .super-cat-row-name {
+      font-size: 0.84rem;
+      line-height: 1.2;
+    }
+
+    .super-cat-row-desc {
+      display: none;
+    }
+
+    .super-cat-row-arrow {
+      width: 26px;
+      height: 26px;
+      font-size: 0.86rem;
+    }
+  }
+
   .menu-empty-state {
     padding: 24px 20px;
     border-radius: 24px;
