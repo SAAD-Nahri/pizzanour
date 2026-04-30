@@ -230,6 +230,20 @@ function createBuildFingerprint(filePaths) {
   return hash.digest("hex").slice(0, 12);
 }
 
+function setSecurityHeaders(req, res, next) {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+
+  const hstsEnabled = booleanFromEnv(process.env.SECURITY_HEADERS_HSTS, process.env.NODE_ENV === "production");
+  if (hstsEnabled) {
+    res.setHeader("Strict-Transport-Security", "max-age=15552000; includeSubDomains");
+  }
+
+  next();
+}
+
 function setStaticAssetHeaders(res, filePath) {
   const extension = path.extname(filePath || "").toLowerCase();
   // Ensure browsers decode localized strings consistently.
@@ -268,6 +282,7 @@ module.exports = {
   createUploadMiddleware,
   getSessionToken,
   parsePort,
+  setSecurityHeaders,
   setStaticAssetHeaders,
   setSessionCookie
 };

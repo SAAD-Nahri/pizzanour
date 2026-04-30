@@ -6,6 +6,7 @@ const fs = require("fs");
 const {
   createBuildFingerprint,
   parsePort,
+  setSecurityHeaders,
   setStaticAssetHeaders
 } = require("./server-common");
 const { createThumbnailRequestHandler, getUploadThumbnailPublicUrl, warmUploadThumbnailCache } = require("./image-thumbnails");
@@ -54,6 +55,7 @@ ensureStorage();
 app.use(compression({
   threshold: 1024
 }));
+app.use(setSecurityHeaders);
 
 app.get("/favicon.ico", (req, res) => {
   res.sendFile(path.join(__dirname, "images", "hero-default.svg"));

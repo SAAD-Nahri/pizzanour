@@ -15,6 +15,7 @@ const {
   createUploadMiddleware,
   getSessionToken,
   parsePort,
+  setSecurityHeaders,
   setStaticAssetHeaders,
   setSessionCookie
 } = require("./server-common");
@@ -288,6 +289,7 @@ function markImporterJobFailed(jobId, error) {
 app.use(compression({
   threshold: 1024
 }));
+app.use(setSecurityHeaders);
 
 const IMPORTER_SYSTEM_PROMPT = [
   "You generate seller-side draft JSON for a white-label restaurant website.",
@@ -5179,7 +5181,7 @@ app.post("/api/admin/login", (req, res) => {
 
   if (username !== currentCreds.user || !verifyPassword(password, currentCreds)) {
     const failedState = registerFailedLogin(rateLimitKey);
-    console.warn(`[AUTH] Invalid credentials for: "${username}" password_length: ${password.length}`);
+    console.warn(`[AUTH] Invalid login attempt for user "${username || "(empty)"}".`);
 
     if (failedState.lockedUntil && failedState.lockedUntil > Date.now()) {
       const retryAfterSec = Math.max(1, Math.ceil((failedState.lockedUntil - Date.now()) / 1000));

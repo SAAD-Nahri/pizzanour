@@ -100,6 +100,7 @@ async function runChecks(websitePort, adminPort) {
       throw new Error("Website health payload did not include the expected service name.");
     }
   });
+  await assertSecurityHeaders(`http://127.0.0.1:${websitePort}/health`);
 
   await assertJson(`http://127.0.0.1:${websitePort}/api/data`, 200, (payload) => {
     if (!payload || !Array.isArray(payload.menu)) {
@@ -114,6 +115,7 @@ async function runChecks(websitePort, adminPort) {
       throw new Error("Admin health payload did not include the expected service name.");
     }
   });
+  await assertSecurityHeaders(`http://127.0.0.1:${adminPort}/health`);
 
   await assertJson(`http://127.0.0.1:${adminPort}/api/admin/session`, 200, (payload) => {
     if (payload.authenticated !== false) {
@@ -260,6 +262,22 @@ async function assertJson(url, expectedStatus, validate) {
 
   const payload = await response.json();
   validate(payload);
+}
+
+async function assertSecurityHeaders(url) {
+  const response = await fetch(url);
+  const expectedHeaders = {
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "referrer-policy": "strict-origin-when-cross-origin"
+  };
+
+  for (const [name, expected] of Object.entries(expectedHeaders)) {
+    const actual = response.headers.get(name);
+    if (actual !== expected) {
+      throw new Error(`Expected ${name}: ${expected} from ${url}, got ${actual || "(missing)"}.`);
+    }
+  }
 }
 
 async function stopServer(child) {
