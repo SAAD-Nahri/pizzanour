@@ -1235,6 +1235,84 @@ body[data-homepage-polish="v2"]:not(.menu-page) .social-link-item:hover {
   box-shadow: var(--sh-sm) !important;
 }
 
+@media (max-width: 480px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-modal-card,
+  body[data-homepage-polish="v2"]:not(.menu-page) .social-modal-card {
+    width: calc(100% - 24px) !important;
+    max-width: 360px !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow-y: auto !important;
+    border-radius: 22px !important;
+    padding: 24px 16px 18px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-modal-close {
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-modal-icon {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-modal-card h2,
+  body[data-homepage-polish="v2"]:not(.menu-page) .social-modal-card h2 {
+    font-size: 1.35rem !important;
+    line-height: 1.15 !important;
+    margin: 0 36px 14px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-modal-box {
+    padding: 12px !important;
+    margin: 12px 0 !important;
+    border-radius: 16px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-modal-box p {
+    margin: 6px 0 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.35 !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-password-box {
+    gap: 8px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-password-box code {
+    max-width: 190px;
+    overflow-wrap: anywhere;
+    font-size: 1rem;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .copy-wifi-btn {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .wifi-qr-box img {
+    width: 128px;
+    height: 128px;
+    margin: 8px auto;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .social-links-grid {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .social-link-item {
+    min-height: 48px !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
 /* ── 19. KILL ORPHAN SCROLL INDICATORS ───────────────────────────────────── */
 
 /* ── 20. KEYFRAMES ───────────────────────────────────────────────────────── */
