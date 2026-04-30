@@ -1075,6 +1075,42 @@ body[data-homepage-polish="v2"]:not(.menu-page) .footer-copy {
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 
+@media (max-width: 480px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .footer {
+    padding: 36px 14px 24px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .footer-brand {
+    margin-bottom: 4px;
+    font-size: 1rem !important;
+    line-height: 1.2;
+    flex-wrap: wrap;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .footer-tagline {
+    margin-bottom: 16px;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .footer-divider {
+    width: 32px;
+    margin-bottom: 14px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .footer p {
+    font-size: 0.76rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .footer-copy {
+    margin-top: 16px !important;
+    padding-top: 12px;
+    font-size: 0.68rem !important;
+  }
+}
+
 /* ── 14. REVEAL ANIMATIONS ───────────────────────────────────────────────── */
 body[data-homepage-polish="v2"]:not(.menu-page) .section-reveal {
   opacity: 0;
