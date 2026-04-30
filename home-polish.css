@@ -654,6 +654,42 @@ body[data-homepage-polish="v2"]:not(.menu-page) .events-grid {
 @media (max-width: 480px) {
   body[data-homepage-polish="v2"]:not(.menu-page) .events-grid {
     grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .event-card {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px !important;
+    text-align: left !important;
+    border-radius: 18px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .event-card-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    font-size: 1.45rem;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .event-card h3 {
+    font-size: 0.92rem !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .event-card-desc {
+    display: none;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .event-reserve-btn {
+    min-height: 36px;
+    padding: 8px 12px !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap;
   }
 }
 
@@ -885,21 +921,38 @@ body[data-homepage-polish="v2"]:not(.menu-page) .contact-cta-btn:hover {
 @media (max-width: 420px) {
   body[data-homepage-polish="v2"]:not(.menu-page) .contact-grid {
     gap: 10px !important;
+    margin-bottom: 14px;
   }
 
   body[data-homepage-polish="v2"]:not(.menu-page) .contact-card {
-    padding: 20px 16px !important;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+    padding: 14px 13px !important;
     border-radius: 18px !important;
+    text-align: left !important;
   }
 
   body[data-homepage-polish="v2"]:not(.menu-page) .contact-icon {
-    font-size: 1.6rem;
-    margin-bottom: 8px;
+    grid-row: span 2;
+    margin: 0;
+    font-size: 1.45rem;
+    text-align: center;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .contact-card h3 {
+    margin: 0 0 3px !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.06em !important;
+    text-align: left !important;
   }
 
   body[data-homepage-polish="v2"]:not(.menu-page) .contact-card p,
   body[data-homepage-polish="v2"]:not(.menu-page) .contact-card a {
-    font-size: 0.95rem !important;
+    min-width: 0;
+    font-size: 0.88rem !important;
+    line-height: 1.25 !important;
     overflow-wrap: anywhere;
   }
 
