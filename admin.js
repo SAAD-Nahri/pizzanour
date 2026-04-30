@@ -2581,6 +2581,16 @@ function buildAdminRequestErrorFromResponse(response, payload = {}) {
     });
 }
 
+function getUploadFailureMessage(code, status) {
+    const messages = {
+        unsupported_file_type: 'Use a JPG, PNG, WebP, GIF, or PDF file. SVG uploads are not accepted for safety.',
+        file_signature_mismatch: 'This file does not match its extension. Export it again as JPG, PNG, WebP, GIF, or PDF.',
+        missing_uploaded_file: 'The upload could not be read. Please choose the file again.',
+        file_too_large: 'This file is too large. Use a file under 10 MB.'
+    };
+    return messages[code] || `Upload failed: ${status || code || 'unknown error'}`;
+}
+
 function cloneAdminDraft(value) {
     if (value === undefined) return undefined;
     if (value === null) return null;
@@ -5900,7 +5910,7 @@ async function uploadImageToServer(file) {
         if (!requestError.message || requestError.message === payload?.error) {
             requestError.message = response.status === 401
                 ? 'Session expired while uploading. Reload and sign in again.'
-                : payload?.error || `Upload failed: ${response.statusText || response.status}`;
+                : getUploadFailureMessage(payload?.error, response.statusText || response.status);
         }
         throw requestError;
     }

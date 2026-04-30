@@ -17,7 +17,8 @@ const {
   parsePort,
   setSecurityHeaders,
   setStaticAssetHeaders,
-  setSessionCookie
+  setSessionCookie,
+  validateUploadedFile
 } = require("./server-common");
 const { createThumbnailRequestHandler, ensureThumbnailFile, getThumbnailTargetFileName } = require("./image-thumbnails");
 const { ensureStorage, getDataVersion, readData, resetToBundledData, uploadsDir, writeData } = require("./site-store");
@@ -5476,6 +5477,13 @@ app.post("/api/upload", requireAuth, (req, res, next) => {
 
     if (!req.file) {
       res.status(400).json({ ok: false, error: "no_file_uploaded" });
+      return;
+    }
+
+    const validation = validateUploadedFile(req.file);
+    if (!validation.ok) {
+      fs.unlink(req.file.path, () => {});
+      res.status(400).json({ ok: false, error: validation.error });
       return;
     }
 

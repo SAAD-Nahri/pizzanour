@@ -7,7 +7,7 @@ const { uploadsDir } = require("./site-store");
 
 const MAX_JSON_BYTES = "1mb";
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-const ALLOWED_UPLOAD_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif", "svg", "pdf"]);
+const ALLOWED_UPLOAD_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif", "pdf"]);
 const SESSION_COOKIE = "restaurant_admin_session";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const NO_STORE_EXTENSIONS = new Set([".html"]);
@@ -214,6 +214,46 @@ function createUploadMiddleware() {
   });
 }
 
+function bufferStartsWith(buffer, signature) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < signature.length) return false;
+  return signature.every((value, index) => buffer[index] === value);
+}
+
+function validateUploadedFile(file) {
+  const extension = path.extname(file?.originalname || file?.filename || "").toLowerCase().replace(/^\./, "");
+  const filePath = file?.path;
+
+  if (!ALLOWED_UPLOAD_EXTENSIONS.has(extension)) {
+    return { ok: false, error: "unsupported_file_type" };
+  }
+
+  if (!filePath || !fs.existsSync(filePath)) {
+    return { ok: false, error: "missing_uploaded_file" };
+  }
+
+  const header = fs.readFileSync(filePath).subarray(0, 32);
+  const isJpeg = bufferStartsWith(header, [0xff, 0xd8, 0xff]);
+  const isPng = bufferStartsWith(header, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const isGif = header.subarray(0, 6).toString("ascii") === "GIF87a" || header.subarray(0, 6).toString("ascii") === "GIF89a";
+  const isWebp = header.subarray(0, 4).toString("ascii") === "RIFF" && header.subarray(8, 12).toString("ascii") === "WEBP";
+  const isPdf = header.subarray(0, 5).toString("ascii") === "%PDF-";
+
+  const validByExtension = {
+    jpg: isJpeg,
+    jpeg: isJpeg,
+    png: isPng,
+    gif: isGif,
+    webp: isWebp,
+    pdf: isPdf
+  };
+
+  if (!validByExtension[extension]) {
+    return { ok: false, error: "file_signature_mismatch" };
+  }
+
+  return { ok: true };
+}
+
 function createBuildFingerprint(filePaths) {
   const hash = crypto.createHash("sha1");
 
@@ -284,5 +324,6 @@ module.exports = {
   parsePort,
   setSecurityHeaders,
   setStaticAssetHeaders,
-  setSessionCookie
+  setSessionCookie,
+  validateUploadedFile
 };

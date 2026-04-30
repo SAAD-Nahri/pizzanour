@@ -27,6 +27,7 @@ async function main() {
 
     await runChecks(websitePort, adminPort);
     await runAuthenticatedAdminRoundTrip(websitePort, adminPort, runtime);
+    await runUploadValidationChecks(adminPort);
     console.log("Smoke checks passed.");
   } finally {
     await Promise.allSettled([stopServer(websiteServer), stopServer(adminServer)]);
@@ -228,6 +229,35 @@ async function loginToAdmin(adminBaseUrl) {
   return cookie.split(";")[0];
 }
 
+async function runUploadValidationChecks(adminPort) {
+  const adminBaseUrl = `http://127.0.0.1:${adminPort}`;
+  const cookie = await loginToAdmin(adminBaseUrl);
+
+  const fakeUpload = await postMultipart(`${adminBaseUrl}/api/upload`, {
+    cookie,
+    fileName: "fake.jpg",
+    type: "image/jpeg",
+    bytes: Buffer.from("not a real jpeg")
+  });
+  if (fakeUpload.status !== 400 || fakeUpload.payload?.error !== "file_signature_mismatch") {
+    throw new Error(`Expected fake jpg upload to be rejected, got ${fakeUpload.status}: ${fakeUpload.payload?.error || "unknown"}.`);
+  }
+
+  const tinyPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/akq9ZQAAAAASUVORK5CYII=",
+    "base64"
+  );
+  const validUpload = await postMultipart(`${adminBaseUrl}/api/upload`, {
+    cookie,
+    fileName: "tiny.png",
+    type: "image/png",
+    bytes: tinyPng
+  });
+  if (validUpload.status !== 200 || !validUpload.payload?.url) {
+    throw new Error(`Expected tiny png upload to succeed, got ${validUpload.status}: ${validUpload.payload?.error || "unknown"}.`);
+  }
+}
+
 async function getJsonWithHeaders(url, options = {}) {
   const response = await fetch(url, options);
   if (!response.ok) {
@@ -251,6 +281,18 @@ async function postJson(url, payload, cookie = "") {
     throw new Error(`Expected success from ${url}, got ${response.status}: ${body.error || response.statusText}`);
   }
   return { payload: body, headers: response.headers };
+}
+
+async function postMultipart(url, { cookie, fileName, type, bytes }) {
+  const form = new FormData();
+  form.append("image", new Blob([bytes], { type }), fileName);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Cookie: cookie },
+    body: form
+  });
+  const payload = await response.json().catch(() => ({}));
+  return { status: response.status, payload, headers: response.headers };
 }
 
 async function assertStatus(url, expectedStatus) {
