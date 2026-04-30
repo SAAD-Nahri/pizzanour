@@ -3766,6 +3766,108 @@ body.menu-page {
   }
 
   @media (max-width: 360px) {
+    .history-modal {
+      width: calc(100% - 16px);
+      max-height: calc(100dvh - 22px);
+      padding: 16px 12px;
+      border-radius: 20px;
+    }
+
+    .history-header {
+      margin-bottom: 12px;
+    }
+
+    .history-header h2 {
+      font-size: 1rem;
+    }
+
+    .history-close-btn,
+    .history-delete-btn {
+      width: 34px;
+      height: 34px;
+      font-size: 1rem;
+    }
+
+    .history-delete-btn {
+      top: 9px;
+      right: 9px;
+    }
+
+    .history-ticket {
+      padding: 11px;
+      margin-bottom: 10px;
+      border-radius: 16px;
+    }
+
+    .history-ticket-card {
+      gap: 10px;
+    }
+
+    .history-ticket-top {
+      gap: 8px;
+      padding-right: 38px;
+    }
+
+    .history-ticket-label {
+      margin-bottom: 4px;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+    }
+
+    .history-ticket-number {
+      font-size: 0.9rem;
+    }
+
+    .history-ticket-status {
+      padding: 6px 8px;
+      font-size: 0.62rem;
+    }
+
+    .history-ticket-meta {
+      gap: 6px;
+      padding: 10px 0;
+    }
+
+    .history-ticket-meta-row {
+      gap: 8px;
+      font-size: 0.78rem;
+    }
+
+    .history-ticket-address {
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      line-height: 1.35;
+    }
+
+    .history-ticket-items {
+      gap: 7px;
+    }
+
+    .history-line-item {
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .history-line-item-main {
+      gap: 7px;
+    }
+
+    .history-line-item-qty {
+      min-width: 28px;
+    }
+
+    .history-line-item-size,
+    .history-line-item-extras {
+      font-size: 0.68rem;
+    }
+
+    .history-empty {
+      padding: 18px 14px;
+      border-radius: 15px;
+      font-size: 0.84rem;
+    }
+
     .cart-drawer-body {
       padding-inline: 10px;
       padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
