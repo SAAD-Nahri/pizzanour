@@ -2181,6 +2181,55 @@
                 margin: 6px 0 0;
             }
 
+            .menu-category-card {
+                min-height: 96px;
+                padding: 12px 14px;
+                border-radius: 16px;
+            }
+
+            .menu-category-card-title {
+                max-width: calc(100% - 42px);
+                padding: 6px 8px 6px 0;
+                border-radius: 0 12px 12px 0;
+                font-size: 0.9rem;
+                line-height: 1.08;
+                letter-spacing: 0;
+            }
+
+            .menu-category-card-count {
+                top: 8px;
+                right: 8px;
+                min-width: 26px;
+                min-height: 26px;
+                padding: 0 7px;
+                font-size: 0.6rem;
+            }
+
+            html[dir='rtl'] .menu-category-card-title {
+                max-width: calc(100% - 42px);
+                padding: 6px 0 6px 8px;
+                border-radius: 12px 0 0 12px;
+            }
+
+            .menu-subnav-track {
+                gap: 5px;
+            }
+
+            .menu-subnav-tab {
+                min-height: 30px;
+                padding: 0 8px;
+                font-size: 0.66rem;
+                border-radius: 999px;
+            }
+
+            .menu-subnav-count {
+                min-width: 16px;
+                min-height: 16px;
+                margin-left: 4px;
+                padding: 0 4px;
+                font-size: 0.54rem;
+            }
+
             .menu-item-card {
                 grid-template-columns: 56px minmax(0, 1fr) 36px;
                 gap: 8px;
