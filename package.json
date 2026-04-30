@@ -9,7 +9,7 @@
     "start:admin": "node admin-server.js",
     "build:admin-icons": "node scripts/generate-admin-pwa-icons.js",
     "build:public": "node scripts/build-public-assets.js",
-    "check": "node --check website-server.js && node --check admin-server.js && node --check site-store.js && node --check server-common.js && node --check media-library/library.js && node --check seller-jobs/jobs.js && node --check app.js && node --check admin.js",
+    "check": "node scripts/encoding-check.js && node --check website-server.js && node --check admin-server.js && node --check site-store.js && node --check server-common.js && node --check media-library/library.js && node --check seller-jobs/jobs.js && node --check app.js && node --check admin.js",
     "media:check": "node scripts/media-library-check.js",
     "uploads:audit": "node scripts/uploads-audit.js",
     "thumbs:build": "node scripts/build-upload-thumbnails.js",
