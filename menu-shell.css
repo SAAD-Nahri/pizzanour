@@ -3479,7 +3479,7 @@ body.menu-page {
   }
 
   .dish-page-body {
-    padding: 24px 16px 14px;
+    padding: 24px 16px calc(86px + env(safe-area-inset-bottom, 0px));
   }
 
   .dish-page-name {
@@ -3491,10 +3491,40 @@ body.menu-page {
     margin-bottom: 16px;
   }
 
+  .dish-config-options,
+  .dish-extra-options {
+    gap: 8px;
+  }
+
+  .dish-config-chip {
+    min-height: 42px;
+    padding: 9px 12px;
+    font-size: 0.82rem;
+  }
+
+  .dish-extra-option {
+    padding: 10px 12px;
+    border-radius: 15px;
+  }
+
+  .dish-extra-copy {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
   .dish-page-footer {
+    bottom: 0;
     padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
     margin-left: -16px;
     margin-right: -16px;
+    backdrop-filter: none;
+  }
+
+  .dish-add-btn {
+    min-height: 50px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    letter-spacing: 0;
   }
 
   .menu-empty-state {
@@ -3510,4 +3540,3 @@ body.menu-page {
     font-size: 0.88rem;
   }
 }
-
