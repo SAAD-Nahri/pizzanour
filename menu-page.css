@@ -2069,6 +2069,73 @@
             }
         }
 
+        @media (max-width: 420px), (pointer: coarse) and (max-width: 768px) {
+            .menu-item-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                grid-template-columns: 62px minmax(0, 1fr) 40px;
+                gap: 9px;
+                min-height: 88px;
+                padding: 10px;
+            }
+
+            .menu-item-img {
+                width: 62px;
+                height: 62px;
+                border-radius: 15px;
+            }
+
+            .menu-item-info {
+                padding-block: 2px;
+            }
+
+            .menu-item-name {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                overflow-wrap: anywhere;
+                text-wrap: auto;
+            }
+
+            .menu-item-desc {
+                -webkit-line-clamp: 1;
+            }
+
+            .menu-item-price {
+                overflow-wrap: anywhere;
+            }
+
+            .menu-item-add {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+
+            .menu-item-badge {
+                top: 7px;
+                inset-inline-start: 7px;
+                max-width: 54px;
+                padding: 4px 6px;
+                font-size: 0.54rem;
+                letter-spacing: 0;
+                border-radius: 12px;
+            }
+
+            .menu-item-love {
+                top: 7px;
+                right: 7px;
+                width: 30px;
+                height: 30px;
+                backdrop-filter: none;
+            }
+
+            html[dir="rtl"] .menu-item-love {
+                right: auto;
+                left: 7px;
+            }
+        }
+
         /* ===== Impeccable App Pass: Menu ===== */
         .top-nav-bar {
             width: min(1160px, calc(100% - 28px));
