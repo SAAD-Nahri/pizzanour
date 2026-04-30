@@ -789,6 +789,22 @@ body[data-homepage-polish="v2"]:not(.menu-page) .gallery-item img {
   object-fit: cover;
 }
 
+@media (max-width: 480px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .gallery-section {
+    padding: 56px 14px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .gallery-grid {
+    gap: 6px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .gallery-item {
+    min-height: 0 !important;
+    aspect-ratio: 1 / 0.86;
+    border-radius: 14px !important;
+  }
+}
+
 /* ── 11. HOURS ───────────────────────────────────────────────────────────── */
 body[data-homepage-polish="v2"]:not(.menu-page) .hours-section { background: #f7f7f9; }
 
@@ -841,6 +857,36 @@ body[data-homepage-polish="v2"]:not(.menu-page) .hours-note {
   border-radius: var(--r-sm);
   background: var(--bl);
   border: 1px solid rgba(255,87,34,0.08);
+}
+
+@media (max-width: 480px) {
+  body[data-homepage-polish="v2"]:not(.menu-page) .hours-card {
+    padding: 18px 14px !important;
+    border-radius: 18px !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .hours-grid {
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .hours-row {
+    min-height: 40px;
+    gap: 8px;
+    padding: 7px 0;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .hours-day,
+  body[data-homepage-polish="v2"]:not(.menu-page) .hours-time {
+    font-size: 0.84rem !important;
+  }
+
+  body[data-homepage-polish="v2"]:not(.menu-page) .hours-note {
+    padding: 10px 12px;
+    font-size: 0.78rem !important;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* ── 12. CONTACT ─────────────────────────────────────────────────────────── */
