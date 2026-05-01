@@ -2649,6 +2649,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            max-width: 100%;
             min-height: 30px;
             min-width: 108px;
             padding: 0 12px;
@@ -2660,6 +2661,9 @@
             font-weight: 800;
             letter-spacing: 0.04em;
             text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             box-shadow: 0 8px 16px rgba(75, 47, 24, 0.06);
             font-variant-numeric: tabular-nums;
         }
@@ -3135,6 +3139,15 @@
 
             .info-row.is-empty .info-text {
                 -webkit-line-clamp: 1;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .landing-meta-pill {
+                min-height: 22px;
+                padding: 0 4px;
+                font-size: 0.54rem;
+                letter-spacing: 0;
             }
         }
 
