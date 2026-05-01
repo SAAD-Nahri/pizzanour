@@ -1784,6 +1784,9 @@ window.applyBranding = function () {
         if (image && branding.heroImage) {
             window.setSafeImageSource(image, branding.heroImage, {
                 fallbackSrc: window.defaultBranding.heroImage,
+                loading: 'eager',
+                decoding: 'async',
+                fetchPriority: 'high',
                 onMissing: () => {
                     image.style.display = '';
                 }
@@ -1801,8 +1804,12 @@ window.applyBranding = function () {
     homepageHeroImages.forEach((src, index) => {
         const image = document.getElementById(`heroSlideImage${index + 1}`);
         if (!image) return;
+        const isPrimaryHero = index === 0;
         window.setSafeImageSource(image, src, {
             fallbackSrc: window.defaultBranding.heroImage,
+            loading: isPrimaryHero ? 'eager' : 'lazy',
+            decoding: 'async',
+            fetchPriority: isPrimaryHero ? 'high' : 'low',
             onMissing: () => {
                 image.style.display = '';
             },

@@ -1032,6 +1032,9 @@ window.applyBranding = function () {
             
             window.setSafeImageSource(image, displayHeroImage, {
                 fallbackSrc: window.defaultBranding.heroImage,
+                loading: 'eager',
+                decoding: 'async',
+                fetchPriority: 'high',
                 onMissing: () => {
                     image.style.display = '';
                 }
