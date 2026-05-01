@@ -249,7 +249,7 @@
 
             <div id="sharedOverlay" class="overlay" onclick="closeAllModals()"></div>
 
-            <div id="cartDrawer" class="modal-sheet">
+            <div id="cartDrawer" class="modal-sheet cart-sheet">
                 <div class="modal-handle"></div>
                 <div id="drawerContent"></div>
             </div>
@@ -849,27 +849,29 @@
                         </div>
                     `).join('')}
                 </div>
-                <div class="cart-service-grid">
-                    ${serviceOptions.map((option) => `
-                        <button class="cart-service-btn${serviceType === option.key ? ' is-active' : ''}" onclick="window.__foodyGetMenuRuntime().setServiceType('${option.key}'); renderDrawer()">
-                            <span class="cart-service-icon">${option.icon}</span>
-                            <span class="cart-service-label">${option.label}</span>
-                        </button>
-                    `).join('')}
-                </div>
-                ${serviceType === 'delivery' ? `
-                <div class="cart-delivery-block">
-                    <label class="cart-delivery-label" data-i18n="cart_delivery_label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
-                    <textarea id="deliveryAddress" rows="2" data-i18n-placeholder="cart_delivery_placeholder" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${window.currentDeliveryAddress || ''}</textarea>
-                    <div id="deliveryAddressHint" class="cart-delivery-hint${window.deliveryAddressNeedsAttention ? ' is-warning' : ''}">${window.deliveryAddressNeedsAttention ? t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.') : t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.')}</div>
-                </div>
-                ` : ''}
-                <div class="cart-total-card">
-                    <div class="cart-total-row">
-                        <span data-i18n="cart_total_label">${t('cart_total_label', 'Total')}</span><span>${formatMoney(total)}</span>
+                <div class="cart-checkout-panel">
+                    <div class="cart-service-grid">
+                        ${serviceOptions.map((option) => `
+                            <button class="cart-service-btn${serviceType === option.key ? ' is-active' : ''}" onclick="window.__foodyGetMenuRuntime().setServiceType('${option.key}'); renderDrawer()">
+                                <span class="cart-service-icon">${option.icon}</span>
+                                <span class="cart-service-label">${option.label}</span>
+                            </button>
+                        `).join('')}
                     </div>
+                    ${serviceType === 'delivery' ? `
+                    <div class="cart-delivery-block">
+                        <label class="cart-delivery-label" data-i18n="cart_delivery_label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
+                        <textarea id="deliveryAddress" rows="2" data-i18n-placeholder="cart_delivery_placeholder" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${window.currentDeliveryAddress || ''}</textarea>
+                        <div id="deliveryAddressHint" class="cart-delivery-hint${window.deliveryAddressNeedsAttention ? ' is-warning' : ''}">${window.deliveryAddressNeedsAttention ? t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.') : t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.')}</div>
+                    </div>
+                    ` : ''}
+                    <div class="cart-total-card">
+                        <div class="cart-total-row">
+                            <span data-i18n="cart_total_label">${t('cart_total_label', 'Total')}</span><span>${formatMoney(total)}</span>
+                        </div>
+                    </div>
+                    <button onclick="generateTicket()" class="cart-confirm-btn" data-i18n="cart_confirm_order">${t('cart_confirm_order', 'CONFIRMER MA COMMANDE')}</button>
                 </div>
-                <button onclick="generateTicket()" class="cart-confirm-btn" data-i18n="cart_confirm_order">${t('cart_confirm_order', 'CONFIRMER MA COMMANDE')}</button>
             </div>
         `;
 

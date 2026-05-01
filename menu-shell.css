@@ -2116,7 +2116,19 @@ body.menu-page {
 }
 
 .cart-drawer-body {
-  padding: 2px 18px 118px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(90dvh - 12px);
+  min-height: min(520px, calc(100dvh - 92px));
+  padding: 2px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.cart-sheet {
+  overflow: hidden;
+}
+
+.cart-sheet #drawerContent {
+  min-height: 0;
 }
 
 .cart-drawer-body.is-empty {
@@ -2172,9 +2184,31 @@ body.menu-page {
 }
 
 .cart-items-list {
-  max-height: 45vh;
+  flex: 1 1 auto;
+  min-height: 118px;
+  max-height: none;
   overflow-y: auto;
   margin-bottom: 18px;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.cart-items-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart-items-list::-webkit-scrollbar-thumb {
+  background: rgba(141, 105, 80, 0.26);
+  border-radius: 999px;
+}
+
+.cart-checkout-panel {
+  flex: 0 0 auto;
+  margin: 0 -2px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(215, 193, 162, 0.24);
+  background: linear-gradient(180deg, rgba(251, 247, 240, 0.2) 0%, rgba(251, 247, 240, 0.98) 22%, #fff 100%);
 }
 
 .cart-item-card {
@@ -3606,7 +3640,13 @@ body.menu-page {
   }
 
   .cart-drawer-body {
-    padding: 0 14px calc(92px + env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 18px);
+    min-height: min(560px, calc(100dvh - env(safe-area-inset-top, 0px) - 34px));
+    padding: 0 14px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cart-sheet {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 8px);
   }
 
   .cart-drawer-header {
@@ -3633,8 +3673,13 @@ body.menu-page {
   }
 
   .cart-items-list {
-    max-height: 34dvh;
+    min-height: 104px;
     margin-bottom: 12px;
+  }
+
+  .cart-checkout-panel {
+    margin-inline: -2px;
+    padding-top: 10px;
   }
 
   .cart-item-card {
@@ -4010,7 +4055,9 @@ body.menu-page {
 
     .cart-drawer-body {
       padding-inline: 10px;
-      padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 14px);
+      min-height: min(500px, calc(100dvh - env(safe-area-inset-top, 0px) - 28px));
     }
 
     .cart-drawer-header {
@@ -4030,8 +4077,12 @@ body.menu-page {
     }
 
     .cart-items-list {
-      max-height: 30dvh;
+      min-height: 86px;
       margin-bottom: 9px;
+    }
+
+    .cart-checkout-panel {
+      padding-top: 8px;
     }
 
     .cart-item-card {
