@@ -23,6 +23,17 @@ function escapeHomepageAttr(value) {
         .replace(/'/g, '&#39;');
 }
 
+function buildSocialLinkMarkup({ href, className, icon, label, iconOnly = false }) {
+    const safeHref = escapeHomepageAttr(href);
+    const safeLabel = escapeHomepageAttr(label);
+    const safeClass = escapeHomepageAttr(className || '');
+    const safeIcon = escapeHomepageAttr(icon);
+    const body = iconOnly
+        ? safeIcon
+        : `<span>${safeIcon}</span> ${safeLabel}`;
+    return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="${safeClass}" aria-label="${safeLabel}" title="${safeLabel}">${body}</a>`;
+}
+
 const HOURS_DAY_I18N_KEYS = {
     lundi: 'day_mon',
     monday: 'day_mon',
@@ -178,43 +189,40 @@ function renderSocialLinks() {
     let modalItems = '';
     let footerIcons = '';
     let contactButtons = '';
+
+    const appendSocialLink = ({ href, label, icon, modalClass }) => {
+        modalItems += buildSocialLinkMarkup({ href, className: modalClass, icon, label });
+        footerIcons += buildSocialLinkMarkup({ href, className: 'footer-social-icon', icon, label, iconOnly: true });
+        contactButtons += buildSocialLinkMarkup({ href, className: 'social-btn', icon, label });
+    };
+
     const instagramUrl = window.getSafeExternalUrl(socialLinks.instagram);
     const facebookUrl = window.getSafeExternalUrl(socialLinks.facebook);
     const tiktokUrl = window.getSafeExternalUrl(socialLinks.tiktok);
     const tripAdvisorUrl = window.getSafeExternalUrl(socialLinks.tripadvisor);
 
     if (instagramUrl) {
-        const label = tx('social_instagram', 'Instagram');
-        modalItems += `<a href="${instagramUrl}" target="_blank" class="social-link-item instagram" aria-label="${label}" title="${label}"><span>📸</span> ${label}</a>`;
-        footerIcons += `<a href="${instagramUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">📸</a>`;
-        contactButtons += `<a href="${instagramUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">📸 ${label}</a>`;
+        appendSocialLink({ href: instagramUrl, label: tx('social_instagram', 'Instagram'), icon: '📸', modalClass: 'social-link-item instagram' });
     }
     if (facebookUrl) {
-        const label = tx('social_facebook', 'Facebook');
-        modalItems += `<a href="${facebookUrl}" target="_blank" class="social-link-item facebook" aria-label="${label}" title="${label}"><span>📘</span> ${label}</a>`;
-        footerIcons += `<a href="${facebookUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">📘</a>`;
-        contactButtons += `<a href="${facebookUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">📘 ${label}</a>`;
+        appendSocialLink({ href: facebookUrl, label: tx('social_facebook', 'Facebook'), icon: '📘', modalClass: 'social-link-item facebook' });
     }
     if (tiktokUrl) {
-        const label = tx('social_tiktok', 'TikTok');
-        modalItems += `<a href="${tiktokUrl}" target="_blank" class="social-link-item tiktok" aria-label="${label}" title="${label}"><span>🎵</span> ${label}</a>`;
-        footerIcons += `<a href="${tiktokUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">🎵</a>`;
-        contactButtons += `<a href="${tiktokUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">🎵 ${label}</a>`;
+        appendSocialLink({ href: tiktokUrl, label: tx('social_tiktok', 'TikTok'), icon: '🎵', modalClass: 'social-link-item tiktok' });
     }
     if (tripAdvisorUrl) {
-        const label = tx('social_tripadvisor', 'TripAdvisor');
-        modalItems += `<a href="${tripAdvisorUrl}" target="_blank" class="social-link-item" aria-label="${label}" title="${label}"><span>⭐</span> ${label}</a>`;
-        footerIcons += `<a href="${tripAdvisorUrl}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">⭐</a>`;
-        contactButtons += `<a href="${tripAdvisorUrl}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">⭐ ${label}</a>`;
+        appendSocialLink({ href: tripAdvisorUrl, label: tx('social_tripadvisor', 'TripAdvisor'), icon: '⭐', modalClass: 'social-link-item' });
     }
     const waNumber = typeof window.getWhatsAppNumber === 'function'
         ? window.getWhatsAppNumber()
         : String(socialLinks.whatsapp || '').replace(/\D/g, '');
     if (waNumber) {
-        const label = tx('social_whatsapp', 'WhatsApp');
-        modalItems += `<a href="https://wa.me/${waNumber}" target="_blank" class="social-link-item whatsapp" aria-label="${label}" title="${label}"><span>📞</span> ${label}</a>`;
-        footerIcons += `<a href="https://wa.me/${waNumber}" target="_blank" class="footer-social-icon" aria-label="${label}" title="${label}">📞</a>`;
-        contactButtons += `<a href="https://wa.me/${waNumber}" target="_blank" class="social-btn" aria-label="${label}" title="${label}">📞 ${label}</a>`;
+        appendSocialLink({
+            href: `https://wa.me/${encodeURIComponent(waNumber)}`,
+            label: tx('social_whatsapp', 'WhatsApp'),
+            icon: '📞',
+            modalClass: 'social-link-item whatsapp'
+        });
     }
 
     const emptyText = typeof window.getTranslation === 'function'
@@ -223,9 +231,9 @@ function renderSocialLinks() {
     const emptyStateHtml = `
         <div class="website-empty-state is-social">
             <strong>${typeof window.getTranslation === 'function'
-                ? window.getTranslation('social_modal_title', 'Nos réseaux')
+                ? escapeHomepageAttr(window.getTranslation('social_modal_title', 'Nos réseaux'))
                 : 'Nos réseaux'}</strong>
-            <span>${emptyText}</span>
+            <span>${escapeHomepageAttr(emptyText)}</span>
         </div>
     `;
     if (modalList) modalList.innerHTML = modalItems || emptyStateHtml;
