@@ -181,6 +181,25 @@ function updateWhatsAppLinks() {
     }
 }
 
+function setHomepageExternalActionLink(link, url) {
+    if (!link) return;
+    if (url) {
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.removeAttribute('aria-disabled');
+        link.removeAttribute('tabindex');
+        link.classList.remove('is-disabled');
+        return;
+    }
+    link.removeAttribute('href');
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+    link.setAttribute('aria-disabled', 'true');
+    link.setAttribute('tabindex', '-1');
+    link.classList.add('is-disabled');
+}
+
 function renderSocialLinks() {
     ensureDeferredHomepageDom();
     const { socialLinks = {} } = homepageState();
@@ -351,20 +370,8 @@ function renderLocation() {
             addressCard.onclick = null;
             addressCard.classList.remove('is-actionable');
         }
-        if (directionsLink && mapUrl) {
-            directionsLink.href = mapUrl;
-            directionsLink.classList.remove('is-disabled');
-        } else if (directionsLink) {
-            directionsLink.removeAttribute('href');
-            directionsLink.classList.add('is-disabled');
-        }
-        if (reviewsLink && mapUrl) {
-            reviewsLink.href = mapUrl;
-            reviewsLink.classList.remove('is-disabled');
-        } else if (reviewsLink) {
-            reviewsLink.removeAttribute('href');
-            reviewsLink.classList.add('is-disabled');
-        }
+        setHomepageExternalActionLink(directionsLink, mapUrl);
+        setHomepageExternalActionLink(reviewsLink, mapUrl);
     } else {
         if (addressCard) {
             addressCard.onclick = null;
@@ -377,14 +384,8 @@ function renderLocation() {
         }
         if (footerAddressText) footerAddressText.textContent = '';
         if (topAddressText) topAddressText.textContent = '';
-        if (directionsLink) {
-            directionsLink.removeAttribute('href');
-            directionsLink.classList.add('is-disabled');
-        }
-        if (reviewsLink) {
-            reviewsLink.removeAttribute('href');
-            reviewsLink.classList.add('is-disabled');
-        }
+        setHomepageExternalActionLink(directionsLink, '');
+        setHomepageExternalActionLink(reviewsLink, '');
     }
 
     if (window.restaurantConfig?.phone) {
