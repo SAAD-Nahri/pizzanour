@@ -1952,12 +1952,25 @@
                 min-height: 20px;
                 padding: 0 7px;
                 font-size: 0.58rem;
+                max-width: 100%;
+                line-height: 1.15;
+                overflow-wrap: anywhere;
+                text-align: start;
+                white-space: normal;
             }
 
             .menu-item-price {
                 margin-top: 8px;
                 padding-top: 0;
                 font-size: 0.9rem;
+                min-width: 0;
+                flex-wrap: wrap;
+                line-height: 1.15;
+                overflow-wrap: anywhere;
+            }
+
+            .menu-item-price-prefix {
+                flex: 0 0 auto;
             }
 
             .menu-item-card:hover {
