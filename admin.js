@@ -925,6 +925,12 @@ const LANDING_CONTENT_FIELDS = [
     { key: 'footer_note', label: 'Footer - Note', type: 'textarea', hint: 'Small footer sentence that reinforces the restaurant identity.' },
     { key: 'footer_rights', label: 'Footer - Rights Text', type: 'text', hint: 'Short legal/footer rights sentence shown after the year and restaurant name.' }
 ];
+const LANDING_CONTENT_GROUPS = [
+    { id: 'hero', title: 'Hero slides', copy: 'Main first-screen headlines, descriptions, and menu button.' },
+    { id: 'about', title: 'About story', copy: 'Restaurant story paragraphs shown on the homepage.' },
+    { id: 'events', title: 'Events and services', copy: 'Birthday, family, team, private event, and call-to-action copy.' },
+    { id: 'footer', title: 'Footer', copy: 'Small footer message and rights text.' }
+];
 const NOUR_HOMEPAGE_COPY_DEFAULTS = {
     fr: {
         hero_sub1: 'Au coeur de Tanger',
@@ -4973,11 +4979,15 @@ function getContentTranslationValue(lang, key) {
     return restaurantConfig?.contentTranslations?.[lang]?.[key] || NOUR_HOMEPAGE_COPY_DEFAULTS?.[lang]?.[key] || '';
 }
 
-function renderLandingContentEditor() {
-    const container = document.getElementById('landingContentGrid');
-    if (!container) return;
+function getLandingContentGroupId(key) {
+    if (String(key || '').startsWith('hero_')) return 'hero';
+    if (String(key || '').startsWith('about_')) return 'about';
+    if (String(key || '').startsWith('footer_')) return 'footer';
+    return 'events';
+}
 
-    container.innerHTML = LANDING_CONTENT_FIELDS.map((field) => `
+function renderLandingContentField(field) {
+    return `
         <div class="landing-copy-card">
             <div class="landing-copy-card-header">
                 <h5 class="landing-copy-field-title">${escapeHtml(field.label)}</h5>
@@ -5004,7 +5014,34 @@ function renderLandingContentEditor() {
                 }).join('')}
             </div>
         </div>
-    `).join('');
+    `;
+}
+
+function renderLandingContentEditor() {
+    const container = document.getElementById('landingContentGrid');
+    if (!container) return;
+    const isCompactViewport = typeof window.matchMedia === 'function'
+        && window.matchMedia('(max-width: 768px)').matches;
+
+    container.innerHTML = LANDING_CONTENT_GROUPS.map((group) => {
+        const fields = LANDING_CONTENT_FIELDS.filter((field) => getLandingContentGroupId(field.key) === group.id);
+        if (!fields.length) return '';
+        const openAttr = !isCompactViewport || group.id === 'hero' ? ' open' : '';
+        return `
+            <details class="landing-copy-group" data-copy-group="${escapeHtml(group.id)}"${openAttr}>
+                <summary>
+                    <span>
+                        <strong>${escapeHtml(group.title)}</strong>
+                        <small>${escapeHtml(group.copy)}</small>
+                    </span>
+                    <em>${fields.length} fields</em>
+                </summary>
+                <div class="landing-copy-group-body">
+                    ${fields.map(renderLandingContentField).join('')}
+                </div>
+            </details>
+        `;
+    }).join('');
 }
 
 function buildLandingContentTranslations() {

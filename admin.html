@@ -3169,6 +3169,69 @@
             gap: 18px;
         }
 
+        .landing-copy-group {
+            border: 1px solid rgba(232, 216, 197, 0.92);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.76);
+            box-shadow: 0 12px 28px rgba(75, 47, 24, 0.05);
+            overflow: clip;
+        }
+
+        .landing-copy-group summary {
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 15px 18px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .landing-copy-group summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .landing-copy-group summary span {
+            display: grid;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .landing-copy-group summary strong {
+            color: #111827;
+            font-size: 0.98rem;
+            line-height: 1.2;
+        }
+
+        .landing-copy-group summary small {
+            color: #75655c;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        .landing-copy-group summary em {
+            flex: 0 0 auto;
+            min-height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(255, 141, 8, 0.1);
+            color: #9a4f00;
+            font-style: normal;
+            font-size: 0.72rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .landing-copy-group-body {
+            display: grid;
+            gap: 14px;
+            padding: 0 16px 16px;
+        }
+
         .landing-copy-card {
             background: linear-gradient(180deg, #fff, #fffaf4);
             border: 1px solid rgba(232, 216, 197, 0.86);
@@ -7343,15 +7406,45 @@
 
             .landing-copy-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .landing-copy-group {
+                border-radius: 16px;
+            }
+
+            .landing-copy-group summary {
+                min-height: 54px;
+                padding: 12px 14px;
+                gap: 8px;
+            }
+
+            .landing-copy-group summary small {
+                display: none;
+            }
+
+            .landing-copy-group summary em {
+                min-height: 24px;
+                padding: 0 8px;
+                font-size: 0.66rem;
+            }
+
+            .landing-copy-group-body {
+                gap: 10px;
+                padding: 0 10px 10px;
             }
 
             .landing-copy-card {
-                padding: 16px;
+                padding: 12px;
                 border-radius: 16px;
             }
 
             .landing-copy-card-header {
-                margin-bottom: 12px;
+                margin-bottom: 9px;
+            }
+
+            .landing-copy-field-title {
+                font-size: 0.9rem;
             }
 
             .landing-copy-field-type {
@@ -7366,7 +7459,11 @@
             .landing-copy-card textarea[data-content-key$="_desc"],
             .landing-copy-card textarea[data-content-key^="about_"],
             .landing-copy-card textarea[data-content-key$="_note"] {
-                min-height: 150px;
+                min-height: 132px;
+            }
+
+            .landing-copy-card input {
+                min-height: 48px;
             }
 
             .info-overview-card {
