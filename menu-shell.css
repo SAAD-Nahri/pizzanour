@@ -3810,6 +3810,62 @@ body.menu-page {
     border-radius: 14px;
   }
 
+  .history-overlay {
+    background: rgba(9, 11, 16, 0.76);
+    backdrop-filter: none;
+  }
+
+  .history-modal {
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(14px);
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 10px);
+    padding: 18px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+    border-radius: 24px 24px 0 0;
+  }
+
+  .history-overlay.open .history-modal {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .history-header {
+    position: sticky;
+    top: -18px;
+    z-index: 2;
+    margin: -18px -14px 14px;
+    padding: 18px 14px 12px;
+    background: linear-gradient(180deg, #fff 0%, rgba(251, 247, 240, 0.98) 100%);
+    border-bottom: 1px solid rgba(215, 193, 162, 0.2);
+  }
+
+  .history-header h2 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .history-ticket-top {
+    padding-right: 42px;
+  }
+
+  .history-ticket-number,
+  .history-ticket-address,
+  .history-line-item-name,
+  .history-line-item-extras,
+  .history-ticket-legacy {
+    overflow-wrap: anywhere;
+  }
+
+  .history-line-item {
+    align-items: flex-start;
+  }
+
+  .history-line-item-total {
+    flex: 0 0 auto;
+  }
+
   .ticket-content {
     min-height: 100dvh;
     justify-content: flex-start;
@@ -4063,14 +4119,16 @@ body.menu-page {
     }
 
     .history-modal {
-      width: calc(100% - 16px);
-      max-height: calc(100dvh - 22px);
-      padding: 16px 12px;
-      border-radius: 20px;
+      width: 100%;
+      max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 8px);
+      padding: 14px 10px calc(14px + env(safe-area-inset-bottom, 0px));
+      border-radius: 20px 20px 0 0;
     }
 
     .history-header {
-      margin-bottom: 12px;
+      top: -14px;
+      margin: -14px -10px 12px;
+      padding: 14px 10px 10px;
     }
 
     .history-header h2 {
@@ -4101,7 +4159,7 @@ body.menu-page {
 
     .history-ticket-top {
       gap: 8px;
-      padding-right: 38px;
+      padding-right: 36px;
     }
 
     .history-ticket-label {
