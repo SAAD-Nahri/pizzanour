@@ -861,6 +861,15 @@ window.setSafeImageSource = function (imgEl, src, options = {}) {
         onMissing();
     };
     imgEl.style.display = options.displayValue || '';
+    if (options.loading) {
+        imgEl.loading = options.loading;
+    }
+    if (options.decoding) {
+        imgEl.decoding = options.decoding;
+    }
+    if (options.fetchPriority) {
+        imgEl.fetchPriority = options.fetchPriority;
+    }
     imgEl.src = cleanSrc;
     return true;
 };
@@ -1045,8 +1054,12 @@ window.applyBranding = function () {
     homepageHeroImages.forEach((src, index) => {
         const image = document.getElementById(`heroSlideImage${index + 1}`);
         if (!image) return;
+        const isPrimaryHero = index === 0;
         window.setSafeImageSource(image, src, {
             fallbackSrc: window.defaultBranding.heroImage,
+            loading: isPrimaryHero ? 'eager' : 'lazy',
+            decoding: 'async',
+            fetchPriority: isPrimaryHero ? 'high' : 'low',
             onMissing: () => {
                 image.style.display = '';
             },
