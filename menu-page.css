@@ -2053,7 +2053,7 @@
             }
 
             .dish-page-body {
-                padding: 24px 16px 14px;
+                padding: 24px 16px calc(92px + env(safe-area-inset-bottom, 0px));
                 border-top-left-radius: 30px;
                 border-top-right-radius: 30px;
                 margin-top: -30px;
@@ -2107,6 +2107,133 @@
             }
 
             .menu-item-price {
+                font-size: 0.88rem;
+            }
+
+            .dish-page-header {
+                height: min(34vh, 250px);
+                min-height: 196px;
+            }
+
+            .dish-page-close,
+            .dish-page-media-nav {
+                width: 38px;
+                height: 38px;
+                border-radius: 14px;
+                backdrop-filter: none;
+            }
+
+            .dish-page-close {
+                top: calc(env(safe-area-inset-top, 0px) + 10px);
+                left: 12px;
+            }
+
+            .dish-page-media-prev {
+                left: 10px;
+            }
+
+            .dish-page-media-next {
+                right: 10px;
+            }
+
+            .dish-page-media-count {
+                right: 12px;
+                bottom: 12px;
+                min-width: 48px;
+                height: 26px;
+                font-size: 0.72rem;
+                backdrop-filter: none;
+            }
+
+            .dish-page-body {
+                padding: 20px 14px calc(86px + env(safe-area-inset-bottom, 0px));
+                border-top-left-radius: 24px;
+                border-top-right-radius: 24px;
+                margin-top: -24px;
+            }
+
+            .dish-page-body::before {
+                width: 46px;
+                margin-bottom: 12px;
+            }
+
+            .dish-page-name {
+                font-size: clamp(1.22rem, 6vw, 1.52rem);
+                line-height: 1.08;
+                letter-spacing: -0.03em;
+                overflow-wrap: anywhere;
+            }
+
+            .dish-page-price {
+                margin-bottom: 9px;
+                font-size: 1.02rem;
+            }
+
+            .dish-page-price-note {
+                margin-bottom: 10px;
+                font-size: 0.76rem;
+            }
+
+            .dish-page-desc {
+                margin-bottom: 12px;
+                font-size: 0.84rem;
+                line-height: 1.45;
+                overflow-wrap: anywhere;
+            }
+
+            .dish-page-config {
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+
+            .dish-config-label {
+                font-size: 0.66rem;
+                letter-spacing: 0.1em;
+            }
+
+            .dish-config-chip {
+                flex: 1 1 auto;
+                min-height: 40px;
+                padding: 8px 10px;
+                text-align: center;
+                line-height: 1.2;
+                overflow-wrap: anywhere;
+            }
+
+            .dish-extra-option {
+                grid-template-columns: 18px minmax(0, 1fr);
+                padding: 9px 10px;
+            }
+
+            .dish-extra-copy {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: start;
+            }
+
+            .dish-extra-name {
+                font-size: 0.84rem;
+                line-height: 1.25;
+                overflow-wrap: anywhere;
+            }
+
+            .dish-extra-price {
+                font-size: 0.76rem;
+            }
+
+            .dish-page-love-row {
+                margin-bottom: 12px;
+            }
+
+            .dish-page-footer {
+                padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+                margin-left: -14px;
+                margin-right: -14px;
+            }
+
+            .dish-add-btn {
+                min-height: 48px;
+                border-radius: 15px;
                 font-size: 0.88rem;
             }
 
@@ -2244,6 +2371,39 @@
         }
 
         @media (max-width: 360px) {
+            .dish-page-header {
+                height: 30vh;
+                min-height: 172px;
+            }
+
+            .dish-page-body {
+                padding: 18px 12px calc(80px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .dish-page-name {
+                font-size: 1.16rem;
+            }
+
+            .dish-page-desc {
+                font-size: 0.8rem;
+            }
+
+            .dish-config-options,
+            .dish-extra-options {
+                gap: 7px;
+            }
+
+            .dish-config-chip,
+            .dish-extra-option {
+                border-radius: 13px;
+            }
+
+            .dish-page-footer {
+                padding: 11px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+                margin-left: -12px;
+                margin-right: -12px;
+            }
+
             .menu-empty-state {
                 gap: 7px;
                 padding: 20px 14px;
