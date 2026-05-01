@@ -581,7 +581,7 @@
             justify-content: center;
             min-width: 20px;
             min-height: 20px;
-            margin-left: 8px;
+            margin-inline-start: 8px;
             padding: 0 6px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.16);
@@ -1383,7 +1383,7 @@
             .menu-subnav-count {
                 min-width: 18px;
                 min-height: 18px;
-                margin-left: 6px;
+                margin-inline-start: 6px;
                 padding: 0 5px;
                 font-size: 0.6rem;
             }
@@ -2505,7 +2505,7 @@
             .menu-subnav-count {
                 min-width: 16px;
                 min-height: 16px;
-                margin-left: 4px;
+                margin-inline-start: 4px;
                 padding: 0 4px;
                 font-size: 0.54rem;
             }
