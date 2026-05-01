@@ -2280,6 +2280,44 @@
             }
         }
 
+        @media (max-width: 420px), (pointer: coarse) and (max-width: 768px) {
+            .featured-card:hover,
+            .menu-category-card:hover,
+            .menu-item-card:hover {
+                transform: none;
+            }
+
+            .featured-card:hover .featured-img-wrap img,
+            .menu-category-card:hover .menu-category-card-media img {
+                transform: none;
+            }
+
+            .featured-card {
+                box-shadow:
+                    0 18px 34px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            }
+
+            .featured-card-glow {
+                display: none;
+            }
+
+            .menu-category-card-media img {
+                filter: saturate(1.04) contrast(0.92) brightness(0.72);
+            }
+
+            .menu-category-card-title {
+                overflow-wrap: anywhere;
+                text-shadow: 0 8px 18px rgba(0, 0, 0, 0.38);
+            }
+
+            .menu-item-add,
+            .featured-add-btn,
+            .love-btn {
+                touch-action: manipulation;
+            }
+        }
+
         /* ===== Impeccable App Pass: Menu ===== */
         .top-nav-bar {
             width: min(1160px, calc(100% - 28px));
