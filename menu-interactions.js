@@ -467,6 +467,7 @@
         ['sharedOverlay', 'cartDrawer', 'ticketModal', 'dishPage', 'historyOverlay', 'superCatSheet', 'superCatOverlay', 'orderPromptOverlay'].forEach((id) => {
             document.getElementById(id)?.classList.remove('open');
         });
+        document.getElementById('cartDrawer')?.classList.remove('is-info-modal');
         orderPromptResolver = null;
         const galleryOverlay = document.getElementById('galleryOverlay');
         if (galleryOverlay) galleryOverlay.style.display = 'none';
@@ -481,6 +482,9 @@
                 document.getElementById(id)?.classList.remove('open');
             }
         });
+        if (!except.has('cartDrawer')) {
+            document.getElementById('cartDrawer')?.classList.remove('is-info-modal');
+        }
         if (!except.has('galleryOverlay')) {
             const galleryOverlay = document.getElementById('galleryOverlay');
             if (galleryOverlay) galleryOverlay.style.display = 'none';
@@ -771,6 +775,7 @@
     function openDrawer() {
         ensureMenuInteractionDom();
         closeTransientUi(['sharedOverlay', 'cartDrawer']);
+        document.getElementById('cartDrawer')?.classList.remove('is-info-modal');
         document.getElementById('sharedOverlay')?.classList.add('open');
         document.getElementById('cartDrawer')?.classList.add('open');
         renderDrawer();

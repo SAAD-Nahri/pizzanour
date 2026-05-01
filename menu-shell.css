@@ -2131,6 +2131,18 @@ body.menu-page {
   min-height: 0;
 }
 
+.cart-sheet.is-info-modal {
+  overflow-y: auto;
+}
+
+.cart-sheet.is-info-modal .cart-drawer-body {
+  min-height: auto;
+}
+
+.cart-sheet.is-info-modal .menu-modal-body {
+  padding: 22px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+}
+
 .cart-drawer-body.is-empty {
   min-height: 44vh;
   display: flex;
@@ -3808,6 +3820,29 @@ body.menu-page {
   .order-prompt-btn {
     min-height: 46px;
     border-radius: 14px;
+  }
+
+  .cart-sheet.is-info-modal {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px);
+  }
+
+  .cart-sheet.is-info-modal .menu-modal-body {
+    padding: 20px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cart-sheet.is-info-modal .menu-modal-body.is-centered {
+    padding-top: 24px;
+  }
+
+  .cart-sheet.is-info-modal .menu-modal-title,
+  .cart-sheet.is-info-modal .menu-modal-subtitle,
+  .cart-sheet.is-info-modal .menu-modal-empty,
+  .cart-sheet.is-info-modal .social-item strong {
+    overflow-wrap: anywhere;
+  }
+
+  .cart-sheet.is-info-modal .menu-modal-action {
+    min-height: 48px;
   }
 
   .history-overlay {

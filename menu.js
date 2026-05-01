@@ -1302,6 +1302,7 @@ function openWiFiModal() {
     `;
     const drawer = document.getElementById('cartDrawer');
     document.getElementById('drawerContent').innerHTML = content;
+    drawer.classList.add('is-info-modal');
     drawer.classList.add('open');
     document.getElementById('sharedOverlay').classList.add('open');
 }
@@ -1341,6 +1342,7 @@ function openSocialModal() {
     `;
     const drawer = document.getElementById('cartDrawer');
     document.getElementById('drawerContent').innerHTML = content;
+    drawer.classList.add('is-info-modal');
     drawer.classList.add('open');
     document.getElementById('sharedOverlay').classList.add('open');
 }
@@ -1354,6 +1356,7 @@ function showLanding() {
         'ticketModal', 'dishPage', 'historyOverlay'].forEach(id => {
             document.getElementById(id)?.classList.remove('open');
         });
+    document.getElementById('cartDrawer')?.classList.remove('is-info-modal');
     currentSharedModal = '';
     document.body.style.overflow = '';
 
