@@ -602,7 +602,6 @@ function buildCategoryNavigationCardMarkup(cat) {
     const localizedName = window.getLocalizedCategoryName(cat, cat);
     const itemCount = getMenuCategoryItemCount(cat);
     const preview = getCategoryPreviewSource(cat);
-    const fallbackGlyph = (localizedName || cat || MENU_UI_ICONS.plate).trim().charAt(0).toUpperCase() || '•';
     const originalSrcAttr = preview.originalSrc && preview.originalSrc !== preview.src
         ? ` data-original-src="${escapeHtmlAttr(preview.originalSrc)}"`
         : '';
@@ -661,6 +660,7 @@ function renderSuperCategoryChildNav(sc, activeCat = '') {
             ${filteredCats.map((c) => buildCategorySubnavButtonMarkup(c, c === activeCat)).join('')}
         </div>
     `;
+    scheduleActiveCategoryTabScroll();
     scheduleMenuFixedLayout();
 }
 
@@ -706,6 +706,20 @@ function updateMenuFixedLayout() {
 
 function scheduleMenuFixedLayout() {
     window.requestAnimationFrame(updateMenuFixedLayout);
+}
+
+function scheduleActiveCategoryTabScroll() {
+    window.requestAnimationFrame(() => {
+        const track = document.querySelector('#catNavScroll .menu-subnav-track');
+        const activeTab = track?.querySelector('.menu-subnav-tab.active, .menu-subnav-tab[aria-current="page"]');
+        if (!track || !activeTab) return;
+
+        activeTab.scrollIntoView({
+            behavior: prefersReducedMenuMotion() ? 'auto' : 'smooth',
+            block: 'nearest',
+            inline: 'center'
+        });
+    });
 }
 
 function ensureMenuInteractionsScriptLoaded() {

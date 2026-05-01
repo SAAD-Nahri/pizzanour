@@ -509,6 +509,8 @@
             overflow-x: auto;
             overflow-y: hidden;
             padding: 2px 0;
+            scroll-padding-inline: 14px;
+            overscroll-behavior-inline: contain;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
