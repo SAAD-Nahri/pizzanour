@@ -437,26 +437,28 @@ function renderPaymentFacilities() {
         family: { icon: '👨‍👩‍👧‍👦', labelKey: 'pf_facility_family' }
     };
 
+    const renderExperienceItem = (item) => {
+        const label = typeof window.getTranslation === 'function'
+            ? window.getTranslation(item.labelKey, item.labelKey)
+            : item.labelKey;
+        return `
+            <div class="pf-icon-item">
+              <span class="pf-icon">${escapeHomepageAttr(item.icon)}</span>
+              <span class="pf-label" data-i18n="${escapeHomepageAttr(item.labelKey)}">${escapeHomepageAttr(label)}</span>
+            </div>
+        `;
+    };
+
     const paymentItems = (guestExperience.paymentMethods || [])
         .map((id) => paymentCatalog[id])
         .filter(Boolean)
-        .map((item) => `
-            <div class="pf-icon-item">
-              <span class="pf-icon">${item.icon}</span>
-              <span class="pf-label" data-i18n="${item.labelKey}">${window.getTranslation(item.labelKey, item.labelKey)}</span>
-            </div>
-        `)
+        .map(renderExperienceItem)
         .join('');
 
     const facilityItems = (guestExperience.facilities || [])
         .map((id) => facilityCatalog[id])
         .filter(Boolean)
-        .map((item) => `
-            <div class="pf-icon-item">
-              <span class="pf-icon">${item.icon}</span>
-              <span class="pf-label" data-i18n="${item.labelKey}">${window.getTranslation(item.labelKey, item.labelKey)}</span>
-            </div>
-        `)
+        .map(renderExperienceItem)
         .join('');
 
     paymentsList.innerHTML = paymentItems;
