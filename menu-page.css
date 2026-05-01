@@ -710,7 +710,7 @@
         .menu-category-card-count {
             position: absolute;
             top: 14px;
-            right: 14px;
+            inset-inline-end: 14px;
             z-index: 2;
             display: inline-flex;
             align-items: center;
@@ -1414,7 +1414,7 @@
 
             .menu-category-card-count {
                 top: 10px;
-                right: 10px;
+                inset-inline-end: 10px;
                 min-width: 30px;
                 min-height: 30px;
                 padding: 0 8px;
@@ -2478,7 +2478,7 @@
 
             .menu-category-card-count {
                 top: 8px;
-                right: 8px;
+                inset-inline-end: 8px;
                 min-width: 26px;
                 min-height: 26px;
                 padding: 0 7px;
