@@ -14,6 +14,15 @@ function tx(key, fallback, vars) {
     return fallback;
 }
 
+function escapeHomepageAttr(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 const HOURS_DAY_I18N_KEYS = {
     lundi: 'day_mon',
     monday: 'day_mon',
@@ -262,11 +271,15 @@ function renderGallery() {
         return;
     }
 
-    grid.innerHTML = images.map(img => `
-        <div class="gallery-item" onclick="openGalleryLightbox('${img}')">
-            <img src="${img}" alt="${tx('image_alt_gallery', 'Gallery image')}" width="640" height="640" loading="lazy" decoding="async" fetchpriority="low" />
+    grid.innerHTML = images.map(img => {
+        const safeSrc = escapeHomepageAttr(img);
+        const inlineSrc = JSON.stringify(String(img || ''));
+        return `
+        <div class="gallery-item" onclick="openGalleryLightbox(${escapeHomepageAttr(inlineSrc)})">
+            <img src="${safeSrc}" alt="${escapeHomepageAttr(tx('image_alt_gallery', 'Gallery image'))}" width="640" height="640" loading="lazy" decoding="async" fetchpriority="low" />
         </div>
-    `).join('');
+    `;
+    }).join('');
     grid.querySelectorAll('img').forEach((imgEl) => {
         imgEl.onerror = () => {
             const card = imgEl.closest('.gallery-item');
