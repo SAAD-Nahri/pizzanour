@@ -2220,7 +2220,7 @@ body.menu-page {
   max-height: none;
   overflow-y: auto;
   margin-bottom: 18px;
-  padding-right: 4px;
+  padding-inline-end: 4px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
@@ -2255,12 +2255,14 @@ body.menu-page {
 
 .cart-item-main {
   flex: 1;
+  min-width: 0;
 }
 
 .cart-item-name {
   font-weight: 700;
   font-size: 0.95rem;
   color: #000;
+  overflow-wrap: anywhere;
 }
 
 .cart-item-size {
@@ -2280,13 +2282,14 @@ body.menu-page {
   font-size: 0.78rem;
   line-height: 1.45;
   color: #8a5d43;
+  overflow-wrap: anywhere;
 }
 
 .cart-item-controls {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .cart-item-qty {
