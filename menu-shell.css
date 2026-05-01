@@ -2815,6 +2815,9 @@ body.menu-page {
   border-radius: 16px;
   font-weight: 800;
   font-size: 1rem;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
