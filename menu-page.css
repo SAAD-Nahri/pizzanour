@@ -1495,7 +1495,7 @@
         .gallery-close {
             position: absolute;
             top: 20px;
-            right: 20px;
+            inset-inline-end: 20px;
             width: 44px;
             height: 44px;
             background: rgba(18, 22, 29, 0.72);
@@ -2123,7 +2123,7 @@
 
             .dish-page-close {
                 top: calc(env(safe-area-inset-top, 0px) + 10px);
-                left: 12px;
+                inset-inline-start: 12px;
             }
 
             .dish-page-media-prev {
@@ -2135,7 +2135,7 @@
             }
 
             .dish-page-media-count {
-                right: 12px;
+                inset-inline-end: 12px;
                 bottom: 12px;
                 min-width: 48px;
                 height: 26px;
@@ -2245,7 +2245,7 @@
 
             .gallery-close {
                 top: calc(env(safe-area-inset-top, 0px) + 10px);
-                right: 12px;
+                inset-inline-end: 12px;
                 width: 40px;
                 height: 40px;
                 border-radius: 14px;

@@ -1268,7 +1268,7 @@ body.menu-page {
 
   .dish-page-close {
     top: calc(env(safe-area-inset-top, 0px) + 14px);
-    left: 16px;
+    inset-inline-start: 16px;
   }
 
   .dish-page-footer {
@@ -1506,7 +1506,7 @@ body.menu-page {
 
 .dish-page-media-count {
   position: absolute;
-  right: 18px;
+  inset-inline-end: 18px;
   bottom: 18px;
   min-width: 56px;
   height: 28px;
@@ -1548,7 +1548,7 @@ body.menu-page {
 .dish-page-close {
   position: absolute;
   top: 20px;
-  left: 20px;
+  inset-inline-start: 20px;
   width: 42px;
   height: 42px;
   background: rgba(14, 16, 21, 0.58);
