@@ -2455,7 +2455,7 @@ body.menu-page {
 .history-delete-btn {
   position: absolute;
   top: 12px;
-  right: 12px;
+  inset-inline-end: 12px;
   background: linear-gradient(180deg, #fff 0%, #f6ebdd 100%);
   border: 1px solid rgba(255, 184, 96, 0.14);
   cursor: pointer;
@@ -2482,7 +2482,7 @@ body.menu-page {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding-right: 46px;
+  padding-inline-end: 46px;
 }
 
 .history-ticket-label {
@@ -3586,7 +3586,7 @@ body.menu-page {
   }
 
   .menu-item-info {
-    padding-right: 38px;
+    padding-inline-end: 38px;
   }
 
   .menu-item-name {
@@ -3915,7 +3915,7 @@ body.menu-page {
   }
 
   .history-ticket-top {
-    padding-right: 42px;
+    padding-inline-end: 42px;
   }
 
   .history-ticket-number,
@@ -4227,7 +4227,7 @@ body.menu-page {
 
     .history-ticket-top {
       gap: 8px;
-      padding-right: 36px;
+      padding-inline-end: 36px;
     }
 
     .history-ticket-label {
