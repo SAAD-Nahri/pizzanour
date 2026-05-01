@@ -1803,7 +1803,12 @@ window.updateStatus = function () {
 
 window.showToast = function (text) {
     document.querySelectorAll('.toast').forEach(t => t.remove());
-    const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.setAttribute('role', 'status');
+    t.setAttribute('aria-live', 'polite');
+    t.setAttribute('aria-atomic', 'true');
+    t.textContent = String(text || '');
     document.body.appendChild(t); setTimeout(() => t.classList.add('show'), 50);
     setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 350); }, 2000);
 };
