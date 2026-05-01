@@ -3715,7 +3715,9 @@ window.updateStatus = function () {
 
     const badge = document.getElementById('statusBadge');
     if (!badge) return isOpen;
-    badge.className = 'status-badge ' + (isOpen ? 'status-open' : 'status-closed');
+    badge.classList.add('status-badge');
+    badge.classList.toggle('status-open', isOpen);
+    badge.classList.toggle('status-closed', !isOpen);
     const textEl = document.getElementById('statusText');
     if (textEl) {
         textEl.setAttribute('data-i18n', isOpen ? 'status_open' : 'status_closed');

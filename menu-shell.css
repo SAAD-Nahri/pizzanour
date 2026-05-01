@@ -47,6 +47,48 @@
 }
 
 /* ===== Impeccable Final Pass ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(100%, 260px);
+  min-width: 0;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 800;
+}
+
+.status-dot {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.status-open .status-dot {
+  background: #25d366;
+  box-shadow: 0 0 10px rgba(37, 211, 102, 0.88);
+}
+
+.status-closed .status-dot {
+  background: var(--red);
+  box-shadow: 0 0 10px rgba(230, 57, 70, 0.88);
+}
+
+.status-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 768px) {
   .top-bar {
     box-shadow: 0 14px 28px rgba(9, 11, 16, 0.16);
