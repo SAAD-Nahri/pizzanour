@@ -153,6 +153,26 @@ function updateWifiUI() {
     }
 }
 
+function getHomepageWhatsAppUrl(value) {
+    const digits = String(value || '').replace(/\D/g, '');
+    return digits ? `https://wa.me/${encodeURIComponent(digits)}` : '';
+}
+
+function setHomepageWhatsAppLink(link, value) {
+    if (!link) return '';
+    const url = getHomepageWhatsAppUrl(value);
+    if (!url) {
+        link.removeAttribute('href');
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+        return '';
+    }
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    return url;
+}
+
 function updateWhatsAppLinks() {
     ensureDeferredHomepageDom();
     const { socialLinks = {} } = homepageState();
@@ -162,11 +182,7 @@ function updateWhatsAppLinks() {
     const contactLink = document.getElementById('contactWALink');
 
     if (eventLink) {
-        if (wa) {
-            eventLink.href = `https://wa.me/${wa}`;
-        } else {
-            eventLink.removeAttribute('href');
-        }
+        setHomepageWhatsAppLink(eventLink, wa);
     }
 
     if (contactLink) {
@@ -176,7 +192,7 @@ function updateWhatsAppLinks() {
             return;
         }
 
-        contactLink.href = `https://wa.me/${wa}`;
+        setHomepageWhatsAppLink(contactLink, wa);
         contactLink.textContent = socialLinks.whatsapp ? `+${wa}` : (window.restaurantConfig?.phone || `+${wa}`);
     }
 }
@@ -239,7 +255,7 @@ function renderSocialLinks() {
         : String(socialLinks.whatsapp || '').replace(/\D/g, '');
     if (waNumber) {
         appendSocialLink({
-            href: `https://wa.me/${encodeURIComponent(waNumber)}`,
+            href: getHomepageWhatsAppUrl(waNumber),
             label: tx('social_whatsapp', 'WhatsApp'),
             icon: '📞',
             modalClass: 'social-link-item whatsapp'
