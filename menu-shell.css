@@ -2943,7 +2943,7 @@ body.menu-page {
   flex: 1;
   height: 1px;
   background: linear-gradient(to right, rgba(255, 141, 8, 0.5), transparent);
-  margin-left: 10px;
+  margin-inline-start: 10px;
 }
 
 @keyframes slideInLeft {
@@ -2969,7 +2969,7 @@ body.menu-page {
   font-size: 1.4rem;
   margin-bottom: 15px;
   color: #fff;
-  padding-left: 10px;
+  padding-inline-start: 10px;
   display: flex;
   align-items: center;
   gap: 10px;

@@ -1618,7 +1618,7 @@
             justify-content: center;
             font-size: 0.8rem;
             font-weight: 800;
-            margin-right: 12px;
+            margin-inline-end: 12px;
             padding: 0 8px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
         }
@@ -1737,7 +1737,7 @@
             font-size: 0.6rem;
             font-weight: 700;
             color: #888;
-            margin-left: 2px;
+            margin-inline-start: 2px;
         }
         /* ============================= GAME STYLES ============================ */
         .game-banner {
