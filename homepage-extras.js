@@ -122,6 +122,11 @@ function updateWifiUI() {
     if (ssidEl) ssidEl.innerHTML = `<strong>${tx('wifi_ssid_label', 'SSID')}:</strong> ${wifiSsid}`;
     if (passEl) passEl.textContent = wifiPass;
     if (qrEl) {
+        qrEl.width = 160;
+        qrEl.height = 160;
+        qrEl.loading = 'lazy';
+        qrEl.decoding = 'async';
+        qrEl.fetchPriority = 'low';
         qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=WIFI:S:${encodeURIComponent(wifiSsid)};T:WPA;P:${encodeURIComponent(wifiPass)};;`;
     }
 }
