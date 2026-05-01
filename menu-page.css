@@ -1050,7 +1050,7 @@
         .menu-item-love {
             position: absolute;
             top: 10px;
-            right: 10px;
+            inset-inline-end: 10px;
             width: 34px;
             height: 34px;
             border-radius: 12px;
@@ -1068,11 +1068,6 @@
         .menu-item-love .love-icon {
             font-size: 0.82rem;
             line-height: 1;
-        }
-
-        html[dir="rtl"] .menu-item-love {
-            right: auto;
-            left: 10px;
         }
 
         .menu-item-add {
@@ -1468,16 +1463,11 @@
                 border-radius: 11px;
                 font-size: 0.62rem;
                 top: 8px;
-                right: 8px;
+                inset-inline-end: 8px;
             }
 
             .menu-item-love .love-icon {
                 font-size: 0.76rem;
-            }
-
-            html[dir="rtl"] .menu-item-love {
-                right: auto;
-                left: 8px;
             }
 
             .love-btn:not(.menu-item-love) {
@@ -1995,7 +1985,7 @@
 
             .menu-item-love {
                 top: 8px;
-                right: 8px;
+                inset-inline-end: 8px;
                 width: 32px;
                 height: 32px;
                 border-radius: 11px;
@@ -2003,11 +1993,6 @@
 
             .menu-item-love .love-icon {
                 font-size: 0.76rem;
-            }
-
-            html[dir="rtl"] .menu-item-love {
-                right: auto;
-                left: 8px;
             }
 
             .love-btn:not(.menu-item-love) {
@@ -2371,15 +2356,10 @@
 
             .menu-item-love {
                 top: 7px;
-                right: 7px;
+                inset-inline-end: 7px;
                 width: 30px;
                 height: 30px;
                 backdrop-filter: none;
-            }
-
-            html[dir="rtl"] .menu-item-love {
-                right: auto;
-                left: 7px;
             }
         }
 
