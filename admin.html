@@ -5426,6 +5426,18 @@
             align-items: center;
         }
 
+        .tool-actions .brand-secondary-btn i,
+        .tool-actions .primary-btn i {
+            font-size: 1em;
+            line-height: 1;
+        }
+
+        .data-danger-action {
+            border-color: rgba(220, 38, 38, 0.2) !important;
+            color: #991b1b !important;
+            background: #fff7f7 !important;
+        }
+
         .importer-review-shell {
             display: grid;
             grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.95fr);
@@ -7730,14 +7742,55 @@
                 padding: 16px;
             }
 
-            #data-tools .tool-actions {
+            #data-tools > h3 {
+                margin-bottom: 4px;
+                font-size: 1.28rem;
+                line-height: 1.15;
+            }
+
+            #data-tools > .copy-muted {
+                margin-bottom: 12px;
+                font-size: 0.84rem;
+                line-height: 1.38;
+            }
+
+            #dataRecoveryCard,
+            #importStudioCard {
                 gap: 10px;
+            }
+
+            #dataRecoveryCard .tool-card-eyebrow,
+            #importStudioCard .tool-card-eyebrow {
+                margin-bottom: 0;
+            }
+
+            #dataRecoveryCard h4,
+            #importStudioCard h4 {
+                margin: 0;
+                font-size: 1rem;
+                line-height: 1.18;
+            }
+
+            #dataRecoveryCard .muted-copy,
+            #importStudioCard .muted-copy {
+                display: none;
+            }
+
+            #dataRecoveryCard .form-group,
+            #importStudioCard .form-group {
+                margin-bottom: 0;
+            }
+
+            #data-tools .tool-actions {
+                gap: 8px;
             }
 
             #data-tools .tool-actions .primary-btn,
             #data-tools .tool-actions .brand-secondary-btn {
                 width: 100%;
                 justify-content: center;
+                min-height: 46px;
+                padding-block: 10px;
             }
 
             #copyImporterDraftJsonBtn {
@@ -10323,9 +10376,9 @@
                         <input type="file" id="restaurantBackupFile" accept="application/json,.json" />
                     </div>
                     <div class="tool-actions">
-                        <button type="button" class="brand-secondary-btn" onclick="exportRestaurantBackup()">Export Backup</button>
-                        <button type="button" class="brand-secondary-btn" onclick="importRestaurantBackup()">Import Backup</button>
-                        <button type="button" class="brand-secondary-btn" onclick="resetRestaurantData()">Reset Demo Data</button>
+                        <button type="button" class="brand-secondary-btn" onclick="exportRestaurantBackup()"><i class="bi bi-download" aria-hidden="true"></i> Export Backup</button>
+                        <button type="button" class="brand-secondary-btn" onclick="importRestaurantBackup()"><i class="bi bi-upload" aria-hidden="true"></i> Import Backup</button>
+                        <button type="button" class="brand-secondary-btn data-danger-action" onclick="resetRestaurantData()"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Reset Demo Data</button>
                     </div>
                 </div>
 

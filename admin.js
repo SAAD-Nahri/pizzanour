@@ -2944,7 +2944,7 @@ function getSectionTitle(sectionId) {
         menu: 'Menu',
         info: 'Info',
         branding: 'Branding',
-        'data-tools': 'Import'
+        'data-tools': 'Data'
     };
 
     return titles[sectionId] || 'Menu';
@@ -6059,7 +6059,7 @@ function renderImporterDraftOutputs(draft) {
     const applyStructureBtn = document.getElementById('applyImporterStructureBtn');
     const applyInfoBtn = document.getElementById('applyImporterInfoBtn');
     const applyColorsBtn = document.getElementById('applyImporterColorsBtn');
-    const copyBtn = document.querySelector('#data-tools .tool-actions .brand-secondary-btn');
+    const copyBtn = document.getElementById('copyImporterDraftJsonBtn');
     if (!summaryEl || !jsonEl) return;
 
     if (!draft) {
