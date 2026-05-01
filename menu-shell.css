@@ -822,7 +822,7 @@ body.menu-page {
 .super-sheet-close {
   position: absolute;
   top: 18px;
-  right: 18px;
+  inset-inline-end: 18px;
   width: 44px;
   height: 44px;
   background: linear-gradient(180deg, #fff 0%, #f6ebdd 100%);
@@ -1228,7 +1228,7 @@ body.menu-page {
 
   .super-sheet-close {
     top: calc(env(safe-area-inset-top, 0px) + 12px);
-    right: 14px;
+    inset-inline-end: 14px;
   }
 
   .dish-page {
@@ -2665,7 +2665,7 @@ body.menu-page {
 .ticket-close-btn {
   position: absolute;
   top: 20px;
-  right: 20px;
+  inset-inline-end: 20px;
   background: linear-gradient(180deg, #fff 0%, #f6ebdd 100%);
   border: 1px solid rgba(255, 184, 96, 0.18);
   font-size: 1.5rem;
@@ -3043,7 +3043,7 @@ body.menu-page {
 .featured-add-btn {
   position: absolute;
   bottom: 12px;
-  right: 12px;
+  inset-inline-end: 12px;
   width: 32px;
   height: 32px;
   background: var(--primary);
@@ -3523,7 +3523,7 @@ body.menu-page {
 
   .super-sheet-close {
     top: calc(env(safe-area-inset-top, 0px) + 10px);
-    right: 12px;
+    inset-inline-end: 12px;
     width: 38px;
     height: 38px;
   }
@@ -3943,7 +3943,7 @@ body.menu-page {
 
   .ticket-close-btn {
     top: calc(env(safe-area-inset-top, 0px) + 12px);
-    right: 14px;
+    inset-inline-end: 14px;
     width: 40px;
     height: 40px;
     font-size: 1.2rem;
@@ -4299,7 +4299,7 @@ body.menu-page {
 
     .ticket-close-btn {
       top: calc(env(safe-area-inset-top, 0px) + 10px);
-      right: 12px;
+      inset-inline-end: 12px;
       width: 38px;
       height: 38px;
       font-size: 1.15rem;
@@ -4552,7 +4552,7 @@ body.menu-page {
 
     .super-sheet-close {
       top: calc(env(safe-area-inset-top, 0px) + 8px);
-      right: 10px;
+      inset-inline-end: 10px;
       width: 34px;
       height: 34px;
       font-size: 0.92rem;

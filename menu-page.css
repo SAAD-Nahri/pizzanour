@@ -235,7 +235,7 @@
         .featured-add-btn {
             position: absolute;
             bottom: 12px;
-            right: 12px;
+            inset-inline-end: 12px;
             width: 40px;
             height: 40px;
             background: linear-gradient(135deg, #ff9f43 0%, #e63946 100%);
