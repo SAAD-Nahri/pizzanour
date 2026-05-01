@@ -39,6 +39,12 @@
         return runtime()?.serializeInlineId?.(value) || JSON.stringify(String(value ?? ''));
     }
 
+    function getOptimizedPreviewImageSrc(value, variant = 'hero') {
+        return typeof window.getPublicUploadThumbnailUrl === 'function'
+            ? window.getPublicUploadThumbnailUrl(value, variant)
+            : value;
+    }
+
     function getAvailableItemExtras(item) {
         return typeof window.getAvailableItemExtras === 'function'
             ? window.getAvailableItemExtras(item)
@@ -601,7 +607,12 @@
                 return;
             }
 
-            window.setSafeImageSource(imgEl, activeImage, {
+            const optimizedImage = getOptimizedPreviewImageSrc(activeImage, 'hero');
+            window.setSafeImageSource(imgEl, optimizedImage, {
+                fallbackSrc: optimizedImage !== activeImage ? activeImage : '',
+                loading: 'eager',
+                decoding: 'async',
+                fetchPriority: 'high',
                 onMissing: () => {
                     imgEl.removeAttribute('src');
                     imgEl.style.display = 'none';
@@ -731,7 +742,12 @@
         void img.offsetWidth;
         img.classList.add('gallery-flip');
 
-        window.setSafeImageSource(img, entry.imageSrc, {
+        const optimizedImage = getOptimizedPreviewImageSrc(entry.imageSrc, 'hero');
+        window.setSafeImageSource(img, optimizedImage, {
+            fallbackSrc: optimizedImage !== entry.imageSrc ? entry.imageSrc : '',
+            loading: 'eager',
+            decoding: 'async',
+            fetchPriority: 'high',
             onMissing: () => {
                 closeGallery();
             },
