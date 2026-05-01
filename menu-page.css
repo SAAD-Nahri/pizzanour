@@ -1154,8 +1154,7 @@
         .cart-bar {
             position: fixed;
             bottom: 20px;
-            left: 15px;
-            right: 15px;
+            inset-inline: 15px;
             background: linear-gradient(135deg, #ff9f43 0%, #e63946 100%);
             min-height: 58px;
             border-radius: 20px;
