@@ -1,5 +1,15 @@
 let eventModalStylesheetPromise = null;
 let currentEventType = '';
+let previousEventBookingBodyOverflow = '';
+
+function cleanEventBookingField(value, maxLength = 80) {
+    return String(value || '').trim().replace(/\s+/g, ' ').slice(0, maxLength);
+}
+
+function getEventBookingWhatsAppUrl(number, message) {
+    const digits = String(number || '').replace(/\D/g, '');
+    return digits ? `https://wa.me/${encodeURIComponent(digits)}?text=${encodeURIComponent(message)}` : '';
+}
 
 const EVENT_TYPE_META = {
     birthday: { icon: '🎂', labelKey: 'event_birthday' },
@@ -97,20 +107,22 @@ window.__eventBookingOpen = async function __eventBookingOpen(type) {
 
     overlay.classList.add('open');
     modal.classList.add('open');
+    previousEventBookingBodyOverflow = document.body.style.overflow || '';
     document.body.style.overflow = 'hidden';
 };
 
 window.__eventBookingClose = function __eventBookingClose() {
     document.getElementById('eventBookingOverlay')?.classList.remove('open');
     document.getElementById('eventBookingModal')?.classList.remove('open');
-    document.body.style.overflow = '';
+    document.body.style.overflow = previousEventBookingBodyOverflow;
+    previousEventBookingBodyOverflow = '';
 };
 
 window.__eventBookingSend = function __eventBookingSend() {
     const nameInput = document.getElementById('eventCustName');
     const phoneInput = document.getElementById('eventCustPhone');
-    const name = nameInput?.value.trim() || '';
-    const phone = phoneInput?.value.trim() || '';
+    const name = cleanEventBookingField(nameInput?.value, 80);
+    const phone = cleanEventBookingField(phoneInput?.value, 40);
 
     if (!name) {
         notifyEventBookingIssue(
@@ -126,6 +138,9 @@ window.__eventBookingSend = function __eventBookingSend() {
         );
         return;
     }
+
+    if (nameInput) nameInput.value = name;
+    if (phoneInput) phoneInput.value = phone;
 
     const waNum = typeof window.getWhatsAppNumber === 'function'
         ? window.getWhatsAppNumber()
@@ -144,9 +159,10 @@ window.__eventBookingSend = function __eventBookingSend() {
     msg += `📱 *${window.formatTranslation('wa_phone_label', 'Tél')}:* ${phone}\n`;
     msg += `━━━━━━━━━━━━━━━━\n\n🙏 ${window.formatTranslation('wa_contact_confirm', 'Merci de me contacter pour confirmer les détails !')}`;
 
-    const opened = typeof window.openSafeExternalUrl === 'function'
-        ? window.openSafeExternalUrl(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank')
-        : window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    const whatsappUrl = getEventBookingWhatsAppUrl(waNum, msg);
+    const opened = whatsappUrl && (typeof window.openSafeExternalUrl === 'function'
+        ? window.openSafeExternalUrl(whatsappUrl, '_blank')
+        : window.open(whatsappUrl, '_blank', 'noopener,noreferrer'));
     if (!opened) {
         notifyEventBookingIssue(window.getTranslation('wa_popup_blocked_text', 'Votre navigateur a bloqué l’ouverture de WhatsApp pour cette commande.'));
         return;
