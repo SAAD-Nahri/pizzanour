@@ -2059,8 +2059,7 @@
 
             .dish-page-footer {
                 padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-                margin-left: -16px;
-                margin-right: -16px;
+                margin-inline: -16px;
             }
         }
 
@@ -2225,8 +2224,7 @@
 
             .dish-page-footer {
                 padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px));
-                margin-left: -14px;
-                margin-right: -14px;
+                margin-inline: -14px;
             }
 
             .dish-add-btn {
@@ -2393,8 +2391,7 @@
 
             .dish-page-footer {
                 padding: 11px 12px calc(12px + env(safe-area-inset-bottom, 0px));
-                margin-left: -12px;
-                margin-right: -12px;
+                margin-inline: -12px;
             }
 
             .menu-empty-state {

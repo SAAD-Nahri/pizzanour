@@ -1274,8 +1274,7 @@ body.menu-page {
   .dish-page-footer {
     bottom: calc(-18px - env(safe-area-inset-bottom, 0px));
     padding: 16px 18px calc(18px + env(safe-area-inset-bottom, 0px));
-    margin-left: -18px;
-    margin-right: -18px;
+    margin-inline: -18px;
   }
 
   .home-floating-hub,
@@ -1744,8 +1743,7 @@ body.menu-page {
   border-top: 1px solid rgba(17, 24, 39, 0.08);
   background: linear-gradient(180deg, rgba(251, 247, 240, 0.82) 0%, rgba(255, 255, 255, 0.98) 26%);
   backdrop-filter: blur(12px);
-  margin-left: -20px;
-  margin-right: -20px;
+  margin-inline: -20px;
   box-shadow: 0 -12px 24px rgba(19, 23, 31, 0.05);
 }
 
@@ -3672,8 +3670,7 @@ body.menu-page {
   .dish-page-footer {
     bottom: 0;
     padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-    margin-left: -16px;
-    margin-right: -16px;
+    margin-inline: -16px;
     backdrop-filter: none;
   }
 
