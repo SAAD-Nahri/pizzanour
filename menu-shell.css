@@ -3810,6 +3810,117 @@ body.menu-page {
     border-radius: 14px;
   }
 
+  .ticket-content {
+    min-height: 100dvh;
+    justify-content: flex-start;
+    padding: calc(env(safe-area-inset-top, 0px) + 58px) 18px calc(24px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+  }
+
+  .ticket-close-btn {
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .ticket-brand {
+    margin-bottom: 20px;
+  }
+
+  .ticket-brand-name {
+    font-size: clamp(1.45rem, 7.2vw, 2rem);
+    letter-spacing: 0.03em;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .ticket-brand-address {
+    margin-top: 7px;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .ticket-summary {
+    margin-bottom: 18px;
+    padding: 16px 0;
+  }
+
+  .ticket-number {
+    font-size: 1.18rem;
+  }
+
+  .ticket-datetime {
+    font-size: 0.84rem;
+  }
+
+  .ticket-service {
+    margin-top: 9px;
+    font-size: 0.98rem;
+  }
+
+  .ticket-delivery-address {
+    font-size: 0.84rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .ticket-items {
+    margin-bottom: 18px;
+  }
+
+  .ticket-item-row {
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+  }
+
+  .ticket-item-name {
+    min-width: 0;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .ticket-item-price {
+    flex: 0 0 auto;
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
+
+  .ticket-total-wrap {
+    margin-bottom: 18px;
+  }
+
+  .ticket-total-box {
+    padding: 15px;
+    border-radius: 15px;
+    font-size: 1.26rem;
+    letter-spacing: 0;
+  }
+
+  .ticket-actions-grid {
+    gap: 9px;
+  }
+
+  .ticket-action-btn,
+  .ticket-action-btn.is-dark,
+  .ticket-action-btn.is-success {
+    min-height: 48px;
+    padding: 13px 12px;
+    border-radius: 14px;
+    font-size: 0.86rem;
+    line-height: 1.15;
+  }
+
+  .ticket-helper {
+    margin-top: 9px;
+    font-size: 0.76rem;
+    line-height: 1.35;
+  }
+
   @media (max-width: 360px) {
     .menu-modal-body {
       padding: 20px 14px;
@@ -4051,6 +4162,131 @@ body.menu-page {
       padding: 18px 14px;
       border-radius: 15px;
       font-size: 0.84rem;
+    }
+
+    .ticket-content {
+      min-height: 100dvh;
+      justify-content: flex-start;
+      padding: calc(env(safe-area-inset-top, 0px) + 54px) 14px calc(22px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
+    }
+
+    .ticket-close-btn {
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      right: 12px;
+      width: 38px;
+      height: 38px;
+      font-size: 1.15rem;
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .ticket-brand {
+      margin-bottom: 16px;
+    }
+
+    .ticket-brand-name {
+      font-size: clamp(1.28rem, 8vw, 1.72rem);
+      letter-spacing: 0.02em;
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-brand-address {
+      margin-top: 6px;
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-summary {
+      margin-bottom: 16px;
+      padding: 14px 0;
+    }
+
+    .ticket-number {
+      font-size: 1.08rem;
+    }
+
+    .ticket-datetime {
+      font-size: 0.78rem;
+    }
+
+    .ticket-service {
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+
+    .ticket-delivery-address {
+      margin-top: 8px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-items {
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+    }
+
+    .ticket-item-row {
+      gap: 10px;
+      margin-bottom: 11px;
+      font-size: 0.84rem;
+    }
+
+    .ticket-item-name {
+      min-width: 0;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-item-extras {
+      font-size: 0.68rem;
+    }
+
+    .ticket-item-price {
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .ticket-total-wrap {
+      margin-bottom: 16px;
+    }
+
+    .ticket-total-box {
+      padding: 13px;
+      border-radius: 14px;
+      font-size: 1.12rem;
+      letter-spacing: 0;
+    }
+
+    .ticket-actions-grid {
+      position: sticky;
+      bottom: 0;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding-top: 10px;
+      background: linear-gradient(180deg, rgba(251, 247, 240, 0), rgba(251, 247, 240, 0.98) 28%, #fff 100%);
+    }
+
+    .ticket-action-btn,
+    .ticket-action-btn.is-dark,
+    .ticket-action-btn.is-success {
+      min-height: 46px;
+      padding: 12px 10px;
+      border-radius: 13px;
+      font-size: 0.8rem;
+      line-height: 1.15;
+    }
+
+    .ticket-helper {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      line-height: 1.35;
     }
 
     .cart-drawer-body {
