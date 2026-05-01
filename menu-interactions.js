@@ -129,6 +129,10 @@
             .replace(/'/g, '&#39;');
     }
 
+    function escapeUiAttr(value) {
+        return escapeUiHtml(value);
+    }
+
     function buildModalEmptyStateMarkup({
         icon = MENU_UI_ICONS.sparkle,
         eyebrow = '',
@@ -215,11 +219,11 @@
         const template = document.createElement('template');
         template.innerHTML = `
             <div id="dishPage" class="dish-page">
-                <button class="dish-page-close" onclick="closeDishPage()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
+                <button class="dish-page-close" onclick="closeDishPage()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${escapeUiAttr(t('modal_close', 'Close'))}" aria-label="${escapeUiAttr(t('modal_close', 'Close'))}">&times;</button>
                 <div class="dish-page-header">
-                    <button id="dishPagePrev" class="dish-page-media-nav dish-page-media-prev" type="button" onclick="prevDishImage()" data-i18n-title="gallery_prev" data-i18n-aria-label="gallery_prev" title="${t('gallery_prev', 'Previous image')}" aria-label="${t('gallery_prev', 'Previous image')}">&#10094;</button>
+                    <button id="dishPagePrev" class="dish-page-media-nav dish-page-media-prev" type="button" onclick="prevDishImage()" data-i18n-title="gallery_prev" data-i18n-aria-label="gallery_prev" title="${escapeUiAttr(t('gallery_prev', 'Previous image'))}" aria-label="${escapeUiAttr(t('gallery_prev', 'Previous image'))}">&#10094;</button>
                     <img id="dishPageImg" src="" alt="" class="dish-page-img" width="1200" height="900" decoding="async">
-                    <button id="dishPageNext" class="dish-page-media-nav dish-page-media-next" type="button" onclick="nextDishImage()" data-i18n-title="gallery_next" data-i18n-aria-label="gallery_next" title="${t('gallery_next', 'Next image')}" aria-label="${t('gallery_next', 'Next image')}">&#10095;</button>
+                    <button id="dishPageNext" class="dish-page-media-nav dish-page-media-next" type="button" onclick="nextDishImage()" data-i18n-title="gallery_next" data-i18n-aria-label="gallery_next" title="${escapeUiAttr(t('gallery_next', 'Next image'))}" aria-label="${escapeUiAttr(t('gallery_next', 'Next image'))}">&#10095;</button>
                     <div id="dishPageCount" class="dish-page-media-count"></div>
                 </div>
                 <div class="dish-page-body">
@@ -230,7 +234,7 @@
                     <div id="dishPageConfig" class="dish-page-config"></div>
                     <div id="dishPageLoveContainer" class="dish-page-love-row"></div>
                     <div class="dish-page-footer">
-                        <button id="dishPageAddBtn" class="dish-add-btn" data-i18n="add_to_cart">${t('add_to_cart', 'AJOUTER AU PANIER')}</button>
+                        <button id="dishPageAddBtn" class="dish-add-btn" data-i18n="add_to_cart">${escapeUiHtml(t('add_to_cart', 'AJOUTER AU PANIER'))}</button>
                     </div>
                 </div>
             </div>
@@ -238,11 +242,11 @@
             <div id="historyOverlay" class="history-overlay" onclick="closeHistory()">
                 <div class="history-modal" onclick="event.stopPropagation()">
                     <div class="history-header">
-                        <h2 data-i18n="history_title">${t('history_title', 'Historique')}</h2>
-                        <button onclick="closeHistory()" class="history-close-btn" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
+                        <h2 data-i18n="history_title">${escapeUiHtml(t('history_title', 'Historique'))}</h2>
+                        <button onclick="closeHistory()" class="history-close-btn" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${escapeUiAttr(t('modal_close', 'Close'))}" aria-label="${escapeUiAttr(t('modal_close', 'Close'))}">&times;</button>
                     </div>
                     <div id="historyContent">
-                        <p class="history-empty" data-i18n="history_empty">${t('history_empty', 'Aucune commande recente.')}</p>
+                        <p class="history-empty" data-i18n="history_empty">${escapeUiHtml(t('history_empty', 'Aucune commande recente.'))}</p>
                     </div>
                 </div>
             </div>
@@ -529,14 +533,14 @@
             configEl.innerHTML = `
                 ${availableSizeKeys.length ? `
                     <div class="dish-config-block">
-                        <div class="dish-config-label">${getDishUiCopy('size_title')}</div>
+                        <div class="dish-config-label">${escapeUiHtml(getDishUiCopy('size_title'))}</div>
                         <div class="dish-config-options dish-size-options">
                             ${availableSizeKeys.map((sizeKey) => `
                                 <button
                                     type="button"
                                     class="dish-config-chip${selectedSize === sizeKey ? ' is-active' : ''}"
-                                    data-size-key="${sizeKey}">
-                                    ${sizeLabels[sizeKey] || sizeKey} · ${formatMoney(item.sizes?.[sizeKey])}
+                                    data-size-key="${escapeUiAttr(sizeKey)}">
+                                    ${escapeUiHtml(sizeLabels[sizeKey] || sizeKey)} · ${formatMoney(item.sizes?.[sizeKey])}
                                 </button>
                             `).join('')}
                         </div>
@@ -544,18 +548,18 @@
                 ` : ''}
                 ${availableExtras.length ? `
                     <div class="dish-config-block">
-                        <div class="dish-config-label">${getDishUiCopy('extras_title')}</div>
+                        <div class="dish-config-label">${escapeUiHtml(getDishUiCopy('extras_title'))}</div>
                         <div class="dish-extra-options">
                             ${availableExtras.map((extra) => `
                                 <label class="dish-extra-option">
                                     <input
                                         type="checkbox"
                                         class="dish-extra-check"
-                                        value="${extra.id}"
+                                        value="${escapeUiAttr(extra.id)}"
                                         ${selectedExtraIds.includes(extra.id) ? 'checked' : ''}>
                                     <span class="dish-extra-copy">
-                                        <span class="dish-extra-name">${extra.name}</span>
-                                        <span class="dish-extra-price">${extra.price ? `+${formatMoney(extra.price)}` : getDishUiCopy('included_label')}</span>
+                                        <span class="dish-extra-name">${escapeUiHtml(extra.name)}</span>
+                                        <span class="dish-extra-price">${extra.price ? `+${formatMoney(extra.price)}` : escapeUiHtml(getDishUiCopy('included_label'))}</span>
                                     </span>
                                 </label>
                             `).join('')}
