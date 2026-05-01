@@ -98,11 +98,13 @@ function renderHours() {
         const dayKey = getHoursDayI18nKey(h);
         const dayLabel = dayKey ? tx(dayKey, h.day) : h.day;
         const dayI18nAttr = dayKey ? ` data-i18n="${dayKey}"` : '';
+        const openTime = escapeHomepageAttr(h.open);
+        const closeTime = escapeHomepageAttr(h.close);
         return `
         <div class="hours-row${h.highlight ? ' highlight-row' : ''}">
-            <span class="hours-day"${dayI18nAttr}>${dayLabel}</span>
+            <span class="hours-day"${dayI18nAttr}>${escapeHomepageAttr(dayLabel)}</span>
             <span class="hours-dash"></span>
-            <span class="hours-time">${h.open} – ${h.close}</span>
+            <span class="hours-time">${openTime} - ${closeTime}</span>
         </div>
     `;
     }).join('');
@@ -113,7 +115,7 @@ function renderHours() {
         } else {
             noteEl.removeAttribute('data-i18n');
         }
-        noteEl.innerHTML = note;
+        noteEl.textContent = note;
     }
 
     // Today's hours for contact section
@@ -123,7 +125,7 @@ function renderHours() {
         const mondayFirstIndex = todayIndex === 0 ? 6 : todayIndex - 1;
         const todayData = hours[mondayFirstIndex] || hours[0];
         if (todayData) {
-            contactTodayHours.textContent = `${todayData.open} – ${todayData.close}`;
+            contactTodayHours.textContent = `${todayData.open} - ${todayData.close}`;
         }
     }
 }
@@ -139,7 +141,7 @@ function updateWifiUI() {
     const wifiPass = (typeof wifiData?.pass === 'string' && wifiData.pass.trim())
         ? wifiData.pass.trim()
         : tx('wifi_default_code_help', 'Ask the team');
-    if (ssidEl) ssidEl.innerHTML = `<strong>${tx('wifi_ssid_label', 'SSID')}:</strong> ${wifiSsid}`;
+    if (ssidEl) ssidEl.innerHTML = `<strong>${escapeHomepageAttr(tx('wifi_ssid_label', 'SSID'))}:</strong> ${escapeHomepageAttr(wifiSsid)}`;
     if (passEl) passEl.textContent = wifiPass;
     if (qrEl) {
         qrEl.width = 160;
