@@ -51,7 +51,7 @@ Set these in Coolify. You can start from [`coolify.env.example`](./coolify.env.e
 - `OPENAI_IMPORT_PDF_MODEL=gpt-4o` optional override for PDF menu imports; use a stronger model here
 - `OPENAI_ITEM_MEDIA_MODEL=gpt-image-1-mini` recommended default for per-item AI dish/drink images when you want lower cost
 - `OPENAI_ITEM_MEDIA_QUALITY=low` recommended default for the cheapest owner-facing image path
-- `SELLER_TOOLS_ENABLED=false` for clean client handoff admin; enable only on seller setup instances
+- `SELLER_TOOLS_ENABLED=false` for clean client handoff admin; this hides AI import setup tools but keeps authenticated backup export/import/reset available with confirmation
 - `AI_MEDIA_TOOLS_ENABLED=false` unless you explicitly want the per-item AI image button available inside the item image modal
 - `COOKIE_SECURE=true`
 - `DATA_FILE=/app/data/data.json`
@@ -114,6 +114,7 @@ Importer note:
 - the current importer supports both uploaded images and PDFs
 - it produces a review draft that must be explicitly applied by the seller
 - it is intended for setup/import time, not for the delivered owner workflow
+- backup export, JSON restore, and demo reset are available to authenticated admins even when seller tools are disabled; import/reset require an explicit confirmation in the UI
 
 AI item-image note:
 
@@ -124,7 +125,7 @@ AI item-image note:
   - `OPENAI_ITEM_MEDIA_QUALITY=low`
 - if your OpenAI org cannot use that model, the server automatically falls back to `dall-e-3`
 - this does not require `SELLER_TOOLS_ENABLED=true`
-- importer routes, backup import/export, and reset remain seller-only when `SELLER_TOOLS_ENABLED=false`
+- importer routes remain seller-only when `SELLER_TOOLS_ENABLED=false`; backup import/export and reset stay available to authenticated admins with confirmation
 
 ## Deploy To See It Live
 

@@ -47,6 +47,7 @@ const MIN_PASSWORD_LENGTH = 8;
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCK_MS = 15 * 60 * 1000;
+const ADMIN_INTENT_HEADER = "x-admin-intent";
 const OPENAI_IMPORT_MODEL = process.env.OPENAI_IMPORT_MODEL || "gpt-4o-mini";
 const OPENAI_IMPORT_PDF_MODEL = process.env.OPENAI_IMPORT_PDF_MODEL || "gpt-4o";
 const OPENAI_ITEM_MEDIA_MODEL = process.env.OPENAI_ITEM_MEDIA_MODEL || "gpt-image-1-mini";
@@ -4960,6 +4961,14 @@ function requireAiMediaTools(_req, res, next) {
   next();
 }
 
+function requireIntentConfirmation(req, res, next) {
+  if (req.get(ADMIN_INTENT_HEADER) !== "confirmed") {
+    res.status(428).json({ ok: false, error: "confirmation_required" });
+    return;
+  }
+  next();
+}
+
 function requireNoActiveImporterJob(_req, res, next) {
   const activeJob = findActiveImporterJob();
   if (activeJob && (activeJob.status === "queued" || activeJob.status === "running")) {
@@ -5302,7 +5311,7 @@ app.post("/api/data", requireAuth, requireNoActiveImporterJob, (req, res) => {
   res.json({ ok: true, data: saved, meta: { savedAt, dataVersion } });
 });
 
-app.get("/api/data/export", requireAuth, requireSellerTools, (_req, res) => {
+app.get("/api/data/export", requireAuth, (_req, res) => {
   const data = readData();
   const stamp = new Date().toISOString().slice(0, 10);
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -5310,7 +5319,7 @@ app.get("/api/data/export", requireAuth, requireSellerTools, (_req, res) => {
   res.send(JSON.stringify(data, null, 2));
 });
 
-app.post("/api/data/import", requireAuth, requireSellerTools, requireNoActiveImporterJob, (req, res) => {
+app.post("/api/data/import", requireAuth, requireIntentConfirmation, requireNoActiveImporterJob, (req, res) => {
   try {
     const payload = req.body?.data && typeof req.body.data === "object" ? req.body.data : req.body;
     const saved = writeData(payload);
@@ -5454,7 +5463,7 @@ app.post("/api/media/library/approve", requireAuth, requireSellerTools, requireA
   }
 });
 
-app.post("/api/data/reset", requireAuth, requireSellerTools, requireNoActiveImporterJob, (_req, res) => {
+app.post("/api/data/reset", requireAuth, requireIntentConfirmation, requireNoActiveImporterJob, (_req, res) => {
   const reset = resetToBundledData();
   res.json({ ok: true, data: reset });
 });

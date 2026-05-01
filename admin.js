@@ -2565,6 +2565,8 @@ function buildAdminRequestErrorFromResponse(response, payload = {}) {
         message = t('admin.save_state.session_expired', 'Session expired. Please sign in again.');
     } else if (status === 409 && code === 'importer_job_in_progress') {
         message = getLongTaskConflictMessage({ code }) || 'Finish the current import before saving again.';
+    } else if (status === 428 || code === 'confirmation_required') {
+        message = 'Please confirm this action before applying it.';
     } else if (status === 429 || code === 'too_many_attempts') {
         message = retryAfterSec > 0
             ? `Too many attempts. Wait ${retryAfterSec}s and try again.`
@@ -3950,6 +3952,7 @@ window.openMenuBuilderEdit = function (type, id, sectionId = null) {
 function applyAdminCapabilities() {
     const sellerToolsNavBtn = document.getElementById('sellerToolsNavBtn');
     const dataToolsSection = document.getElementById('data-tools');
+    const importStudioCard = document.getElementById('importStudioCard');
     const modalAiImageTools = document.getElementById('modalAiImageTools');
     const translationButtons = [
         document.getElementById('itemTranslationGenerateBtn'),
@@ -3959,11 +3962,12 @@ function applyAdminCapabilities() {
     ].filter(Boolean);
 
     if (!adminCapabilities.sellerToolsEnabled) {
-        sellerToolsNavBtn?.remove();
-        dataToolsSection?.remove();
+        if (importStudioCard) importStudioCard.style.display = 'none';
+        if (sellerToolsNavBtn) sellerToolsNavBtn.innerHTML = '<i class="bi bi-download" aria-hidden="true"></i> Data';
     } else {
         if (sellerToolsNavBtn) sellerToolsNavBtn.style.display = '';
         if (dataToolsSection) dataToolsSection.style.display = '';
+        if (importStudioCard) importStudioCard.style.display = '';
     }
 
     if (!adminCapabilities.aiMediaToolsEnabled) {
@@ -3982,10 +3986,7 @@ function applyAdminCapabilities() {
         });
     }
 
-    if (!adminCapabilities.sellerToolsEnabled && dataToolsSection?.classList.contains('active')) {
-        const menuBtn = document.getElementById('menuNavBtn');
-        if (menuBtn) showSection('menu', menuBtn);
-    }
+    if (dataToolsSection) dataToolsSection.style.display = '';
 }
 
 async function loadAdminCapabilities() {
@@ -5926,6 +5927,123 @@ async function uploadImageToServer(file) {
     throw createAdminRequestError('No upload URL was returned from the server.', 'upload_failed');
 }
 
+window.exportRestaurantBackup = async function () {
+    try {
+        const response = await fetch('/api/data/export', { credentials: 'include' });
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw buildAdminRequestErrorFromResponse(response, payload);
+        }
+
+        const blob = await response.blob();
+        const stamp = new Date().toISOString().slice(0, 10);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `restaurant-backup-${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast('Backup exported.');
+    } catch (error) {
+        console.error('Backup export failed:', error);
+        showToast(`Backup export failed: ${error.message}`);
+    }
+};
+
+window.importRestaurantBackup = async function () {
+    const input = document.getElementById('restaurantBackupFile');
+    const file = input?.files?.[0];
+    if (!file) {
+        showToast('Choose a JSON backup first.');
+        return;
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(await file.text());
+    } catch (_error) {
+        showToast('This backup file is not valid JSON.');
+        return;
+    }
+
+    const confirmed = await showAdminConfirm({
+        kicker: 'Import backup',
+        title: 'Replace live data with this backup?',
+        copy: 'The current restaurant data will be backed up first, then replaced by the selected JSON file.',
+        note: 'Menu, branding, info, hours, gallery references, and homepage copy may change.',
+        confirmLabel: 'Import backup',
+        cancelLabel: 'Not yet',
+        tone: 'danger'
+    });
+    if (!confirmed) return;
+
+    try {
+        setAdminSaveState(ADMIN_REQUEST_STATE.saving, 'Importing backup...');
+        const response = await fetch('/api/data/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Intent': 'confirmed' },
+            credentials: 'include',
+            body: JSON.stringify({ data: parsed })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+
+        await loadDataFromServer({ silent: true });
+        refreshUI();
+        setAdminSaveState(ADMIN_REQUEST_STATE.success, 'Backup imported.', {
+            savedAt: data?.meta?.savedAt || new Date().toISOString(),
+            dataVersion: data?.meta?.dataVersion || adminSaveState.dataVersion
+        });
+        showToast('Backup imported.');
+    } catch (error) {
+        console.error('Backup import failed:', error);
+        reflectAdminRequestFailure(error);
+        showToast(`Backup import failed: ${error.message}`);
+    }
+};
+
+window.resetRestaurantData = async function () {
+    const confirmed = await showAdminConfirm({
+        kicker: 'Reset data',
+        title: 'Reset to bundled demo data?',
+        copy: 'The current restaurant data will be backed up first, then replaced with the bundled starter data.',
+        note: 'Use this only when intentionally preparing a fresh setup.',
+        confirmLabel: 'Reset data',
+        cancelLabel: 'Cancel',
+        tone: 'danger'
+    });
+    if (!confirmed) return;
+
+    try {
+        setAdminSaveState(ADMIN_REQUEST_STATE.saving, 'Resetting data...');
+        const response = await fetch('/api/data/reset', {
+            method: 'POST',
+            headers: { 'X-Admin-Intent': 'confirmed' },
+            credentials: 'include'
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) {
+            throw buildAdminRequestErrorFromResponse(response, data);
+        }
+
+        await loadDataFromServer({ silent: true });
+        refreshUI();
+        setAdminSaveState(ADMIN_REQUEST_STATE.success, 'Demo data restored.', {
+            savedAt: new Date().toISOString(),
+            dataVersion: adminSaveState.dataVersion
+        });
+        showToast('Demo data restored.');
+    } catch (error) {
+        console.error('Data reset failed:', error);
+        reflectAdminRequestFailure(error);
+        showToast(`Reset failed: ${error.message}`);
+    }
+};
+
 
 function renderImporterDraftOutputs(draft) {
     const summaryEl = document.getElementById('importStudioSummaryOutput');
@@ -6813,7 +6931,7 @@ window.applyImporterDraft = async function (scope = 'menu_only') {
         const payload = buildImporterApplyPayload(lastImporterDraft, scope);
         const response = await fetch('/api/data/import', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Intent': 'confirmed' },
             credentials: 'include',
             body: JSON.stringify({ data: payload })
         });

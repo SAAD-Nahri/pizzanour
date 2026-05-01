@@ -8868,7 +8868,7 @@
         <button class="nav-btn sidebar-nav-mobile-hidden active" id="menuNavBtn" data-section="menu" onclick="showSection('menu', this)"><i class="bi bi-journal-text" aria-hidden="true"></i> Menu</button>
         <button class="nav-btn sidebar-nav-mobile-hidden" id="infoNavBtn" data-section="info" onclick="showSection('info', this)"><i class="bi bi-info-circle" aria-hidden="true"></i> Info</button>
         <button class="nav-btn" id="brandingNavBtn" data-section="branding" onclick="showSection('branding', this)"><i class="bi bi-palette2" aria-hidden="true"></i> Branding</button>
-        <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)"><i class="bi bi-download" aria-hidden="true"></i> Import</button>
+        <button class="nav-btn" id="sellerToolsNavBtn" data-section="data-tools" onclick="showSection('data-tools', this)"><i class="bi bi-download" aria-hidden="true"></i> Data</button>
         <div class="sidebar-actions">
             <div id="adminSaveStatus" class="admin-save-status" aria-live="polite"></div>
             <button class="nav-btn sidebar-install-btn" id="adminSidebarInstallBtn" type="button" onclick="installAdminApp()" hidden>⬇ Install App</button>
@@ -10311,10 +10311,25 @@
 
         <!-- DATA TOOLS SECTION -->
         <div id="data-tools" class="section">
-            <h3 data-i18n="admin.import.title">Menu Import</h3>
-            <p class="copy-muted" data-i18n="admin.import.subtitle">Turn menu images or a PDF into a reviewable draft before publishing.</p>
+            <h3>Data Tools</h3>
+            <p class="copy-muted">Export, restore, or import menu data with confirmation before anything overwrites the live site.</p>
             <div class="tool-grid">
-                <div class="tool-card tool-card--accent tool-card--wide">
+                <div class="tool-card tool-card--wide" id="dataRecoveryCard">
+                    <div class="tool-card-eyebrow">Recovery</div>
+                    <h4>Backups and restore</h4>
+                    <p class="muted-copy">Export a JSON backup anytime. Imports and resets ask for confirmation before changing live data.</p>
+                    <div class="form-group">
+                        <label for="restaurantBackupFile">Restore from JSON backup</label>
+                        <input type="file" id="restaurantBackupFile" accept="application/json,.json" />
+                    </div>
+                    <div class="tool-actions">
+                        <button type="button" class="brand-secondary-btn" onclick="exportRestaurantBackup()">Export Backup</button>
+                        <button type="button" class="brand-secondary-btn" onclick="importRestaurantBackup()">Import Backup</button>
+                        <button type="button" class="brand-secondary-btn" onclick="resetRestaurantData()">Reset Demo Data</button>
+                    </div>
+                </div>
+
+                <div class="tool-card tool-card--accent tool-card--wide" id="importStudioCard">
                     <div class="tool-card-eyebrow">Importer</div>
                             <h4>AI Import Studio</h4>
                             <p class="muted-copy">Upload a menu, create a draft, review the result, then publish only what you trust.</p>

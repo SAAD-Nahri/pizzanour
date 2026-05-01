@@ -58,6 +58,7 @@ function startServer(entryFile, port, runtime) {
       AUTH_FILE: runtime.authFile,
       DATA_BACKUP_DIR: runtime.backupDir,
       UPLOADS_DIR: uploadsDir,
+      SELLER_TOOLS_ENABLED: "false",
       ADMIN_USER: adminCredentials.user,
       ADMIN_PASS: adminCredentials.pass
     },
@@ -145,6 +146,25 @@ async function runAuthenticatedAdminRoundTrip(websitePort, adminPort, runtime) {
   const marker = `Smoke ${Date.now()}`;
 
   try {
+    const exportResponse = await fetch(`${adminBaseUrl}/api/data/export`, {
+      headers: { Cookie: cookie }
+    });
+    if (!exportResponse.ok) {
+      throw new Error(`Admin backup export should be available to authenticated owners, got ${exportResponse.status}.`);
+    }
+
+    const unconfirmedImport = await postJson(`${adminBaseUrl}/api/data/import`, { data: originalData }, cookie, { expectSuccess: false });
+    if (unconfirmedImport.status !== 428 || unconfirmedImport.payload?.error !== "confirmation_required") {
+      throw new Error("Admin backup import should require explicit confirmation.");
+    }
+
+    const confirmedImport = await postJson(`${adminBaseUrl}/api/data/import`, { data: originalData }, cookie, {
+      headers: { "X-Admin-Intent": "confirmed" }
+    });
+    if (!confirmedImport.payload?.ok) {
+      throw new Error("Confirmed admin backup import did not succeed.");
+    }
+
     const nextPayload = JSON.parse(JSON.stringify(originalData));
     nextPayload.branding = {
       ...(nextPayload.branding || {}),
@@ -276,8 +296,8 @@ async function getJsonWithHeaders(url, options = {}) {
   return { payload, headers: response.headers };
 }
 
-async function postJson(url, payload, cookie = "") {
-  const headers = { "Content-Type": "application/json" };
+async function postJson(url, payload, cookie = "", options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (cookie) headers.Cookie = cookie;
 
   const response = await fetch(url, {
@@ -286,10 +306,10 @@ async function postJson(url, payload, cookie = "") {
     body: JSON.stringify(payload)
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
+  if (!response.ok && options.expectSuccess !== false) {
     throw new Error(`Expected success from ${url}, got ${response.status}: ${body.error || response.statusText}`);
   }
-  return { payload: body, headers: response.headers };
+  return { status: response.status, payload: body, headers: response.headers };
 }
 
 async function postMultipart(url, { cookie, fileName, type, bytes }) {
