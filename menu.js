@@ -429,18 +429,50 @@ function buildCategoryBackdropImageValue(src) {
     return toCssImageValue(original);
 }
 
+function getCategoryAccentHues(cat = '') {
+    const text = String(cat || 'menu');
+    let hash = 0;
+    for (let i = 0; i < text.length; i += 1) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(i);
+        hash |= 0;
+    }
+    const warm = [18, 28, 352, 42, 8, 338];
+    const secondary = [168, 204, 248, 288, 122, 318];
+    const index = Math.abs(hash) % warm.length;
+    return {
+        primary: warm[index],
+        secondary: secondary[(index + Math.abs(hash >> 3)) % secondary.length]
+    };
+}
+
 function applyActiveCategoryBackdrop(cat = '') {
     const contentArea = document.querySelector('#menuNavigationView .menu-content-area');
     if (!contentArea) return;
 
+    const categoryKey = String(cat || '').trim();
+    if (!categoryKey) {
+        contentArea.classList.remove('is-category-backed', 'is-category-fallback-backed');
+        contentArea.style.removeProperty('--menu-category-backdrop-image');
+        contentArea.style.removeProperty('--menu-category-accent-primary');
+        contentArea.style.removeProperty('--menu-category-accent-secondary');
+        return;
+    }
+
     const explicitCategoryImage = getExplicitCategoryImage(cat);
     if (!explicitCategoryImage) {
+        const hues = getCategoryAccentHues(categoryKey);
         contentArea.classList.remove('is-category-backed');
+        contentArea.classList.add('is-category-fallback-backed');
         contentArea.style.removeProperty('--menu-category-backdrop-image');
+        contentArea.style.setProperty('--menu-category-accent-primary', hues.primary);
+        contentArea.style.setProperty('--menu-category-accent-secondary', hues.secondary);
         return;
     }
 
     contentArea.classList.add('is-category-backed');
+    contentArea.classList.remove('is-category-fallback-backed');
+    contentArea.style.removeProperty('--menu-category-accent-primary');
+    contentArea.style.removeProperty('--menu-category-accent-secondary');
     contentArea.style.setProperty(
         '--menu-category-backdrop-image',
         buildCategoryBackdropImageValue(explicitCategoryImage)
