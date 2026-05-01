@@ -795,6 +795,7 @@
         const restaurantName = typeof window.getRestaurantDisplayName === 'function'
             ? window.getRestaurantDisplayName()
             : 'Restaurant';
+        const safeRestaurantName = escapeUiHtml(restaurantName);
         const serviceOptions = [
             { key: 'onsite', icon: MENU_UI_ICONS.plate, label: t('service_onsite', 'Sur place') },
             { key: 'takeaway', icon: MENU_UI_ICONS.takeaway, label: t('service_takeaway', 'A emporter') },
@@ -805,9 +806,9 @@
             content.innerHTML = `
                 <div class="cart-drawer-body is-empty">
                     <div class="cart-drawer-header">
-                        <div class="cart-drawer-title">${restaurantName}</div>
+                        <div class="cart-drawer-title">${safeRestaurantName}</div>
                         <div class="cart-drawer-meta">
-                            <div class="cart-drawer-count">${t('cart_items_count', '{count} item(s)', { count: 0 })}</div>
+                            <div class="cart-drawer-count">${escapeUiHtml(t('cart_items_count', '{count} item(s)', { count: 0 }))}</div>
                         </div>
                     </div>
                     ${buildModalEmptyStateMarkup({
@@ -830,10 +831,10 @@
         content.innerHTML = `
             <div class="cart-drawer-body">
                 <div class="cart-drawer-header">
-                    <div class="cart-drawer-title">${restaurantName}</div>
+                    <div class="cart-drawer-title">${safeRestaurantName}</div>
                     <div class="cart-drawer-meta">
-                        <button onclick="window.confirmClearCart()" class="cart-drawer-clear" data-i18n="cart_clear" data-i18n-aria-label="cart_clear" data-i18n-title="cart_clear" aria-label="${t('cart_clear', 'Vider')}" title="${t('cart_clear', 'Vider')}">${t('cart_clear', 'Vider')}</button>
-                        <div class="cart-drawer-count">${t('cart_items_count', '{count} item(s)', { count: cart.length })}</div>
+                        <button onclick="window.confirmClearCart()" class="cart-drawer-clear" data-i18n="cart_clear" data-i18n-aria-label="cart_clear" data-i18n-title="cart_clear" aria-label="${escapeUiHtml(t('cart_clear', 'Vider'))}" title="${escapeUiHtml(t('cart_clear', 'Vider'))}">${escapeUiHtml(t('cart_clear', 'Vider'))}</button>
+                        <div class="cart-drawer-count">${escapeUiHtml(t('cart_items_count', '{count} item(s)', { count: cart.length }))}</div>
                     </div>
                 </div>
                 <div class="cart-items-list">
@@ -841,15 +842,15 @@
                         <div class="cart-item-card">
                             <div class="cart-item-main">
                                 <div class="cart-item-name">
-                                    ${window.getLocalizedMenuName(item)} ${item.selectedSize ? `<span class="cart-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}
+                                    ${escapeUiHtml(window.getLocalizedMenuName(item))} ${item.selectedSize ? `<span class="cart-item-size">(${escapeUiHtml(item.selectedSize.charAt(0).toUpperCase())})</span>` : ''}
                                 </div>
-                                ${item.selectedExtras?.length ? `<div class="cart-item-extras">${formatSelectedExtrasSummary(item.selectedExtras)}</div>` : ''}
+                                ${item.selectedExtras?.length ? `<div class="cart-item-extras">${escapeUiHtml(formatSelectedExtrasSummary(item.selectedExtras))}</div>` : ''}
                                 <div class="cart-item-price">${formatMoney(item.price * item.qty)}</div>
                             </div>
                             <div class="cart-item-controls">
-                                <button onclick="removeFromCart('${item.cartId}')" class="cart-qty-btn is-minus">-</button>
+                                <button onclick="removeFromCart(${serializeInlineId(item.cartId)})" class="cart-qty-btn is-minus">-</button>
                                 <span class="cart-item-qty">${item.qty}</span>
-                                <button onclick="window.repeatCartItem('${item.cartId}')" class="cart-qty-btn is-plus">+</button>
+                                <button onclick="window.repeatCartItem(${serializeInlineId(item.cartId)})" class="cart-qty-btn is-plus">+</button>
                             </div>
                         </div>
                     `).join('')}
@@ -859,23 +860,23 @@
                         ${serviceOptions.map((option) => `
                             <button class="cart-service-btn${serviceType === option.key ? ' is-active' : ''}" onclick="window.__foodyGetMenuRuntime().setServiceType('${option.key}'); renderDrawer()">
                                 <span class="cart-service-icon">${option.icon}</span>
-                                <span class="cart-service-label">${option.label}</span>
+                                <span class="cart-service-label">${escapeUiHtml(option.label)}</span>
                             </button>
                         `).join('')}
                     </div>
                     ${serviceType === 'delivery' ? `
                     <div class="cart-delivery-block">
-                        <label class="cart-delivery-label" data-i18n="cart_delivery_label">${t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`)}</label>
-                        <textarea id="deliveryAddress" rows="2" data-i18n-placeholder="cart_delivery_placeholder" placeholder="${t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...')}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${window.currentDeliveryAddress || ''}</textarea>
-                        <div id="deliveryAddressHint" class="cart-delivery-hint${window.deliveryAddressNeedsAttention ? ' is-warning' : ''}">${window.deliveryAddressNeedsAttention ? t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.') : t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.')}</div>
+                        <label class="cart-delivery-label" data-i18n="cart_delivery_label">${escapeUiHtml(t('cart_delivery_label', `${MENU_UI_ICONS.address} Adresse de livraison`))}</label>
+                        <textarea id="deliveryAddress" rows="2" data-i18n-placeholder="cart_delivery_placeholder" placeholder="${escapeUiHtml(t('cart_delivery_placeholder', 'Ex : Appartement 12, residence, quartier...'))}" oninput="window.handleDeliveryAddressInput(this)" class="cart-delivery-input${window.deliveryAddressNeedsAttention ? ' is-invalid' : ''}">${escapeUiHtml(window.currentDeliveryAddress || '')}</textarea>
+                        <div id="deliveryAddressHint" class="cart-delivery-hint${window.deliveryAddressNeedsAttention ? ' is-warning' : ''}">${escapeUiHtml(window.deliveryAddressNeedsAttention ? t('ticket_delivery_required', 'Veuillez saisir votre adresse de livraison.') : t('cart_delivery_help', 'Ajoutez une adresse claire pour confirmer la livraison.'))}</div>
                     </div>
                     ` : ''}
                     <div class="cart-total-card">
                         <div class="cart-total-row">
-                            <span data-i18n="cart_total_label">${t('cart_total_label', 'Total')}</span><span>${formatMoney(total)}</span>
+                            <span data-i18n="cart_total_label">${escapeUiHtml(t('cart_total_label', 'Total'))}</span><span>${formatMoney(total)}</span>
                         </div>
                     </div>
-                    <button onclick="generateTicket()" class="cart-confirm-btn" data-i18n="cart_confirm_order">${t('cart_confirm_order', 'CONFIRMER MA COMMANDE')}</button>
+                    <button onclick="generateTicket()" class="cart-confirm-btn" data-i18n="cart_confirm_order">${escapeUiHtml(t('cart_confirm_order', 'CONFIRMER MA COMMANDE'))}</button>
                 </div>
             </div>
         `;
@@ -1132,43 +1133,48 @@
         const restaurantAddress = typeof window.getRestaurantAddress === 'function' ? window.getRestaurantAddress() : '';
 
         const serviceLabel = getServiceTypeLabel(serviceType, t('service_onsite', 'Sur place'));
+        const safeServiceLabel = escapeUiHtml(serviceLabel);
+        const safeOrderNo = escapeUiHtml(orderNo);
+        const safeRestaurantName = escapeUiHtml(restaurantName);
+        const safeRestaurantAddress = escapeUiHtml(restaurantAddress);
+        const safeDeliveryAddress = escapeUiHtml(window.currentDeliveryAddress || '');
 
         ticketContent.innerHTML = `
             <div class="ticket-content">
-                <button onclick="closeAllModals()" class="ticket-close-btn" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
+                <button onclick="closeAllModals()" class="ticket-close-btn" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${escapeUiHtml(t('modal_close', 'Close'))}" aria-label="${escapeUiHtml(t('modal_close', 'Close'))}">&times;</button>
                 <div class="ticket-brand">
-                    <div class="ticket-brand-name">${restaurantName}</div>
-                    <div class="ticket-brand-address">${restaurantAddress}</div>
+                    <div class="ticket-brand-name">${safeRestaurantName}</div>
+                    <div class="ticket-brand-address">${safeRestaurantAddress}</div>
                 </div>
                 <div class="ticket-summary">
-                    <div class="ticket-number">${t('ticket_number_prefix', 'TICKET')} #${orderNo}</div>
+                    <div class="ticket-number">${escapeUiHtml(t('ticket_number_prefix', 'TICKET'))} #${safeOrderNo}</div>
                     <div class="ticket-datetime">${formatUiDate(now)} - ${formatUiTime(now)}</div>
-                    <div class="ticket-service">${t('ticket_type_label', 'Type')}: ${serviceLabel}</div>
-                    ${serviceType === 'delivery' ? `<div class="ticket-delivery-address">${MENU_UI_ICONS.address} ${window.currentDeliveryAddress}</div>` : ''}
+                    <div class="ticket-service">${escapeUiHtml(t('ticket_type_label', 'Type'))}: ${safeServiceLabel}</div>
+                    ${serviceType === 'delivery' ? `<div class="ticket-delivery-address">${MENU_UI_ICONS.address} ${safeDeliveryAddress}</div>` : ''}
                 </div>
                 <div class="ticket-items">
                     ${cart.map((item) => `
                         <div class="ticket-item-row">
                             <div class="ticket-item-name">
-                                <div><strong class="ticket-item-qty">${item.qty} &times;</strong> ${window.getLocalizedMenuName(item)}${item.selectedSize ? ` <span class="ticket-item-size">(${item.selectedSize.charAt(0).toUpperCase()})</span>` : ''}</div>
-                                ${item.selectedExtras?.length ? `<div class="ticket-item-extras">${item.selectedExtras.map((extra) => extra.name).join(' • ')}</div>` : ''}
+                                <div><strong class="ticket-item-qty">${escapeUiHtml(item.qty)} &times;</strong> ${escapeUiHtml(window.getLocalizedMenuName(item))}${item.selectedSize ? ` <span class="ticket-item-size">(${escapeUiHtml(item.selectedSize.charAt(0).toUpperCase())})</span>` : ''}</div>
+                                ${item.selectedExtras?.length ? `<div class="ticket-item-extras">${escapeUiHtml(item.selectedExtras.map((extra) => extra.name).filter(Boolean).join(' • '))}</div>` : ''}
                             </div>
                             <div class="ticket-item-price">${formatMoney(item.price * item.qty)}</div>
                         </div>
                     `).join('')}
                 </div>
                 <div class="ticket-total-wrap">
-                    <div class="ticket-total-box"><span data-i18n="ticket_total_prefix">${t('ticket_total_prefix', 'TOTAL :')}</span> ${formatMoney(total)}</div>
+                    <div class="ticket-total-box"><span data-i18n="ticket_total_prefix">${escapeUiHtml(t('ticket_total_prefix', 'TOTAL :'))}</span> ${formatMoney(total)}</div>
                 </div>
                 ${serviceType === 'delivery' ? `
                     <div class="ticket-actions-grid">
-                        <button onclick="document.getElementById('ticketModal').classList.remove('open'); document.getElementById('cartDrawer').classList.add('open');" class="ticket-action-btn is-outline">${t('ticket_edit', 'MODIFIER')}</button>
-                        <button onclick="sendOrderViaWhatsApp('${orderNo}', ${total.toFixed(2)}, '${serviceLabel}')" class="ticket-action-btn is-primary">${t('ticket_order', 'COMMANDER')}</button>
+                        <button onclick="document.getElementById('ticketModal').classList.remove('open'); document.getElementById('cartDrawer').classList.add('open');" class="ticket-action-btn is-outline">${escapeUiHtml(t('ticket_edit', 'MODIFIER'))}</button>
+                        <button onclick="sendOrderViaWhatsApp(${serializeInlineId(orderNo)}, ${total.toFixed(2)}, ${serializeInlineId(serviceLabel)})" class="ticket-action-btn is-primary">${escapeUiHtml(t('ticket_order', 'COMMANDER'))}</button>
                     </div>
                 ` : `
                     <div id="ticketActions_${orderNo}" class="ticket-actions-single">
-                        <button onclick="finalizeOrderSilent('${orderNo}', ${total.toFixed(2)}, '${serviceLabel}', this)" class="ticket-action-btn is-dark">${t('ticket_validate', 'VALIDER LA COMMANDE')}</button>
-                        <div class="ticket-helper">${t('ticket_helper', 'Cliquez pour enregistrer et montrer au serveur')}</div>
+                        <button onclick="finalizeOrderSilent(${serializeInlineId(orderNo)}, ${total.toFixed(2)}, ${serializeInlineId(serviceLabel)}, this)" class="ticket-action-btn is-dark">${escapeUiHtml(t('ticket_validate', 'VALIDER LA COMMANDE'))}</button>
+                        <div class="ticket-helper">${escapeUiHtml(t('ticket_helper', 'Cliquez pour enregistrer et montrer au serveur'))}</div>
                     </div>
                 `}
             </div>
@@ -1233,9 +1239,14 @@
         const parent = btn.parentElement;
         if (!parent) return;
         parent.innerHTML = `
-            <button onclick="closeAllModals(); showLanding();" class="ticket-action-btn is-success">${t('ticket_saved', 'ORDER SAVED')}</button>
-            <div class="ticket-helper is-success">${t('ticket_saved_help', 'Order saved. Tap to close.')}</div>
+            <button onclick="closeAllModals(); showLanding();" class="ticket-action-btn is-success">${escapeUiHtml(t('ticket_saved', 'ORDER SAVED'))}</button>
+            <div class="ticket-helper is-success">${escapeUiHtml(t('ticket_saved_help', 'Order saved. Tap to close.'))}</div>
         `;
+    }
+
+    function getOrderWhatsAppUrl(number, message) {
+        const digits = String(number || '').replace(/\D/g, '');
+        return digits ? `https://wa.me/${encodeURIComponent(digits)}?text=${encodeURIComponent(message)}` : '';
     }
 
     function sendOrderViaWhatsApp(orderNo, total, serviceLabel) {
@@ -1270,7 +1281,8 @@
             return;
         }
 
-        const opened = window.openSafeExternalUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
+        const whatsappUrl = getOrderWhatsAppUrl(phone, waText);
+        const opened = whatsappUrl && window.openSafeExternalUrl(whatsappUrl, '_blank');
         if (!opened) {
             showOrderNotice({
                 icon: () => MENU_UI_ICONS.whatsapp || MENU_UI_ICONS.sparkle,
