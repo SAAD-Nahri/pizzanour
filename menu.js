@@ -559,7 +559,8 @@ function getCategoryPreviewSource(cat) {
     if (explicitCategoryImage) {
         return {
             src: getMenuCardImageSrc(explicitCategoryImage, 'menu'),
-            originalSrc: explicitCategoryImage
+            originalSrc: explicitCategoryImage,
+            fallbackOnly: false
         };
     }
 
@@ -575,17 +576,15 @@ function getCategoryPreviewSource(cat) {
     if (itemSrc) {
         return {
             src: getMenuCardImageSrc(itemSrc, 'menu'),
-            originalSrc: itemSrc
+            originalSrc: itemSrc,
+            fallbackOnly: false
         };
     }
 
-    const brandingHero = String(window.restaurantConfig?.branding?.heroImage || '').trim();
-    const runtimeHero = document.getElementById('menuHeroImage')?.getAttribute('src') || '';
-    const fallbackSrc = brandingHero || runtimeHero || 'images/hero-default.svg';
-
     return {
-        src: fallbackSrc,
-        originalSrc: ''
+        src: '',
+        originalSrc: '',
+        fallbackOnly: true
     };
 }
 
@@ -607,11 +606,15 @@ function buildCategoryNavigationCardMarkup(cat) {
     const originalSrcAttr = preview.originalSrc && preview.originalSrc !== preview.src
         ? ` data-original-src="${escapeHtmlAttr(preview.originalSrc)}"`
         : '';
+    const categoryFallbackGlyph = catEmojis[cat] || MENU_UI_ICONS.plate;
+    const mediaMarkup = preview.fallbackOnly
+        ? `<span class="emoji-placeholder menu-category-fallback" aria-hidden="true">${escapeHtmlAttr(categoryFallbackGlyph)}</span>`
+        : `<img class="menu-deferred-img" data-menu-src="${escapeHtmlAttr(preview.src)}"${originalSrcAttr} data-fallback-emoji="${escapeHtmlAttr(categoryFallbackGlyph)}" data-fallback-class="menu-category-fallback" alt="${escapeHtmlAttr(localizedName)}" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low">`;
 
     return `
-        <button class="menu-category-card menu-reveal-observe" data-cat="${escapeHtmlAttr(cat)}" onclick="showCategoryItems(${serializeInlineId(cat)})">
+        <button class="menu-category-card${preview.fallbackOnly ? ' has-designed-fallback' : ''} menu-reveal-observe" data-cat="${escapeHtmlAttr(cat)}" onclick="showCategoryItems(${serializeInlineId(cat)})">
             <span class="menu-category-card-media">
-                <img class="menu-deferred-img" data-menu-src="${escapeHtmlAttr(preview.src)}"${originalSrcAttr} data-fallback-emoji="${escapeHtmlAttr(fallbackGlyph)}" alt="${escapeHtmlAttr(localizedName)}" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low">
+                ${mediaMarkup}
             </span>
             <span class="menu-category-card-shade"></span>
             <span class="menu-category-card-title">${localizedName}</span>
@@ -833,8 +836,10 @@ function loadDeferredMenuImage(img) {
         }
         img.onerror = null;
         const fallback = document.createElement('span');
-        fallback.className = 'emoji-placeholder';
+        fallback.className = ['emoji-placeholder', img.dataset.fallbackClass || ''].filter(Boolean).join(' ');
         fallback.textContent = img.dataset.fallbackEmoji || MENU_UI_ICONS.plate;
+        fallback.setAttribute('aria-hidden', 'true');
+        img.closest('.menu-category-card')?.classList.add('has-designed-fallback');
         img.replaceWith(fallback);
     };
     img.src = src;
