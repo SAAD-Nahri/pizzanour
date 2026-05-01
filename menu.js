@@ -1276,19 +1276,19 @@ function renderLandingSocialLinks() {
 
     if (socials.facebook) {
         const label = t('social_facebook', 'Facebook');
-        links.push(`<a href="${socials.facebook}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.facebook}</a>`);
+        links.push(`<a href="${escapeHtmlAttr(socials.facebook)}" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.facebook}</a>`);
     }
     if (socials.instagram) {
         const label = t('social_instagram', 'Instagram');
-        links.push(`<a href="${socials.instagram}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.instagram}</a>`);
+        links.push(`<a href="${escapeHtmlAttr(socials.instagram)}" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.instagram}</a>`);
     }
     if (socials.tiktok) {
         const label = t('social_tiktok', 'TikTok');
-        links.push(`<a href="${socials.tiktok}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.tiktok}</a>`);
+        links.push(`<a href="${escapeHtmlAttr(socials.tiktok)}" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.tiktok}</a>`);
     }
     if (socials.whatsapp) {
         const label = t('social_whatsapp', 'WhatsApp');
-        links.push(`<a href="https://wa.me/${socials.whatsapp}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.whatsapp}</a>`);
+        links.push(`<a href="https://wa.me/${encodeURIComponent(socials.whatsapp)}" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.whatsapp}</a>`);
     }
 
     const config = window.restaurantConfig;
@@ -1300,15 +1300,15 @@ function renderLandingSocialLinks() {
 
     if (mapUrl && locationConfig.address) {
         const label = t('landing_map_title', 'View on map');
-        links.push(`<a href="${mapUrl}" target="_blank" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.map}</a>`);
+        links.push(`<a href="${escapeHtmlAttr(mapUrl)}" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.map}</a>`);
     }
     if (phoneHref && config.phone) {
         const label = t('landing_call_title', 'Call');
-        links.push(`<a href="${phoneHref}" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.phone}</a>`);
+        links.push(`<a href="${escapeHtmlAttr(phoneHref)}" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.phone}</a>`);
     }
     if (hasWifi) {
         const label = t('landing_wifi_title', 'WiFi code');
-        links.push(`<a href="#" onclick="openWiFiModal(); return false;" class="social-icon-link" aria-label="${label}" title="${label}">${SVG_ICONS.wifi}</a>`);
+        links.push(`<a href="#" onclick="openWiFiModal(); return false;" class="social-icon-link" aria-label="${escapeHtmlAttr(label)}" title="${escapeHtmlAttr(label)}">${SVG_ICONS.wifi}</a>`);
     }
 
     container.classList.toggle('social-links-minimal', links.length === 1);
@@ -1324,12 +1324,12 @@ function openWiFiModal() {
     const content = `
         <div class="modal-body menu-modal-body is-centered">
             <div class="menu-modal-icon">${MENU_UI_ICONS.wifi}</div>
-            <h2 class="menu-modal-title">${wifiTitle}</h2>
-            <p class="menu-modal-subtitle">${networkLabel}: <strong>${config.wifi.name}</strong></p>
+            <h2 class="menu-modal-title">${escapeHtmlAttr(wifiTitle)}</h2>
+            <p class="menu-modal-subtitle">${escapeHtmlAttr(networkLabel)}: <strong>${escapeHtmlAttr(config.wifi.name)}</strong></p>
             <div class="menu-modal-code-card">
-                ${config.wifi.code}
+                ${escapeHtmlAttr(config.wifi.code)}
             </div>
-            <button class="menu-modal-action" onclick="closeAllModals()">${closeLabel}</button>
+            <button class="menu-modal-action" onclick="closeAllModals()">${escapeHtmlAttr(closeLabel)}</button>
         </div>
     `;
     const drawer = document.getElementById('cartDrawer');
@@ -1357,19 +1357,19 @@ function openSocialModal() {
     config.socials.tiktok = window.getSafeExternalUrl(config.socials.tiktok);
     config.socials.tripadvisor = window.getSafeExternalUrl(config.socials.tripadvisor);
     const socials = [
-        config.socials.instagram ? `<a href="${config.socials.instagram}" target="_blank" class="social-item" aria-label="${instagramLabel}" title="${instagramLabel}"><span class="social-item-icon">${MENU_UI_ICONS.instagram}</span> <strong>${instagramLabel}</strong></a>` : '',
-        config.socials.facebook ? `<a href="${config.socials.facebook}" target="_blank" class="social-item" aria-label="${facebookLabel}" title="${facebookLabel}"><span class="social-item-icon">${MENU_UI_ICONS.facebook}</span> <strong>${facebookLabel}</strong></a>` : '',
-        config.socials.tiktok ? `<a href="${config.socials.tiktok}" target="_blank" class="social-item" aria-label="${tiktokLabel}" title="${tiktokLabel}"><span class="social-item-icon">${MENU_UI_ICONS.tiktok}</span> <strong>${tiktokLabel}</strong></a>` : '',
-        config.socials.tripadvisor ? `<a href="${config.socials.tripadvisor}" target="_blank" class="social-item" aria-label="${tripAdvisorLabel}" title="${tripAdvisorLabel}"><span class="social-item-icon">${MENU_UI_ICONS.sparkle}</span> <strong>${tripAdvisorLabel}</strong></a>` : '',
-        whatsappNumber ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" class="social-item" aria-label="${whatsappLabel}" title="${whatsappLabel}"><span class="social-item-icon">${MENU_UI_ICONS.whatsapp}</span> <strong>${whatsappLabel}</strong></a>` : ''
+        config.socials.instagram ? `<a href="${escapeHtmlAttr(config.socials.instagram)}" target="_blank" rel="noopener noreferrer" class="social-item" aria-label="${escapeHtmlAttr(instagramLabel)}" title="${escapeHtmlAttr(instagramLabel)}"><span class="social-item-icon">${MENU_UI_ICONS.instagram}</span> <strong>${escapeHtmlAttr(instagramLabel)}</strong></a>` : '',
+        config.socials.facebook ? `<a href="${escapeHtmlAttr(config.socials.facebook)}" target="_blank" rel="noopener noreferrer" class="social-item" aria-label="${escapeHtmlAttr(facebookLabel)}" title="${escapeHtmlAttr(facebookLabel)}"><span class="social-item-icon">${MENU_UI_ICONS.facebook}</span> <strong>${escapeHtmlAttr(facebookLabel)}</strong></a>` : '',
+        config.socials.tiktok ? `<a href="${escapeHtmlAttr(config.socials.tiktok)}" target="_blank" rel="noopener noreferrer" class="social-item" aria-label="${escapeHtmlAttr(tiktokLabel)}" title="${escapeHtmlAttr(tiktokLabel)}"><span class="social-item-icon">${MENU_UI_ICONS.tiktok}</span> <strong>${escapeHtmlAttr(tiktokLabel)}</strong></a>` : '',
+        config.socials.tripadvisor ? `<a href="${escapeHtmlAttr(config.socials.tripadvisor)}" target="_blank" rel="noopener noreferrer" class="social-item" aria-label="${escapeHtmlAttr(tripAdvisorLabel)}" title="${escapeHtmlAttr(tripAdvisorLabel)}"><span class="social-item-icon">${MENU_UI_ICONS.sparkle}</span> <strong>${escapeHtmlAttr(tripAdvisorLabel)}</strong></a>` : '',
+        whatsappNumber ? `<a href="https://wa.me/${encodeURIComponent(whatsappNumber)}" target="_blank" rel="noopener noreferrer" class="social-item" aria-label="${escapeHtmlAttr(whatsappLabel)}" title="${escapeHtmlAttr(whatsappLabel)}"><span class="social-item-icon">${MENU_UI_ICONS.whatsapp}</span> <strong>${escapeHtmlAttr(whatsappLabel)}</strong></a>` : ''
     ].filter(Boolean).join('');
     const content = `
         <div class="modal-body menu-modal-body">
-            <h2 class="menu-modal-title">${title}</h2>
+            <h2 class="menu-modal-title">${escapeHtmlAttr(title)}</h2>
             <div class="social-list">
-                ${socials || `<p class="menu-modal-empty">${emptyText}</p>`}
+                ${socials || `<p class="menu-modal-empty">${escapeHtmlAttr(emptyText)}</p>`}
             </div>
-            <button class="menu-modal-action is-muted" onclick="closeAllModals()">${closeLabel}</button>
+            <button class="menu-modal-action is-muted" onclick="closeAllModals()">${escapeHtmlAttr(closeLabel)}</button>
         </div>
     `;
     const drawer = document.getElementById('cartDrawer');
@@ -1486,12 +1486,12 @@ function renderFeaturedSlider(items, containerId) {
     container.innerHTML = `
         <div class="featured-header-sexy menu-reveal-observe">
             <div class="featured-header-copy">
-                <span class="featured-header-label">${t('featured_label', 'Sélection Signature')}</span>
+                <span class="featured-header-label">${escapeHtmlAttr(t('featured_label', 'Sélection Signature'))}</span>
                 <div class="featured-header-meta">
-                    <span class="featured-header-stat">${liveStats.items} ${t('menu_items', 'plats')}</span>
-                    <span class="featured-header-stat">${liveStats.categories} ${t('categories', 'catégories')}</span>
-                    <span class="featured-header-stat">${liveStats.featured} ${t('featured_label', 'signature')}</span>
-                    <span class="featured-header-stat">${items.length} ${t('featured_label', 'sélection')}</span>
+                    <span class="featured-header-stat">${liveStats.items} ${escapeHtmlAttr(t('menu_items', 'plats'))}</span>
+                    <span class="featured-header-stat">${liveStats.categories} ${escapeHtmlAttr(t('categories', 'catégories'))}</span>
+                    <span class="featured-header-stat">${liveStats.featured} ${escapeHtmlAttr(t('featured_label', 'signature'))}</span>
+                    <span class="featured-header-stat">${items.length} ${escapeHtmlAttr(t('featured_label', 'sélection'))}</span>
                 </div>
             </div>
         </div>
@@ -1499,16 +1499,16 @@ function renderFeaturedSlider(items, containerId) {
             ${items.map(item => `
                 <div class="featured-card menu-reveal-observe" onclick="openDishPage(${serializeInlineId(item.id)})">
                     <div class="featured-card-glow"></div>
-                    <div class="featured-card-badge">${t('featured_label', 'Signature')}</div>
+                    <div class="featured-card-badge">${escapeHtmlAttr(t('featured_label', 'Signature'))}</div>
                     <div class="featured-img-wrap">
                         ${imgTag(item, { defer: true })}
                     </div>
                     <div class="featured-info">
-                        <div class="featured-name">${window.getLocalizedMenuName(item)}</div>
-                        <div class="featured-desc">${window.getLocalizedMenuDescription(item, t('dish_default_desc', 'Une préparation soignée avec les meilleurs ingrédients.'))}</div>
+                        <div class="featured-name">${escapeHtmlAttr(window.getLocalizedMenuName(item))}</div>
+                        <div class="featured-desc">${escapeHtmlAttr(window.getLocalizedMenuDescription(item, t('dish_default_desc', 'Une préparation soignée avec les meilleurs ingrédients.')))}</div>
                     <div class="featured-price-row">
                         <div class="featured-price">${window.getItemPrice(item).toFixed(0)} MAD</div>
-                        <div class="featured-hint">${t('view_menu', 'Voir le Menu')}</div>
+                        <div class="featured-hint">${escapeHtmlAttr(t('view_menu', 'Voir le Menu'))}</div>
                     </div>
                 </div>
                     <button class="featured-add-btn" onclick="event.stopPropagation();handleMenuItemAdd(${serializeInlineId(item.id)})">+</button>
@@ -1587,12 +1587,12 @@ function renderSuperCatSheet() {
     const availableSuperCategories = getAvailableSuperCategories();
     list.innerHTML = availableSuperCategories.length
         ? availableSuperCategories.map(sc => `
-        <div class="super-cat-row menu-reveal-observe" onclick="selectSuperCategory('${sc.id}')">
+        <div class="super-cat-row menu-reveal-observe" onclick="selectSuperCategory(${serializeInlineId(sc.id)})">
             <div class="super-cat-row-left">
-                <span class="super-cat-row-emoji">${sc.emoji}</span>
+                <span class="super-cat-row-emoji">${escapeHtmlAttr(sc.emoji)}</span>
                 <div class="super-cat-row-info">
-                    <div class="super-cat-row-name">${window.getLocalizedSuperCategoryName(sc, sc.name)}</div>
-                    <div class="super-cat-row-desc">${window.getLocalizedSuperCategoryDescription(sc, '')}</div>
+                    <div class="super-cat-row-name">${escapeHtmlAttr(window.getLocalizedSuperCategoryName(sc, sc.name))}</div>
+                    <div class="super-cat-row-desc">${escapeHtmlAttr(window.getLocalizedSuperCategoryDescription(sc, ''))}</div>
                 </div>
             </div>
             <span class="super-cat-row-count">${getSuperCategoryItemCount(sc)}</span>
