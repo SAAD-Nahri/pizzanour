@@ -1411,6 +1411,7 @@ body.menu-page {
   font-weight: 700;
   line-height: 1.35;
   text-align: center;
+  overflow-wrap: anywhere;
   box-shadow: 0 20px 42px rgba(0, 0, 0, 0.24);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px);
@@ -3795,9 +3796,12 @@ body.menu-page {
     bottom: calc(84px + env(safe-area-inset-bottom, 0px));
     min-width: min(260px, calc(100vw - 28px));
     max-width: calc(100vw - 28px);
+    max-height: 96px;
     padding: 12px 14px;
     border-radius: 15px;
     font-size: 0.84rem;
+    line-height: 1.32;
+    overflow: hidden;
     backdrop-filter: none;
   }
 
