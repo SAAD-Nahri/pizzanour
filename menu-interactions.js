@@ -263,11 +263,11 @@
             </div>
 
             <div id="galleryOverlay" class="gallery-overlay" onclick="closeGallery()">
-                <button class="gallery-close" onclick="closeGallery()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${t('modal_close', 'Close')}" aria-label="${t('modal_close', 'Close')}">&times;</button>
+                <button class="gallery-close" onclick="closeGallery()" data-i18n-title="modal_close" data-i18n-aria-label="modal_close" title="${escapeUiAttr(t('modal_close', 'Close'))}" aria-label="${escapeUiAttr(t('modal_close', 'Close'))}">&times;</button>
                 <div class="gallery-container" onclick="event.stopPropagation()">
-                    <button class="gallery-nav gallery-prev" onclick="prevGalleryImage()" data-i18n-title="gallery_prev" data-i18n-aria-label="gallery_prev" title="${t('gallery_prev', 'Previous image')}" aria-label="${t('gallery_prev', 'Previous image')}">&#10094;</button>
-                    <img id="galleryImg" src="" alt="${t('image_alt_gallery', 'Gallery image')}" data-i18n-alt="image_alt_gallery" width="1200" height="900" decoding="async">
-                    <button class="gallery-nav gallery-next" onclick="nextGalleryImage()" data-i18n-title="gallery_next" data-i18n-aria-label="gallery_next" title="${t('gallery_next', 'Next image')}" aria-label="${t('gallery_next', 'Next image')}">&#10095;</button>
+                    <button class="gallery-nav gallery-prev" onclick="prevGalleryImage()" data-i18n-title="gallery_prev" data-i18n-aria-label="gallery_prev" title="${escapeUiAttr(t('gallery_prev', 'Previous image'))}" aria-label="${escapeUiAttr(t('gallery_prev', 'Previous image'))}">&#10094;</button>
+                    <img id="galleryImg" src="" alt="${escapeUiAttr(t('image_alt_gallery', 'Gallery image'))}" data-i18n-alt="image_alt_gallery" width="1200" height="900" decoding="async">
+                    <button class="gallery-nav gallery-next" onclick="nextGalleryImage()" data-i18n-title="gallery_next" data-i18n-aria-label="gallery_next" title="${escapeUiAttr(t('gallery_next', 'Next image'))}" aria-label="${escapeUiAttr(t('gallery_next', 'Next image'))}">&#10095;</button>
                 </div>
                 <div class="gallery-info" onclick="event.stopPropagation()">
                     <div id="galleryTitle" class="gallery-title"></div>
@@ -283,8 +283,8 @@
                     <p id="orderPromptCopy" class="order-prompt-copy"></p>
                     <div id="orderPromptNote" class="order-prompt-note"></div>
                     <div class="order-prompt-actions">
-                        <button id="orderPromptCancel" class="order-prompt-btn is-muted" type="button" onclick="resolveOrderPrompt(false)">${t('action_cancel', 'Annuler')}</button>
-                        <button id="orderPromptConfirm" class="order-prompt-btn is-primary" type="button" onclick="resolveOrderPrompt(true)">${t('action_confirm', 'Confirmer')}</button>
+                        <button id="orderPromptCancel" class="order-prompt-btn is-muted" type="button" onclick="resolveOrderPrompt(false)">${escapeUiHtml(t('action_cancel', 'Annuler'))}</button>
+                        <button id="orderPromptConfirm" class="order-prompt-btn is-primary" type="button" onclick="resolveOrderPrompt(true)">${escapeUiHtml(t('action_confirm', 'Confirmer'))}</button>
                     </div>
                 </div>
             </div>
@@ -923,7 +923,7 @@
             : history.map((ticketHtml, index) => `
                 <div class="history-ticket history-ticket-wrap">
                     ${renderHistoryTicketCard(ticketHtml)}
-                    <button onclick="deleteHistoryItem(${index})" class="history-delete-btn" data-i18n-title="history_delete_title" data-i18n-aria-label="history_delete_title" title="${t('history_delete_title', 'Supprimer')}" aria-label="${t('history_delete_title', 'Supprimer')}">${MENU_UI_ICONS.trash}</button>
+                    <button onclick="deleteHistoryItem(${index})" class="history-delete-btn" data-i18n-title="history_delete_title" data-i18n-aria-label="history_delete_title" title="${escapeUiAttr(t('history_delete_title', 'Supprimer'))}" aria-label="${escapeUiAttr(t('history_delete_title', 'Supprimer'))}">${MENU_UI_ICONS.trash}</button>
                 </div>
             `).join('');
     }
@@ -1073,24 +1073,24 @@
             <div class="history-ticket-card${normalized.legacy ? ' is-legacy' : ''}">
                 <div class="history-ticket-top">
                     <div>
-                        <div class="history-ticket-label">${t('ticket_number_prefix', 'TICKET')}</div>
+                        <div class="history-ticket-label">${escapeHistoryHtml(t('ticket_number_prefix', 'TICKET'))}</div>
                         <div class="history-ticket-number">#${escapeHistoryHtml(normalized.orderNo || '----')}</div>
                     </div>
                     <div class="history-ticket-status">${escapeHistoryHtml(localizedServiceLabel)}</div>
                 </div>
                 <div class="history-ticket-meta">
                     <div class="history-ticket-meta-row">
-                        <span>${t('ticket_date', 'Date')}</span>
+                        <span>${escapeHistoryHtml(t('ticket_date', 'Date'))}</span>
                         <strong>${escapeHistoryHtml(dateParts.date || '')}</strong>
                     </div>
                     ${dateParts.time ? `
                         <div class="history-ticket-meta-row">
-                            <span>${t('ticket_time', 'Heure')}</span>
+                            <span>${escapeHistoryHtml(t('ticket_time', 'Heure'))}</span>
                             <strong>${escapeHistoryHtml(dateParts.time)}</strong>
                         </div>
                     ` : ''}
                     <div class="history-ticket-meta-row">
-                        <span>${t('ticket_total', 'TOTAL')}</span>
+                        <span>${escapeHistoryHtml(t('ticket_total', 'TOTAL'))}</span>
                         <strong>${Number.isFinite(normalized.total) ? `${normalized.total.toFixed(0)} ${escapeHistoryHtml(normalized.currency)}` : escapeHistoryHtml(normalized.totalLabel || '')}</strong>
                     </div>
                     ${normalized.address ? `
