@@ -2789,10 +2789,15 @@
 
             .top-nav-left {
                 flex: 1 1 auto;
+                max-width: calc(100% - 140px);
             }
 
             .top-nav-right {
                 flex: 0 0 auto;
+            }
+
+            #menuNavigationView[data-mode='items'] .menu-game-shortcut {
+                display: none;
             }
 
             .nav-icon-btn,
@@ -2809,7 +2814,9 @@
             }
 
             .nav-breadcrumb {
-                max-width: min(30vw, 118px);
+                flex: 1 1 auto;
+                max-width: none;
+                min-width: 0;
                 font-size: 0.78rem;
             }
 
